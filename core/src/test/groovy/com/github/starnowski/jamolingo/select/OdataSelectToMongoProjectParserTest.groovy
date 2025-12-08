@@ -27,7 +27,7 @@ class OdataSelectToMongoProjectParserTest extends Specification {
 
         where:
             bsonFile |  edmConfigFile
-            "case1.bson"       |  ""
+            "select/stages/case1.json"       |  ""
     }
 
     def Bson loadBsonFromFile(String filePath) {
