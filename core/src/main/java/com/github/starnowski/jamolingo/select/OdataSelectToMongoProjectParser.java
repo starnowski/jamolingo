@@ -13,7 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class OdataSelectToMongoProjectParser {
-    public static SelectOperatorResult buildProjection(SelectOption selectOption) {
+    public SelectOperatorResult parse(SelectOption selectOption) {
         if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
 //            return new Document(); // no projection → all fields
             //TODO
