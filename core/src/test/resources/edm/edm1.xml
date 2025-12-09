@@ -1,0 +1,9 @@
+<EntityType Name="Category">
+<!--    <Key>-->
+<!--        <PropertyRef Name="ID" />-->
+<!--    </Key>-->
+<!--    <Property Name="ID" Type="Edm.Int32" Nullable="false"/>-->
+    <Property Name="plainString" Type="Edm.String" Nullable="false"/>
+<!--    <NavigationProperty Name="Parent" Type="Namespace.Category" Partner="Children"/>-->
+<!--    <NavigationProperty Name="Children" Type="Collection(Namespace.Category)" Partner="Parent"/>-->
+</EntityType>
