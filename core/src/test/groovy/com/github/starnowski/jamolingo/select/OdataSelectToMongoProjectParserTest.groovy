@@ -44,7 +44,10 @@ class OdataSelectToMongoProjectParserTest extends Specification {
         where:
             bsonFile |  edmConfigFile   | selectFields
             "select/stages/case1.json"       |  "edm/edm1.xml"  | ["plainString"]
+            "select/stages/case1.json"       |  "edm/edm1.xml"  | ["*"] // ExpandAsterisk = false
     }
+
+    // TODO ExpandAsterisk = true (all fields defined in EDM)
 
     def Bson loadBsonFromFile(String filePath) {
         String bson = Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(filePath).getFile()).getPath()))

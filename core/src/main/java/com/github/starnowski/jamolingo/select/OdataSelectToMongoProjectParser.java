@@ -64,7 +64,6 @@ public class OdataSelectToMongoProjectParser {
                       .map(field -> Map.entry(field, 1))
                       .toList()
                       .toArray(new Map.Entry[0])));
-      document.append("_id", 0); // TODO add configuration option
       return document;
     }
 
