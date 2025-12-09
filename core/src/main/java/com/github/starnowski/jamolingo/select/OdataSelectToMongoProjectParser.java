@@ -11,17 +11,15 @@ import org.bson.conversions.Bson;
 public class OdataSelectToMongoProjectParser {
   public SelectOperatorResult parse(SelectOption selectOption) {
     if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
-      //            return new Document(); // no projection → all fields
-      // TODO
-      return null;
+      // TODO check if _id is part of available register property
+      return new DefaultSelectOperatorResult(new HashSet<>(), true, true);
     }
 
     List<String> fields = new ArrayList<>();
     for (SelectItem item : selectOption.getSelectItems()) {
       if (item.isStar()) {
-        //                return new Document(); // * means all fields
-        // TODO
-        return null;
+        // TODO check if _id is part of available register property
+        return new DefaultSelectOperatorResult(new HashSet<>(), true, true);
       }
       if (!item.getResourcePath().getUriResourceParts().stream()
           .allMatch(p -> p instanceof UriResourceProperty)) {
@@ -33,15 +31,21 @@ public class OdataSelectToMongoProjectParser {
               .collect(Collectors.joining("."));
       fields.add(propertyName);
     }
-    return new DefaultSelectOperatorResult(new HashSet<>(fields));
+    // TODO check if _id is part of available register property
+    return new DefaultSelectOperatorResult(new HashSet<>(fields), true, false);
   }
 
-  private class DefaultSelectOperatorResult implements SelectOperatorResult {
+  private static class DefaultSelectOperatorResult implements SelectOperatorResult {
 
     private final Set<String> selectedFields;
+    private final boolean removeIdPropertyIfNotSpecified;
+    private final boolean wildCard;
 
-    private DefaultSelectOperatorResult(Set<String> selectedFields) {
+    private DefaultSelectOperatorResult(
+        Set<String> selectedFields, boolean removeIdPropertyIfNotSpecified, boolean wildCard) {
       this.selectedFields = selectedFields;
+      this.removeIdPropertyIfNotSpecified = removeIdPropertyIfNotSpecified;
+      this.wildCard = wildCard;
     }
 
     @Override
@@ -51,7 +55,7 @@ public class OdataSelectToMongoProjectParser {
 
     @Override
     public boolean isWildCard() {
-      return false;
+      return wildCard;
     }
 
     @Override
@@ -64,7 +68,9 @@ public class OdataSelectToMongoProjectParser {
                       .map(field -> Map.entry(field, 1))
                       .toList()
                       .toArray(new Map.Entry[0])));
-      // TODO check if _id is present if not then add _id with 0 as the _id was not explicit mentioned in select
+      if (removeIdPropertyIfNotSpecified && !document.containsKey("_id")) {
+        document.append("_id", 0);
+      }
       return document;
     }
 
