@@ -1,70 +1,76 @@
 package com.github.starnowski.jamolingo.select;
 
+import java.util.*;
+import java.util.stream.Collectors;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 public class OdataSelectToMongoProjectParser {
-    public SelectOperatorResult parse(SelectOption selectOption) {
-        if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
-//            return new Document(); // no projection → all fields
-            //TODO
-            return null;
-        }
+  public SelectOperatorResult parse(SelectOption selectOption) {
+    if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
+      //            return new Document(); // no projection → all fields
+      // TODO
+      return null;
+    }
 
-        List<String> fields = new ArrayList<>();
-        for (SelectItem item : selectOption.getSelectItems()) {
-            if (item.isStar()) {
-//                return new Document(); // * means all fields
-                //TODO
-                return null;
-            }
-            if (!item.getResourcePath().getUriResourceParts()
-                    .stream().allMatch(
-                            p -> p instanceof UriResourceProperty
-                    )) {
-                throw new RuntimeException("Invalid select parameter " + item.getResourcePath());
-            }
-            String propertyName = item.getResourcePath().getUriResourceParts()
-                    .stream()
-                    .map(p -> ((UriResourceProperty) p).getProperty().getName())
-                    .collect(Collectors.joining("."));
-            fields.add(propertyName);
-        }
-
-//        return new Document(Map.ofEntries(fields.stream().distinct().map(field -> Map.entry(field, 1)).toList().toArray(new Map.Entry[0])));
-        //TODO
+    List<String> fields = new ArrayList<>();
+    for (SelectItem item : selectOption.getSelectItems()) {
+      if (item.isStar()) {
+        //                return new Document(); // * means all fields
+        // TODO
         return null;
+      }
+      if (!item.getResourcePath().getUriResourceParts().stream()
+          .allMatch(p -> p instanceof UriResourceProperty)) {
+        throw new RuntimeException("Invalid select parameter " + item.getResourcePath());
+      }
+      String propertyName =
+          item.getResourcePath().getUriResourceParts().stream()
+              .map(p -> ((UriResourceProperty) p).getProperty().getName())
+              .collect(Collectors.joining("."));
+      fields.add(propertyName);
+    }
+    return new DefaultSelectOperatorResult(new HashSet<>(fields));
+  }
+
+  private class DefaultSelectOperatorResult implements SelectOperatorResult {
+
+    private final Set<String> selectedFields;
+
+    private DefaultSelectOperatorResult(Set<String> selectedFields) {
+      this.selectedFields = selectedFields;
     }
 
-    private class DefaultSelectOperatorResult implements SelectOperatorResult{
-
-        @Override
-        public Set<String> getSelectedFields() {
-            return Set.of();
-        }
-
-        @Override
-        public boolean isWildCard() {
-            return false;
-        }
-
-        @Override
-        public Bson getProjectObject() {
-            return null;
-        }
-
-        @Override
-        public Bson getStageObject() {
-            return null;
-        }
+    @Override
+    public Set<String> getSelectedFields() {
+      return selectedFields;
     }
+
+    @Override
+    public boolean isWildCard() {
+      return false;
+    }
+
+    @Override
+    public Bson getProjectObject() {
+      Document document =
+          new Document(
+              Map.ofEntries(
+                  getSelectedFields().stream()
+                      .distinct()
+                      .map(field -> Map.entry(field, 1))
+                      .toList()
+                      .toArray(new Map.Entry[0])));
+      document.append("_id", 0); // TODO add configuration option
+      return document;
+    }
+
+    @Override
+    public Bson getStageObject() {
+      return new Document("$project", getProjectObject());
+    }
+  }
 }

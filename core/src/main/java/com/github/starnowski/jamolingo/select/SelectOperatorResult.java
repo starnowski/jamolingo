@@ -1,16 +1,15 @@
 package com.github.starnowski.jamolingo.select;
 
-import org.bson.conversions.Bson;
-
 import java.util.Set;
+import org.bson.conversions.Bson;
 
 public interface SelectOperatorResult {
 
-    Set<String> getSelectedFields();
+  Set<String> getSelectedFields();
 
-    boolean isWildCard();
+  boolean isWildCard();
 
-    Bson getProjectObject();
+  Bson getProjectObject();
 
-    Bson getStageObject();
+  Bson getStageObject();
 }

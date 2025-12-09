@@ -4,7 +4,9 @@ import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider
 import org.apache.olingo.commons.core.edm.EdmProviderImpl
 import org.apache.olingo.server.api.OData
+import org.apache.olingo.server.api.uri.UriInfo
 import org.apache.olingo.server.core.MetadataParser
+import org.apache.olingo.server.core.uri.parser.Parser
 import org.bson.Document
 import org.bson.conversions.Bson
 import spock.lang.Specification
@@ -13,6 +15,7 @@ import spock.lang.Unroll
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.stream.Collectors
 
 class OdataSelectToMongoProjectParserTest extends Specification {
 
@@ -22,19 +25,25 @@ class OdataSelectToMongoProjectParserTest extends Specification {
         given:
             Bson expectedBson = loadBsonFromFile(bsonFile)
             Edm edm = loadEmdProvider(edmConfigFile)
-            // TODO load EDM config
-            // TODO define $select
+
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri("Items",
+                            "\$select=" +
+                                    selectFields.stream().filter(Objects::nonNull)
+                                            .filter(s -> !s.trim().isEmpty())
+                                            .collect(Collectors.joining(","))
+                            , null, null)
             OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
 
         when:
-            def result = tested.parse()
+            def result = tested.parse(uriInfo.getSelectOption())
 
         then:
-            result.getStageObject() == result
+            result.getStageObject() == expectedBson
 
         where:
-            bsonFile |  edmConfigFile
-            "select/stages/case1.json"       |  "edm/edm1.xml"
+            bsonFile |  edmConfigFile   | selectFields
+            "select/stages/case1.json"       |  "edm/edm1.xml"  | ["plainString"]
     }
 
     def Bson loadBsonFromFile(String filePath) {
