@@ -64,6 +64,7 @@ public class OdataSelectToMongoProjectParser {
                       .map(field -> Map.entry(field, 1))
                       .toList()
                       .toArray(new Map.Entry[0])));
+      // TODO check if _id is present if not then add _id with 0 as the _id was not explicit mentioned in select
       return document;
     }
 
