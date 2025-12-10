@@ -45,6 +45,7 @@ class OdataSelectToMongoProjectParserTest extends Specification {
             bsonFile |  edmConfigFile   | selectFields
             "select/stages/case1.json"       |  "edm/edm1.xml"  | ["plainString"]
             "select/stages/case_wildcard_without_id.json"       |  "edm/edm1.xml"  | ["*"] // ExpandAsterisk = false
+            "select/stages/case2.json"       |  "edm/edm2_with_nested_collections.xml"  | ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"] // ExpandAsterisk = false
     }
 
     // TODO ExpandAsterisk = true (all fields defined in EDM)
