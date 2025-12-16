@@ -3,6 +3,7 @@ package com.github.starnowski.jamolingo.context;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
+import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EntityMapping {
@@ -21,6 +22,35 @@ public class EntityMapping {
 
   public String getCollection() {
     return collection;
+  }
+
+  public EntityMapping withCollection(String collection) {
+    this.collection = collection;
+    return this;
+  }
+
+  public EntityMapping withRootPath(String rootPath) {
+    this.rootPath = rootPath;
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    EntityMapping that = (EntityMapping) o;
+    return Objects.equals(collection, that.collection)
+        && Objects.equals(rootPath, that.rootPath)
+        && Objects.equals(properties, that.properties);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(collection, rootPath, properties);
+  }
+
+  public EntityMapping withProperties(Map<String, PropertyMapping> properties) {
+    this.properties = properties;
+    return this;
   }
 
   public void setCollection(String collection) {
