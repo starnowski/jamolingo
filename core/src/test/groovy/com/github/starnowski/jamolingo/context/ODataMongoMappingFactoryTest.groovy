@@ -28,6 +28,6 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
 
         where:
             edmConfigFile   | schema    || expectedODataMongoMapping
-            "edm/edm1.xml"  | "Demo"    || new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withProperties(Map.of("plainString", new PropertyMapping()))))
+            "edm/edm1.xml"  | "Demo"    || new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping()))))
     }
 }
