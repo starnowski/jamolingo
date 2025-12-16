@@ -35,4 +35,9 @@ public class ODataMongoMapping {
   public void setEntities(Map<String, EntityMapping> entities) {
     this.entities = entities;
   }
+
+  @Override
+  public String toString() {
+    return "ODataMongoMapping{" + "entities=" + entities + '}';
+  }
 }

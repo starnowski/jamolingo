@@ -8,6 +8,32 @@ import java.util.Objects;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PropertyMapping {
   @Override
+  public String toString() {
+    return "PropertyMapping{"
+        + "key="
+        + key
+        + ", mongoPath='"
+        + mongoPath
+        + '\''
+        + ", mongoName='"
+        + mongoName
+        + '\''
+        + ", relativeTo='"
+        + relativeTo
+        + '\''
+        + ", type='"
+        + type
+        + '\''
+        + ", ignore="
+        + ignore
+        + ", computed="
+        + computed
+        + ", properties="
+        + properties
+        + '}';
+  }
+
+  @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
     PropertyMapping that = (PropertyMapping) o;

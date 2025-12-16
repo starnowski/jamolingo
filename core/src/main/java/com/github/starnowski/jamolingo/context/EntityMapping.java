@@ -7,6 +7,19 @@ import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class EntityMapping {
+  @Override
+  public String toString() {
+    return "EntityMapping{"
+        + "collection='"
+        + collection
+        + '\''
+        + ", rootPath='"
+        + rootPath
+        + '\''
+        + ", properties="
+        + properties
+        + '}';
+  }
 
   /** MongoDB collection name */
   @JsonProperty("collection")
