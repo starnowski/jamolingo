@@ -3,6 +3,7 @@ package com.github.starnowski.jamolingo.context;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.olingo.commons.api.edm.*;
+import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 
 public class ODataMongoMappingFactory {
 
@@ -62,7 +63,7 @@ public class ODataMongoMappingFactory {
     }
 
     // --- Complex vs primitive ---
-    if (declaringType instanceof EdmComplexType) {
+    if (EdmTypeKind.COMPLEX.equals(prop.getType().getKind())) {
       EdmComplexType complexType = (EdmComplexType) prop.getType();
 
       pm.setProperties(mapComplexProperties(complexType));
