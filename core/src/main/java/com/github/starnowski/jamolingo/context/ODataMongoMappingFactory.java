@@ -31,7 +31,6 @@ public class ODataMongoMappingFactory {
 
     entity.setCollection(defaultCollectionName(entityType));
     entity.setProperties(mapProperties(entityType));
-
     return entity;
   }
 
@@ -53,6 +52,7 @@ public class ODataMongoMappingFactory {
   private PropertyMapping mapProperty(EdmProperty prop, EdmStructuredType declaringType) {
 
     PropertyMapping pm = new PropertyMapping();
+    pm.setType(prop.getType().getNamespace() + "." + prop.getType().getName());
 
     // --- Key detection ---
     if (declaringType instanceof EdmEntityType) {
