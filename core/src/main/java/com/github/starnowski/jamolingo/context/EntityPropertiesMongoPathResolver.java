@@ -23,7 +23,7 @@ public class EntityPropertiesMongoPathResolver {
     if (entityMapping.getProperties() != null) {
       for (Map.Entry<String, PropertyMapping> e : entityMapping.getProperties().entrySet()) {
 
-        compileProperty(entityName, e.getKey(), e.getValue(), entityRoot, entityName, result);
+        compileProperty(e.getKey(), e.getValue(), entityRoot, entityName, result);
       }
     }
 
@@ -33,7 +33,6 @@ public class EntityPropertiesMongoPathResolver {
   // ----------------------------------------------------
 
   private void compileProperty(
-      String entityName,
       String propertyName,
       PropertyMapping property,
       String currentMongoBase,
@@ -62,7 +61,7 @@ public class EntityPropertiesMongoPathResolver {
 
     for (Map.Entry<String, PropertyMapping> nested : property.getProperties().entrySet()) {
 
-      compileProperty(entityName, nested.getKey(), nested.getValue(), nextMongoBase, edmPath, out);
+      compileProperty(nested.getKey(), nested.getValue(), nextMongoBase, edmPath, out);
     }
   }
 
