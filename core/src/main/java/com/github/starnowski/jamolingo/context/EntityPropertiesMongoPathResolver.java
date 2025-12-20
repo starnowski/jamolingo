@@ -8,13 +8,13 @@ public class EntityPropertiesMongoPathResolver {
 
   public Map<String, String> resolve(EntityMapping entityMapping) {
     // TODO
-    return compile(entityMapping.getCollection(), entityMapping).entrySet().stream()
+    return compile(entityMapping).entrySet().stream()
         .collect(
             Collectors.toMap(
                 (entry) -> entry.getKey(), (entry) -> entry.getValue().getMongoPath()));
   }
 
-  private Map<String, MongoPathEntry> compile(String entityName, EntityMapping entityMapping) {
+  private Map<String, MongoPathEntry> compile(EntityMapping entityMapping) {
 
     Map<String, MongoPathEntry> result = new LinkedHashMap<>();
 
@@ -23,7 +23,7 @@ public class EntityPropertiesMongoPathResolver {
     if (entityMapping.getProperties() != null) {
       for (Map.Entry<String, PropertyMapping> e : entityMapping.getProperties().entrySet()) {
 
-        compileProperty(e.getKey(), e.getValue(), entityRoot, entityName, result);
+        compileProperty(e.getKey(), e.getValue(), entityRoot, null, result);
       }
     }
 
@@ -43,7 +43,7 @@ public class EntityPropertiesMongoPathResolver {
       return;
     }
 
-    String edmPath = currentEdmBase + "." + propertyName;
+    String edmPath = currentEdmBase == null ? propertyName : currentEdmBase + "." + propertyName;
     String mongoPath = resolveMongoPath(property, currentMongoBase, propertyName);
 
     // Leaf property
