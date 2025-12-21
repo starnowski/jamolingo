@@ -7,6 +7,8 @@ import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PropertyMapping {
+
+  //TODO Add flatterLevelUp -> Integer
   @Override
   public String toString() {
     return "PropertyMapping{"
