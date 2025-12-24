@@ -3,16 +3,12 @@ package com.github.starnowski.jamolingo.context;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class EntityPropertiesMongoPathResolver {
 
-  public Map<String, String> resolve(EntityMapping entityMapping) {
+  public Map<String, MongoPathEntry> resolve(EntityMapping entityMapping) {
     // TODO
-    return compile(entityMapping).entrySet().stream()
-        .collect(
-            Collectors.toMap(
-                (entry) -> entry.getKey(), (entry) -> entry.getValue().getMongoPath()));
+    return compile(entityMapping);
   }
 
   private Map<String, MongoPathEntry> compile(EntityMapping entityMapping) {
@@ -86,8 +82,10 @@ public class EntityPropertiesMongoPathResolver {
         return join(null, localName);
       }
       return join(
-              String.join(".", Arrays.asList(mongoParentsPath)
-                      .subList(0, mongoParentsPath.length - property.getFlatterLevelUp())),
+          String.join(
+              ".",
+              Arrays.asList(mongoParentsPath)
+                  .subList(0, mongoParentsPath.length - property.getFlatterLevelUp())),
           localName);
     }
     String base =
@@ -115,7 +113,7 @@ public class EntityPropertiesMongoPathResolver {
     return normalize(base) + "." + normalize(name);
   }
 
-  private static final class MongoPathEntry {
+  public static final class MongoPathEntry {
 
     private final String edmPath;
     private final String mongoPath;

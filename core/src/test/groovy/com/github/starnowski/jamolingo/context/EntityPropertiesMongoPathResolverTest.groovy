@@ -3,6 +3,8 @@ package com.github.starnowski.jamolingo.context
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.util.stream.Collectors
+
 class EntityPropertiesMongoPathResolverTest extends Specification {
 
     @Unroll
@@ -11,7 +13,9 @@ class EntityPropertiesMongoPathResolverTest extends Specification {
             def tested = new EntityPropertiesMongoPathResolver()
 
         when:
-            def result = tested.resolve(entityMapping)
+            def result = tested.resolve(entityMapping).entrySet().stream().collect(
+                    Collectors.toMap(
+                            (entry) -> entry.getKey(), (entry) -> entry.getValue().getMongoPath()))
 
         then:
             result == expecteMongoPatsh
