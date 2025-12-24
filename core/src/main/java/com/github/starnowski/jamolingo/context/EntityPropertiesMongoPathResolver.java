@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.context;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -76,7 +77,19 @@ public class EntityPropertiesMongoPathResolver {
     }
 
     String localName = property.getMongoName() != null ? property.getMongoName() : propertyName;
-
+    if (property.getFlatterLevelUp() != null) {
+      String[] mongoParentsPath = currentMongoBase.split("\\.");
+      if (property.getFlatterLevelUp() > mongoParentsPath.length) {
+        throw new RuntimeException("the falatterLevelUp with too large value");
+      }
+      if (property.getFlatterLevelUp() == mongoParentsPath.length) {
+        return join(null, localName);
+      }
+      return join(
+              String.join(".", Arrays.asList(mongoParentsPath)
+                      .subList(0, mongoParentsPath.length - property.getFlatterLevelUp())),
+          localName);
+    }
     String base =
         property.getRelativeTo() != null
             ? join(currentMongoBase, property.getRelativeTo())

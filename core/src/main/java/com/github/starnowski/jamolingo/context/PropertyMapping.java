@@ -8,7 +8,7 @@ import java.util.Objects;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PropertyMapping {
 
-  //TODO Add flatterLevelUp -> Integer
+  // TODO Add flatterLevelUp -> Integer
   @Override
   public String toString() {
     return "PropertyMapping{"
@@ -73,6 +73,22 @@ public class PropertyMapping {
   /** Mongo type hint (ObjectId, Decimal128, Date, etc.) */
   @JsonProperty("type")
   private String type;
+
+  public Integer getFlatterLevelUp() {
+    return flatterLevelUp;
+  }
+
+  public PropertyMapping withFlatterLevelUp(Integer flatterLevelUp) {
+    this.flatterLevelUp = flatterLevelUp;
+    return this;
+  }
+
+  public void setFlatterLevelUp(Integer flatterLevelUp) {
+    this.flatterLevelUp = flatterLevelUp;
+  }
+
+  @JsonProperty("flatterLevelUp")
+  private Integer flatterLevelUp;
 
   public PropertyMapping withKey(Boolean key) {
     this.key = key;
