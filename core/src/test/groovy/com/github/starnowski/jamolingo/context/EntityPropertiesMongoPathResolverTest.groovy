@@ -71,11 +71,9 @@ class EntityPropertiesMongoPathResolverTest extends Specification {
                 .withCollection("Item")
                 .withProperties(Map.of("nestedObject", new PropertyMapping().withProperties(Map.of("plainString", new PropertyMapping().withFlattenedLevelUp(1)) )))
                         || Map.of("nestedObject.plainString", "plainString", "nestedObject", "nestedObject")
-        // EDM nested grand object - Mongo flat property
-//            new EntityMapping()
-//                    .withCollection("Item")
-//                    .withProperties(Map.of("nestedObject", new PropertyMapping().withProperties(Map.of("plainString", new PropertyMapping().withFlatterLevelUp(1)) )))
-//                    || Map.of("nestedObject.plainString", "plainString")
+        // EDM Circular complex type
+        new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(new CircularReferenceMapping().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED)), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
+                || Map.ofEntries(Map.entry("plainString", "plainString"), Map.entry("Addresses.City", "Addresses.City"), Map.entry("Addresses.ZipCode","Addresses.ZipCode"), Map.entry("Addresses.Street","Addresses.Street"), Map.entry("Addresses", "Addresses"), Map.entry("Name", "Name"), Map.entry("Addresses.BackUpAddresses","Addresses.BackUpAddresses"))
         // TODO Add mappings for object itself
         // TODO flatted
         //TODO Circular
