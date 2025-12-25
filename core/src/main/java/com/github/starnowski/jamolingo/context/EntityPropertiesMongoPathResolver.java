@@ -7,7 +7,6 @@ import java.util.Map;
 public class EntityPropertiesMongoPathResolver {
 
   public Map<String, MongoPathEntry> resolve(EntityMapping entityMapping) {
-    // TODO
     return compile(entityMapping);
   }
 
@@ -60,6 +59,10 @@ public class EntityPropertiesMongoPathResolver {
 
       compileProperty(nested.getKey(), nested.getValue(), nextMongoBase, edmPath, out);
     }
+//    out.put(
+//            edmPath,
+//            new MongoPathEntry(
+//                    edmPath, mongoPath, Boolean.TRUE.equals(property.getKey()), property.getType()));
   }
 
   // ----------------------------------------------------
@@ -73,19 +76,19 @@ public class EntityPropertiesMongoPathResolver {
     }
 
     String localName = property.getMongoName() != null ? property.getMongoName() : propertyName;
-    if (property.getFlatterLevelUp() != null) {
+    if (property.getFlattenedLevelUp() != null) {
       String[] mongoParentsPath = currentMongoBase.split("\\.");
-      if (property.getFlatterLevelUp() > mongoParentsPath.length) {
-        throw new RuntimeException("the falatterLevelUp with too large value");
+      if (property.getFlattenedLevelUp() > mongoParentsPath.length) {
+        throw new RuntimeException("the flattenedLevelUp with too large value");
       }
-      if (property.getFlatterLevelUp() == mongoParentsPath.length) {
+      if (property.getFlattenedLevelUp() == mongoParentsPath.length) {
         return join(null, localName);
       }
       return join(
           String.join(
               ".",
               Arrays.asList(mongoParentsPath)
-                  .subList(0, mongoParentsPath.length - property.getFlatterLevelUp())),
+                  .subList(0, mongoParentsPath.length - property.getFlattenedLevelUp())),
           localName);
     }
     String base =

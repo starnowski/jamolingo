@@ -74,21 +74,21 @@ public class PropertyMapping {
   @JsonProperty("type")
   private String type;
 
-  public Integer getFlatterLevelUp() {
-    return flatterLevelUp;
+  public Integer getFlattenedLevelUp() {
+    return flattenedLevelUp;
   }
 
-  public PropertyMapping withFlatterLevelUp(Integer flatterLevelUp) {
-    this.flatterLevelUp = flatterLevelUp;
+  public PropertyMapping withFlattenedLevelUp(Integer flatterLevelUp) {
+    this.flattenedLevelUp = flatterLevelUp;
     return this;
   }
 
-  public void setFlatterLevelUp(Integer flatterLevelUp) {
-    this.flatterLevelUp = flatterLevelUp;
+  public void setFlattenedLevelUp(Integer flattenedLevelUp) {
+    this.flattenedLevelUp = flattenedLevelUp;
   }
 
-  @JsonProperty("flatterLevelUp")
-  private Integer flatterLevelUp;
+  @JsonProperty("flattenedLevelUp")
+  private Integer flattenedLevelUp;
 
   public PropertyMapping withKey(Boolean key) {
     this.key = key;
