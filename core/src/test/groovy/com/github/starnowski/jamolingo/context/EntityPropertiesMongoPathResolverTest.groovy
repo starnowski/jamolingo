@@ -5,10 +5,12 @@ import spock.lang.Unroll
 
 import java.util.stream.Collectors
 
+import static java.util.Map.entry
+
 class EntityPropertiesMongoPathResolverTest extends Specification {
 
     @Unroll
-    def "should return correct mongo properties mapping based on entity configuration #entityMapping with only leafs"(){
+    def "should return correct mongo path based on entity configuration #entityMapping with only leafs"(){
         given:
             def tested = new EntityPropertiesMongoPathResolver()
 
@@ -41,7 +43,7 @@ class EntityPropertiesMongoPathResolverTest extends Specification {
     }
 
     @Unroll
-    def "should return correct mongo properties mapping based on entity configuration #entityMapping"(){
+    def "should return correct mongo path based on entity configuration #entityMapping"(){
         given:
         def tested = new EntityPropertiesMongoPathResolver()
 
@@ -74,6 +76,28 @@ class EntityPropertiesMongoPathResolverTest extends Specification {
         // EDM Circular complex type
         new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(new CircularReferenceMapping().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED)), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
                 || Map.ofEntries(Map.entry("plainString", "plainString"), Map.entry("Addresses.City", "Addresses.City"), Map.entry("Addresses.ZipCode","Addresses.ZipCode"), Map.entry("Addresses.Street","Addresses.Street"), Map.entry("Addresses", "Addresses"), Map.entry("Name", "Name"), Map.entry("Addresses.BackUpAddresses","Addresses.BackUpAddresses"))
+        // TODO Add mappings for object itself
+        // TODO flatted
+        //TODO Circular
+    }
+
+    @Unroll
+    def "should return correct mongo properties mapping based on entity configuration #entityMapping"(){
+        given:
+            def tested = new EntityPropertiesMongoPathResolver()
+
+        when:
+            def result = tested.resolve(entityMapping)
+
+        then:
+            result == expecteMongoPatsh
+
+        where:
+        entityMapping   ||  expecteMongoPatsh
+
+        // EDM Circular complex type
+            new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(new CircularReferenceMapping().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED)), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
+                        || Map.ofEntries(Map.entry("plainString", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("plainString").withMongoPath("plainString").build()))
         // TODO Add mappings for object itself
         // TODO flatted
         //TODO Circular

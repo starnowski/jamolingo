@@ -3,6 +3,7 @@ package com.github.starnowski.jamolingo.context;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class EntityPropertiesMongoPathResolver {
 
@@ -168,50 +169,6 @@ public class EntityPropertiesMongoPathResolver {
       public EntityPropertiesMongoPathResolverContext build() {
         return new EntityPropertiesMongoPathResolverContext(generateOnlyLeafs);
       }
-    }
-  }
-
-  public static final class MongoPathEntry {
-
-    private final String edmPath;
-    private final String mongoPath;
-    private final boolean key;
-    private final String type;
-
-    public CircularReferenceMapping getCircularReferenceMapping() {
-      return circularReferenceMapping;
-    }
-
-    private final CircularReferenceMapping circularReferenceMapping;
-
-    public MongoPathEntry(
-        String edmPath,
-        String mongoPath,
-        boolean key,
-        String type,
-        CircularReferenceMapping circularReferenceMapping) {
-
-      this.edmPath = edmPath;
-      this.mongoPath = mongoPath;
-      this.key = key;
-      this.type = type;
-      this.circularReferenceMapping = circularReferenceMapping;
-    }
-
-    public String getEdmPath() {
-      return edmPath;
-    }
-
-    public String getMongoPath() {
-      return mongoPath;
-    }
-
-    public boolean isKey() {
-      return key;
-    }
-
-    public String getType() {
-      return type;
     }
   }
 }
