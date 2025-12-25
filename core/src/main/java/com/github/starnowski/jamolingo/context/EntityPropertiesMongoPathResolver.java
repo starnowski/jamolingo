@@ -6,40 +6,19 @@ import java.util.Map;
 
 public class EntityPropertiesMongoPathResolver {
 
-  public static class EntityPropertiesMongoPathResolverContext {
-    public boolean isGenerateOnlyLeafs() {
-      return generateOnlyLeafs;
-    }
-
-    private final boolean generateOnlyLeafs;
-
-      public EntityPropertiesMongoPathResolverContext(boolean generateOnlyLeafs) {
-          this.generateOnlyLeafs = generateOnlyLeafs;
-      }
-
-      public static class EntityPropertiesMongoPathResolverContextBuilder {
-        private boolean generateOnlyLeafs;
-
-        public EntityPropertiesMongoPathResolverContextBuilder withGenerateOnlyLeafs(boolean generateOnlyLeafs) {
-          this.generateOnlyLeafs = generateOnlyLeafs;
-          return this;
-        }
-
-        public EntityPropertiesMongoPathResolverContext build() {
-          return new EntityPropertiesMongoPathResolverContext(generateOnlyLeafs);
-        }
-      }
-  }
-
   public Map<String, MongoPathEntry> resolve(EntityMapping entityMapping) {
     return resolve(entityMapping, new EntityPropertiesMongoPathResolverContext(false));
   }
 
-  public Map<String, MongoPathEntry> resolve(EntityMapping entityMapping, EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
+  public Map<String, MongoPathEntry> resolve(
+      EntityMapping entityMapping,
+      EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
     return compile(entityMapping, entityPropertiesMongoPathResolverContext);
   }
 
-  private Map<String, MongoPathEntry> compile(EntityMapping entityMapping, EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
+  private Map<String, MongoPathEntry> compile(
+      EntityMapping entityMapping,
+      EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
 
     Map<String, MongoPathEntry> result = new LinkedHashMap<>();
 
@@ -48,21 +27,26 @@ public class EntityPropertiesMongoPathResolver {
     if (entityMapping.getProperties() != null) {
       for (Map.Entry<String, PropertyMapping> e : entityMapping.getProperties().entrySet()) {
 
-        compileProperty(e.getKey(), e.getValue(), entityRoot, null, result, entityPropertiesMongoPathResolverContext);
+        compileProperty(
+            e.getKey(),
+            e.getValue(),
+            entityRoot,
+            null,
+            result,
+            entityPropertiesMongoPathResolverContext);
       }
     }
 
     return result;
   }
 
-  // ----------------------------------------------------
-
   private void compileProperty(
-          String propertyName,
-          PropertyMapping property,
-          String currentMongoBase,
-          String currentEdmBase,
-          Map<String, MongoPathEntry> out, EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
+      String propertyName,
+      PropertyMapping property,
+      String currentMongoBase,
+      String currentEdmBase,
+      Map<String, MongoPathEntry> out,
+      EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
 
     if (Boolean.TRUE.equals(property.getIgnore())) {
       return;
@@ -86,15 +70,21 @@ public class EntityPropertiesMongoPathResolver {
 
     for (Map.Entry<String, PropertyMapping> nested : property.getProperties().entrySet()) {
 
-      compileProperty(nested.getKey(), nested.getValue(), nextMongoBase, edmPath, out, entityPropertiesMongoPathResolverContext);
+      compileProperty(
+          nested.getKey(),
+          nested.getValue(),
+          nextMongoBase,
+          edmPath,
+          out,
+          entityPropertiesMongoPathResolverContext);
     }
     if (entityPropertiesMongoPathResolverContext.isGenerateOnlyLeafs()) {
       return;
     }
     out.put(
-            edmPath,
-            new MongoPathEntry(
-                    edmPath, mongoPath, Boolean.TRUE.equals(property.getKey()), property.getType()));
+        edmPath,
+        new MongoPathEntry(
+            edmPath, mongoPath, Boolean.TRUE.equals(property.getKey()), property.getType()));
   }
 
   // ----------------------------------------------------
@@ -131,6 +121,8 @@ public class EntityPropertiesMongoPathResolver {
     return join(base, localName);
   }
 
+  // ----------------------------------------------------
+
   private String normalize(String path) {
     if (path == null || path.isEmpty()) {
       return "";
@@ -146,6 +138,36 @@ public class EntityPropertiesMongoPathResolver {
       return normalize(base);
     }
     return normalize(base) + "." + normalize(name);
+  }
+
+  public enum CircularStrategy {
+    EMBED_LIMITED // embed up to maxDepth
+  }
+
+  public static class EntityPropertiesMongoPathResolverContext {
+    private final boolean generateOnlyLeafs;
+
+    public EntityPropertiesMongoPathResolverContext(boolean generateOnlyLeafs) {
+      this.generateOnlyLeafs = generateOnlyLeafs;
+    }
+
+    public boolean isGenerateOnlyLeafs() {
+      return generateOnlyLeafs;
+    }
+
+    public static class EntityPropertiesMongoPathResolverContextBuilder {
+      private boolean generateOnlyLeafs;
+
+      public EntityPropertiesMongoPathResolverContextBuilder withGenerateOnlyLeafs(
+          boolean generateOnlyLeafs) {
+        this.generateOnlyLeafs = generateOnlyLeafs;
+        return this;
+      }
+
+      public EntityPropertiesMongoPathResolverContext build() {
+        return new EntityPropertiesMongoPathResolverContext(generateOnlyLeafs);
+      }
+    }
   }
 
   public static final class MongoPathEntry {
@@ -177,6 +199,25 @@ public class EntityPropertiesMongoPathResolver {
 
     public String getType() {
       return type;
+    }
+  }
+
+  public static class CircularReferenceMapping {
+    /** EDM path where recursion re-anchors Example: "Item.Addresses" */
+    private String anchorEdmPath;
+
+    /** Max allowed depth (optional) */
+    private Integer maxDepth;
+
+    /** Resolution strategy */
+    private CircularStrategy strategy;
+
+    public String getAnchorEdmPath() {
+      return anchorEdmPath;
+    }
+
+    public void setAnchorEdmPath(String anchorEdmPath) {
+      this.anchorEdmPath = anchorEdmPath;
     }
   }
 }
