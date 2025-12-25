@@ -36,10 +36,10 @@ public class EntityPropertiesMongoPathResolver {
   }
 
   public Map<String, MongoPathEntry> resolve(EntityMapping entityMapping, EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
-    return compile(entityMapping);
+    return compile(entityMapping, entityPropertiesMongoPathResolverContext);
   }
 
-  private Map<String, MongoPathEntry> compile(EntityMapping entityMapping) {
+  private Map<String, MongoPathEntry> compile(EntityMapping entityMapping, EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
 
     Map<String, MongoPathEntry> result = new LinkedHashMap<>();
 
@@ -48,7 +48,7 @@ public class EntityPropertiesMongoPathResolver {
     if (entityMapping.getProperties() != null) {
       for (Map.Entry<String, PropertyMapping> e : entityMapping.getProperties().entrySet()) {
 
-        compileProperty(e.getKey(), e.getValue(), entityRoot, null, result);
+        compileProperty(e.getKey(), e.getValue(), entityRoot, null, result, entityPropertiesMongoPathResolverContext);
       }
     }
 
@@ -58,11 +58,11 @@ public class EntityPropertiesMongoPathResolver {
   // ----------------------------------------------------
 
   private void compileProperty(
-      String propertyName,
-      PropertyMapping property,
-      String currentMongoBase,
-      String currentEdmBase,
-      Map<String, MongoPathEntry> out) {
+          String propertyName,
+          PropertyMapping property,
+          String currentMongoBase,
+          String currentEdmBase,
+          Map<String, MongoPathEntry> out, EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
 
     if (Boolean.TRUE.equals(property.getIgnore())) {
       return;
@@ -86,12 +86,15 @@ public class EntityPropertiesMongoPathResolver {
 
     for (Map.Entry<String, PropertyMapping> nested : property.getProperties().entrySet()) {
 
-      compileProperty(nested.getKey(), nested.getValue(), nextMongoBase, edmPath, out);
+      compileProperty(nested.getKey(), nested.getValue(), nextMongoBase, edmPath, out, entityPropertiesMongoPathResolverContext);
     }
-//    out.put(
-//            edmPath,
-//            new MongoPathEntry(
-//                    edmPath, mongoPath, Boolean.TRUE.equals(property.getKey()), property.getType()));
+    if (entityPropertiesMongoPathResolverContext.isGenerateOnlyLeafs()) {
+      return;
+    }
+    out.put(
+            edmPath,
+            new MongoPathEntry(
+                    edmPath, mongoPath, Boolean.TRUE.equals(property.getKey()), property.getType()));
   }
 
   // ----------------------------------------------------
