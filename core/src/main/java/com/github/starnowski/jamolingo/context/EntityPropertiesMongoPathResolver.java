@@ -6,7 +6,36 @@ import java.util.Map;
 
 public class EntityPropertiesMongoPathResolver {
 
+  public static class EntityPropertiesMongoPathResolverContext {
+    public boolean isGenerateOnlyLeafs() {
+      return generateOnlyLeafs;
+    }
+
+    private final boolean generateOnlyLeafs;
+
+      public EntityPropertiesMongoPathResolverContext(boolean generateOnlyLeafs) {
+          this.generateOnlyLeafs = generateOnlyLeafs;
+      }
+
+      public static class EntityPropertiesMongoPathResolverContextBuilder {
+        private boolean generateOnlyLeafs;
+
+        public EntityPropertiesMongoPathResolverContextBuilder withGenerateOnlyLeafs(boolean generateOnlyLeafs) {
+          this.generateOnlyLeafs = generateOnlyLeafs;
+          return this;
+        }
+
+        public EntityPropertiesMongoPathResolverContext build() {
+          return new EntityPropertiesMongoPathResolverContext(generateOnlyLeafs);
+        }
+      }
+  }
+
   public Map<String, MongoPathEntry> resolve(EntityMapping entityMapping) {
+    return resolve(entityMapping, new EntityPropertiesMongoPathResolverContext(false));
+  }
+
+  public Map<String, MongoPathEntry> resolve(EntityMapping entityMapping, EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
     return compile(entityMapping);
   }
 
