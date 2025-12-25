@@ -38,14 +38,6 @@ class EntityPropertiesMongoPathResolverTest extends Specification {
                 .withCollection("Item")
                 .withProperties(Map.of("nestedObject", new PropertyMapping().withProperties(Map.of("plainString", new PropertyMapping().withFlattenedLevelUp(1)) )))
                 || Map.of("nestedObject.plainString", "plainString")
-            // EDM nested grand object - Mongo flat property
-//            new EntityMapping()
-//                    .withCollection("Item")
-//                    .withProperties(Map.of("nestedObject", new PropertyMapping().withProperties(Map.of("plainString", new PropertyMapping().withFlatterLevelUp(1)) )))
-//                    || Map.of("nestedObject.plainString", "plainString")
-        // TODO Add mappings for object itself
-        // TODO flatted
-            //TODO Circular
     }
 
     @Unroll

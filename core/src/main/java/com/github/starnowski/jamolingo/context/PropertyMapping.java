@@ -8,52 +8,6 @@ import java.util.Objects;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PropertyMapping {
 
-  // TODO Add flatterLevelUp -> Integer
-  @Override
-  public String toString() {
-    return "PropertyMapping{"
-        + "key="
-        + key
-        + ", mongoPath='"
-        + mongoPath
-        + '\''
-        + ", mongoName='"
-        + mongoName
-        + '\''
-        + ", relativeTo='"
-        + relativeTo
-        + '\''
-        + ", type='"
-        + type
-        + '\''
-        + ", ignore="
-        + ignore
-        + ", computed="
-        + computed
-        + ", properties="
-        + properties
-        + '}';
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (o == null || getClass() != o.getClass()) return false;
-    PropertyMapping that = (PropertyMapping) o;
-    return Objects.equals(key, that.key)
-        && Objects.equals(mongoPath, that.mongoPath)
-        && Objects.equals(mongoName, that.mongoName)
-        && Objects.equals(relativeTo, that.relativeTo)
-        && Objects.equals(type, that.type)
-        && Objects.equals(ignore, that.ignore)
-        && Objects.equals(computed, that.computed)
-        && Objects.equals(properties, that.properties);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(key, mongoPath, mongoName, relativeTo, type, ignore, computed, properties);
-  }
-
   /** Marks OData key property */
   @JsonProperty("key")
   private Boolean key;
@@ -74,8 +28,86 @@ public class PropertyMapping {
   @JsonProperty("type")
   private String type;
 
+  @JsonProperty("circularReferenceMapping")
+  private CircularReferenceMapping circularReferenceMapping;
+
   public Integer getFlattenedLevelUp() {
     return flattenedLevelUp;
+  }
+
+  public void setCircularReferenceMapping(CircularReferenceMapping circularReferenceMapping) {
+    this.circularReferenceMapping = circularReferenceMapping;
+  }
+
+  public CircularReferenceMapping getCircularReferenceMapping() {
+    return circularReferenceMapping;
+  }
+
+  public PropertyMapping withCircularReferenceMapping(
+      CircularReferenceMapping circularReferenceMapping) {
+    this.circularReferenceMapping = circularReferenceMapping;
+    return this;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (o == null || getClass() != o.getClass()) return false;
+    PropertyMapping that = (PropertyMapping) o;
+    return Objects.equals(key, that.key)
+        && Objects.equals(mongoPath, that.mongoPath)
+        && Objects.equals(mongoName, that.mongoName)
+        && Objects.equals(relativeTo, that.relativeTo)
+        && Objects.equals(type, that.type)
+        && Objects.equals(circularReferenceMapping, that.circularReferenceMapping)
+        && Objects.equals(flattenedLevelUp, that.flattenedLevelUp)
+        && Objects.equals(ignore, that.ignore)
+        && Objects.equals(computed, that.computed)
+        && Objects.equals(properties, that.properties);
+  }
+
+  @Override
+  public String toString() {
+    return "PropertyMapping{"
+        + "key="
+        + key
+        + ", mongoPath='"
+        + mongoPath
+        + '\''
+        + ", mongoName='"
+        + mongoName
+        + '\''
+        + ", relativeTo='"
+        + relativeTo
+        + '\''
+        + ", type='"
+        + type
+        + '\''
+        + ", circularReferenceMapping="
+        + circularReferenceMapping
+        + ", flattenedLevelUp="
+        + flattenedLevelUp
+        + ", ignore="
+        + ignore
+        + ", computed="
+        + computed
+        + ", properties="
+        + properties
+        + '}';
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        key,
+        mongoPath,
+        mongoName,
+        relativeTo,
+        type,
+        circularReferenceMapping,
+        flattenedLevelUp,
+        ignore,
+        computed,
+        properties);
   }
 
   public PropertyMapping withFlattenedLevelUp(Integer flatterLevelUp) {

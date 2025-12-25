@@ -61,7 +61,11 @@ public class EntityPropertiesMongoPathResolver {
       out.put(
           edmPath,
           new MongoPathEntry(
-              edmPath, mongoPath, Boolean.TRUE.equals(property.getKey()), property.getType()));
+              edmPath,
+              mongoPath,
+              Boolean.TRUE.equals(property.getKey()),
+              property.getType(),
+              null));
       return;
     }
 
@@ -81,10 +85,11 @@ public class EntityPropertiesMongoPathResolver {
     if (entityPropertiesMongoPathResolverContext.isGenerateOnlyLeafs()) {
       return;
     }
+    // TODO
     out.put(
         edmPath,
         new MongoPathEntry(
-            edmPath, mongoPath, Boolean.TRUE.equals(property.getKey()), property.getType()));
+            edmPath, mongoPath, Boolean.TRUE.equals(property.getKey()), property.getType(), null));
   }
 
   // ----------------------------------------------------
@@ -140,10 +145,6 @@ public class EntityPropertiesMongoPathResolver {
     return normalize(base) + "." + normalize(name);
   }
 
-  public enum CircularStrategy {
-    EMBED_LIMITED // embed up to maxDepth
-  }
-
   public static class EntityPropertiesMongoPathResolverContext {
     private final boolean generateOnlyLeafs;
 
@@ -177,12 +178,24 @@ public class EntityPropertiesMongoPathResolver {
     private final boolean key;
     private final String type;
 
-    public MongoPathEntry(String edmPath, String mongoPath, boolean key, String type) {
+    public CircularReferenceMapping getCircularReferenceMapping() {
+      return circularReferenceMapping;
+    }
+
+    private final CircularReferenceMapping circularReferenceMapping;
+
+    public MongoPathEntry(
+        String edmPath,
+        String mongoPath,
+        boolean key,
+        String type,
+        CircularReferenceMapping circularReferenceMapping) {
 
       this.edmPath = edmPath;
       this.mongoPath = mongoPath;
       this.key = key;
       this.type = type;
+      this.circularReferenceMapping = circularReferenceMapping;
     }
 
     public String getEdmPath() {
@@ -199,25 +212,6 @@ public class EntityPropertiesMongoPathResolver {
 
     public String getType() {
       return type;
-    }
-  }
-
-  public static class CircularReferenceMapping {
-    /** EDM path where recursion re-anchors Example: "Item.Addresses" */
-    private String anchorEdmPath;
-
-    /** Max allowed depth (optional) */
-    private Integer maxDepth;
-
-    /** Resolution strategy */
-    private CircularStrategy strategy;
-
-    public String getAnchorEdmPath() {
-      return anchorEdmPath;
-    }
-
-    public void setAnchorEdmPath(String anchorEdmPath) {
-      this.anchorEdmPath = anchorEdmPath;
     }
   }
 }
