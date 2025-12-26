@@ -4,8 +4,9 @@ import java.util.*;
 
 public class EntityPropertiesMongoPathContextBuilder {
 
-  public static class EntityPropertiesMongoPathContext{
-    public EntityPropertiesMongoPathContext(Map<String, MongoPathEntry> edmToMongoPath, Map<String, MongoPathEntry> circularEdmPaths) {
+  public static class EntityPropertiesMongoPathContext {
+    public EntityPropertiesMongoPathContext(
+        Map<String, MongoPathEntry> edmToMongoPath, Map<String, MongoPathEntry> circularEdmPaths) {
       this.edmToMongoPath = Collections.unmodifiableMap(edmToMongoPath);
       this.circularEdmPaths = Collections.unmodifiableMap(circularEdmPaths);
     }
@@ -20,17 +21,20 @@ public class EntityPropertiesMongoPathContextBuilder {
 
     @Override
     public String toString() {
-      return "EntityPropertiesMongoPathContext{" +
-              "edmToMongoPath=" + edmToMongoPath +
-              ", circularEdmPaths=" + circularEdmPaths +
-              '}';
+      return "EntityPropertiesMongoPathContext{"
+          + "edmToMongoPath="
+          + edmToMongoPath
+          + ", circularEdmPaths="
+          + circularEdmPaths
+          + '}';
     }
 
     @Override
     public boolean equals(Object o) {
       if (o == null || getClass() != o.getClass()) return false;
       EntityPropertiesMongoPathContext that = (EntityPropertiesMongoPathContext) o;
-      return Objects.equals(edmToMongoPath, that.edmToMongoPath) && Objects.equals(circularEdmPaths, that.circularEdmPaths);
+      return Objects.equals(edmToMongoPath, that.edmToMongoPath)
+          && Objects.equals(circularEdmPaths, that.circularEdmPaths);
     }
 
     @Override
@@ -110,7 +114,7 @@ public class EntityPropertiesMongoPathContextBuilder {
       compileProperty(
           nested.getKey(),
           nested.getValue(),
-              mongoPath,
+          mongoPath,
           edmPath,
           out,
           entityPropertiesMongoPathResolverContext);
