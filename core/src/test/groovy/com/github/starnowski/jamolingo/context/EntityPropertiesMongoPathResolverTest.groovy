@@ -97,7 +97,15 @@ class EntityPropertiesMongoPathResolverTest extends Specification {
 
         // EDM Circular complex type
             new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(new CircularReferenceMapping().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED)), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
-                        || Map.ofEntries(Map.entry("plainString", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("plainString").withMongoPath("plainString").build()))
+                        || Map.ofEntries(
+                    Map.entry("plainString", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("plainString").withMongoPath("plainString").build()),
+                    Map.entry("Name", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Name").withMongoPath("Name").build()),
+                    Map.entry("Addresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses").withMongoPath("Addresses").build()),
+                    Map.entry("Addresses.BackUpAddresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses.BackUpAddresses").withMongoPath("Addresses.BackUpAddresses").withCircularReferenceMapping(new CircularReferenceMapping().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED)).build()),
+                    Map.entry("Addresses.Street", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses.Street").withMongoPath("Addresses.Street").build()),
+                    Map.entry("Addresses.City", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses.City").withMongoPath("Addresses.City").build()),
+                    Map.entry("Addresses.ZipCode", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses.ZipCode").withMongoPath("Addresses.ZipCode").build())
+            )
         // TODO Add mappings for object itself
         // TODO flatted
         //TODO Circular
