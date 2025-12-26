@@ -1,22 +1,58 @@
 package com.github.starnowski.jamolingo.context;
 
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
-public class EntityPropertiesMongoPathResolver {
+public class EntityPropertiesMongoPathContextBuilder {
 
-  public Map<String, MongoPathEntry> resolve(EntityMapping entityMapping) {
-    return resolve(entityMapping, new EntityPropertiesMongoPathResolverContext(false));
+  public static class EntityPropertiesMongoPathContext{
+    public EntityPropertiesMongoPathContext(Map<String, MongoPathEntry> edmToMongoPath, Map<String, MongoPathEntry> circularEdmPaths) {
+      this.edmToMongoPath = Collections.unmodifiableMap(edmToMongoPath);
+      this.circularEdmPaths = Collections.unmodifiableMap(circularEdmPaths);
+    }
+
+    public Map<String, MongoPathEntry> getEdmToMongoPath() {
+      return edmToMongoPath;
+    }
+
+    public Map<String, MongoPathEntry> getCircularEdmPaths() {
+      return circularEdmPaths;
+    }
+
+    @Override
+    public String toString() {
+      return "EntityPropertiesMongoPathContext{" +
+              "edmToMongoPath=" + edmToMongoPath +
+              ", circularEdmPaths=" + circularEdmPaths +
+              '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (o == null || getClass() != o.getClass()) return false;
+      EntityPropertiesMongoPathContext that = (EntityPropertiesMongoPathContext) o;
+      return Objects.equals(edmToMongoPath, that.edmToMongoPath) && Objects.equals(circularEdmPaths, that.circularEdmPaths);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(edmToMongoPath, circularEdmPaths);
+    }
+
+    private final Map<String, MongoPathEntry> edmToMongoPath;
+    private final Map<String, MongoPathEntry> circularEdmPaths;
   }
 
-  public Map<String, MongoPathEntry> resolve(
+  public EntityPropertiesMongoPathContext build(EntityMapping entityMapping) {
+    return build(entityMapping, new EntityPropertiesMongoPathResolverContext(false));
+  }
+
+  public EntityPropertiesMongoPathContext build(
       EntityMapping entityMapping,
       EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
     return compile(entityMapping, entityPropertiesMongoPathResolverContext);
   }
 
-  private Map<String, MongoPathEntry> compile(
+  private EntityPropertiesMongoPathContext compile(
       EntityMapping entityMapping,
       EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
 
@@ -37,7 +73,7 @@ public class EntityPropertiesMongoPathResolver {
       }
     }
 
-    return result;
+    return new EntityPropertiesMongoPathContext(result, new HashMap<>());
   }
 
   private void compileProperty(
@@ -69,15 +105,12 @@ public class EntityPropertiesMongoPathResolver {
       return;
     }
 
-    // Complex property → recurse
-    String nextMongoBase = mongoPath;
-
     for (Map.Entry<String, PropertyMapping> nested : property.getProperties().entrySet()) {
 
       compileProperty(
           nested.getKey(),
           nested.getValue(),
-          nextMongoBase,
+              mongoPath,
           edmPath,
           out,
           entityPropertiesMongoPathResolverContext);
@@ -85,7 +118,6 @@ public class EntityPropertiesMongoPathResolver {
     if (entityPropertiesMongoPathResolverContext.isGenerateOnlyLeafs()) {
       return;
     }
-    // TODO
     out.put(
         edmPath,
         new MongoPathEntry(

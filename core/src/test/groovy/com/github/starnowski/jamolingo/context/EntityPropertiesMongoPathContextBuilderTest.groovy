@@ -5,17 +5,15 @@ import spock.lang.Unroll
 
 import java.util.stream.Collectors
 
-import static java.util.Map.entry
-
-class EntityPropertiesMongoPathResolverTest extends Specification {
+class EntityPropertiesMongoPathContextBuilderTest extends Specification {
 
     @Unroll
     def "should return correct mongo path based on entity configuration #entityMapping with only leafs"(){
         given:
-            def tested = new EntityPropertiesMongoPathResolver()
+            def tested = new EntityPropertiesMongoPathContextBuilder()
 
         when:
-            def result = tested.resolve(entityMapping, new EntityPropertiesMongoPathResolver.EntityPropertiesMongoPathResolverContext.EntityPropertiesMongoPathResolverContextBuilder().withGenerateOnlyLeafs(true).build()).entrySet().stream().collect(
+            def result = tested.build(entityMapping, new EntityPropertiesMongoPathContextBuilder.EntityPropertiesMongoPathResolverContext.EntityPropertiesMongoPathResolverContextBuilder().withGenerateOnlyLeafs(true).build()).getEdmToMongoPath().entrySet().stream().collect(
                     Collectors.toMap(
                             (entry) -> entry.getKey(), (entry) -> entry.getValue().getMongoPath()))
 
@@ -45,10 +43,10 @@ class EntityPropertiesMongoPathResolverTest extends Specification {
     @Unroll
     def "should return correct mongo path based on entity configuration #entityMapping"(){
         given:
-        def tested = new EntityPropertiesMongoPathResolver()
+        def tested = new EntityPropertiesMongoPathContextBuilder()
 
         when:
-        def result = tested.resolve(entityMapping).entrySet().stream().collect(
+        def result = tested.build(entityMapping).getEdmToMongoPath().entrySet().stream().collect(
                 Collectors.toMap(
                         (entry) -> entry.getKey(), (entry) -> entry.getValue().getMongoPath()))
 
@@ -84,13 +82,13 @@ class EntityPropertiesMongoPathResolverTest extends Specification {
     @Unroll
     def "should return correct mongo properties mapping based on entity configuration #entityMapping"(){
         given:
-            def tested = new EntityPropertiesMongoPathResolver()
+            def tested = new EntityPropertiesMongoPathContextBuilder()
 
         when:
-            def result = tested.resolve(entityMapping)
+            def result = tested.build(entityMapping)
 
         then:
-            result == expecteMongoPatsh
+            result.getEdmToMongoPath() == expecteMongoPatsh
 
         where:
         entityMapping   ||  expecteMongoPatsh
