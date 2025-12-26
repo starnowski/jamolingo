@@ -35,6 +35,18 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                 .withAnchorEdmPath("Addresses"))
                             )
                     ) ))))
+            "edm/edm3_complextype_with_circular_reference_collection.xml"  | "Demo"    ||
+                new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String"), "Name", new PropertyMapping().withType("Edm.String"), "Addresses", new PropertyMapping().withType("Demo.Address").withProperties(
+                        Map.of(
+                                "Street", new PropertyMapping().withType("Edm.String"),
+                                "City", new PropertyMapping().withType("Edm.String"),
+                                "ZipCode", new PropertyMapping().withType("Edm.String"),
+                                "BackUpAddresses", new PropertyMapping().withType("Demo.Address")
+                                .withCircularReferenceMapping(new CircularReferenceMapping()
+                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                        .withAnchorEdmPath("Addresses"))
+                        )
+                ) ))))
             //TODO Test case with circular types
     }
 }
