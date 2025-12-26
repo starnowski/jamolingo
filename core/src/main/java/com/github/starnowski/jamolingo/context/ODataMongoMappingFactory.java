@@ -1,5 +1,7 @@
 package com.github.starnowski.jamolingo.context;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.olingo.commons.api.edm.*;
@@ -17,6 +19,26 @@ public class ODataMongoMappingFactory {
 
     mapping.setEntities(entities);
     return mapping;
+  }
+
+  private static class EntityPropertyMappingContext {
+    private final String currentEdmPath;
+    private final Map<String, String> edmTypeAndEdmPath;
+
+    public EntityPropertyMappingContext(
+        String currentEdmPath, Map<String, String> edmTypeAndEdmPath) {
+      this.currentEdmPath = currentEdmPath;
+      this.edmTypeAndEdmPath =
+          edmTypeAndEdmPath == null ? Collections.emptyMap() : edmTypeAndEdmPath;
+    }
+
+    public String getCurrentEdmPath() {
+      return currentEdmPath;
+    }
+
+    public Map<String, String> getEdmTypeAndEdmPath() {
+      return edmTypeAndEdmPath;
+    }
   }
 
   public ODataMongoMapping build(Edm edm, String schema) {
@@ -43,13 +65,18 @@ public class ODataMongoMappingFactory {
     // Primitive + Complex properties
     for (String propName : entityType.getPropertyNames()) {
       EdmProperty prop = entityType.getStructuralProperty(propName);
-      props.put(prop.getName(), mapProperty(prop, entityType));
+      props.put(
+          prop.getName(),
+          mapProperty(prop, entityType, new EntityPropertyMappingContext(prop.getName(), null)));
     }
 
     return props;
   }
 
-  private PropertyMapping mapProperty(EdmProperty prop, EdmStructuredType declaringType) {
+  private PropertyMapping mapProperty(
+      EdmProperty prop,
+      EdmStructuredType declaringType,
+      EntityPropertyMappingContext entityPropertyMappingContext) {
 
     PropertyMapping pm = new PropertyMapping();
     pm.setType(prop.getType().getNamespace() + "." + prop.getType().getName());
@@ -65,8 +92,23 @@ public class ODataMongoMappingFactory {
     // --- Complex vs primitive ---
     if (EdmTypeKind.COMPLEX.equals(prop.getType().getKind())) {
       EdmComplexType complexType = (EdmComplexType) prop.getType();
-
-      pm.setProperties(mapComplexProperties(complexType));
+      String typeName = complexType.getName();
+      if (entityPropertyMappingContext.getEdmTypeAndEdmPath().containsKey(typeName)) {
+        pm.setCircularReferenceMapping(
+            new CircularReferenceMapping()
+                .withStrategy(CircularStrategy.EMBED_LIMITED)
+                .withAnchorEdmPath(
+                    entityPropertyMappingContext.getEdmTypeAndEdmPath().get(typeName)));
+        return pm;
+      } else {
+        Map<String, String> updatedMap =
+            new HashMap<>(entityPropertyMappingContext.getEdmTypeAndEdmPath());
+        updatedMap.put(typeName, entityPropertyMappingContext.getCurrentEdmPath());
+        EntityPropertyMappingContext updatedEntityPropertyMappingContext =
+            new EntityPropertyMappingContext(
+                entityPropertyMappingContext.getCurrentEdmPath(), updatedMap);
+        pm.setProperties(mapComplexProperties(complexType, updatedEntityPropertyMappingContext));
+      }
     }
 
     // Mongo-specific fields intentionally NOT set here
@@ -74,13 +116,21 @@ public class ODataMongoMappingFactory {
     return pm;
   }
 
-  private Map<String, PropertyMapping> mapComplexProperties(EdmComplexType complexType) {
+  private Map<String, PropertyMapping> mapComplexProperties(
+      EdmComplexType complexType, EntityPropertyMappingContext entityPropertyMappingContext) {
 
     Map<String, PropertyMapping> props = new LinkedHashMap<>();
 
     for (String propName : complexType.getPropertyNames()) {
       EdmProperty prop = complexType.getStructuralProperty(propName);
-      props.put(prop.getName(), mapProperty(prop, complexType));
+      props.put(
+          prop.getName(),
+          mapProperty(
+              prop,
+              complexType,
+              new EntityPropertyMappingContext(
+                  entityPropertyMappingContext.getCurrentEdmPath() + "." + prop.getName(),
+                  new HashMap<>(entityPropertyMappingContext.getEdmTypeAndEdmPath()))));
     }
 
     return props;
