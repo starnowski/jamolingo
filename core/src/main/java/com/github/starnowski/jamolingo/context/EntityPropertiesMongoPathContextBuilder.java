@@ -1,8 +1,8 @@
 package com.github.starnowski.jamolingo.context;
 
-import java.util.*;
-
 import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
+
+import java.util.*;
 
 public class EntityPropertiesMongoPathContextBuilder {
 
@@ -20,7 +20,8 @@ public class EntityPropertiesMongoPathContextBuilder {
       EntityMapping entityMapping,
       EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
 
-    Map<String, MongoPathEntry> result = new LinkedHashMap<>();
+    EntityPropertiesMongoPathContextOutPut out = new EntityPropertiesMongoPathContextOutPut();
+    out.edmToMongoPath = new LinkedHashMap<>();
 
     String entityRoot = normalize(entityMapping.getRootPath());
 
@@ -32,12 +33,16 @@ public class EntityPropertiesMongoPathContextBuilder {
             e.getValue(),
             entityRoot,
             null,
-            result,
+            out,
             entityPropertiesMongoPathResolverContext);
       }
     }
     // TODO complex types references
-    return new EntityPropertiesMongoPathContext(result, new HashMap<>());
+    return new EntityPropertiesMongoPathContext(out.edmToMongoPath);
+  }
+
+  private static final class EntityPropertiesMongoPathContextOutPut {
+    private Map<String, MongoPathEntry> edmToMongoPath;
   }
 
   private void compileProperty(
@@ -45,20 +50,23 @@ public class EntityPropertiesMongoPathContextBuilder {
       PropertyMapping property,
       String currentMongoBase,
       String currentEdmBase,
-      Map<String, MongoPathEntry> out,
+      EntityPropertiesMongoPathContextOutPut out,
       EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
 
     if (Boolean.TRUE.equals(property.getIgnore())) {
       return;
     }
 
-    String edmPath = currentEdmBase == null ? propertyName : currentEdmBase + ODATA_PATH_SEPARATOR_CHARACTER + propertyName;
+    String edmPath =
+        currentEdmBase == null
+            ? propertyName
+            : currentEdmBase + ODATA_PATH_SEPARATOR_CHARACTER + propertyName;
     String mongoPath = resolveMongoPath(property, currentMongoBase, propertyName);
 
     // Leaf property
     if (property.getProperties() == null || property.getProperties().isEmpty()) {
 
-      out.put(
+      out.edmToMongoPath.put(
           edmPath,
           new MongoPathEntry(
               edmPath,
@@ -82,7 +90,7 @@ public class EntityPropertiesMongoPathContextBuilder {
     if (entityPropertiesMongoPathResolverContext.isGenerateOnlyLeafs()) {
       return;
     }
-    out.put(
+    out.edmToMongoPath.put(
         edmPath,
         new MongoPathEntry(
             edmPath,

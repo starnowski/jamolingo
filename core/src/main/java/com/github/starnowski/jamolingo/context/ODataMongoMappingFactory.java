@@ -1,13 +1,13 @@
 package com.github.starnowski.jamolingo.context;
 
+import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
-
-import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
 
 public class ODataMongoMappingFactory {
 
@@ -131,7 +131,9 @@ public class ODataMongoMappingFactory {
               prop,
               complexType,
               new EntityPropertyMappingContext(
-                  entityPropertyMappingContext.getCurrentEdmPath() + ODATA_PATH_SEPARATOR_CHARACTER + prop.getName(),
+                  entityPropertyMappingContext.getCurrentEdmPath()
+                      + ODATA_PATH_SEPARATOR_CHARACTER
+                      + prop.getName(),
                   new HashMap<>(entityPropertyMappingContext.getEdmTypeAndEdmPath()))));
     }
 
