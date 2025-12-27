@@ -91,25 +91,74 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                 )
 
             // Complex Types circular reference, where one type is from different schema Entity -> Type A -> Type B -> Type A
-            "edm/edm4_complextype_with_long_nested_circular_reference_different_schema.xml"  | "Policy.Model"    ||
-                new ODataMongoMapping().withEntities(Map.of("SalesOrder", new EntityMapping().withCollection("SalesOrder").withProperties(
-                        Map.of("OrderId", new PropertyMapping().withType("Edm.String").withKey(true),
-                                "Configuration", new PropertyMapping().withType("Sales.Model.ProductConfiguration").withProperties(
+        "edm/edm4_complextype_with_long_nested_circular_reference_different_schema.xml" | "Policy.Model" ||
+                new ODataMongoMapping()
+                        .withEntities(
                                 Map.of(
-                                        "ProductId", new PropertyMapping().withType("Edm.String"),
-                                        "SelectedOptions", new PropertyMapping().withType("Edm.String"),
-                                        "PricingContext", new PropertyMapping().withType("Pricing.Model.PricingContext")
-                                        .withProperties(Map.of("Currency", new PropertyMapping().withType("Edm.String"),
-                                                "CustomerGroup", new PropertyMapping().withType("Edm.String"),
-                                                "EvaluatedConfiguration", new PropertyMapping().withType("Sales.Model.ProductConfiguration")
-                                                .withCircularReferenceMapping(new CircularReferenceMapping()
-                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
-                                                        .withAnchorEdmPath("Configuration")
+                                        "InsurancePolicy",
+                                        new EntityMapping()
+                                                .withCollection("InsurancePolicy")
+                                                .withProperties(
+                                                        Map.of(
+                                                                "PolicyNumber",
+                                                                new PropertyMapping()
+                                                                        .withType("Edm.String")
+                                                                        .withKey(true),
+
+                                                                "CoverageSnapshot",
+                                                                new PropertyMapping()
+                                                                        .withType("Policy.Model.CoverageSnapshot")
+                                                                        .withProperties(
+                                                                                Map.of(
+                                                                                        "CoverageCode",
+                                                                                        new PropertyMapping()
+                                                                                                .withType("Edm.String"),
+
+                                                                                        "EligibilityRule",
+                                                                                        new PropertyMapping()
+                                                                                                .withType("Rules.Model.EligibilityRule")
+                                                                                                .withProperties(
+                                                                                                        Map.of(
+                                                                                                                "RuleCode",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Edm.String"),
+
+                                                                                                                "Description",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Edm.String"),
+
+                                                                                                                "EvaluationContext",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Rules.Model.RuleEvaluationContext")
+                                                                                                                        .withProperties(
+                                                                                                                                Map.of(
+                                                                                                                                        "EvaluatedAtUtc",
+                                                                                                                                        new PropertyMapping()
+                                                                                                                                                .withType("Edm.DateTimeOffset"),
+
+                                                                                                                                        "Result",
+                                                                                                                                        new PropertyMapping()
+                                                                                                                                                .withType("Edm.String"),
+
+                                                                                                                                        "EvaluatedRule",
+                                                                                                                                        new PropertyMapping()
+                                                                                                                                                .withType("Rules.Model.EligibilityRule")
+                                                                                                                                                .withCircularReferenceMapping(
+                                                                                                                                                        new CircularReferenceMapping()
+                                                                                                                                                                .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                                                                                .withAnchorEdmPath(
+                                                                                                                                                                        "CoverageSnapshot.EligibilityRule"
+                                                                                                                                                                )
+                                                                                                                                                )
+                                                                                                                                )
+                                                                                                                        )
+                                                                                                        )
+                                                                                                )
+                                                                                )
+                                                                        )
+                                                        )
                                                 )
-                                        )
-                                        )
-                                )))))
-                )
-            //TODO edm4_complextype_with_long_nested_circular_reference_different_schema
+                                )
+                        )
     }
 }
