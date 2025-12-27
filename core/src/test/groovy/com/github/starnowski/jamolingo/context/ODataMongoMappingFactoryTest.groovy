@@ -71,21 +71,19 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                 )
             // Complex Types circular reference, where one type is from different schema Entity -> Type A -> Type B -> Type A
             "edm/edm4_complextype_with_long_circular_reference_different_schema.xml"  | "Sales.Model"    ||
-                new ODataMongoMapping().withEntities(Map.of("WorkflowInstance", new EntityMapping().withCollection("WorkflowInstance").withProperties(
-                        Map.of("InstanceId", new PropertyMapping().withType("Edm.String").withKey(true),
-                                "Definition", new PropertyMapping().withType("Workflow.Model.WorkflowDefinition").withProperties(
+                new ODataMongoMapping().withEntities(Map.of("SalesOrder", new EntityMapping().withCollection("SalesOrder").withProperties(
+                        Map.of("OrderId", new PropertyMapping().withType("Edm.String").withKey(true),
+                                "Configuration", new PropertyMapping().withType("Sales.Model.ProductConfiguration").withProperties(
                                 Map.of(
-                                        "WorkflowKey", new PropertyMapping().withType("Edm.String"),
-                                        "Version", new PropertyMapping().withType("Edm.Int32"),
-                                        "Steps", new PropertyMapping().withType("Edm.String"),
-                                        "ExecutionContext", new PropertyMapping().withType("Workflow.Model.ExecutionContext")
-                                        .withProperties(Map.of("TriggeredBy", new PropertyMapping().withType("Edm.String"),
-                                                "ExecutionTimeUtc", new PropertyMapping().withType("Edm.DateTimeOffset"),
-                                                "RuntimeVariables", new PropertyMapping().withType("Edm.String"),
-                                                "EvaluatedDefinition", new PropertyMapping().withType("Workflow.Model.WorkflowDefinition")
+                                        "ProductId", new PropertyMapping().withType("Edm.String"),
+                                        "SelectedOptions", new PropertyMapping().withType("Edm.String"),
+                                        "PricingContext", new PropertyMapping().withType("Pricing.Model.PricingContext")
+                                        .withProperties(Map.of("Currency", new PropertyMapping().withType("Edm.String"),
+                                                "CustomerGroup", new PropertyMapping().withType("Edm.String"),
+                                                "EvaluatedConfiguration", new PropertyMapping().withType("Sales.Model.ProductConfiguration")
                                                 .withCircularReferenceMapping(new CircularReferenceMapping()
                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
-                                                        .withAnchorEdmPath("Definition")
+                                                        .withAnchorEdmPath("Configuration")
                                                 )
                                         )
                                         )

@@ -76,7 +76,7 @@ public class EntityPropertiesMongoPathContextBuilder {
             entityPropertiesMongoPathResolverContext);
       }
     }
-    //TODO complex types references
+    // TODO complex types references
     return new EntityPropertiesMongoPathContext(result, new HashMap<>());
   }
 
