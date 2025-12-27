@@ -2,6 +2,8 @@ package com.github.starnowski.jamolingo.context;
 
 import java.util.*;
 
+import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
+
 public class EntityPropertiesMongoPathContextBuilder {
 
   public EntityPropertiesMongoPathContext build(EntityMapping entityMapping) {
@@ -50,7 +52,7 @@ public class EntityPropertiesMongoPathContextBuilder {
       return;
     }
 
-    String edmPath = currentEdmBase == null ? propertyName : currentEdmBase + "." + propertyName;
+    String edmPath = currentEdmBase == null ? propertyName : currentEdmBase + ODATA_PATH_SEPARATOR_CHARACTER + propertyName;
     String mongoPath = resolveMongoPath(property, currentMongoBase, propertyName);
 
     // Leaf property
