@@ -7,6 +7,8 @@ import java.util.Map;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 
+import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
+
 public class ODataMongoMappingFactory {
 
   public ODataMongoMapping build(EdmSchema edmSchema) {
@@ -129,7 +131,7 @@ public class ODataMongoMappingFactory {
               prop,
               complexType,
               new EntityPropertyMappingContext(
-                  entityPropertyMappingContext.getCurrentEdmPath() + "." + prop.getName(),
+                  entityPropertyMappingContext.getCurrentEdmPath() + ODATA_PATH_SEPARATOR_CHARACTER + prop.getName(),
                   new HashMap<>(entityPropertyMappingContext.getEdmTypeAndEdmPath()))));
     }
 
