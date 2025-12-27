@@ -90,7 +90,26 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                 )))))
                 )
 
-            //edm4_complextype_with_long_circular_reference
-            //TODO Test case with circular types
+            // Complex Types circular reference, where one type is from different schema Entity -> Type A -> Type B -> Type A
+            "edm/edm4_complextype_with_long_nested_circular_reference_different_schema.xml"  | "Policy.Model"    ||
+                new ODataMongoMapping().withEntities(Map.of("SalesOrder", new EntityMapping().withCollection("SalesOrder").withProperties(
+                        Map.of("OrderId", new PropertyMapping().withType("Edm.String").withKey(true),
+                                "Configuration", new PropertyMapping().withType("Sales.Model.ProductConfiguration").withProperties(
+                                Map.of(
+                                        "ProductId", new PropertyMapping().withType("Edm.String"),
+                                        "SelectedOptions", new PropertyMapping().withType("Edm.String"),
+                                        "PricingContext", new PropertyMapping().withType("Pricing.Model.PricingContext")
+                                        .withProperties(Map.of("Currency", new PropertyMapping().withType("Edm.String"),
+                                                "CustomerGroup", new PropertyMapping().withType("Edm.String"),
+                                                "EvaluatedConfiguration", new PropertyMapping().withType("Sales.Model.ProductConfiguration")
+                                                .withCircularReferenceMapping(new CircularReferenceMapping()
+                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                        .withAnchorEdmPath("Configuration")
+                                                )
+                                        )
+                                        )
+                                )))))
+                )
+            //TODO edm4_complextype_with_long_nested_circular_reference_different_schema
     }
 }
