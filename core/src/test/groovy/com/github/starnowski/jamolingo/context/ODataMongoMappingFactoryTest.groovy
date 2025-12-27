@@ -70,7 +70,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                 )))))
                 )
             // Complex Types circular reference, where one type is from different schema Entity -> Type A -> Type B -> Type A
-            "edm/edm4_complextype_with_long_circular_reference_different_schema.xml"  | "Workflow.Model"    ||
+            "edm/edm4_complextype_with_long_circular_reference_different_schema.xml"  | "Sales.Model"    ||
                 new ODataMongoMapping().withEntities(Map.of("WorkflowInstance", new EntityMapping().withCollection("WorkflowInstance").withProperties(
                         Map.of("InstanceId", new PropertyMapping().withType("Edm.String").withKey(true),
                                 "Definition", new PropertyMapping().withType("Workflow.Model.WorkflowDefinition").withProperties(

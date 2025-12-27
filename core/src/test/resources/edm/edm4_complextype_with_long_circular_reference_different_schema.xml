@@ -2,51 +2,63 @@
 <edmx:Edmx Version="4.0"
            xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
     <edmx:DataServices>
-        <Schema Namespace="Workflow.Model"
+
+        <!-- ================================================= -->
+        <!-- Sales Schema -->
+        <!-- ================================================= -->
+        <Schema Namespace="Sales.Model"
                 xmlns="http://docs.oasis-open.org/odata/ns/edm">
 
             <!-- ===================== -->
-            <!-- Main Entity -->
+            <!-- Entity -->
             <!-- ===================== -->
-            <EntityType Name="WorkflowInstance">
+            <EntityType Name="SalesOrder">
                 <Key>
-                    <PropertyRef Name="InstanceId"/>
+                    <PropertyRef Name="OrderId"/>
                 </Key>
-                <Property Name="InstanceId" Type="Edm.String" Nullable="false"/>
-                <Property Name="Definition" Type="Workflow.Model.WorkflowDefinition"/>
+                <Property Name="OrderId" Type="Edm.String" Nullable="false"/>
+                <Property Name="Configuration"
+                          Type="Sales.Model.ProductConfiguration"/>
             </EntityType>
 
             <!-- ===================== -->
-            <!-- Complex Types -->
+            <!-- Complex Type (TypeA) -->
             <!-- ===================== -->
-
-            <!-- TypeA -->
-            <ComplexType Name="WorkflowDefinition">
-                <Property Name="WorkflowKey" Type="Edm.String"/>
-                <Property Name="Version" Type="Edm.Int32"/>
-                <Property Name="Steps" Type="Collection(Edm.String)"/>
-                <Property Name="ExecutionContext"
-                          Type="Workflow.Model.ExecutionContext"/>
-            </ComplexType>
-
-            <!-- TypeB -->
-            <ComplexType Name="ExecutionContext">
-                <Property Name="TriggeredBy" Type="Edm.String"/>
-                <Property Name="ExecutionTimeUtc" Type="Edm.DateTimeOffset"/>
-                <Property Name="RuntimeVariables"
+            <ComplexType Name="ProductConfiguration">
+                <Property Name="ProductId" Type="Edm.String"/>
+                <Property Name="SelectedOptions"
                           Type="Collection(Edm.String)"/>
-                <Property Name="EvaluatedDefinition"
-                          Type="Workflow.Model.WorkflowDefinition"/>
+                <Property Name="PricingContext"
+                          Type="Pricing.Model.PricingContext"/>
             </ComplexType>
 
             <!-- ===================== -->
             <!-- Container -->
             <!-- ===================== -->
             <EntityContainer Name="Container">
-                <EntitySet Name="WorkflowInstances"
-                           EntityType="Workflow.Model.WorkflowInstance"/>
+                <EntitySet Name="SalesOrders"
+                           EntityType="Sales.Model.SalesOrder"/>
             </EntityContainer>
 
         </Schema>
+
+        <!-- ================================================= -->
+        <!-- Pricing Schema -->
+        <!-- ================================================= -->
+        <Schema Namespace="Pricing.Model"
+                xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+            <!-- ===================== -->
+            <!-- Complex Type (TypeB) -->
+            <!-- ===================== -->
+            <ComplexType Name="PricingContext">
+                <Property Name="Currency" Type="Edm.String"/>
+                <Property Name="CustomerGroup" Type="Edm.String"/>
+                <Property Name="EvaluatedConfiguration"
+                          Type="Sales.Model.ProductConfiguration"/>
+            </ComplexType>
+
+        </Schema>
+
     </edmx:DataServices>
 </edmx:Edmx>
