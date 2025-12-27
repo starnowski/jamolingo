@@ -89,9 +89,10 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
 
         then:
             result.getEdmToMongoPath() == expecteMongoPatsh
+            result.getCircularEdmPaths() == expectedCircularEdmPaths
 
         where:
-        entityMapping   ||  expecteMongoPatsh
+        entityMapping   ||  expecteMongoPatsh   |   expectedCircularEdmPaths
 
         // EDM Circular complex type
             new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(new CircularReferenceMapping().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED)), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
@@ -104,6 +105,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                     Map.entry("Addresses/City", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/City").withMongoPath("Addresses.City").build()),
                     Map.entry("Addresses/ZipCode", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/ZipCode").withMongoPath("Addresses.ZipCode").build())
             )
+            |   Map.of("Addresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses").withMongoPath("Addresses").build())
         // TODO Add mappings for object itself
         // TODO flatted
         //TODO Circular
