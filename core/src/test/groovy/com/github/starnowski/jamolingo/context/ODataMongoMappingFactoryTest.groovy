@@ -147,7 +147,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                                                         new CircularReferenceMapping()
                                                                                                                                                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                                                                                 .withAnchorEdmPath(
-                                                                                                                                                                        "CoverageSnapshot.EligibilityRule"
+                                                                                                                                                                        "CoverageSnapshot/EligibilityRule"
                                                                                                                                                                 )
                                                                                                                                                 )
                                                                                                                                 )
