@@ -47,6 +47,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                         .withAnchorEdmPath("Addresses"))
                         )
                 ) ))))
+            // Complex Types circular reference Entity -> Type A -> Type B -> Type A
             "edm/edm4_complextype_with_long_circular_reference.xml"  | "Workflow.Model"    ||
                 new ODataMongoMapping().withEntities(Map.of("WorkflowInstance", new EntityMapping().withCollection("WorkflowInstance").withProperties(
                         Map.of("InstanceId", new PropertyMapping().withType("Edm.String").withKey(true),
@@ -67,6 +68,28 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                 )
                         )
                 )))))
+                )
+            // Complex Types circular reference, where one type is from different schema Entity -> Type A -> Type B -> Type A
+            "edm/edm4_complextype_with_long_circular_reference_different_schema.xml"  | "Workflow.Model"    ||
+                new ODataMongoMapping().withEntities(Map.of("WorkflowInstance", new EntityMapping().withCollection("WorkflowInstance").withProperties(
+                        Map.of("InstanceId", new PropertyMapping().withType("Edm.String").withKey(true),
+                                "Definition", new PropertyMapping().withType("Workflow.Model.WorkflowDefinition").withProperties(
+                                Map.of(
+                                        "WorkflowKey", new PropertyMapping().withType("Edm.String"),
+                                        "Version", new PropertyMapping().withType("Edm.Int32"),
+                                        "Steps", new PropertyMapping().withType("Edm.String"),
+                                        "ExecutionContext", new PropertyMapping().withType("Workflow.Model.ExecutionContext")
+                                        .withProperties(Map.of("TriggeredBy", new PropertyMapping().withType("Edm.String"),
+                                                "ExecutionTimeUtc", new PropertyMapping().withType("Edm.DateTimeOffset"),
+                                                "RuntimeVariables", new PropertyMapping().withType("Edm.String"),
+                                                "EvaluatedDefinition", new PropertyMapping().withType("Workflow.Model.WorkflowDefinition")
+                                                .withCircularReferenceMapping(new CircularReferenceMapping()
+                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                        .withAnchorEdmPath("Definition")
+                                                )
+                                        )
+                                        )
+                                )))))
                 )
 
             //edm4_complextype_with_long_circular_reference
