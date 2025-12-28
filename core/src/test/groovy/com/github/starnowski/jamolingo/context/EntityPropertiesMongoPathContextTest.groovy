@@ -49,4 +49,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
      *  ENTITY - C -> A -> B
      *  ENTITY - A -> B -> A (edm - A)
      */
+    /*
+     * edmPath - used to resolve type definition, not path
+     */
 }
