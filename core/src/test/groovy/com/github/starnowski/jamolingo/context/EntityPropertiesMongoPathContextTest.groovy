@@ -42,4 +42,11 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     //TODO Missing edmPath
 
     //TODO Circular reference A -> B -> A -> B -> C -> B -> A -> B -> B.pro
+    /*
+     * TODO Circular reference
+     *  ENTITY - C -> B -> A (edm - A)
+     *  ENTITY - C -> B -> C (edm - C)
+     *  ENTITY - C -> A -> B
+     *  ENTITY - A -> B -> A (edm - A)
+     */
 }
