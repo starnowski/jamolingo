@@ -12,7 +12,7 @@ public class EntityPropertiesMongoPathContext {
 
   public String resolveMongoPathForEDMPath(String edmPath) {
     //TODO
-    return null;
+    return this.edmToMongoPath.get(edmPath).getMongoPath();
   }
 
   public Map<String, MongoPathEntry> getEdmToMongoPath() {
