@@ -63,15 +63,8 @@ public class ODataMongoMappingFactory {
   private Map<String, PropertyMapping> mapProperties(EdmEntityType entityType) {
 
     Map<String, PropertyMapping> props = new LinkedHashMap<>();
-    Map<String, String> edmTypeAndEdmPath = new HashMap<>();
     // Resolve Complex types to shorter circular reference edm path
-    for (String propName : entityType.getPropertyNames()) {
-      EdmProperty prop = entityType.getStructuralProperty(propName);
-      Map.Entry<String, String> entry = tryToExtractEdmPathForComplexType(prop, null);
-      if (entry != null) {
-        edmTypeAndEdmPath.putIfAbsent(entry.getKey(), entry.getValue());
-      }
-    }
+    Map<String, String> edmTypeAndEdmPath = enrichedCircularReferenceMapBasedOnPropertiesForEdmStructuredType(null, entityType, null);
 
     // Primitive + Complex properties
     for (String propName : entityType.getPropertyNames()) {
@@ -82,6 +75,18 @@ public class ODataMongoMappingFactory {
     }
 
     return props;
+  }
+
+  private Map<String, String> enrichedCircularReferenceMapBasedOnPropertiesForEdmStructuredType(Map<String, String> base, EdmStructuredType type, String currentEdmTypePath){
+    Map<String, String> edmTypeAndEdmPath = base == null ? new HashMap<>() : new HashMap<>(base);
+    for (String propName : type.getPropertyNames()) {
+      EdmProperty prop = type.getStructuralProperty(propName);
+      Map.Entry<String, String> entry = tryToExtractEdmPathForComplexType(prop, currentEdmTypePath);
+      if (entry != null) {
+        edmTypeAndEdmPath.putIfAbsent(entry.getKey(), entry.getValue());
+      }
+    }
+    return edmTypeAndEdmPath;
   }
 
   private Map.Entry<String, String> tryToExtractEdmPathForComplexType(EdmProperty property, String currentEdmTypePath) {
@@ -122,9 +127,10 @@ public class ODataMongoMappingFactory {
                     entityPropertyMappingContext.getEdmTypeAndEdmPath().get(typeName)).build());
         return pm;
       } else {
-        Map<String, String> updatedMap =
-            new HashMap<>(entityPropertyMappingContext.getEdmTypeAndEdmPath());
-        updatedMap.put(typeName, entityPropertyMappingContext.getCurrentEdmPath());
+        Map<String, String> updatedMap =enrichedCircularReferenceMapBasedOnPropertiesForEdmStructuredType(entityPropertyMappingContext.getEdmTypeAndEdmPath(), complexType, entityPropertyMappingContext.getCurrentEdmPath());
+
+//            new HashMap<>(entityPropertyMappingContext.getEdmTypeAndEdmPath());
+//        updatedMap.put(typeName, entityPropertyMappingContext.getCurrentEdmPath());
         EntityPropertyMappingContext updatedEntityPropertyMappingContext =
             new EntityPropertyMappingContext(
                 entityPropertyMappingContext.getCurrentEdmPath(), updatedMap);
