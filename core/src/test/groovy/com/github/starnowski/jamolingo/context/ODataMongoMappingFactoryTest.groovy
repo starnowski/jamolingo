@@ -160,5 +160,140 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                 )
                                 )
                         )
+        "edm/edm5_multiple_circula_references.xml" | "Demo.Model" ||
+                new ODataMongoMapping()
+                        .withEntities(
+                                Map.of(
+                                        "RootEntity",
+                                        new EntityMapping()
+                                                .withCollection("RootEntity")
+                                                .withProperties(
+                                                        Map.of(
+                                                                "Id",
+                                                                new PropertyMapping()
+                                                                        .withType("Edm.String")
+                                                                        .withKey(true),
+
+                                                                // ---------------------------
+                                                                // PropC (ComplexTypeC)
+                                                                // ---------------------------
+                                                                "PropC",
+                                                                new PropertyMapping()
+                                                                        .withType("Demo.Model.ComplexTypeC")
+                                                                        .withProperties(
+                                                                                Map.of(
+                                                                                        "StringProperty",
+                                                                                        new PropertyMapping()
+                                                                                                .withType("Edm.String"),
+
+                                                                                        "PropB",
+                                                                                        new PropertyMapping()
+                                                                                                .withType("Demo.Model.ComplexTypeB")
+                                                                                                .withProperties(
+                                                                                                        Map.of(
+                                                                                                                "StringProperty",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Edm.String"),
+
+                                                                                                                "PropA",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Demo.Model.ComplexTypeA")
+                                                                                                                        .withProperties(
+                                                                                                                                Map.of(
+                                                                                                                                        "StringProperty",
+                                                                                                                                        new PropertyMapping()
+                                                                                                                                                .withType("Edm.String"),
+
+                                                                                                                                        "PropB",
+                                                                                                                                        new PropertyMapping()
+                                                                                                                                                .withType("Demo.Model.ComplexTypeB")
+                                                                                                                                                .withCircularReferenceMapping(
+                                                                                                                                                        CircularReferenceMapping.builder()
+                                                                                                                                                                .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                                                                                .withAnchorEdmPath("PropC/PropB").build()
+                                                                                                                                                )
+                                                                                                                                )
+                                                                                                                        ),
+
+                                                                                                                "PropC",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Demo.Model.ComplexTypeC")
+                                                                                                                        .withCircularReferenceMapping(
+                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                                                        .withAnchorEdmPath("PropC").build()
+                                                                                                                        )
+                                                                                                        )
+                                                                                                ),
+
+                                                                                        "PropA",
+                                                                                        new PropertyMapping()
+                                                                                                .withType("Demo.Model.ComplexTypeA")
+                                                                                                .withProperties(
+                                                                                                        Map.of(
+                                                                                                                "StringProperty",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Edm.String"),
+
+                                                                                                                "PropB",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Demo.Model.ComplexTypeB")
+                                                                                                                        .withCircularReferenceMapping(
+                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                                                        .withAnchorEdmPath("PropC/PropB").build()
+                                                                                                                        )
+                                                                                                        )
+                                                                                                )
+                                                                                )
+                                                                        ),
+
+                                                                // ---------------------------
+                                                                // PropA (ComplexTypeA)
+                                                                // ---------------------------
+                                                                "PropA",
+                                                                new PropertyMapping()
+                                                                        .withType("Demo.Model.ComplexTypeA")
+                                                                        .withProperties(
+                                                                                Map.of(
+                                                                                        "StringProperty",
+                                                                                        new PropertyMapping()
+                                                                                                .withType("Edm.String"),
+
+                                                                                        "PropB",
+                                                                                        new PropertyMapping()
+                                                                                                .withType("Demo.Model.ComplexTypeB")
+                                                                                                .withProperties(
+                                                                                                        Map.of(
+                                                                                                                "StringProperty",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Edm.String"),
+
+                                                                                                                "PropA",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Demo.Model.ComplexTypeA")
+                                                                                                                        .withCircularReferenceMapping(
+                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                                                        .withAnchorEdmPath("PropA").build()
+                                                                                                                        ),
+
+                                                                                                                "PropC",
+                                                                                                                new PropertyMapping()
+                                                                                                                        .withType("Demo.Model.ComplexTypeC")
+                                                                                                                        .withCircularReferenceMapping(
+                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                                                        .withAnchorEdmPath("PropC").build()
+                                                                                                                        )
+                                                                                                        )
+                                                                                                )
+                                                                                )
+                                                                        )
+                                                        )
+                                                )
+                                )
+                        )
+
     }
 }
