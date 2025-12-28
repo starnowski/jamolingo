@@ -40,4 +40,6 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     //TODO Circular reference (properties have different names and mongo paths levels) mapping with nested levels (no max level)
     //TODO Circular reference with max level exception
     //TODO Missing edmPath
+
+    //TODO Circular reference A -> B -> A -> B -> C -> B -> A -> B -> B.pro
 }
