@@ -101,5 +101,131 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                     Map.entry("Addresses/City", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/City").withMongoPath("Addresses.City").build()),
                     Map.entry("Addresses/ZipCode", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/ZipCode").withMongoPath("Addresses.ZipCode").build())
             )
+            /*
+            Entity → C → B → C	Anchor path: PropC
+            Entity → C → B → A	Anchor path: PropA
+            Entity → A → B → A	Anchor path: PropA
+            Entity → A → B → C	Anchor path: PropC
+            */
+
+            new EntityMapping()
+                .withCollection("RootEntity")
+                .withProperties(
+                        Map.of(
+                                "Id",
+                                new PropertyMapping()
+                                        .withType("Edm.String")
+                                        .withKey(true),
+
+                                // =======================
+                                // PropC (ComplexTypeC)
+                                // =======================
+                                "PropC",
+                                new PropertyMapping()
+                                        .withType("Demo.Model.ComplexTypeC")
+                                        .withProperties(
+                                                Map.of(
+                                                        "StringProperty",
+                                                        new PropertyMapping()
+                                                                .withType("Edm.String"),
+
+                                                        "PropB",
+                                                        new PropertyMapping()
+                                                                .withType("Demo.Model.ComplexTypeB")
+                                                                .withProperties(
+                                                                        Map.of(
+                                                                                "StringProperty",
+                                                                                new PropertyMapping()
+                                                                                        .withType("Edm.String"),
+
+                                                                                // 🔁 C → B → A (circle to RootEntity/PropA)
+                                                                                "PropA",
+                                                                                new PropertyMapping()
+                                                                                        .withType("Demo.Model.ComplexTypeA")
+                                                                                        .withCircularReferenceMapping(
+                                                                                                CircularReferenceMapping.builder()
+                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                        .withAnchorEdmPath("PropA").build()
+                                                                                        ),
+
+                                                                                // 🔁 C → B → C
+                                                                                "PropC",
+                                                                                new PropertyMapping()
+                                                                                        .withType("Demo.Model.ComplexTypeC")
+                                                                                        .withCircularReferenceMapping(
+                                                                                                CircularReferenceMapping.builder()
+                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                        .withAnchorEdmPath("PropC").build()
+                                                                                        )
+                                                                        )
+                                                                ),
+
+                                                        // 🔁 C → A (circle to RootEntity/PropA)
+                                                        "PropA",
+                                                        new PropertyMapping()
+                                                                .withType("Demo.Model.ComplexTypeA")
+                                                                .withCircularReferenceMapping(
+                                                                        CircularReferenceMapping.builder()
+                                                                                .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                .withAnchorEdmPath("PropA").build()
+                                                                )
+                                                )
+                                        ),
+
+                                // =======================
+                                // PropA (ComplexTypeA)
+                                // =======================
+                                "PropA",
+                                new PropertyMapping()
+                                        .withType("Demo.Model.ComplexTypeA")
+                                        .withProperties(
+                                                Map.of(
+                                                        "StringProperty",
+                                                        new PropertyMapping()
+                                                                .withType("Edm.String"),
+
+                                                        "PropB",
+                                                        new PropertyMapping()
+                                                                .withType("Demo.Model.ComplexTypeB")
+                                                                .withProperties(
+                                                                        Map.of(
+                                                                                "StringProperty",
+                                                                                new PropertyMapping()
+                                                                                        .withType("Edm.String"),
+
+                                                                                // 🔁 A → B → A
+                                                                                "PropA",
+                                                                                new PropertyMapping()
+                                                                                        .withType("Demo.Model.ComplexTypeA")
+                                                                                        .withCircularReferenceMapping(
+                                                                                                CircularReferenceMapping.builder()
+                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                        .withAnchorEdmPath("PropA").build()
+                                                                                        ),
+
+                                                                                // 🔁 A → B → C
+                                                                                "PropC",
+                                                                                new PropertyMapping()
+                                                                                        .withType("Demo.Model.ComplexTypeC")
+                                                                                        .withCircularReferenceMapping(
+                                                                                                CircularReferenceMapping.builder()
+                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                        .withAnchorEdmPath("PropC").build()
+                                                                                        )
+                                                                        )
+                                                                )
+                                                )
+                                        )
+                        )
+                )   || Map.ofEntries(
+                Map.entry("plainString", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("plainString").withMongoPath("plainString").build()),
+                Map.entry("Name", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Name").withMongoPath("Name").build()),
+                Map.entry("Addresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses").withMongoPath("Addresses").build()),
+                Map.entry("Addresses/BackUpAddresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/BackUpAddresses").withMongoPath("Addresses.BackUpAddresses").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
+                Map.entry("Addresses/Street", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/Street").withMongoPath("Addresses.Street").build()),
+                Map.entry("Addresses/City", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/City").withMongoPath("Addresses.City").build()),
+                Map.entry("Addresses/ZipCode", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/ZipCode").withMongoPath("Addresses.ZipCode").build())
+        )
+
     }
 }
