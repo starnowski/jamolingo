@@ -63,16 +63,33 @@ public class ODataMongoMappingFactory {
   private Map<String, PropertyMapping> mapProperties(EdmEntityType entityType) {
 
     Map<String, PropertyMapping> props = new LinkedHashMap<>();
+    Map<String, String> edmTypeAndEdmPath = new HashMap<>();
+    // Resolve Complex types to shorter circular reference edm path
+    for (String propName : entityType.getPropertyNames()) {
+      EdmProperty prop = entityType.getStructuralProperty(propName);
+      Map.Entry<String, String> entry = tryToExtractEdmPathForComplexType(prop, null);
+      if (entry != null) {
+        edmTypeAndEdmPath.putIfAbsent(entry.getKey(), entry.getValue());
+      }
+    }
 
     // Primitive + Complex properties
     for (String propName : entityType.getPropertyNames()) {
       EdmProperty prop = entityType.getStructuralProperty(propName);
       props.put(
           prop.getName(),
-          mapProperty(prop, entityType, new EntityPropertyMappingContext(prop.getName(), null)));
+          mapProperty(prop, entityType, new EntityPropertyMappingContext(prop.getName(), edmTypeAndEdmPath)));
     }
 
     return props;
+  }
+
+  private Map.Entry<String, String> tryToExtractEdmPathForComplexType(EdmProperty property, String currentEdmTypePath) {
+    if (EdmTypeKind.COMPLEX.equals(property.getType().getKind())) {
+      EdmComplexType complexType = (EdmComplexType) property.getType();
+      return Map.entry(complexType.getName(), buildEDMPath(currentEdmTypePath, property.getName()));
+    }
+    return null;
   }
 
   private PropertyMapping mapProperty(
@@ -95,7 +112,9 @@ public class ODataMongoMappingFactory {
     if (EdmTypeKind.COMPLEX.equals(prop.getType().getKind())) {
       EdmComplexType complexType = (EdmComplexType) prop.getType();
       String typeName = complexType.getName();
-      if (entityPropertyMappingContext.getEdmTypeAndEdmPath().containsKey(typeName)) {
+      if (entityPropertyMappingContext.getEdmTypeAndEdmPath().containsKey(typeName) &&
+             !entityPropertyMappingContext.getCurrentEdmPath().equals(entityPropertyMappingContext.getEdmTypeAndEdmPath().get(typeName))
+      ) {
         pm.setCircularReferenceMapping(
             CircularReferenceMapping.builder()
                 .withStrategy(CircularStrategy.EMBED_LIMITED)
@@ -131,13 +150,17 @@ public class ODataMongoMappingFactory {
               prop,
               complexType,
               new EntityPropertyMappingContext(
-                  entityPropertyMappingContext.getCurrentEdmPath()
-                      + ODATA_PATH_SEPARATOR_CHARACTER
-                      + prop.getName(),
+                  buildEDMPath(entityPropertyMappingContext.getCurrentEdmPath(), prop.getName()),
                   new HashMap<>(entityPropertyMappingContext.getEdmTypeAndEdmPath()))));
     }
 
     return props;
+  }
+
+  private String buildEDMPath(String base, String currentNode){
+    return base == null ? currentNode : base
+            + ODATA_PATH_SEPARATOR_CHARACTER
+            + currentNode;
   }
 
   // ------------------ Defaults ------------------
