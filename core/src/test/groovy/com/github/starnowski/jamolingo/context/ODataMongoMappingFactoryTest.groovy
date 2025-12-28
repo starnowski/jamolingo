@@ -174,9 +174,9 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                         .withType("Edm.String")
                                                                         .withKey(true),
 
-                                                                // ---------------------------
+                                                                // =======================
                                                                 // PropC (ComplexTypeC)
-                                                                // ---------------------------
+                                                                // =======================
                                                                 "PropC",
                                                                 new PropertyMapping()
                                                                         .withType("Demo.Model.ComplexTypeC")
@@ -195,26 +195,17 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Edm.String"),
 
+                                                                                                                // 🔁 C → B → A (circle to RootEntity/PropA)
                                                                                                                 "PropA",
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Demo.Model.ComplexTypeA")
-                                                                                                                        .withProperties(
-                                                                                                                                Map.of(
-                                                                                                                                        "StringProperty",
-                                                                                                                                        new PropertyMapping()
-                                                                                                                                                .withType("Edm.String"),
-
-                                                                                                                                        "PropB",
-                                                                                                                                        new PropertyMapping()
-                                                                                                                                                .withType("Demo.Model.ComplexTypeB")
-                                                                                                                                                .withCircularReferenceMapping(
-                                                                                                                                                        CircularReferenceMapping.builder()
-                                                                                                                                                                .withStrategy(CircularStrategy.EMBED_LIMITED)
-                                                                                                                                                                .withAnchorEdmPath("PropC/PropB").build()
-                                                                                                                                                )
-                                                                                                                                )
+                                                                                                                        .withCircularReferenceMapping(
+                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                                                        .withAnchorEdmPath("PropA").build()
                                                                                                                         ),
 
+                                                                                                                // 🔁 C → B → C
                                                                                                                 "PropC",
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Demo.Model.ComplexTypeC")
@@ -226,31 +217,21 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                         )
                                                                                                 ),
 
+                                                                                        // 🔁 C → A (circle to RootEntity/PropA)
                                                                                         "PropA",
                                                                                         new PropertyMapping()
                                                                                                 .withType("Demo.Model.ComplexTypeA")
-                                                                                                .withProperties(
-                                                                                                        Map.of(
-                                                                                                                "StringProperty",
-                                                                                                                new PropertyMapping()
-                                                                                                                        .withType("Edm.String"),
-
-                                                                                                                "PropB",
-                                                                                                                new PropertyMapping()
-                                                                                                                        .withType("Demo.Model.ComplexTypeB")
-                                                                                                                        .withCircularReferenceMapping(
-                                                                                                                                CircularReferenceMapping.builder()
-                                                                                                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
-                                                                                                                                        .withAnchorEdmPath("PropC/PropB").build()
-                                                                                                                        )
-                                                                                                        )
+                                                                                                .withCircularReferenceMapping(
+                                                                                                        CircularReferenceMapping.builder()
+                                                                                                                .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                                                                                .withAnchorEdmPath("PropA").build()
                                                                                                 )
                                                                                 )
                                                                         ),
 
-                                                                // ---------------------------
+                                                                // =======================
                                                                 // PropA (ComplexTypeA)
-                                                                // ---------------------------
+                                                                // =======================
                                                                 "PropA",
                                                                 new PropertyMapping()
                                                                         .withType("Demo.Model.ComplexTypeA")
@@ -269,6 +250,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Edm.String"),
 
+                                                                                                                // 🔁 A → B → A
                                                                                                                 "PropA",
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Demo.Model.ComplexTypeA")
@@ -278,6 +260,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                                         .withAnchorEdmPath("PropA").build()
                                                                                                                         ),
 
+                                                                                                                // 🔁 A → B → C
                                                                                                                 "PropC",
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Demo.Model.ComplexTypeC")
@@ -294,6 +277,6 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                 )
                                 )
                         )
-
     }
+
 }
