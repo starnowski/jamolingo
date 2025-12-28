@@ -10,6 +10,11 @@ public class EntityPropertiesMongoPathContext {
     this.edmToMongoPath = Collections.unmodifiableMap(edmToMongoPath);
   }
 
+  public String resolveMongoPathForEDMPath(String edmPath) {
+    //TODO
+    return null;
+  }
+
   public Map<String, MongoPathEntry> getEdmToMongoPath() {
     return edmToMongoPath;
   }
