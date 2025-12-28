@@ -30,9 +30,9 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                     "City", new PropertyMapping().withType("Edm.String"),
                                     "ZipCode", new PropertyMapping().withType("Edm.String"),
                                     "BackUpAddresses", new PropertyMapping().withType("Demo.Address")
-                                        .withCircularReferenceMapping(new CircularReferenceMapping()
+                                        .withCircularReferenceMapping(CircularReferenceMapping.builder()
                                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
-                                                .withAnchorEdmPath("Addresses"))
+                                                .withAnchorEdmPath("Addresses").build())
                             )
                     ) ))))
             "edm/edm3_complextype_with_circular_reference_collection.xml"  | "Demo"    ||
@@ -42,9 +42,9 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                 "City", new PropertyMapping().withType("Edm.String"),
                                 "ZipCode", new PropertyMapping().withType("Edm.String"),
                                 "BackUpAddresses", new PropertyMapping().withType("Demo.Address")
-                                .withCircularReferenceMapping(new CircularReferenceMapping()
+                                .withCircularReferenceMapping(CircularReferenceMapping.builder()
                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
-                                        .withAnchorEdmPath("Addresses"))
+                                        .withAnchorEdmPath("Addresses").build())
                         )
                 ) ))))
             // Complex Types circular reference Entity -> Type A -> Type B -> Type A
@@ -61,9 +61,9 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                         "ExecutionTimeUtc", new PropertyMapping().withType("Edm.DateTimeOffset"),
                                         "RuntimeVariables", new PropertyMapping().withType("Edm.String"),
                                         "EvaluatedDefinition", new PropertyMapping().withType("Workflow.Model.WorkflowDefinition")
-                                            .withCircularReferenceMapping(new CircularReferenceMapping()
+                                            .withCircularReferenceMapping(CircularReferenceMapping.builder()
                                                     .withStrategy(CircularStrategy.EMBED_LIMITED)
-                                                    .withAnchorEdmPath("Definition")
+                                                    .withAnchorEdmPath("Definition").build()
                                             )
                                 )
                         )
@@ -81,9 +81,9 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                         .withProperties(Map.of("Currency", new PropertyMapping().withType("Edm.String"),
                                                 "CustomerGroup", new PropertyMapping().withType("Edm.String"),
                                                 "EvaluatedConfiguration", new PropertyMapping().withType("Sales.Model.ProductConfiguration")
-                                                .withCircularReferenceMapping(new CircularReferenceMapping()
+                                                .withCircularReferenceMapping(CircularReferenceMapping.builder()
                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
-                                                        .withAnchorEdmPath("Configuration")
+                                                        .withAnchorEdmPath("Configuration").build()
                                                 )
                                         )
                                         )
@@ -144,11 +144,11 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                                         new PropertyMapping()
                                                                                                                                                 .withType("Rules.Model.EligibilityRule")
                                                                                                                                                 .withCircularReferenceMapping(
-                                                                                                                                                        new CircularReferenceMapping()
+                                                                                                                                                        CircularReferenceMapping.builder()
                                                                                                                                                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                                                                                 .withAnchorEdmPath(
                                                                                                                                                                         "CoverageSnapshot/EligibilityRule"
-                                                                                                                                                                )
+                                                                                                                                                                ).build()
                                                                                                                                                 )
                                                                                                                                 )
                                                                                                                         )
