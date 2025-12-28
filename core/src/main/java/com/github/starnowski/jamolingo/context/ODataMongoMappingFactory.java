@@ -97,10 +97,10 @@ public class ODataMongoMappingFactory {
       String typeName = complexType.getName();
       if (entityPropertyMappingContext.getEdmTypeAndEdmPath().containsKey(typeName)) {
         pm.setCircularReferenceMapping(
-            new CircularReferenceMapping()
+            CircularReferenceMapping.builder()
                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                 .withAnchorEdmPath(
-                    entityPropertyMappingContext.getEdmTypeAndEdmPath().get(typeName)));
+                    entityPropertyMappingContext.getEdmTypeAndEdmPath().get(typeName)).build());
         return pm;
       } else {
         Map<String, String> updatedMap =
