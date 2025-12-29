@@ -33,7 +33,34 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "Addresses/ZipCode"     ||  "Addresses.ZipCode"
     }
 
-    //TODO flatted properties (properties have different names and mongo paths levels) mapping
+    @Unroll
+    def "should find mongo path for edm path based on EDM mapping that is different with Mongo Document"() {
+        given:
+            def mappings = Map.ofEntries(
+                    Map.entry("plainString", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("plainString").withMongoPath("stringProperty").build()),
+                    Map.entry("Name", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Name").withMongoPath("name").build()),
+                    Map.entry("Addresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses").withMongoPath("userAddress").build()),
+                    Map.entry("Addresses/Street", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/Street").withMongoPath("street").build()),
+                    Map.entry("Addresses/City", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/City").withMongoPath("Addresses.City").build()),
+                    Map.entry("Addresses/ZipCode", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/ZipCode").withMongoPath("userAddress.zip.fullCode").build()))
+            def tested = new EntityPropertiesMongoPathContext(mappings)
+
+        when:
+            def result = tested.resolveMongoPathForEDMPath(edmPath)
+
+        then:
+            result == expectedMongoPath
+
+        where:
+            edmPath                 ||  expectedMongoPath
+            "plainString"           ||  "stringProperty"
+            "Name"                  ||  "name"
+            "Addresses"             ||  "userAddress"
+            "Addresses/Street"      ||  "street"
+            "Addresses/City"        ||  "Addresses.City"
+            "Addresses/ZipCode"     ||  "userAddress.zip.fullCode"
+    }
+
     //TODO Complex types (one-to-one) mapping
     //TODO Complex types (properties have different names and mongo paths levels) mapping
     //TODO Circular reference (one-to-one) mapping with nested levels (no max level)
