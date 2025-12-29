@@ -93,7 +93,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "Id"                            ||  "Id"
             "PropC/PropB/PropA"             ||  "PropC.PropB.PropA"
             "PropA/PropB/StringProperty"    ||  "PropA.PropB.StringProperty"
-            "PropC/PropB/PropA/PropB"       ||  "PropC.PropB.PropA.PropB.StringProperty"
+            "PropC/PropB/PropA/PropB/StringProperty"       ||  "PropC.PropB.PropA.PropB.StringProperty"
     }
 
     //TODO Complex types (one-to-one) mapping
