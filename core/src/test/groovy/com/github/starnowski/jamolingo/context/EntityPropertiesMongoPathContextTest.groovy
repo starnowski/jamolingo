@@ -89,8 +89,10 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             result == expectedMongoPath
 
         where:
-            edmPath                 ||  expectedMongoPath
-            "Id"           ||  "Id"
+            edmPath                         ||  expectedMongoPath
+            "Id"                            ||  "Id"
+            "PropC/PropB/PropA"             ||  "PropC.PropB.PropA"
+            "PropA/PropB/StringProperty"    ||  "PropA.PropB.StringProperty"
     }
 
     //TODO Complex types (one-to-one) mapping
