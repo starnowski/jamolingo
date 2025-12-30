@@ -60,7 +60,17 @@ public class EntityPropertiesMongoPathContext {
     // Check if baseEDMProperty has recurrence type
     if (baseEDMProperty.getCircularReferenceMapping() == null
         || baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath() == null) {
-      return null;
+      if (longestMatchingEDMPath.contains(ODATA_PATH_SEPARATOR_CHARACTER)) {
+        /*
+         * There is a chance that some edm path part does not have circular reference mapping
+         */
+        throw new RuntimeException("The part of edm path '%s' does not have circular reference mapping defined".formatted(longestMatchingEDMPath));
+      } else {
+        /*
+         * Single node, not circular reference makes sense for single property
+         */
+        return null;
+      }
     }
     String baseMongoPath = baseEDMProperty.getMongoPath();
     // Remove longestMatchingEDMPath from edmPath -> tmpEDMPath
