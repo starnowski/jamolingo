@@ -137,9 +137,9 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             edmPath                                                     ||  expectedExceptionMessage
             "xxx"                                                       ||  "No 'xxx' EDM path found"
             "PropC/PropBD"                                              ||  "No 'PropC/PropBD' EDM path found"
-            "PropA/PropX/StringProperty"                                ||  "PropA.PropB.StringProperty"
-            "PropC/PropB/PropA/PropB/StringField"                       ||  "PropC.PropB.PropA.PropB.StringProperty"
-            "PropC/PropB/PropA/PropB/PropC/PropA/StringField"           ||  "PropC.PropB.PropA.PropB.PropC.PropA.StringProperty"
+            "PropA/PropX/StringProperty"                                ||  "No 'PropA/PropX/StringProperty' EDM path found"
+            "PropC/PropB/PropA/PropB/StringField"                       ||  "No 'PropC/PropB/PropA/PropB/StringField' EDM path found"
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringField"           ||  "No 'PropC/PropB/PropA/PropB/PropC/PropA/StringField' EDM path found"
     }
 
 
@@ -147,8 +147,6 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     //TODO Circular reference with max level exception
 
     //TODO Circular reference with max level exception for specific fields
-
-    //TODO Missing edmPath
 
     private static Map<String, MongoPathEntry> prepareEdmToMongoPathOneToOneMappginWithCircularReferences() {
         Map.ofEntries(
