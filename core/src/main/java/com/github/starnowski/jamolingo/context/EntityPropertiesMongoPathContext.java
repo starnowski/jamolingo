@@ -41,7 +41,7 @@ public class EntityPropertiesMongoPathContext {
       String tmpEDMPath = edmPath.substring(longestMatchingEDMPath.length());
       MongoPathEntry circuralReferencyType = this.edmToMongoPath.get(baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath());
       // TODO Concat type EDMPath and tmpEDMPath -> tmpEDMPath
-      tmpEDMPath = circuralReferencyType.getEdmPath() + ODATA_PATH_SEPARATOR_CHARACTER + tmpEDMPath;
+      tmpEDMPath = circuralReferencyType.getEdmPath() + tmpEDMPath;
       // TODO Check if edmToMongoPath has tmpEDMPath
       if (this.edmToMongoPath.containsKey(tmpEDMPath)) {
         // TODO If yes then
