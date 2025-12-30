@@ -127,10 +127,10 @@ class EntityPropertiesMongoPathContextTest extends Specification {
         where:
         edmPath                         ||  expectedMongoPath
         "Id"                            ||  "_id"
-        "PropC/PropB/PropA"             ||  "PropC.PropB.PropA"
-        "PropA/PropB/StringProperty"    ||  "PropA.PropB.StringProperty"
-        "PropC/PropB/PropA/PropB/StringProperty"       ||  "PropC.PropB.PropA.PropB.StringProperty"
-        "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"       ||  "PropC.PropB.PropA.PropB.PropC.PropA.StringProperty"
+        "PropC/PropB/PropA"             ||  "c.cb.ba"
+        "PropA/PropB/StringProperty"    ||  "a.ab.bString"
+        "PropC/PropB/PropA/PropB/StringProperty"       ||  "c.cb.ba.ab.bString"
+        "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"       ||  "c.cb.ba.ab.bc.ca.aString"
     }
 
     //TODO Complex types (one-to-one) mapping
@@ -141,14 +141,4 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     //TODO Missing edmPath
 
     //TODO Circular reference A -> B -> A -> B -> C -> B -> A -> B -> B.pro
-    /*
-     * TODO Circular reference
-     *  ENTITY - C -> B -> A (edm - A)
-     *  ENTITY - C -> B -> C (edm - C)
-     *  ENTITY - C -> A -> B
-     *  ENTITY - A -> B -> A (edm - A)
-     */
-    /*
-     * edmPath - used to resolve type definition, not path
-     */
 }
