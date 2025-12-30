@@ -12,4 +12,11 @@ public interface SelectOperatorResult {
   Bson getProjectObject();
 
   Bson getStageObject();
+
+  //TODO Create AbstractOlingoOperatorResult
+  //TODO getStagesObjects() - list of stages in order (even if result has one)
+  //TODO Used MongoDB document properties with Dot annotation
+  //TODO Produced MongoDB document properties
+  //  $expand - property that contains fetched (joined) documents
+  //  $apply - transformation
 }
