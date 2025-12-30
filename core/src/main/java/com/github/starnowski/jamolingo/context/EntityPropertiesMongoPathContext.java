@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
+
 // TODO Add interface
 public class EntityPropertiesMongoPathContext {
   public EntityPropertiesMongoPathContext(Map<String, MongoPathEntry> edmToMongoPath) {
@@ -12,6 +14,9 @@ public class EntityPropertiesMongoPathContext {
 
   public String resolveMongoPathForEDMPath(String edmPath) {
     //TODO
+    if (edmPath == null) {
+      return null;
+    }
     MongoPathEntry entry = this.edmToMongoPath.get(edmPath);
     if (entry == null) {
       //TODO
@@ -26,14 +31,25 @@ public class EntityPropertiesMongoPathContext {
       if (longestMatchingEDMPath == null) {
         //TODO exception
       }
-      String baseMongoPath = this.edmToMongoPath.get(longestMatchingEDMPath).getMongoPath();
-      //TODO resolve type
-      //TODO get type mongoPath
+      // resolve type
+      // get type mongoPath
+      MongoPathEntry baseEDMProperty = this.edmToMongoPath.get(longestMatchingEDMPath);
+      //TODO Check if baseEDMProperty has recurence type
+      String baseMongoPath = baseEDMProperty.getMongoPath();
       // TODO in recurence
       // TODO Remove longestMatchingEDMPath from edmPath -> tmpEDMPath
+      String tmpEDMPath = edmPath.substring(longestMatchingEDMPath.length());
+      MongoPathEntry circuralReferencyType = this.edmToMongoPath.get(baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath());
       // TODO Concat type EDMPath and tmpEDMPath -> tmpEDMPath
+      tmpEDMPath = circuralReferencyType.getEdmPath() + ODATA_PATH_SEPARATOR_CHARACTER + tmpEDMPath;
       // TODO Check if edmToMongoPath has tmpEDMPath
-      // TODO If yes then
+      if (this.edmToMongoPath.containsKey(tmpEDMPath)) {
+        // TODO If yes then
+        StringBuilder resultBuilder = new StringBuilder(baseMongoPath);
+        MongoPathEntry lastElement = this.edmToMongoPath.get(tmpEDMPath);
+        resultBuilder.append(lastElement.getMongoPath().substring(circuralReferencyType.getMongoPath().length()));
+        return resultBuilder.toString();
+      }
       // TODO end recurence
       return baseMongoPath;
     } else {
