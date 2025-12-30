@@ -31,6 +31,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "Addresses/Street"      ||  "Addresses.Street"
             "Addresses/City"        ||  "Addresses.City"
             "Addresses/ZipCode"     ||  "Addresses.ZipCode"
+            null                    ||  null
     }
 
     @Unroll
