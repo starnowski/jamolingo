@@ -131,12 +131,10 @@ class EntityPropertiesMongoPathContextTest extends Specification {
         "PropA/PropB/StringProperty"    ||  "a.ab.bString"
         "PropC/PropB/PropA/PropB/StringProperty"       ||  "c.cb.ba.ab.bString"
         "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"       ||  "c.cb.ba.ab.bc.ca.aString"
+        "PropC/PropB/PropA/PropB/PropC/PropA/PropB/PropC/PropA/StringProperty"       ||  "c.cb.ba.ab.bc.ca.ab.bc.ca.aString"
+        "PropC/PropB/PropA/PropB/PropC/PropA/PropB/PropC/PropA/PropB/PropC/StringProperty"       ||  "c.cb.ba.ab.bc.ca.ab.bc.ca.ab.bc.cString"
     }
 
-    //TODO Complex types (one-to-one) mapping
-    //TODO Complex types (properties have different names and mongo paths levels) mapping
-    //TODO Circular reference (one-to-one) mapping with nested levels (no max level)
-    //TODO Circular reference (properties have different names and mongo paths levels) mapping with nested levels (no max level)
     //TODO Circular reference with max level exception
     //TODO Missing edmPath
 
