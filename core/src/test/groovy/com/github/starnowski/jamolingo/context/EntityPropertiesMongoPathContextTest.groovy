@@ -121,7 +121,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     }
 
     @Unroll
-    def "should find mongo path for edm path based on EDM (that contains circular references) mapping one-to-one with Mongo Document"() {
+    def "should thrown an exception with expected message '#expectedExceptionMessage' when trying to find edm path that do not exists"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappginWithCircularReferences()
             def tested = new EntityPropertiesMongoPathContext(mappings)
@@ -131,15 +131,15 @@ class EntityPropertiesMongoPathContextTest extends Specification {
 
         then:
             def  ex = thrown()
-            ex.message == ""
+            ex.message == expectedExceptionMessage
 
         where:
-            edmPath                                                     ||  expectedMongoPath
+            edmPath                                                     ||  expectedExceptionMessage
             "xxx"                                                       ||  "No 'xxx' EDM path found"
             "PropC/PropBD"                                              ||  "No 'PropC/PropBD' EDM path found"
-            "PropA/PropB/StringProperty"                                ||  "PropA.PropB.StringProperty"
-            "PropC/PropB/PropA/PropB/StringProperty"                    ||  "PropC.PropB.PropA.PropB.StringProperty"
-            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        ||  "PropC.PropB.PropA.PropB.PropC.PropA.StringProperty"
+            "PropA/PropX/StringProperty"                                ||  "PropA.PropB.StringProperty"
+            "PropC/PropB/PropA/PropB/StringField"                       ||  "PropC.PropB.PropA.PropB.StringProperty"
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringField"           ||  "PropC.PropB.PropA.PropB.PropC.PropA.StringProperty"
     }
 
 
