@@ -120,10 +120,13 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "PropC/PropB/PropA/PropB/PropC/PropA/PropB/PropC/PropA/PropB/PropC/StringProperty"       ||  "c.cb.ba.ab.bc.ca.ab.bc.ca.ab.bc.cString"
     }
 
-    //TODO Circular reference with max level exception
-    //TODO Missing edmPath
 
-    //TODO Circular reference A -> B -> A -> B -> C -> B -> A -> B -> B.pro
+
+    //TODO Circular reference with max level exception
+
+    //TODO Circular reference with max level exception for specific fields
+
+    //TODO Missing edmPath
 
     private Map<String, MongoPathEntry> prepareEdmToMongoPathOneToOneMappginWithCircularReferences() {
         Map.ofEntries(
