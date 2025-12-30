@@ -120,6 +120,28 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "PropC/PropB/PropA/PropB/PropC/PropA/PropB/PropC/PropA/PropB/PropC/StringProperty"       ||  "c.cb.ba.ab.bc.ca.ab.bc.ca.ab.bc.cString"
     }
 
+    @Unroll
+    def "should find mongo path for edm path based on EDM (that contains circular references) mapping one-to-one with Mongo Document"() {
+        given:
+            def mappings = prepareEdmToMongoPathOneToOneMappginWithCircularReferences()
+            def tested = new EntityPropertiesMongoPathContext(mappings)
+
+        when:
+            tested.resolveMongoPathForEDMPath(edmPath)
+
+        then:
+            def  ex = thrown()
+            ex.message == ""
+
+        where:
+            edmPath                                                     ||  expectedMongoPath
+            "xxx"                                                       ||  "No 'xxx' EDM path found"
+            "PropC/PropBD"                                              ||  "No 'PropC/PropBD' EDM path found"
+            "PropA/PropB/StringProperty"                                ||  "PropA.PropB.StringProperty"
+            "PropC/PropB/PropA/PropB/StringProperty"                    ||  "PropC.PropB.PropA.PropB.StringProperty"
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        ||  "PropC.PropB.PropA.PropB.PropC.PropA.StringProperty"
+    }
+
 
 
     //TODO Circular reference with max level exception
