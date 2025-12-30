@@ -19,7 +19,9 @@ public class EntityPropertiesMongoPathContext {
     MongoPathEntry entry = this.edmToMongoPath.get(edmPath);
     if (entry == null) {
       String result = tryToResolveCircularReferencesMongoPath(edmPath);
-//      if ()
+      if (result == null) {
+        throw new InvalidEDMPath("No '%s' EDM path found".formatted(edmPath));
+      }
       return result;
     } else {
       return entry.getMongoPath();
