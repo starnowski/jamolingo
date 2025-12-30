@@ -64,7 +64,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     @Unroll
     def "should find mongo path for edm path based on EDM (that contains circular references) mapping one-to-one with Mongo Document"() {
         given:
-            def mappings = prepareEdmToMongoPathOneToOneMappginWithCircularReferences()
+            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
             def tested = new EntityPropertiesMongoPathContext(mappings)
 
         when:
@@ -123,7 +123,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     @Unroll
     def "should thrown an exception with expected message '#expectedExceptionMessage' when trying to find edm path that do not exists"() {
         given:
-            def mappings = prepareEdmToMongoPathOneToOneMappginWithCircularReferences()
+            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
             def tested = new EntityPropertiesMongoPathContext(mappings)
 
         when:
@@ -148,7 +148,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
 
     //TODO Circular reference with max level exception for specific fields
 
-    private static Map<String, MongoPathEntry> prepareEdmToMongoPathOneToOneMappginWithCircularReferences() {
+    private static Map<String, MongoPathEntry> prepareEdmToMongoPathOneToOneMappingWithCircularReferences() {
         Map.ofEntries(
                 Map.entry("Id", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Id").withMongoPath("Id").withType("Edm.String").withKey(true).build()),
                 Map.entry("PropA/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/PropB/PropA").withType("Demo.Model.ComplexTypeA").withMongoPath("PropA.PropB.PropA").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("PropA").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
