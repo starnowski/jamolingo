@@ -40,6 +40,13 @@ public class EntityPropertiesMongoPathContext {
     if (longestMatchingEDMPath == null) {
       return null;
     }
+    if (!edmPath.substring(longestMatchingEDMPath.length()).startsWith(ODATA_PATH_SEPARATOR_CHARACTER)) {
+      /*
+       * Although the chosen edm part is a prefix for edmPath, the other part does not start with '/' character
+       * which means that chosen part does not match because it is not correct parent.
+       */
+      return null;
+    }
     // resolve type
     // get type mongoPath
     MongoPathEntry baseEDMProperty = this.edmToMongoPath.get(longestMatchingEDMPath);
