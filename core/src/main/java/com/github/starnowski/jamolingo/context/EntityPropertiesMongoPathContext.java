@@ -20,41 +20,45 @@ public class EntityPropertiesMongoPathContext {
     MongoPathEntry entry = this.edmToMongoPath.get(edmPath);
     if (entry == null) {
       //TODO
-      String longestMatchingEDMPath = edmToMongoPath.keySet().stream().filter(edmPath::startsWith).max((s1, s2) -> {
-          if (s1.length() > s2.length()) {
-              return 1;
-          } else if (s1.length() < s2.length()) {
-              return -1;
-          }
-          return 0;
-      }).orElse(null);
-      if (longestMatchingEDMPath == null) {
-        //TODO exception
-      }
-      // resolve type
-      // get type mongoPath
-      MongoPathEntry baseEDMProperty = this.edmToMongoPath.get(longestMatchingEDMPath);
-      //TODO Check if baseEDMProperty has recurence type
-      String baseMongoPath = baseEDMProperty.getMongoPath();
-      // TODO in recurence
-      // TODO Remove longestMatchingEDMPath from edmPath -> tmpEDMPath
-      String tmpEDMPath = edmPath.substring(longestMatchingEDMPath.length());
-      MongoPathEntry circuralReferencyType = this.edmToMongoPath.get(baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath());
-      // TODO Concat type EDMPath and tmpEDMPath -> tmpEDMPath
-      tmpEDMPath = circuralReferencyType.getEdmPath() + tmpEDMPath;
-      // TODO Check if edmToMongoPath has tmpEDMPath
-      if (this.edmToMongoPath.containsKey(tmpEDMPath)) {
-        // TODO If yes then
-        StringBuilder resultBuilder = new StringBuilder(baseMongoPath);
-        MongoPathEntry lastElement = this.edmToMongoPath.get(tmpEDMPath);
-        resultBuilder.append(lastElement.getMongoPath().substring(circuralReferencyType.getMongoPath().length()));
-        return resultBuilder.toString();
-      }
-      // TODO end recurence
-      return baseMongoPath;
+      return tryToResolveCircularReferencesMongoPath(edmPath);
     } else {
       return entry.getMongoPath();
     }
+  }
+
+  private String tryToResolveCircularReferencesMongoPath(String edmPath) {
+    String longestMatchingEDMPath = edmToMongoPath.keySet().stream().filter(edmPath::startsWith).max((s1, s2) -> {
+        if (s1.length() > s2.length()) {
+            return 1;
+        } else if (s1.length() < s2.length()) {
+            return -1;
+        }
+        return 0;
+    }).orElse(null);
+    if (longestMatchingEDMPath == null) {
+      //TODO exception
+    }
+    // resolve type
+    // get type mongoPath
+    MongoPathEntry baseEDMProperty = this.edmToMongoPath.get(longestMatchingEDMPath);
+    //TODO Check if baseEDMProperty has recurence type
+    String baseMongoPath = baseEDMProperty.getMongoPath();
+    // TODO in recurence
+    // TODO Remove longestMatchingEDMPath from edmPath -> tmpEDMPath
+    String tmpEDMPath = edmPath.substring(longestMatchingEDMPath.length());
+    MongoPathEntry circuralReferencyType = this.edmToMongoPath.get(baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath());
+    // TODO Concat type EDMPath and tmpEDMPath -> tmpEDMPath
+    tmpEDMPath = circuralReferencyType.getEdmPath() + tmpEDMPath;
+    // TODO Check if edmToMongoPath has tmpEDMPath
+    if (this.edmToMongoPath.containsKey(tmpEDMPath)) {
+      // TODO If yes then
+      StringBuilder resultBuilder = new StringBuilder(baseMongoPath);
+      MongoPathEntry lastElement = this.edmToMongoPath.get(tmpEDMPath);
+      resultBuilder.append(lastElement.getMongoPath().substring(circuralReferencyType.getMongoPath().length()));
+      return resultBuilder.toString();
+    }
+    // TODO end recurence
+    return baseMongoPath;
   }
 
   public Map<String, MongoPathEntry> getEdmToMongoPath() {
