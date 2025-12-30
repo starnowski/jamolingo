@@ -130,7 +130,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             tested.resolveMongoPathForEDMPath(edmPath)
 
         then:
-            def  ex = thrown()
+            def  ex = thrown(EntityPropertiesMongoPathContext.InvalidEDMPath)
             ex.message == expectedExceptionMessage
 
         where:
@@ -150,7 +150,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
 
     //TODO Missing edmPath
 
-    private Map<String, MongoPathEntry> prepareEdmToMongoPathOneToOneMappginWithCircularReferences() {
+    private static Map<String, MongoPathEntry> prepareEdmToMongoPathOneToOneMappginWithCircularReferences() {
         Map.ofEntries(
                 Map.entry("Id", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Id").withMongoPath("Id").withType("Edm.String").withKey(true).build()),
                 Map.entry("PropA/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/PropB/PropA").withType("Demo.Model.ComplexTypeA").withMongoPath("PropA.PropB.PropA").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("PropA").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),

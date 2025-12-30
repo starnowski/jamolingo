@@ -13,14 +13,14 @@ public class EntityPropertiesMongoPathContext {
   }
 
   public String resolveMongoPathForEDMPath(String edmPath) {
-    //TODO
     if (edmPath == null) {
       return null;
     }
     MongoPathEntry entry = this.edmToMongoPath.get(edmPath);
     if (entry == null) {
-      //TODO
-      return tryToResolveCircularReferencesMongoPath(edmPath);
+      String result = tryToResolveCircularReferencesMongoPath(edmPath);
+//      if ()
+      return result;
     } else {
       return entry.getMongoPath();
     }
@@ -36,7 +36,7 @@ public class EntityPropertiesMongoPathContext {
         return 0;
     }).orElse(null);
     if (longestMatchingEDMPath == null) {
-      //TODO exception
+      return null;
     }
     // resolve type
     // get type mongoPath
@@ -58,6 +58,9 @@ public class EntityPropertiesMongoPathContext {
       return resultBuilder.toString();
     } else {
       String childMongoPath = tryToResolveCircularReferencesMongoPath(tmpEDMPath);
+      if (childMongoPath == null){
+        return null;
+      }
       childMongoPath = childMongoPath.substring(circuralReferencyType.getMongoPath().length());
       return baseMongoPath + childMongoPath;
     }
@@ -85,4 +88,11 @@ public class EntityPropertiesMongoPathContext {
   }
 
   private final Map<String, MongoPathEntry> edmToMongoPath;
+
+  public static class InvalidEDMPath extends RuntimeException{
+
+    public InvalidEDMPath(String message) {
+      super(message);
+    }
+  }
 }
