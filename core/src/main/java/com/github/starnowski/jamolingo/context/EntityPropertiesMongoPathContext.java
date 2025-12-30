@@ -56,9 +56,11 @@ public class EntityPropertiesMongoPathContext {
       MongoPathEntry lastElement = this.edmToMongoPath.get(tmpEDMPath);
       resultBuilder.append(lastElement.getMongoPath().substring(circuralReferencyType.getMongoPath().length()));
       return resultBuilder.toString();
+    } else {
+      String childMongoPath = tryToResolveCircularReferencesMongoPath(tmpEDMPath);
+      childMongoPath = childMongoPath.substring(circuralReferencyType.getMongoPath().length());
+      return baseMongoPath + childMongoPath;
     }
-    // TODO end recurence
-    return baseMongoPath;
   }
 
   public Map<String, MongoPathEntry> getEdmToMongoPath() {
