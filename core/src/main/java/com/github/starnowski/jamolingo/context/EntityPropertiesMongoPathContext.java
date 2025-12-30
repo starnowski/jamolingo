@@ -1,10 +1,10 @@
 package com.github.starnowski.jamolingo.context;
 
+import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
-
-import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
 
 // TODO Add interface
 public class EntityPropertiesMongoPathContext {
@@ -29,18 +29,25 @@ public class EntityPropertiesMongoPathContext {
   }
 
   private String tryToResolveCircularReferencesMongoPath(String edmPath) {
-    String longestMatchingEDMPath = edmToMongoPath.keySet().stream().filter(edmPath::startsWith).max((s1, s2) -> {
-        if (s1.length() > s2.length()) {
-            return 1;
-        } else if (s1.length() < s2.length()) {
-            return -1;
-        }
-        return 0;
-    }).orElse(null);
+    String longestMatchingEDMPath =
+        edmToMongoPath.keySet().stream()
+            .filter(edmPath::startsWith)
+            .max(
+                (s1, s2) -> {
+                  if (s1.length() > s2.length()) {
+                    return 1;
+                  } else if (s1.length() < s2.length()) {
+                    return -1;
+                  }
+                  return 0;
+                })
+            .orElse(null);
     if (longestMatchingEDMPath == null) {
       return null;
     }
-    if (!edmPath.substring(longestMatchingEDMPath.length()).startsWith(ODATA_PATH_SEPARATOR_CHARACTER)) {
+    if (!edmPath
+        .substring(longestMatchingEDMPath.length())
+        .startsWith(ODATA_PATH_SEPARATOR_CHARACTER)) {
       /*
        * Although the chosen edm part is a prefix for edmPath, the other part does not start with '/' character
        * which means that chosen part does not match because it is not correct parent.
@@ -50,27 +57,31 @@ public class EntityPropertiesMongoPathContext {
     // resolve type
     // get type mongoPath
     MongoPathEntry baseEDMProperty = this.edmToMongoPath.get(longestMatchingEDMPath);
-    //TODO Check if baseEDMProperty has recurence type
+    // Check if baseEDMProperty has recurrence type
+    if (baseEDMProperty.getCircularReferenceMapping() == null
+        || baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath() == null) {
+      return null;
+    }
     String baseMongoPath = baseEDMProperty.getMongoPath();
-    // TODO in recurence
-    // TODO Remove longestMatchingEDMPath from edmPath -> tmpEDMPath
+    // Remove longestMatchingEDMPath from edmPath -> tmpEDMPath
     String tmpEDMPath = edmPath.substring(longestMatchingEDMPath.length());
-    MongoPathEntry circuralReferencyType = this.edmToMongoPath.get(baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath());
-    // TODO Concat type EDMPath and tmpEDMPath -> tmpEDMPath
-    tmpEDMPath = circuralReferencyType.getEdmPath() + tmpEDMPath;
-    // TODO Check if edmToMongoPath has tmpEDMPath
+    MongoPathEntry circumferentialType =
+        this.edmToMongoPath.get(baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath());
+    // Concat type EDMPath and tmpEDMPath -> tmpEDMPath
+    tmpEDMPath = circumferentialType.getEdmPath() + tmpEDMPath;
+    // Check if edmToMongoPath has tmpEDMPath
     if (this.edmToMongoPath.containsKey(tmpEDMPath)) {
-      // TODO If yes then
       StringBuilder resultBuilder = new StringBuilder(baseMongoPath);
       MongoPathEntry lastElement = this.edmToMongoPath.get(tmpEDMPath);
-      resultBuilder.append(lastElement.getMongoPath().substring(circuralReferencyType.getMongoPath().length()));
+      resultBuilder.append(
+          lastElement.getMongoPath().substring(circumferentialType.getMongoPath().length()));
       return resultBuilder.toString();
     } else {
       String childMongoPath = tryToResolveCircularReferencesMongoPath(tmpEDMPath);
-      if (childMongoPath == null){
+      if (childMongoPath == null) {
         return null;
       }
-      childMongoPath = childMongoPath.substring(circuralReferencyType.getMongoPath().length());
+      childMongoPath = childMongoPath.substring(circumferentialType.getMongoPath().length());
       return baseMongoPath + childMongoPath;
     }
   }
@@ -98,7 +109,7 @@ public class EntityPropertiesMongoPathContext {
 
   private final Map<String, MongoPathEntry> edmToMongoPath;
 
-  public static class InvalidEDMPath extends RuntimeException{
+  public static class InvalidEDMPath extends RuntimeException {
 
     public InvalidEDMPath(String message) {
       super(message);

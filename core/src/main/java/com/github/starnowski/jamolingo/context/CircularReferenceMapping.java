@@ -3,21 +3,24 @@ package com.github.starnowski.jamolingo.context;
 import java.util.Objects;
 
 public class CircularReferenceMapping {
-  public CircularReferenceMapping(String anchorEdmPath, Integer maxDepth, CircularStrategy strategy) {
+  public CircularReferenceMapping(
+      String anchorEdmPath, Integer maxDepth, CircularStrategy strategy) {
     this.anchorEdmPath = anchorEdmPath;
     this.maxDepth = maxDepth;
     this.strategy = strategy;
   }
 
-  public static CircularReferenceMappingBuilder builder(){
+  public static CircularReferenceMappingBuilder builder() {
     return new CircularReferenceMappingBuilder();
   }
 
-  public static final class CircularReferenceMappingBuilder{
+  public static final class CircularReferenceMappingBuilder {
     /** Resolution strategy */
     private CircularStrategy strategy;
+
     /** EDM path where recursion re-anchors Example: "Item.Addresses" */
     private String anchorEdmPath;
+
     /** Max allowed depth (optional) */
     private Integer maxDepth;
 
@@ -88,5 +91,4 @@ public class CircularReferenceMapping {
   public String getAnchorEdmPath() {
     return anchorEdmPath;
   }
-
 }
