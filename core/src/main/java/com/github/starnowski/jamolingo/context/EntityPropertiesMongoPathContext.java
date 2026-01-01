@@ -13,12 +13,16 @@ public class EntityPropertiesMongoPathContext {
   }
 
   public String resolveMongoPathForEDMPath(String edmPath) {
+    return resolveMongoPathForEDMPath(edmPath, new EdmPathContextSearch());
+  }
+
+  public String resolveMongoPathForEDMPath(String edmPath, EdmPathContextSearch edmPathContextSearch) {
     if (edmPath == null) {
       return null;
     }
     MongoPathEntry entry = this.edmToMongoPath.get(edmPath);
     if (entry == null) {
-      String result = tryToResolveCircularReferencesMongoPath(edmPath);
+      String result = tryToResolveCircularReferencesMongoPath(edmPath, edmPathContextSearch);
       if (result == null) {
         throw new InvalidEDMPathException("No '%s' EDM path found".formatted(edmPath));
       }
@@ -28,7 +32,7 @@ public class EntityPropertiesMongoPathContext {
     }
   }
 
-  private String tryToResolveCircularReferencesMongoPath(String edmPath) {
+  private String tryToResolveCircularReferencesMongoPath(String edmPath, EdmPathContextSearch edmPathContextSearch) {
     String longestMatchingEDMPath =
         edmToMongoPath.keySet().stream()
             .filter(edmPath::startsWith)
@@ -77,7 +81,7 @@ public class EntityPropertiesMongoPathContext {
           lastElement.getMongoPath().substring(circumferentialType.getMongoPath().length()));
       return resultBuilder.toString();
     } else {
-      String childMongoPath = tryToResolveCircularReferencesMongoPath(tmpEDMPath);
+      String childMongoPath = tryToResolveCircularReferencesMongoPath(tmpEDMPath, edmPathContextSearch);
       if (childMongoPath == null) {
         return null;
       }
@@ -134,5 +138,9 @@ public class EntityPropertiesMongoPathContext {
         public ExceededCircularReferenceDepthException(String message) {
             super(message);
         }
+    }
+
+    public static class EdmPathContextSearch {
+
     }
 }
