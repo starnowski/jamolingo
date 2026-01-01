@@ -22,7 +22,7 @@ public class EntityPropertiesMongoPathContext {
     }
     MongoPathEntry entry = this.edmToMongoPath.get(edmPath);
     if (entry == null) {
-      String result = tryToResolveCircularReferencesMongoPath(edmPath, edmPathContextSearch);
+      String result = tryToResolveCircularReferencesMongoPath(edmPath, new EdmPathSearchState(edmPathContextSearch));
       if (result == null) {
         throw new InvalidEDMPathException("No '%s' EDM path found".formatted(edmPath));
       }
@@ -32,7 +32,8 @@ public class EntityPropertiesMongoPathContext {
     }
   }
 
-  private String tryToResolveCircularReferencesMongoPath(String edmPath, EdmPathContextSearch edmPathContextSearch) {
+  private String tryToResolveCircularReferencesMongoPath(String edmPath, EdmPathSearchState edmPathSearchState) {
+    edmPathSearchState.validate();
     String longestMatchingEDMPath =
         edmToMongoPath.keySet().stream()
             .filter(edmPath::startsWith)
@@ -81,7 +82,7 @@ public class EntityPropertiesMongoPathContext {
           lastElement.getMongoPath().substring(circumferentialType.getMongoPath().length()));
       return resultBuilder.toString();
     } else {
-      String childMongoPath = tryToResolveCircularReferencesMongoPath(tmpEDMPath, edmPathContextSearch);
+      String childMongoPath = tryToResolveCircularReferencesMongoPath(tmpEDMPath, edmPathSearchState.createNext());
       if (childMongoPath == null) {
         return null;
       }
@@ -140,7 +141,35 @@ public class EntityPropertiesMongoPathContext {
         }
     }
 
-    public static class EdmPathContextSearch {
+    public static class MongoPathMaxDepthException extends EntityPropertiesMongoPathContextException {
 
+        public MongoPathMaxDepthException(String message) {
+            super(message);
+        }
+    }
+
+    private static class EdmPathSearchState {
+        private final EdmPathContextSearch edmPathContextSearch;
+        private final int currentDepth;
+
+        private EdmPathSearchState(EdmPathContextSearch edmPathContextSearch, int currentDepth) {
+            this.edmPathContextSearch = edmPathContextSearch;
+            this.currentDepth = currentDepth;
+        }
+
+        public EdmPathSearchState(EdmPathContextSearch edmPathContextSearch) {
+            this.edmPathContextSearch = edmPathContextSearch;
+            this.currentDepth = 0;
+        }
+
+        public EdmPathSearchState createNext() {
+            return new EdmPathSearchState(edmPathContextSearch, currentDepth + 1);
+        }
+
+        public void validate() {
+            if (edmPathContextSearch.getMongoPathMaxDepth() > 0 && currentDepth > edmPathContextSearch.getMongoPathMaxDepth()) {
+                throw new MongoPathMaxDepthException("Mongo path max depth %d exceeded".formatted(edmPathContextSearch.getMongoPathMaxDepth()));
+            }
+        }
     }
 }

@@ -166,6 +166,27 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     //TODO Maximal nested level for single property - maxCircularLimit
     //TODO Maximal circular level for all property total
     //TODO Maximal nested depth
+    @Unroll
+    def "should throw an exception for edm path based on EDM (that contains circular references) when the mongo path depth limit was exceeded"() {
+        given:
+        def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
+        def tested = new EntityPropertiesMongoPathContext(mappings)
+        def searchContext = new EntityPropertiesMongoPathContext.EdmPathContextSearch(maxDepth)
+
+        when:
+        tested.resolveMongoPathForEDMPath(edmPath, searchContext)
+
+        then:
+        def  ex = thrown(EntityPropertiesMongoPathContext.MongoPathMaxDepthException)
+        ex.message == "Mongo path max depth ${maxDepth} exceeded"
+
+        where:
+        edmPath                                                     | maxDepth
+        "PropC/PropB/PropA/PropB/StringProperty"                    | 0
+        "PropC/PropB/PropA/PropB/StringProperty"                    | 1
+        "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1
+        "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2
+    }
 
 
     //TODO Circular reference with max level exception
