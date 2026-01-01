@@ -20,7 +20,7 @@ public class EntityPropertiesMongoPathContext {
     if (entry == null) {
       String result = tryToResolveCircularReferencesMongoPath(edmPath);
       if (result == null) {
-        throw new InvalidEDMPath("No '%s' EDM path found".formatted(edmPath));
+        throw new InvalidEDMPathException("No '%s' EDM path found".formatted(edmPath));
       }
       return result;
     } else {
@@ -109,10 +109,30 @@ public class EntityPropertiesMongoPathContext {
 
   private final Map<String, MongoPathEntry> edmToMongoPath;
 
-  public static class InvalidEDMPath extends RuntimeException {
+  public static class EntityPropertiesMongoPathContextException extends RuntimeException {
+      public EntityPropertiesMongoPathContextException() {
+      }
 
-    public InvalidEDMPath(String message) {
+      public EntityPropertiesMongoPathContextException(String message) {
+          super(message);
+      }
+
+      public EntityPropertiesMongoPathContextException(String message, Throwable cause) {
+          super(message, cause);
+      }
+  }
+
+  public static class InvalidEDMPathException extends EntityPropertiesMongoPathContextException {
+
+    public InvalidEDMPathException(String message) {
       super(message);
     }
   }
+
+    public static class ExceededCircularReferenceDepthException extends EntityPropertiesMongoPathContextException {
+
+        public ExceededCircularReferenceDepthException(String message) {
+            super(message);
+        }
+    }
 }
