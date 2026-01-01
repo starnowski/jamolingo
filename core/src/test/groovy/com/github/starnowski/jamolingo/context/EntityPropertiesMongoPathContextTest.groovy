@@ -163,7 +163,9 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        ||  2
     }
 
-    //TODO Maximal nested level
+    //TODO Maximal nested level for single property - maxCircularLimit
+    //TODO Maximal circular level for all property total
+    //TODO Maximal nested depth
 
 
     //TODO Circular reference with max level exception
