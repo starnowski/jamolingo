@@ -12,5 +12,10 @@ public class DefaultEdmPathContextSearch implements EdmPathContextSearch{
         return mongoPathMaxDepth;
     }
 
-
+    @Override
+    public String toString() {
+        return "DefaultEdmPathContextSearch{" +
+                "mongoPathMaxDepth=" + mongoPathMaxDepth +
+                '}';
+    }
 }
