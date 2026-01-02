@@ -13,7 +13,7 @@ public class EntityPropertiesMongoPathContext {
   }
 
   public String resolveMongoPathForEDMPath(String edmPath) {
-    return resolveMongoPathForEDMPath(edmPath, new EdmPathContextSearch());
+    return resolveMongoPathForEDMPath(edmPath, DefaultEdmPathContextSearch.builder().build());
   }
 
   public String resolveMongoPathForEDMPath(String edmPath, EdmPathContextSearch edmPathContextSearch) {

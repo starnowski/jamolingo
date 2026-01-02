@@ -18,4 +18,21 @@ public class DefaultEdmPathContextSearch implements EdmPathContextSearch{
                 "mongoPathMaxDepth=" + mongoPathMaxDepth +
                 '}';
     }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private Integer mongoPathMaxDepth;
+
+        public Builder withMongoPathMaxDepth(Integer mongoPathMaxDepth) {
+            this.mongoPathMaxDepth = mongoPathMaxDepth;
+            return this;
+        }
+
+        public DefaultEdmPathContextSearch build() {
+            return new DefaultEdmPathContextSearch(mongoPathMaxDepth);
+        }
+    }
 }
