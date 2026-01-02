@@ -166,10 +166,5 @@ public class EntityPropertiesMongoPathContext {
             return new EdmPathSearchState(edmPathContextSearch, currentDepth + 1);
         }
 
-        public void validate() {
-            if (edmPathContextSearch.getMongoPathMaxDepth() > 0 && currentDepth > edmPathContextSearch.getMongoPathMaxDepth()) {
-                throw new MongoPathMaxDepthException("Mongo path max depth %d exceeded".formatted(edmPathContextSearch.getMongoPathMaxDepth()));
-            }
-        }
     }
 }

@@ -169,23 +169,23 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     @Unroll
     def "should throw an exception for edm path based on EDM (that contains circular references) when the mongo path depth limit was exceeded"() {
         given:
-        def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-        def tested = new EntityPropertiesMongoPathContext(mappings)
-        def searchContext = new EntityPropertiesMongoPathContext.EdmPathContextSearch(maxDepth)
+            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
+            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def searchContext = DefaultEdmPathContextSearch.builder().withMongoPathMaxDepth(maxDepth).build()
 
         when:
-        tested.resolveMongoPathForEDMPath(edmPath, searchContext)
+            tested.resolveMongoPathForEDMPath(edmPath, searchContext)
 
         then:
-        def  ex = thrown(EntityPropertiesMongoPathContext.MongoPathMaxDepthException)
-        ex.message == "Mongo path max depth ${maxDepth} exceeded"
+            def  ex = thrown(EntityPropertiesMongoPathContext.MongoPathMaxDepthException)
+            ex.message == "Mongo path '${mongoPath}' for '${edmPath}' edm path exceeded max depth ${maxDepth}"
 
         where:
-        edmPath                                                     | maxDepth
-        "PropC/PropB/PropA/PropB/StringProperty"                    | 0
-        "PropC/PropB/PropA/PropB/StringProperty"                    | 1
-        "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1
-        "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2
+            edmPath                                                     | maxDepth  |   mongoPath
+            "PropC/PropB/PropA/PropB/StringProperty"                    | 0         |   ""
+            "PropC/PropB/PropA/PropB/StringProperty"                    | 1         |   ""
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1         |   ""
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2         |   ""
     }
 
 
