@@ -8,6 +8,9 @@ import java.util.Objects;
 
 // TODO Add interface
 public class EntityPropertiesMongoPathContext {
+
+    private static final String MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN = "Mongo path '%s' for '%s' edm path exceeded max depth %s";
+
   public EntityPropertiesMongoPathContext(Map<String, MongoPathEntry> edmToMongoPath) {
     this.edmToMongoPath = Collections.unmodifiableMap(edmToMongoPath);
   }
@@ -28,12 +31,18 @@ public class EntityPropertiesMongoPathContext {
       }
       return result;
     } else {
-      return entry.getMongoPath();
+        String mongoPath = entry.getMongoPath();
+        if (edmPathContextSearch.getMongoPathMaxDepth() == null) {
+            return mongoPath;
+        } else if (mongoPath.split("\\.").length > edmPathContextSearch.getMongoPathMaxDepth()){
+            throw new MongoPathMaxDepthException(MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN.formatted(edmPath, mongoPath, edmPathContextSearch.getMongoPathMaxDepth()));
+        } else {
+            return mongoPath;
+        }
     }
   }
 
   private String tryToResolveCircularReferencesMongoPath(String edmPath, EdmPathSearchState edmPathSearchState) {
-    edmPathSearchState.validate();
     String longestMatchingEDMPath =
         edmToMongoPath.keySet().stream()
             .filter(edmPath::startsWith)

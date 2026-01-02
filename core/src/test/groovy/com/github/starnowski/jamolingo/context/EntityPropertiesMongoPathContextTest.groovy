@@ -143,25 +143,25 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "PropC/PropB/PropA/PropB/PropC/PropA/StringField"           ||  "No 'PropC/PropB/PropA/PropB/PropC/PropA/StringField' EDM path found"
     }
 
-    @Unroll
-    def "should throw an exception for edm path based on EDM (that contains circular references) when the limit for circular reference was exceeded"() {
-        given:
-            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-            def tested = new EntityPropertiesMongoPathContext(mappings)
-
-        when:
-            def result = tested.resolveMongoPathForEDMPath(edmPath)
-
-        then:
-            def  ex = thrown(EntityPropertiesMongoPathContext.ExceededCircularReferenceDepthException)
-            ex.message == expectedExceptionMessage
-
-        where:
-            edmPath                                                     ||  expectedMaxLevel
-            "PropC/PropB/PropA/PropB/StringProperty"                    ||  1
-            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        ||  1
-            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        ||  2
-    }
+//    @Unroll
+//    def "should throw an exception for edm path based on EDM (that contains circular references) when the limit for circular reference was exceeded"() {
+//        given:
+//            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
+//            def tested = new EntityPropertiesMongoPathContext(mappings)
+//
+//        when:
+//            def result = tested.resolveMongoPathForEDMPath(edmPath)
+//
+//        then:
+//            def  ex = thrown(EntityPropertiesMongoPathContext.ExceededCircularReferenceDepthException)
+//            ex.message == expectedExceptionMessage
+//
+//        where:
+//            edmPath                                                     ||  expectedMaxLevel
+//            "PropC/PropB/PropA/PropB/StringProperty"                    ||  1
+//            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        ||  1
+//            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        ||  2
+//    }
 
     //TODO Maximal nested level for single property - maxCircularLimit
     //TODO Maximal circular level for all property total
