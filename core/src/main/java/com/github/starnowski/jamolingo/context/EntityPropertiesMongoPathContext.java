@@ -34,8 +34,8 @@ public class EntityPropertiesMongoPathContext {
                 edmPath, EdmPathSearchState.builder(edmPathContextSearch).build());
       } catch (InternalMongoPathMaxDepthException e) {
         throw new MongoPathMaxDepthException(
-                MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN
-                .formatted(e.getMongoPath(), edmPath, edmPathContextSearch.getMongoPathMaxDepth()));
+            MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN.formatted(
+                e.getMongoPath(), edmPath, edmPathContextSearch.getMongoPathMaxDepth()));
       }
       if (result == null) {
         throw new InvalidEDMPathException("No '%s' EDM path found".formatted(edmPath));
@@ -48,7 +48,7 @@ public class EntityPropertiesMongoPathContext {
       } else if (mongoPath.split("\\.").length > edmPathContextSearch.getMongoPathMaxDepth()) {
         throw new MongoPathMaxDepthException(
             MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN.formatted(
-                    mongoPath, edmPath, edmPathContextSearch.getMongoPathMaxDepth()));
+                mongoPath, edmPath, edmPathContextSearch.getMongoPathMaxDepth()));
       } else {
         return mongoPath;
       }
