@@ -1,5 +1,7 @@
 package com.github.starnowski.jamolingo.context;
 
+import java.util.Objects;
+
 public class DefaultEdmPathContextSearch implements EdmPathContextSearch{
     public DefaultEdmPathContextSearch(Integer mongoPathMaxDepth) {
         this.mongoPathMaxDepth = mongoPathMaxDepth;
@@ -10,6 +12,18 @@ public class DefaultEdmPathContextSearch implements EdmPathContextSearch{
     @Override
     public Integer getMongoPathMaxDepth() {
         return mongoPathMaxDepth;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        DefaultEdmPathContextSearch that = (DefaultEdmPathContextSearch) o;
+        return Objects.equals(mongoPathMaxDepth, that.mongoPathMaxDepth);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(mongoPathMaxDepth);
     }
 
     @Override
