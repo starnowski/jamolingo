@@ -34,7 +34,7 @@ public class EntityPropertiesMongoPathContext {
                 edmPath, EdmPathSearchState.builder(edmPathContextSearch).build());
       } catch (InternalMongoPathMaxDepthException e) {
         throw new MongoPathMaxDepthException(
-            "Mongo path '%s' for '%s' edm path exceeded max depth %d"
+                MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN
                 .formatted(e.getMongoPath(), edmPath, edmPathContextSearch.getMongoPathMaxDepth()));
       }
       if (result == null) {
@@ -48,7 +48,7 @@ public class EntityPropertiesMongoPathContext {
       } else if (mongoPath.split("\\.").length > edmPathContextSearch.getMongoPathMaxDepth()) {
         throw new MongoPathMaxDepthException(
             MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN.formatted(
-                edmPath, mongoPath, edmPathContextSearch.getMongoPathMaxDepth()));
+                    mongoPath, edmPath, edmPathContextSearch.getMongoPathMaxDepth()));
       } else {
         return mongoPath;
       }
