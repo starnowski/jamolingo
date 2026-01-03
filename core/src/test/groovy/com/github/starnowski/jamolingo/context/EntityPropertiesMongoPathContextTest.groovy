@@ -170,6 +170,9 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     def "should throw an exception for edm path based on EDM (that contains circular references) when the mongo path depth limit was exceeded"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
+            mappings = new HashMap<String, MongoPathEntry>(mappings)
+            // Adding one EDM property that has nested mongo path
+            mappings.put("PropDNested", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropDNested").withMongoPath("somePropertyD.child.grandChild").build())
             def tested = new EntityPropertiesMongoPathContext(mappings)
             def searchContext = DefaultEdmPathContextSearch.builder().withMongoPathMaxDepth(maxDepth).build()
 
@@ -186,6 +189,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "PropC/PropB/PropA/PropB/StringProperty"                    | 1         |   "PropC.PropB.PropA"
             "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1         |   "PropC.PropB.PropA"
             "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2         |   "PropC.PropB.PropA"
+            "PropDNested"                                               | 2         |   "somePropertyD.child.grandChild"
     }
 
 
