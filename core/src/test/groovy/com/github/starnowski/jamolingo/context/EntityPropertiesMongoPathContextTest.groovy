@@ -173,6 +173,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             mappings = new HashMap<String, MongoPathEntry>(mappings)
             // Adding one EDM property that has nested mongo path
             mappings.put("PropDNested", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropDNested").withMongoPath("somePropertyD.child.grandChild").build())
+            mappings.put("PropC/PropCNested", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropCNested").withMongoPath("PropC.PropCNested").build())
             def tested = new EntityPropertiesMongoPathContext(mappings)
             def searchContext = DefaultEdmPathContextSearch.builder().withMongoPathMaxDepth(maxDepth).build()
 
@@ -190,6 +191,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1         |   "PropC.PropB.PropA"
             "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2         |   "PropC.PropB.PropA"
             "PropDNested"                                               | 2         |   "somePropertyD.child.grandChild"
+            "PropC/PropB/PropC/PropCNested"                             | 2         |   "PropC.PropB.PropC"
     }
 
 
