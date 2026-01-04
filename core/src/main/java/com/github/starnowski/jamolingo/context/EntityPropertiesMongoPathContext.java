@@ -10,7 +10,7 @@ public interface EntityPropertiesMongoPathContext {
 
   Map<String, MongoPathEntry> getEdmToMongoPath();
 
-  public static class EntityPropertiesMongoPathContextException extends RuntimeException {
+  static class EntityPropertiesMongoPathContextException extends RuntimeException {
     public EntityPropertiesMongoPathContextException() {}
 
     public EntityPropertiesMongoPathContextException(String message) {
@@ -22,14 +22,14 @@ public interface EntityPropertiesMongoPathContext {
     }
   }
 
-  public static class InvalidEDMPathException extends EntityPropertiesMongoPathContextException {
+  static class InvalidEDMPathException extends EntityPropertiesMongoPathContextException {
 
     public InvalidEDMPathException(String message) {
       super(message);
     }
   }
 
-  public static class ExceededCircularReferenceDepthException
+  static class ExceededCircularReferenceDepthException
       extends EntityPropertiesMongoPathContextException {
 
     private final String edmPathReference;
@@ -52,20 +52,20 @@ public interface EntityPropertiesMongoPathContext {
     }
   }
 
-  public static class MongoPathMaxDepthException extends EntityPropertiesMongoPathContextException {
+  static class MongoPathMaxDepthException extends EntityPropertiesMongoPathContextException {
 
     public MongoPathMaxDepthException(String message) {
       super(message);
     }
   }
 
-  public static class InvalidAnchorPathException extends EntityPropertiesMongoPathContextException {
+  static class InvalidAnchorPathException extends EntityPropertiesMongoPathContextException {
     public InvalidAnchorPathException(String message) {
       super(message);
     }
   }
 
-  public static class ExceededTotalCircularReferenceLimitException
+  static class ExceededTotalCircularReferenceLimitException
       extends EntityPropertiesMongoPathContextException {
     public ExceededTotalCircularReferenceLimitException(String message) {
       super(message);

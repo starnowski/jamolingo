@@ -216,6 +216,73 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     }
 
     @Unroll
+    def "should throw ExceededCircularReferenceDepthException when property specific circular limit of #limit is exceeded for #edmPath"() {
+        given:
+            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
+            mappings = new HashMap<>(mappings)
+            // Override global limit for PropA/PropB/PropA
+            mappings.put("PropA/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder()
+                    .withEdmPath("PropA/PropB/PropA")
+                    .withType("Demo.Model.ComplexTypeA")
+                    .withMongoPath("PropA.PropB.PropA")
+                    .withCircularReferenceMapping(
+                            CircularReferenceMapping.builder()
+                                    .withAnchorEdmPath("PropA")
+                                    .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                    .build())
+                    .withMaxCircularLimitPerEdmPath(limit) // Property specific limit
+                    .build())
+
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
+            def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitPerEdmPath(10).build() // Global limit is higher
+
+        when:
+            tested.resolveMongoPathForEDMPath(edmPath, searchContext)
+
+        then:
+            def ex = thrown(EntityPropertiesMongoPathContext.ExceededCircularReferenceDepthException)
+            ex.message == "Circular edm path '${exceptionCircularPath}' exceeded max depth ${limit} in main edm path '${edmPath}'"
+
+        where:
+            edmPath                                                             | limit | exceptionCircularPath
+            "PropA/PropB/PropA/PropB/StringProperty"                            | 0     | "PropA/PropB/PropA"
+            "PropA/PropB/PropA/PropB/PropA/PropB/StringProperty"                            | 1     | "PropA/PropB/PropA"
+    }
+
+    @Unroll
+    def "should find mongo path when property specific circular limit of #limit is NOT exceeded for #edmPath"() {
+        given:
+            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
+            mappings = new HashMap<>(mappings)
+            // Override global limit for PropA/PropB/PropA
+            mappings.put("PropA/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder()
+                    .withEdmPath("PropA/PropB/PropA")
+                    .withType("Demo.Model.ComplexTypeA")
+                    .withMongoPath("PropA.PropB.PropA")
+                    .withCircularReferenceMapping(
+                            CircularReferenceMapping.builder()
+                                    .withAnchorEdmPath("PropA")
+                                    .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                    .build())
+                    .withMaxCircularLimitPerEdmPath(limit) // Property specific limit
+                    .build())
+
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
+            def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitPerEdmPath(1).build() // Global limit is lower
+
+        when:
+            def result = tested.resolveMongoPathForEDMPath(edmPath, searchContext)
+
+        then:
+            result == expectedMongoPath
+
+        where:
+            edmPath                                                             | limit | expectedMongoPath
+            "PropA/PropB/PropA/PropB/StringProperty"                            | 1     | "PropA.PropB.PropA.PropB.StringProperty"
+            "PropA/PropB/PropA/PropB/PropC/PropB/PropA/PropB/StringProperty"          | 5     | "PropA.PropB.PropA.PropB.PropC.PropB.PropA.PropB.StringProperty"
+    }
+
+    @Unroll
     def "should find mongo path for edm path based on EDM (that contains circular references) when the circular limit is NOT exceeded"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()

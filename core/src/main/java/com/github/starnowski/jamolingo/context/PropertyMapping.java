@@ -31,6 +31,22 @@ public class PropertyMapping {
   @JsonProperty("circularReferenceMapping")
   private CircularReferenceMapping circularReferenceMapping;
 
+  @JsonProperty("maxCircularLimitPerEdmPath")
+  private Integer maxCircularLimitPerEdmPath;
+
+  public Integer getMaxCircularLimitPerEdmPath() {
+    return maxCircularLimitPerEdmPath;
+  }
+
+  public void setMaxCircularLimitPerEdmPath(Integer maxCircularLimitPerEdmPath) {
+    this.maxCircularLimitPerEdmPath = maxCircularLimitPerEdmPath;
+  }
+
+  public PropertyMapping withMaxCircularLimitPerEdmPath(Integer maxCircularLimitPerEdmPath) {
+    this.maxCircularLimitPerEdmPath = maxCircularLimitPerEdmPath;
+    return this;
+  }
+
   public Integer getFlattenedLevelUp() {
     return flattenedLevelUp;
   }
@@ -59,6 +75,7 @@ public class PropertyMapping {
         && Objects.equals(relativeTo, that.relativeTo)
         && Objects.equals(type, that.type)
         && Objects.equals(circularReferenceMapping, that.circularReferenceMapping)
+        && Objects.equals(maxCircularLimitPerEdmPath, that.maxCircularLimitPerEdmPath)
         && Objects.equals(flattenedLevelUp, that.flattenedLevelUp)
         && Objects.equals(ignore, that.ignore)
         && Objects.equals(computed, that.computed)
@@ -84,6 +101,8 @@ public class PropertyMapping {
         + '\''
         + ", circularReferenceMapping="
         + circularReferenceMapping
+        + ", maxCircularLimitPerEdmPath="
+        + maxCircularLimitPerEdmPath
         + ", flattenedLevelUp="
         + flattenedLevelUp
         + ", ignore="
@@ -104,6 +123,7 @@ public class PropertyMapping {
         relativeTo,
         type,
         circularReferenceMapping,
+        maxCircularLimitPerEdmPath,
         flattenedLevelUp,
         ignore,
         computed,
