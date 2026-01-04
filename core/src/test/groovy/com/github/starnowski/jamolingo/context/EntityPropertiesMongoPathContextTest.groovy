@@ -240,19 +240,45 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     //TODO test case that increase limit and allows to search deeper
     //TODO test case that decrease limit and disallow to search deeper then default limit
 
-    def "should throw ExceededTotalCircularReferenceLimitException when total circular limit is exceeded"() {
+    @Unroll
+    def "should throw ExceededTotalCircularReferenceLimitException when total circular limit of #limit is exceeded"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
             def tested = new EntityPropertiesMongoPathContext(mappings)
-            def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitForAllEdmPaths(1).build()
-            def edmPath = "PropC/PropB/PropA/PropB/PropC/PropB/PropA/StringProperty"
+            def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitForAllEdmPaths(limit).build()
 
         when:
             tested.resolveMongoPathForEDMPath(edmPath, searchContext)
 
         then:
             def ex = thrown(EntityPropertiesMongoPathContext.ExceededTotalCircularReferenceLimitException)
-            ex.message == "Total circular reference limit of 1 exceeded."
+            ex.message == "Total circular reference limit of ${limit} exceeded."
+
+        where:
+            edmPath                                                             | limit
+            "PropC/PropB/PropA/PropB/StringProperty"                            | 0
+            "PropC/PropB/PropA/PropB/PropC/PropB/PropA/StringProperty"          | 0
+            "PropC/PropB/PropA/PropB/PropC/PropB/PropA/StringProperty"          | 1
+            "PropC/PropB/PropA/PropB/PropC/PropB/PropA/StringProperty"          | 2
+    }
+
+    @Unroll
+    def "should find mongo path for edm path when total circular limit is NOT exceeded"() {
+        given:
+            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
+            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitForAllEdmPaths(limit).build()
+
+        when:
+            def result = tested.resolveMongoPathForEDMPath(edmPath, searchContext)
+
+        then:
+            result == expectedMongoPath
+
+        where:
+            edmPath                                                             | limit | expectedMongoPath
+            "PropC/PropB/PropA/PropB/StringProperty"                            | 1     | "PropC.PropB.PropA.PropB.StringProperty"
+            "PropC/PropB/PropA/PropB/PropC/PropB/PropA/StringProperty"          | 3     | "PropC.PropB.PropA.PropB.PropC.PropB.PropA.StringProperty"
     }
 
     def "should throw InvalidAnchorPathException when anchor path is invalid"() {
