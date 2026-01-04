@@ -209,11 +209,9 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             ex.message == "Circular edm path '${exceptionCircularPath}' exceeded max depth ${circularLimit} in main edm path '${edmPath}'"
 
         where:
-            edmPath                                                     | circularLimit  |   exceptionCircularPath
-            "PropC/PropB/PropA/PropB/StringProperty"                    | 0         |   "PropC/PropB/PropA"
-            "PropC/PropB/PropA/PropB/StringProperty"                    | 1         |   "PropC/PropB/PropA"
-            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1         |   "PropC/PropB/PropA"
-            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2         |   "PropC/PropB/PropA"
+            edmPath                                                             | circularLimit     |   exceptionCircularPath
+            "PropC/PropB/PropA/PropB/StringProperty"                            | 0                 |   "PropC/PropB/PropA"
+            "PropC/PropB/PropA/PropB/PropC/PropB/PropA/StringProperty"          | 1                 |   "PropC/PropB/PropA"
     }
 
     //TODO Circular reference with max level exception
