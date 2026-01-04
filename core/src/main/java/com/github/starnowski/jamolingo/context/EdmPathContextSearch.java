@@ -5,4 +5,6 @@ public interface EdmPathContextSearch {
   Integer getMongoPathMaxDepth();
 
   Integer getMaxCircularLimitPerEdmPath();
+
+  Integer getMaxCircularLimitForAllEdmPaths();
 }
