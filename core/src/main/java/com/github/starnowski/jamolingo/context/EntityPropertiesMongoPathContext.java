@@ -169,9 +169,20 @@ public class EntityPropertiesMongoPathContext {
 
     private final String edmPathReference;
 
-    public ExceededCircularReferenceDepthException(String message, String edmPathReference) {
+    public int getExceededLimit() {
+      return exceededLimit;
+    }
+
+    public String getEdmPathReference() {
+      return edmPathReference;
+    }
+
+    private final int exceededLimit;
+
+    public ExceededCircularReferenceDepthException(String message, String edmPathReference, int exceededLimit) {
       super(message);
         this.edmPathReference = edmPathReference;
+        this.exceededLimit = exceededLimit;
     }
   }
 
