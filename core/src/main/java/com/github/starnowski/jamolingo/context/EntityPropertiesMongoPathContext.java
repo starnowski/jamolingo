@@ -167,8 +167,11 @@ public class EntityPropertiesMongoPathContext {
   public static class ExceededCircularReferenceDepthException
       extends EntityPropertiesMongoPathContextException {
 
-    public ExceededCircularReferenceDepthException(String message) {
+    private final String edmPathReference;
+
+    public ExceededCircularReferenceDepthException(String message, String edmPathReference) {
       super(message);
+        this.edmPathReference = edmPathReference;
     }
   }
 
