@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0"
+           xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+        <Schema Namespace="Workflow.Model"
+                xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+            <!-- ===================== -->
+            <!-- Main Entity -->
+            <!-- ===================== -->
+            <EntityType Name="WorkflowInstance">
+                <Key>
+                    <PropertyRef Name="InstanceId"/>
+                </Key>
+                <Property Name="InstanceId" Type="Edm.String" Nullable="false"/>
+                <Property Name="Definition" Type="Workflow.Model.WorkflowDefinition"/>
+            </EntityType>
+
+            <!-- ===================== -->
+            <!-- Complex Types -->
+            <!-- ===================== -->
+
+            <!-- TypeA -->
+            <ComplexType Name="WorkflowDefinition">
+                <Property Name="WorkflowKey" Type="Edm.String"/>
+                <Property Name="Version" Type="Edm.Int32"/>
+                <Property Name="Steps" Type="Collection(Edm.String)"/>
+                <Property Name="ExecutionContext"
+                          Type="Workflow.Model.ExecutionContext"/>
+            </ComplexType>
+
+            <!-- TypeB -->
+            <ComplexType Name="ExecutionContext">
+                <Property Name="TriggeredBy" Type="Edm.String"/>
+                <Property Name="ExecutionTimeUtc" Type="Edm.DateTimeOffset"/>
+                <Property Name="RuntimeVariables"
+                          Type="Collection(Edm.String)"/>
+                <Property Name="EvaluatedDefinition"
+                          Type="Workflow.Model.WorkflowDefinition"/>
+            </ComplexType>
+
+            <!-- ===================== -->
+            <!-- Container -->
+            <!-- ===================== -->
+            <EntityContainer Name="Container">
+                <EntitySet Name="WorkflowInstances"
+                           EntityType="Workflow.Model.WorkflowInstance"/>
+            </EntityContainer>
+
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

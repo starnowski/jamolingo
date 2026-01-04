@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx
+Version="4.0"
+xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+
+<edmx:DataServices>
+    <Schema
+            Namespace="Demo"
+            xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+        <!-- Entity type -->
+        <EntityType Name="Item">
+            <!--    <Key>-->
+            <!--        <PropertyRef Name="ID" />-->
+            <!--    </Key>-->
+            <!--    <Property Name="ID" Type="Edm.Int32" Nullable="false"/>-->
+            <Property Name="plainString" Type="Edm.String" Nullable="false"/>
+            <!--    <NavigationProperty Name="Parent" Type="Namespace.Category" Partner="Children"/>-->
+            <!--    <NavigationProperty Name="Children" Type="Collection(Namespace.Category)" Partner="Parent"/>-->
+        </EntityType>
+
+        <!-- Container -->
+        <EntityContainer Name="Container">
+            <EntitySet Name="Items" EntityType="Demo.Item" />
+        </EntityContainer>
+
+    </Schema>
+</edmx:DataServices>
+
+</edmx:Edmx>
