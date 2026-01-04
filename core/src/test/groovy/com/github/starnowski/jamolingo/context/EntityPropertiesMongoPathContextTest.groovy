@@ -240,6 +240,30 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     //TODO test case that increase limit and allows to search deeper
     //TODO test case that decrease limit and disallow to search deeper then default limit
 
+    def "should throw InvalidAnchorPathException when anchor path is invalid"() {
+        given:
+        def mappings = new HashMap<>(prepareEdmToMongoPathOneToOneMappingWithCircularReferences())
+        mappings.put("PropA/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder()
+                .withEdmPath("PropA/PropB/PropA")
+                .withType("Demo.Model.ComplexTypeA")
+                .withMongoPath("PropA.PropB.PropA")
+                .withCircularReferenceMapping(
+                        CircularReferenceMapping.builder()
+                                .withAnchorEdmPath("InvalidAnchor") // Invalid anchor path
+                                .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                .build())
+                .build())
+        def tested = new EntityPropertiesMongoPathContext(mappings)
+        def edmPath = "PropA/PropB/PropA/PropB/StringProperty"
+
+        when:
+        tested.resolveMongoPathForEDMPath(edmPath)
+
+        then:
+        def ex = thrown(EntityPropertiesMongoPathContext.InvalidAnchorPathException)
+        ex.message == "The anchor path 'InvalidAnchor' defined in the circular reference mapping for 'PropA/PropB/PropA' is not a valid EDM path."
+    }
+
 
     private static Map<String, MongoPathEntry> prepareEdmToMongoPathOneToOneMappingWithCircularReferences() {
         Map.ofEntries(

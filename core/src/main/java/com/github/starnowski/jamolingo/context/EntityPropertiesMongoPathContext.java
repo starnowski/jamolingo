@@ -46,6 +46,11 @@ public class EntityPropertiesMongoPathContext {
                 e.getEdmPath(), e.getCircularLimit(), edmPath),
             e.getEdmPath(),
             e.getCircularLimit());
+      } catch (InternalInvalidAnchorPathException e) {
+        throw new InvalidAnchorPathException(
+            String.format(
+                "The anchor path '%s' defined in the circular reference mapping for '%s' is not a valid EDM path.",
+                e.getAnchorPath(), e.getEdmPath()));
       }
       if (result == null) {
         throw new InvalidEDMPathException("No '%s' EDM path found".formatted(edmPath));
@@ -67,7 +72,9 @@ public class EntityPropertiesMongoPathContext {
 
   private String tryToResolveCircularReferencesMongoPath(
       String edmPath, EdmPathSearchState edmPathSearchState)
-      throws InternalMongoPathMaxDepthException, InternalMaxCircularLimitPerEdmPathException {
+      throws InternalMongoPathMaxDepthException,
+          InternalMaxCircularLimitPerEdmPathException,
+          InternalInvalidAnchorPathException {
     String longestMatchingEDMPath =
         edmToMongoPath.keySet().stream()
             .filter(edmPath::startsWith)
@@ -106,8 +113,11 @@ public class EntityPropertiesMongoPathContext {
     edmPathSearchState.validateMaxCircularLimitPerEdmPathWithAdditionalEdmPath(baseEDMProperty);
     // Remove longestMatchingEDMPath from edmPath -> tmpEDMPath
     String tmpEDMPath = edmPath.substring(longestMatchingEDMPath.length());
-    MongoPathEntry circumferentialType =
-        this.edmToMongoPath.get(baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath());
+    String anchorPath = baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath();
+    MongoPathEntry circumferentialType = this.edmToMongoPath.get(anchorPath);
+    if (circumferentialType == null) {
+      throw new InternalInvalidAnchorPathException(anchorPath, longestMatchingEDMPath);
+    }
     // TODO
     // Concat type EDMPath and tmpEDMPath -> tmpEDMPath
     tmpEDMPath = circumferentialType.getEdmPath() + tmpEDMPath;
@@ -209,6 +219,12 @@ public class EntityPropertiesMongoPathContext {
     }
   }
 
+  public static class InvalidAnchorPathException extends EntityPropertiesMongoPathContextException {
+    public InvalidAnchorPathException(String message) {
+      super(message);
+    }
+  }
+
   private static class InternalMongoPathMaxDepthException extends Exception {
 
     private final String mongoPath;
@@ -238,6 +254,25 @@ public class EntityPropertiesMongoPathContext {
     private InternalMaxCircularLimitPerEdmPathException(String edmPath, int circularLimit) {
       this.edmPath = edmPath;
       this.circularLimit = circularLimit;
+    }
+  }
+
+  private static class InternalInvalidAnchorPathException extends Exception {
+
+    private final String anchorPath;
+    private final String edmPath;
+
+    public String getAnchorPath() {
+      return anchorPath;
+    }
+
+    public String getEdmPath() {
+      return edmPath;
+    }
+
+    private InternalInvalidAnchorPathException(String anchorPath, String edmPath) {
+      this.anchorPath = anchorPath;
+      this.edmPath = edmPath;
     }
   }
 
