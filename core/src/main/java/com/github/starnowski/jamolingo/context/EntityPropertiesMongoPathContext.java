@@ -4,71 +4,71 @@ import java.util.Map;
 
 public interface EntityPropertiesMongoPathContext {
 
-    String resolveMongoPathForEDMPath(String edmPath);
-    String resolveMongoPathForEDMPath(
-            String edmPath, EdmPathContextSearch edmPathContextSearch);
-    Map<String, MongoPathEntry> getEdmToMongoPath();
+  String resolveMongoPathForEDMPath(String edmPath);
 
-    public static class EntityPropertiesMongoPathContextException extends RuntimeException {
-        public EntityPropertiesMongoPathContextException() {}
+  String resolveMongoPathForEDMPath(String edmPath, EdmPathContextSearch edmPathContextSearch);
 
-        public EntityPropertiesMongoPathContextException(String message) {
-            super(message);
-        }
+  Map<String, MongoPathEntry> getEdmToMongoPath();
 
-        public EntityPropertiesMongoPathContextException(String message, Throwable cause) {
-            super(message, cause);
-        }
+  public static class EntityPropertiesMongoPathContextException extends RuntimeException {
+    public EntityPropertiesMongoPathContextException() {}
+
+    public EntityPropertiesMongoPathContextException(String message) {
+      super(message);
     }
 
-    public static class InvalidEDMPathException extends EntityPropertiesMongoPathContextException {
+    public EntityPropertiesMongoPathContextException(String message, Throwable cause) {
+      super(message, cause);
+    }
+  }
 
-        public InvalidEDMPathException(String message) {
-            super(message);
-        }
+  public static class InvalidEDMPathException extends EntityPropertiesMongoPathContextException {
+
+    public InvalidEDMPathException(String message) {
+      super(message);
+    }
+  }
+
+  public static class ExceededCircularReferenceDepthException
+      extends EntityPropertiesMongoPathContextException {
+
+    private final String edmPathReference;
+
+    public int getExceededLimit() {
+      return exceededLimit;
     }
 
-    public static class ExceededCircularReferenceDepthException
-            extends EntityPropertiesMongoPathContextException {
-
-        private final String edmPathReference;
-
-        public int getExceededLimit() {
-            return exceededLimit;
-        }
-
-        public String getEdmPathReference() {
-            return edmPathReference;
-        }
-
-        private final int exceededLimit;
-
-        public ExceededCircularReferenceDepthException(
-                String message, String edmPathReference, int exceededLimit) {
-            super(message);
-            this.edmPathReference = edmPathReference;
-            this.exceededLimit = exceededLimit;
-        }
+    public String getEdmPathReference() {
+      return edmPathReference;
     }
 
-    public static class MongoPathMaxDepthException extends EntityPropertiesMongoPathContextException {
+    private final int exceededLimit;
 
-        public MongoPathMaxDepthException(String message) {
-            super(message);
-        }
+    public ExceededCircularReferenceDepthException(
+        String message, String edmPathReference, int exceededLimit) {
+      super(message);
+      this.edmPathReference = edmPathReference;
+      this.exceededLimit = exceededLimit;
     }
+  }
 
-    public static class InvalidAnchorPathException extends EntityPropertiesMongoPathContextException {
-        public InvalidAnchorPathException(String message) {
-            super(message);
-        }
+  public static class MongoPathMaxDepthException extends EntityPropertiesMongoPathContextException {
+
+    public MongoPathMaxDepthException(String message) {
+      super(message);
     }
+  }
 
-    public static class ExceededTotalCircularReferenceLimitException
-            extends EntityPropertiesMongoPathContextException {
-        public ExceededTotalCircularReferenceLimitException(String message) {
-            super(message);
-        }
+  public static class InvalidAnchorPathException extends EntityPropertiesMongoPathContextException {
+    public InvalidAnchorPathException(String message) {
+      super(message);
     }
+  }
 
+  public static class ExceededTotalCircularReferenceLimitException
+      extends EntityPropertiesMongoPathContextException {
+    public ExceededTotalCircularReferenceLimitException(String message) {
+      super(message);
+    }
+  }
 }

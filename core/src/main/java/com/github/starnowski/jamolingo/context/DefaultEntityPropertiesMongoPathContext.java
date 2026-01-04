@@ -159,7 +159,7 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
 
   @Override
   public String toString() {
-    return "DefaultEntityPropertiesMongoPathContext{" + "edmToMongoPath=" + edmToMongoPath + '}' ;
+    return "DefaultEntityPropertiesMongoPathContext{" + "edmToMongoPath=" + edmToMongoPath + '}';
   }
 
   @Override
