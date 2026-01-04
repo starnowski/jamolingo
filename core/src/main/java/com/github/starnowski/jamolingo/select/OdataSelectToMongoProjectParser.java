@@ -78,5 +78,20 @@ public class OdataSelectToMongoProjectParser {
     public Bson getStageObject() {
       return new Document("$project", getProjectObject());
     }
+
+    @Override
+    public List<Bson> getStagesObjects() {
+      return Collections.singletonList(getStageObject());
+    }
+
+    @Override
+    public List<String> getUsedMongoDocumentProperties() {
+      return new ArrayList<>(selectedFields);
+    }
+
+    @Override
+    public List<String> getProducedMongoDocumentProperties() {
+      return new ArrayList<>(selectedFields);
+    }
   }
 }
