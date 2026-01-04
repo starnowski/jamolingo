@@ -19,15 +19,15 @@ This is a library project and is not intended to be run standalone. It should be
 
 ### Build Command
 
-The project is built using standard Maven commands. The following command will clean the project, compile the source code, run all tests, and install the artifact into your local Maven repository.
+The project is built using standard Maven commands. It also use the Maven wrapper. The following command will clean the project, compile the source code, run all tests, and install the artifact into your local Maven repository.
 
 ```bash
-mvn clean install
+mvnw clean install
 ```
 
 ### Testing
 
-Tests are written in Groovy using the [Spock Framework](https://spockframework.org/). They are located in `core/src/test/groovy` and are automatically executed as part of the `mvn clean install` command.
+Tests are written in Groovy using the [Spock Framework](https://spockframework.org/). They are located in `core/src/test/groovy` and are automatically executed as part of the `mvnw clean install` command.
 
 ## Development Conventions
 
@@ -37,12 +37,12 @@ The project enforces the [Google Java Format](https://github.com/google/google-j
 
 *   **To check for formatting issues:**
     ```bash
-    mvn spotless:check
+    mvnw spotless:check
     ```
 
 *   **To automatically apply the correct formatting:**
     ```bash
-    mvn spotless:apply
+    mvnw spotless:apply
     ```
 
 ### Dependency Management
