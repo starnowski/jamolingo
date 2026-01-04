@@ -60,6 +60,13 @@ Although it generates code in compile mode there was in the past issues related 
 
 Below there is an example of immutable type DefaultEdmPathContextSearch that contains inner static builder type.
 The name of builder class is similar with base class but with suffix "Builder".
+Also generally the assumption is that all immutable objects in project that stores only data should have implement below methods:
+- toString()
+- equals()
+- hashCode()
+
+And what is important all those methods should return values computed based on all their declared properties.
+No property should be omitted.
 
 ```java
 package com.github.starnowski.jamolingo.context;
