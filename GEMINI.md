@@ -44,6 +44,8 @@ The project enforces the [Google Java Format](https://github.com/google/google-j
     ```bash
     mvnw spotless:apply
     ```
+    
+Important! After each code change that is store in the {module}/main/src/java folders we have to run the spotless:apply goal to format correctly
 
 ### Dependency Management
 
