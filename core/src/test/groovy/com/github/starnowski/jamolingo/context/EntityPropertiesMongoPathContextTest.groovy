@@ -81,6 +81,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "PropA/PropB/StringProperty"    ||  "PropA.PropB.StringProperty"
             "PropC/PropB/PropA/PropB/StringProperty"       ||  "PropC.PropB.PropA.PropB.StringProperty"
             "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"       ||  "PropC.PropB.PropA.PropB.PropC.PropA.StringProperty"
+            "PropC/PropB/PropA/PropB/PropC/PropB/PropA/StringProperty"       ||  "PropC.PropB.PropA.PropB.PropC.PropB.PropA.StringProperty"
     }
 
     @Unroll
