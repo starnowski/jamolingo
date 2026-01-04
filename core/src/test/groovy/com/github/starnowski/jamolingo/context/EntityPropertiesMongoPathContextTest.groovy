@@ -210,10 +210,10 @@ class EntityPropertiesMongoPathContextTest extends Specification {
 
         where:
             edmPath                                                     | circularLimit  |   exceptionCircularPath
-            "PropC/PropB/PropA/PropB/StringProperty"                    | 0         |   "PropC.PropB.PropA"
-            "PropC/PropB/PropA/PropB/StringProperty"                    | 1         |   "PropC.PropB.PropA"
-            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1         |   "PropC.PropB.PropA"
-            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2         |   "PropC.PropB.PropA"
+            "PropC/PropB/PropA/PropB/StringProperty"                    | 0         |   "PropC/PropB/PropA"
+            "PropC/PropB/PropA/PropB/StringProperty"                    | 1         |   "PropC/PropB/PropA"
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1         |   "PropC/PropB/PropA"
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2         |   "PropC/PropB/PropA"
     }
 
     //TODO Circular reference with max level exception
