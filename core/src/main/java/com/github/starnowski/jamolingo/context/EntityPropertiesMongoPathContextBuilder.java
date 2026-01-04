@@ -38,7 +38,7 @@ public class EntityPropertiesMongoPathContextBuilder {
       }
     }
     // TODO complex types references
-    return new EntityPropertiesMongoPathContext(out.edmToMongoPath);
+    return new DefaultEntityPropertiesMongoPathContext(out.edmToMongoPath);
   }
 
   private static final class EntityPropertiesMongoPathContextOutPut {

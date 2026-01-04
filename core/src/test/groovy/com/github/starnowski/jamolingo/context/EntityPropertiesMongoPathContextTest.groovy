@@ -15,7 +15,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
                     Map.entry("Addresses/Street", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/Street").withMongoPath("Addresses.Street").build()),
                     Map.entry("Addresses/City", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/City").withMongoPath("Addresses.City").build()),
                     Map.entry("Addresses/ZipCode", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/ZipCode").withMongoPath("Addresses.ZipCode").build()))
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
 
         when:
             def result = tested.resolveMongoPathForEDMPath(edmPath)
@@ -44,7 +44,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
                     Map.entry("Addresses/Street", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/Street").withMongoPath("street").build()),
                     Map.entry("Addresses/City", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/City").withMongoPath("Addresses.City").build()),
                     Map.entry("Addresses/ZipCode", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/ZipCode").withMongoPath("userAddress.zip.fullCode").build()))
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
 
         when:
             def result = tested.resolveMongoPathForEDMPath(edmPath)
@@ -66,7 +66,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     def "should find mongo path for edm path based on EDM (that contains circular references) mapping one-to-one with Mongo Document"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
 
         when:
             def result = tested.resolveMongoPathForEDMPath(edmPath)
@@ -103,7 +103,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
                     Map.entry("PropC/StringProperty", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/StringProperty").withType("Edm.String").withMongoPath("c.cString").build()),
                     Map.entry("PropC", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC").withMongoPath("c").withType("Demo.Model.ComplexTypeC").build())
             )
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
 
         when:
             def result = tested.resolveMongoPathForEDMPath(edmPath)
@@ -126,7 +126,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     def "should thrown an exception with expected message '#expectedExceptionMessage' when trying to find edm path that do not exists"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
 
         when:
             tested.resolveMongoPathForEDMPath(edmPath)
@@ -148,7 +148,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
 //    def "should throw an exception for edm path based on EDM (that contains circular references) when the limit for circular reference was exceeded"() {
 //        given:
 //            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-//            def tested = new EntityPropertiesMongoPathContext(mappings)
+//            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
 //
 //        when:
 //            def result = tested.resolveMongoPathForEDMPath(edmPath)
@@ -175,7 +175,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             // Adding one EDM property that has nested mongo path
             mappings.put("PropDNested", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropDNested").withMongoPath("somePropertyD.child.grandChild").build())
             mappings.put("PropC/PropCNested", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropCNested").withMongoPath("PropC.PropCNested").build())
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
             def searchContext = DefaultEdmPathContextSearch.builder().withMongoPathMaxDepth(maxDepth).build()
 
         when:
@@ -199,7 +199,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     def "should throw an exception for edm path based on EDM (that contains circular references) when the circular limit (#circularLimit) was exceeded"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
             def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitPerEdmPath(circularLimit).build()
 
         when:
@@ -219,7 +219,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     def "should find mongo path for edm path based on EDM (that contains circular references) when the circular limit is NOT exceeded"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
             def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitPerEdmPath(circularLimit).build()
 
         when:
@@ -244,7 +244,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     def "should throw ExceededTotalCircularReferenceLimitException when total circular limit of #limit is exceeded"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
             def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitForAllEdmPaths(limit).build()
 
         when:
@@ -266,7 +266,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
     def "should find mongo path for edm path when total circular limit is NOT exceeded"() {
         given:
             def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
-            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
             def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitForAllEdmPaths(limit).build()
 
         when:
@@ -294,7 +294,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                                 .build())
                 .build())
-        def tested = new EntityPropertiesMongoPathContext(mappings)
+        def tested = new DefaultEntityPropertiesMongoPathContext(mappings)
         def edmPath = "PropA/PropB/PropA/PropB/StringProperty"
 
         when:
