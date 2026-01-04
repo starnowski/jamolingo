@@ -194,10 +194,34 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             "PropC/PropB/PropC/PropCNested"                             | 2         |   "PropC.PropB.PropC"
     }
 
+    @Unroll
+    def "should throw an exception for edm path based on EDM (that contains circular references) when the circular limit (#circularLimit) was exceeded"() {
+        given:
+            def mappings = prepareEdmToMongoPathOneToOneMappingWithCircularReferences()
+            def tested = new EntityPropertiesMongoPathContext(mappings)
+            def searchContext = DefaultEdmPathContextSearch.builder().withMaxCircularLimitPerEdmPath(circularLimit).build()
+
+        when:
+            tested.resolveMongoPathForEDMPath(edmPath, searchContext)
+
+        then:
+            def  ex = thrown(EntityPropertiesMongoPathContext.ExceededCircularReferenceDepthException)
+            ex.message == "Circular edm path '${exceptionCircularPath}' exceeded max depth ${circularLimit} in main edm path '${edmPath}'"
+
+        where:
+            edmPath                                                     | circularLimit  |   exceptionCircularPath
+            "PropC/PropB/PropA/PropB/StringProperty"                    | 0         |   "PropC.PropB.PropA"
+            "PropC/PropB/PropA/PropB/StringProperty"                    | 1         |   "PropC.PropB.PropA"
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 1         |   "PropC.PropB.PropA"
+            "PropC/PropB/PropA/PropB/PropC/PropA/StringProperty"        | 2         |   "PropC.PropB.PropA"
+    }
 
     //TODO Circular reference with max level exception
 
     //TODO Circular reference with max level exception for specific fields
+    //TODO test case that increase limit and allows to search deeper
+    //TODO test case that decrease limit and disallow to search deeper then default limit
+
 
     private static Map<String, MongoPathEntry> prepareEdmToMongoPathOneToOneMappingWithCircularReferences() {
         Map.ofEntries(
