@@ -13,13 +13,14 @@
     </modules>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <org.apache.olingo.version>5.0.0</org.apache.olingo.version>
         <org.apache.groovy.groovy-all.version>4.0.28</org.apache.groovy.groovy-all.version>
         <spock.core.version>1.1-groovy-2.4</spock.core.version>
         <org.spockframework.spock.version>2.4-M7-groovy-4.0</org.spockframework.spock.version>
+        <org.projectlombok.lombok.version>1.16.20</org.projectlombok.lombok.version>
     </properties>
 
     <dependencyManagement>
@@ -73,13 +74,13 @@
                 <version>3.8.0</version>
                 <configuration>
                     <release>17</release>  <!--or <release>10</release>-->
-                    <annotationProcessorPaths>
-                        <path>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                            <version>${org.projectlombok.lombok.version}</version>
-                        </path>
-                    </annotationProcessorPaths>
+<!--                    <annotationProcessorPaths>-->
+<!--                        <path>-->
+<!--                            <groupId>org.projectlombok</groupId>-->
+<!--                            <artifactId>lombok</artifactId>-->
+<!--                            <version>${org.projectlombok.lombok.version}</version>-->
+<!--                        </path>-->
+<!--                    </annotationProcessorPaths>-->
                 </configuration>
             </plugin>
             <plugin>

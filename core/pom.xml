@@ -12,8 +12,8 @@
     <artifactId>core</artifactId>
 
     <properties>
-        <maven.compiler.source>21</maven.compiler.source>
-        <maven.compiler.target>21</maven.compiler.target>
+        <maven.compiler.source>8</maven.compiler.source>
+        <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -48,10 +48,11 @@
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>
                 <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.9.0</version>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
                         <goals>
+                            <goal>compile</goal>
                             <goal>compileTests</goal>
                         </goals>
                     </execution>
