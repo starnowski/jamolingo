@@ -1,5 +1,7 @@
 package com.github.starnowski.jamolingo.context;
 
+import static com.github.starnowski.jamolingo.context.Constants.MONGO_HARDCODED_BSON_DOCUMENT_NESTING_LIMIT;
+
 import java.util.Objects;
 
 public class DefaultEdmPathContextSearch implements EdmPathContextSearch {
@@ -64,7 +66,7 @@ public class DefaultEdmPathContextSearch implements EdmPathContextSearch {
   }
 
   public static class Builder {
-    private Integer mongoPathMaxDepth;
+    private Integer mongoPathMaxDepth = MONGO_HARDCODED_BSON_DOCUMENT_NESTING_LIMIT;
     private Integer maxCircularLimitPerEdmPath;
     private Integer maxCircularLimitForAllEdmPaths;
 
