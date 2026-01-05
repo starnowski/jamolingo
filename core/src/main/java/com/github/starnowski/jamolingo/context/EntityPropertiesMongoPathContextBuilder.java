@@ -37,8 +37,28 @@ public class EntityPropertiesMongoPathContextBuilder {
             entityPropertiesMongoPathResolverContext);
       }
     }
+    validateCircularReferences(out);
     // TODO complex types references
     return new DefaultEntityPropertiesMongoPathContext(out.edmToMongoPath);
+  }
+
+  private void validateCircularReferences(EntityPropertiesMongoPathContextOutPut out) {
+    Map<String, MongoPathEntry> edmPathToMongoPropertyMapping = out.edmToMongoPath;
+    edmPathToMongoPropertyMapping.forEach(
+        (key, value) -> {
+          if (value.getCircularReferenceMapping() != null
+              && CircularStrategy.EMBED_LIMITED.equals(
+                  value.getCircularReferenceMapping().getStrategy())
+              && value.getCircularReferenceMapping().getAnchorEdmPath() != null) {
+            if (!edmPathToMongoPropertyMapping.containsKey(
+                value.getCircularReferenceMapping().getAnchorEdmPath())) {
+              throw new EntityPropertiesMongoPathContext.InvalidAnchorPathException(
+                  String.format(
+                      "The anchor path '%s' defined in the circular reference mapping for '%s' is not a valid EDM path.",
+                      value.getCircularReferenceMapping().getAnchorEdmPath(), key));
+            }
+          }
+        });
   }
 
   private static final class EntityPropertiesMongoPathContextOutPut {
