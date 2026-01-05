@@ -77,6 +77,48 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
     }
 
     @Unroll
+    def "should throw exception for invalid anchor path for #testCaseName"() {
+        given:
+        def tested = new EntityPropertiesMongoPathContextBuilder()
+
+        when:
+        tested.build(entityMapping)
+
+        then:
+        def e = thrown(EntityPropertiesMongoPathContext.InvalidAnchorPathException)
+        e.message == expectedMessage
+
+        where:
+        testCaseName | entityMapping || expectedMessage
+        "simple case" | new EntityMapping()
+                .withCollection("Item")
+                .withProperties(Map.of(
+                        "Addresses", new PropertyMapping().withProperties(Map.of(
+                                "BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(
+                                        CircularReferenceMapping.builder()
+                                                .withAnchorEdmPath("InvalidAnchor") // Invalid anchor path
+                                                .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                .build()
+                                )
+                        ))
+                )) || "The anchor path 'InvalidAnchor' defined in the circular reference mapping for 'Addresses/BackUpAddresses' is not a valid EDM path."
+        "nested case" | new EntityMapping()
+                .withCollection("Item")
+                .withProperties(Map.of(
+                        "Person", new PropertyMapping().withProperties(Map.of(
+                                "Addresses", new PropertyMapping().withProperties(Map.of(
+                                        "BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(
+                                                CircularReferenceMapping.builder()
+                                                        .withAnchorEdmPath("Person/InvalidAnchor") // Invalid anchor path
+                                                        .withStrategy(CircularStrategy.EMBED_LIMITED)
+                                                        .build()
+                                        )
+                                ))
+                        ))
+                )) || "The anchor path 'Person/InvalidAnchor' defined in the circular reference mapping for 'Person/Addresses/BackUpAddresses' is not a valid EDM path."
+    }
+
+    @Unroll
     def "should return correct mongo properties mapping based on entity configuration #entityMapping"(){
         given:
             def tested = new EntityPropertiesMongoPathContextBuilder()
