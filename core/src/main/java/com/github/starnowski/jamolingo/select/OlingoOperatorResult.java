@@ -3,7 +3,7 @@ package com.github.starnowski.jamolingo.select;
 import java.util.List;
 import org.bson.conversions.Bson;
 
-public interface AbstractOlingoOperatorResult {
+public interface OlingoOperatorResult {
 
   /**
    * Returns a list of Bson stages objects that represent operations to be performed. The stages are
@@ -28,4 +28,6 @@ public interface AbstractOlingoOperatorResult {
    * @return A list of produced MongoDB document properties.
    */
   List<String> getProducedMongoDocumentProperties();
+
+  // TODO Add methods that returns properties that are added, remove, transformed new output
 }
