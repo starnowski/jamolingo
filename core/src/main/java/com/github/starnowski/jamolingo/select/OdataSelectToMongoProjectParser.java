@@ -80,7 +80,7 @@ public class OdataSelectToMongoProjectParser {
     }
 
     @Override
-    public List<Bson> getStagesObjects() {
+    public List<Bson> getStageObjects() {
       return Collections.singletonList(getStageObject());
     }
 
@@ -90,8 +90,24 @@ public class OdataSelectToMongoProjectParser {
     }
 
     @Override
-    public List<String> getProducedMongoDocumentProperties() {
-      return new ArrayList<>(selectedFields);
+    public List<String> getWrittenMongoDocumentProperties() {
+      return List.of();
+    }
+
+    @Override
+    public List<String> getAddedMongoDocumentProperties() {
+      return List.of();
+    }
+
+    @Override
+    public List<String> getRemovedMongoDocumentProperties() {
+      // TODO in case if the _id would be removed
+      return List.of();
+    }
+
+    @Override
+    public boolean isDocumentShapeRedefined() {
+      return false;
     }
   }
 }
