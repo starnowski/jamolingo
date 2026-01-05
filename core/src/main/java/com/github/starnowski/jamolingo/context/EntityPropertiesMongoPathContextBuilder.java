@@ -38,7 +38,6 @@ public class EntityPropertiesMongoPathContextBuilder {
       }
     }
     validateCircularReferences(out);
-    // TODO complex types references
     return new DefaultEntityPropertiesMongoPathContext(out.edmToMongoPath);
   }
 
