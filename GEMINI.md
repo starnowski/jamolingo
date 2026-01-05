@@ -25,6 +25,8 @@ The project is built using standard Maven commands. It also use the Maven wrappe
 mvnw clean install
 ```
 
+Important! Consider of invoking the "spotless:apply" goal before build, check "Code Style and Formatting" section below.
+
 ### Testing
 
 Tests are written in Groovy using the [Spock Framework](https://spockframework.org/). They are located in `core/src/test/groovy` and are automatically executed as part of the `mvnw clean install` command.
