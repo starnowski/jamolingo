@@ -36,6 +36,8 @@ public class EntityPropertiesMongoPathContextBuilder {
             out,
             entityPropertiesMongoPathResolverContext);
       }
+      // TODO Store properties the Set with names of edmPaths of properties, required for
+      // ExpandAsterisk = true (all fields defined in EDM)
     }
     validateCircularReferences(out);
     return new DefaultEntityPropertiesMongoPathContext(out.edmToMongoPath);
@@ -106,6 +108,8 @@ public class EntityPropertiesMongoPathContextBuilder {
           edmPath,
           out,
           entityPropertiesMongoPathResolverContext);
+      // TODO Store properties the Set with names of edmPaths of properties, required for
+      // ExpandAsterisk = true (all fields defined in EDM)
     }
     if (entityPropertiesMongoPathResolverContext.isGenerateOnlyLeafs()) {
       return;
