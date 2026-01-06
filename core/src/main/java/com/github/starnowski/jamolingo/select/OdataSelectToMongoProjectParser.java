@@ -34,10 +34,6 @@ public class OdataSelectToMongoProjectParser {
       }
       String propertyName =
           edmMongoContextFacade.resolveMongoPathForEDMPath(item.getResourcePath()).getMongoPath();
-
-      //          item.getResourcePath().getUriResourceParts().stream()
-      //              .map(p -> ((UriResourceProperty) p).getProperty().getName())
-      //              .collect(Collectors.joining("."));
       fields.add(propertyName);
     }
     // TODO check if _id is part of available register property

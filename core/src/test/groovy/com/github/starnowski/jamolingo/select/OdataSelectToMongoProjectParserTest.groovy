@@ -1,6 +1,9 @@
 package com.github.starnowski.jamolingo.select
 
 import com.github.starnowski.jamolingo.AbstractSpecification
+import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade
+import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder
+import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
 import org.apache.olingo.server.api.uri.UriInfo
@@ -38,7 +41,38 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
             [bsonFile, edmConfigFile, selectFields] << oneToOneEdmPathsMappings()
     }
 
-    static oneToOneEdmPathsMappings() {
+    @Unroll
+    def "should return expected stage bson object with default EdmMongoContextFacade with 1-to-1 edm to mongo mapping"() {
+        given:
+        Bson expectedBson = loadBsonFromFile(bsonFile)
+        Edm edm = loadEmdProvider(edmConfigFile)
+        ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+        def odataMapping = factory.build(edm.getSchema("Demo"))
+        def entityMapping = odataMapping.getEntities().get("Item")
+        EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+        def context = entityPropertiesMongoPathContextBuilder.build(entityMapping, new EntityPropertiesMongoPathContextBuilder.EntityPropertiesMongoPathResolverContext.EntityPropertiesMongoPathResolverContextBuilder().withGenerateOnlyLeafs(true).build())
+
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("Items",
+                        "\$select=" +
+                                selectFields.stream().filter(Objects::nonNull)
+                                        .filter(s -> !s.trim().isEmpty())
+                                        .collect(Collectors.joining(","))
+                        , null, null)
+        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+
+        when:
+        def result = tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null))
+
+        then:
+        result.getStageObject() == expectedBson
+
+        where:
+        [bsonFile, edmConfigFile, selectFields] << oneToOneEdmPathsMappings()
+    }
+
+        static oneToOneEdmPathsMappings() {
         [
                 ["select/stages/case1.json"       ,  "edm/edm1.xml"  , ["plainString"]],
                 ["select/stages/case_wildcard_without_id.json"       ,  "edm/edm1.xml"  , ["*"]],// ExpandAsterisk = false
