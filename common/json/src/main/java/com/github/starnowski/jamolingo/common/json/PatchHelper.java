@@ -2,7 +2,6 @@ package com.github.starnowski.jamolingo.common.json;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.json.*;
 
 import java.io.IOException;

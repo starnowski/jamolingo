@@ -8,6 +8,9 @@ import jakarta.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
 
+/**
+ * TODO add tests cases
+ */
 public class JSONOverrideHelper {
 
     private final PatchHelper patchHelper;
@@ -21,7 +24,13 @@ public class JSONOverrideHelper {
     }
 
     public enum PatchType  {
+        /**
+         * JSON Patch (RFC 6902)
+         */
         JSON_PATCH,
+        /**
+         * JSON Merge Patch (RFC 7396)
+         */
         MERGE
     }
 
