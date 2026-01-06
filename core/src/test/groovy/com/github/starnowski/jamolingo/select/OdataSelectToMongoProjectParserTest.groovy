@@ -50,7 +50,7 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
         def odataMapping = factory.build(edm.getSchema("Demo"))
         def entityMapping = odataMapping.getEntities().get("Item")
         EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
-        def context = entityPropertiesMongoPathContextBuilder.build(entityMapping, new EntityPropertiesMongoPathContextBuilder.EntityPropertiesMongoPathResolverContext.EntityPropertiesMongoPathResolverContextBuilder().withGenerateOnlyLeafs(true).build())
+        def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
 
 
         UriInfo uriInfo = new Parser(edm, OData.newInstance())

@@ -23,14 +23,21 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
   @Override
   public MongoPathResolution resolveMongoPathForEDMPath(UriInfoResource uriInfoResource) {
     if (entityPropertiesMongoPathContext == null) {
-      String result =
-          uriInfoResource.getUriResourceParts().stream()
-              .map(p -> ((UriResourceProperty) p).getProperty().getName())
-              .collect(Collectors.joining("."));
+      String result = preparePath(uriInfoResource, ".");
       return new InnerMongoPathResolution(result);
     } else {
-      return null;
+      String edmPath = preparePath(uriInfoResource, "/");
+      return edmPathContextSearch == null
+          ? entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(edmPath)
+          : entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(
+              edmPath, edmPathContextSearch);
     }
+  }
+
+  private static String preparePath(UriInfoResource uriInfoResource, String delimiter) {
+    return uriInfoResource.getUriResourceParts().stream()
+        .map(p -> ((UriResourceProperty) p).getProperty().getName())
+        .collect(Collectors.joining(delimiter));
   }
 
   private static final class InnerMongoPathResolution implements MongoPathResolution {
