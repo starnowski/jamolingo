@@ -7,10 +7,13 @@ import org.apache.olingo.server.api.uri.UriResourceProperty;
 public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
 
   private final EntityPropertiesMongoPathContext entityPropertiesMongoPathContext;
+  private final EdmPathContextSearch edmPathContextSearch;
 
   public DefaultEdmMongoContextFacade(
-      EntityPropertiesMongoPathContext entityPropertiesMongoPathContext) {
+      EntityPropertiesMongoPathContext entityPropertiesMongoPathContext,
+      EdmPathContextSearch edmPathContextSearch) {
     this.entityPropertiesMongoPathContext = entityPropertiesMongoPathContext;
+    this.edmPathContextSearch = edmPathContextSearch;
   }
 
   public static DefaultEdmMongoContextFacadeBuilder builder() {
@@ -53,15 +56,25 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
 
     private EntityPropertiesMongoPathContext entityPropertiesMongoPathContext;
 
+    public DefaultEdmMongoContextFacadeBuilder withEdmPathContextSearch(
+        EdmPathContextSearch edmPathContextSearch) {
+      this.edmPathContextSearch = edmPathContextSearch;
+      return this;
+    }
+
+    private EdmPathContextSearch edmPathContextSearch;
+
     public DefaultEdmMongoContextFacadeBuilder withDefaultEdmMongoContextFacade(
         DefaultEdmMongoContextFacade defaultEdmMongoContextFacade) {
       this.entityPropertiesMongoPathContext =
           defaultEdmMongoContextFacade.entityPropertiesMongoPathContext;
+      this.edmPathContextSearch = defaultEdmMongoContextFacade.edmPathContextSearch;
       return this;
     }
 
     public DefaultEdmMongoContextFacade build() {
-      return new DefaultEdmMongoContextFacade(entityPropertiesMongoPathContext);
+      return new DefaultEdmMongoContextFacade(
+          entityPropertiesMongoPathContext, edmPathContextSearch);
     }
   }
 }
