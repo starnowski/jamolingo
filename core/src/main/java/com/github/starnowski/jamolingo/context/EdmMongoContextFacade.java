@@ -4,5 +4,5 @@ import org.apache.olingo.server.api.uri.UriInfoResource;
 
 public interface EdmMongoContextFacade {
 
-    MongoPathResolution resolveMongoPathForEDMPath(UriInfoResource uriInfoResource);
+  MongoPathResolution resolveMongoPathForEDMPath(UriInfoResource uriInfoResource);
 }

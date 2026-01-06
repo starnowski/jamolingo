@@ -273,32 +273,76 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
   }
 
   private static class EdmPathSearchState {
+
     private final EdmPathContextSearch edmPathContextSearch;
+
     private final String currentMongoPath;
+
     private final Map<String, Integer> edmPathCircularReferenceCount;
 
     public EdmPathSearchState(
         EdmPathContextSearch edmPathContextSearch,
         String currentMongoPath,
         Map<String, Integer> edmPathCircularReferenceCount) {
+
       this.edmPathContextSearch = edmPathContextSearch;
+
       this.currentMongoPath = currentMongoPath;
+
       this.edmPathCircularReferenceCount =
           edmPathCircularReferenceCount == null
               ? Collections.emptyMap()
               : Collections.unmodifiableMap(edmPathCircularReferenceCount);
     }
 
+    @Override
+    public boolean equals(Object o) {
+
+      if (this == o) return true;
+
+      if (o == null || getClass() != o.getClass()) return false;
+
+      EdmPathSearchState that = (EdmPathSearchState) o;
+
+      return Objects.equals(edmPathContextSearch, that.edmPathContextSearch)
+          && Objects.equals(currentMongoPath, that.currentMongoPath)
+          && Objects.equals(edmPathCircularReferenceCount, that.edmPathCircularReferenceCount);
+    }
+
+    @Override
+    public int hashCode() {
+
+      return Objects.hash(edmPathContextSearch, currentMongoPath, edmPathCircularReferenceCount);
+    }
+
+    @Override
+    public String toString() {
+
+      return "EdmPathSearchState{"
+          + "edmPathContextSearch="
+          + edmPathContextSearch
+          + ", currentMongoPath='"
+          + currentMongoPath
+          + '\''
+          + ", edmPathCircularReferenceCount="
+          + edmPathCircularReferenceCount
+          + '}';
+    }
+
     private int getTotalEdmPathCircularReferenceCount() {
+
       return edmPathCircularReferenceCount.values().stream().mapToInt(Integer::intValue).sum();
     }
 
     public void validateCurrentWithAppliedPath(String nextPartOfPath)
         throws InternalMongoPathMaxDepthException {
+
       String path =
           currentMongoPath == null ? nextPartOfPath : currentMongoPath + "." + nextPartOfPath;
+
       if (edmPathContextSearch.getMongoPathMaxDepth() != null
           && (path.split("\\.").length > edmPathContextSearch.getMongoPathMaxDepth())) {
+
         throw new InternalMongoPathMaxDepthException(path);
       }
     }
@@ -307,64 +351,85 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
         MongoPathEntry mongoPathEntry)
         throws InternalMaxCircularLimitPerEdmPathException,
             InternalExceededTotalCircularReferenceLimitException {
+
       Integer effectiveMaxCircularLimitPerEdmPath =
           mongoPathEntry.getMaxCircularLimitPerEdmPath() != null
               ? mongoPathEntry.getMaxCircularLimitPerEdmPath()
               : edmPathContextSearch.getMaxCircularLimitPerEdmPath();
 
       if (effectiveMaxCircularLimitPerEdmPath != null) {
+
         Integer currentCount = edmPathCircularReferenceCount.get(mongoPathEntry.getEdmPath());
+
         if ((currentCount == null ? 0 : currentCount) + 1 > effectiveMaxCircularLimitPerEdmPath) {
+
           throw new InternalMaxCircularLimitPerEdmPathException(
               mongoPathEntry.getEdmPath(), effectiveMaxCircularLimitPerEdmPath);
         }
       }
 
       if (edmPathContextSearch.getMaxCircularLimitForAllEdmPaths() != null) {
+
         if (getTotalEdmPathCircularReferenceCount() + 1
             > edmPathContextSearch.getMaxCircularLimitForAllEdmPaths()) {
+
           throw new InternalExceededTotalCircularReferenceLimitException(
               edmPathContextSearch.getMaxCircularLimitForAllEdmPaths());
         }
       }
     }
 
-    public static EdmPathSearchState.Builder builder(EdmPathContextSearch edmPathContextSearch) {
-      return new EdmPathSearchState.Builder(edmPathContextSearch);
+    public static EdmPathSearchStateBuilder builder(EdmPathContextSearch edmPathContextSearch) {
+
+      return new EdmPathSearchStateBuilder(edmPathContextSearch);
     }
 
-    public static class Builder {
+    public static class EdmPathSearchStateBuilder {
+
       private EdmPathContextSearch edmPathContextSearch;
+
       private String currentMongoPath;
+
       private Map<String, Integer> edmPathCircularReferenceCount;
 
-      public Builder withEdmPathCircularReferenceCount(
+      public EdmPathSearchStateBuilder withEdmPathCircularReferenceCount(
           Map<String, Integer> edmPathCircularReferenceCount) {
+
         this.edmPathCircularReferenceCount =
             edmPathCircularReferenceCount == null
                 ? null
                 : new HashMap<>(edmPathCircularReferenceCount);
+
         return this;
       }
 
-      private Builder(EdmPathContextSearch edmPathContextSearch) {
+      private EdmPathSearchStateBuilder(EdmPathContextSearch edmPathContextSearch) {
+
         this.edmPathContextSearch = edmPathContextSearch;
       }
 
-      public Builder withCurrentMongoPath(String currentMongoPath) {
+      public EdmPathSearchStateBuilder withCurrentMongoPath(String currentMongoPath) {
+
         this.currentMongoPath = currentMongoPath;
+
         return this;
       }
 
-      public Builder increaseEdmPathCircularReferenceCountForEdmPath(String edmPath) {
+      public EdmPathSearchStateBuilder increaseEdmPathCircularReferenceCountForEdmPath(
+          String edmPath) {
+
         if (edmPathCircularReferenceCount == null) {
+
           edmPathCircularReferenceCount = new HashMap<>();
         }
+
         edmPathCircularReferenceCount.merge(edmPath, 1, Integer::sum);
+
         return this;
       }
 
       public EdmPathSearchState build() {
+
         return new EdmPathSearchState(
             edmPathContextSearch, currentMongoPath, edmPathCircularReferenceCount);
       }
