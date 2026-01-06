@@ -124,7 +124,6 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
     if (circumferentialType == null) {
       throw new InternalInvalidAnchorPathException(anchorPath, longestMatchingEDMPath);
     }
-    // TODO
     // Concat type EDMPath and tmpEDMPath -> tmpEDMPath
     tmpEDMPath = circumferentialType.getEdmPath() + tmpEDMPath;
     // Check if edmToMongoPath has tmpEDMPath
