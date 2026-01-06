@@ -1,7 +1,8 @@
 package com.github.starnowski.jamolingo.select;
 
+import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.context.EdmMongoContextFacade;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
@@ -9,7 +10,13 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 public class OdataSelectToMongoProjectParser {
+
   public SelectOperatorResult parse(SelectOption selectOption) {
+    return parse(selectOption, DefaultEdmMongoContextFacade.builder().build());
+  }
+
+  public SelectOperatorResult parse(
+      SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
     if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
       // TODO check if _id is part of available register property
       return new DefaultSelectOperatorResult(new HashSet<>(), true, true);
@@ -26,9 +33,11 @@ public class OdataSelectToMongoProjectParser {
         throw new RuntimeException("Invalid select parameter " + item.getResourcePath());
       }
       String propertyName =
-          item.getResourcePath().getUriResourceParts().stream()
-              .map(p -> ((UriResourceProperty) p).getProperty().getName())
-              .collect(Collectors.joining("."));
+          edmMongoContextFacade.resolveMongoPathForEDMPath(item.getResourcePath()).getMongoPath();
+
+      //          item.getResourcePath().getUriResourceParts().stream()
+      //              .map(p -> ((UriResourceProperty) p).getProperty().getName())
+      //              .collect(Collectors.joining("."));
       fields.add(propertyName);
     }
     // TODO check if _id is part of available register property

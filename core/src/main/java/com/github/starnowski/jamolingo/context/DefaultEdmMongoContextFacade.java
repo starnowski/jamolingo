@@ -1,6 +1,8 @@
 package com.github.starnowski.jamolingo.context;
 
+import java.util.stream.Collectors;
 import org.apache.olingo.server.api.uri.UriInfoResource;
+import org.apache.olingo.server.api.uri.UriResourceProperty;
 
 public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
 
@@ -17,7 +19,29 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
 
   @Override
   public MongoPathResolution resolveMongoPathForEDMPath(UriInfoResource uriInfoResource) {
-    return null;
+    if (entityPropertiesMongoPathContext == null) {
+      String result =
+          uriInfoResource.getUriResourceParts().stream()
+              .map(p -> ((UriResourceProperty) p).getProperty().getName())
+              .collect(Collectors.joining("."));
+      return new InnerMongoPathResolution(result);
+    } else {
+      return null;
+    }
+  }
+
+  private static final class InnerMongoPathResolution implements MongoPathResolution {
+
+    public InnerMongoPathResolution(String mongoPath) {
+      this.mongoPath = mongoPath;
+    }
+
+    private final String mongoPath;
+
+    @Override
+    public String getMongoPath() {
+      return mongoPath;
+    }
   }
 
   public static class DefaultEdmMongoContextFacadeBuilder {
