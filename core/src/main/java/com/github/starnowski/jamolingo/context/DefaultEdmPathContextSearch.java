@@ -70,6 +70,13 @@ public class DefaultEdmPathContextSearch implements EdmPathContextSearch {
     private Integer maxCircularLimitPerEdmPath;
     private Integer maxCircularLimitForAllEdmPaths;
 
+    public Builder withDefaultEdmPathContextSearch(DefaultEdmPathContextSearch defaultEdmPathContextSearch) {
+      this.maxCircularLimitPerEdmPath = defaultEdmPathContextSearch.maxCircularLimitPerEdmPath;
+      this.mongoPathMaxDepth = defaultEdmPathContextSearch.mongoPathMaxDepth;
+      this.maxCircularLimitForAllEdmPaths = defaultEdmPathContextSearch.maxCircularLimitForAllEdmPaths;
+      return this;
+    }
+
     public Builder withMaxCircularLimitPerEdmPath(Integer maxCircularLimitPerEdmPath) {
       this.maxCircularLimitPerEdmPath = maxCircularLimitPerEdmPath;
       return this;
