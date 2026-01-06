@@ -20,12 +20,12 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
   }
 
   @Override
-  public String resolveMongoPathForEDMPath(String edmPath) {
+  public MongoPathResolution resolveMongoPathForEDMPath(String edmPath) {
     return resolveMongoPathForEDMPath(edmPath, DefaultEdmPathContextSearch.builder().build());
   }
 
   @Override
-  public String resolveMongoPathForEDMPath(
+  public MongoPathResolution resolveMongoPathForEDMPath(
       String edmPath, EdmPathContextSearch edmPathContextSearch) {
     if (edmPath == null) {
       return null;
@@ -60,17 +60,17 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
         throw new EntityPropertiesMongoPathContext.InvalidEDMPathException(
             "No '%s' EDM path found".formatted(edmPath));
       }
-      return result;
+      return new DefaultMongoPathResolution(result);
     } else {
       String mongoPath = entry.getMongoPath();
       if (edmPathContextSearch.getMongoPathMaxDepth() == null) {
-        return mongoPath;
+        return new DefaultMongoPathResolution(mongoPath);
       } else if (mongoPath.split("\\.").length > edmPathContextSearch.getMongoPathMaxDepth()) {
         throw new EntityPropertiesMongoPathContext.MongoPathMaxDepthException(
             MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN.formatted(
                 mongoPath, edmPath, edmPathContextSearch.getMongoPathMaxDepth()));
       } else {
-        return mongoPath;
+        return new DefaultMongoPathResolution(mongoPath);
       }
     }
   }
@@ -177,6 +177,38 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
   }
 
   private final Map<String, MongoPathEntry> edmToMongoPath;
+
+  private static class DefaultMongoPathResolution implements MongoPathResolution {
+
+    private final String mongoPath;
+
+    private DefaultMongoPathResolution(String mongoPath) {
+      this.mongoPath = mongoPath;
+    }
+
+    @Override
+    public String getMongoPath() {
+      return mongoPath;
+    }
+
+    @Override
+    public String toString() {
+      return "DefaultMongoPathResolution{" + "mongoPath='" + mongoPath + '\'' + '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      DefaultMongoPathResolution that = (DefaultMongoPathResolution) o;
+      return Objects.equals(mongoPath, that.mongoPath);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(mongoPath);
+    }
+  }
 
   private static class InternalMongoPathMaxDepthException extends Exception {
 

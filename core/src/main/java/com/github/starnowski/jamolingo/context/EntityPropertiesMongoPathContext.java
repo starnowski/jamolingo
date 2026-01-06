@@ -4,9 +4,10 @@ import java.util.Map;
 
 public interface EntityPropertiesMongoPathContext {
 
-  String resolveMongoPathForEDMPath(String edmPath);
+  MongoPathResolution resolveMongoPathForEDMPath(String edmPath);
 
-  String resolveMongoPathForEDMPath(String edmPath, EdmPathContextSearch edmPathContextSearch);
+  MongoPathResolution resolveMongoPathForEDMPath(
+      String edmPath, EdmPathContextSearch edmPathContextSearch);
 
   Map<String, MongoPathEntry> getEdmToMongoPath();
 

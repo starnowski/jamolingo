@@ -21,7 +21,11 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             def result = tested.resolveMongoPathForEDMPath(edmPath)
 
         then:
-            result == expectedMongoPath
+            if (expectedMongoPath == null) {
+                assert result == null
+            } else {
+                assert result.getMongoPath() == expectedMongoPath
+            }
 
         where:
             edmPath                 ||  expectedMongoPath
@@ -50,7 +54,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             def result = tested.resolveMongoPathForEDMPath(edmPath)
 
         then:
-            result == expectedMongoPath
+            result.getMongoPath() == expectedMongoPath
 
         where:
             edmPath                 ||  expectedMongoPath
@@ -72,7 +76,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             def result = tested.resolveMongoPathForEDMPath(edmPath)
 
         then:
-            result == expectedMongoPath
+            result.getMongoPath() == expectedMongoPath
 
         where:
             edmPath                         ||  expectedMongoPath
@@ -109,7 +113,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             def result = tested.resolveMongoPathForEDMPath(edmPath)
 
         then:
-            result == expectedMongoPath
+            result.getMongoPath() == expectedMongoPath
 
         where:
             edmPath                         ||  expectedMongoPath
@@ -251,7 +255,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             def result = tested.resolveMongoPathForEDMPath(edmPath, searchContext)
 
         then:
-            result == expectedMongoPath
+            result.getMongoPath() == expectedMongoPath
 
         where:
             edmPath                                                             | limit | expectedMongoPath
@@ -270,7 +274,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             def result = tested.resolveMongoPathForEDMPath(edmPath, searchContext)
 
         then:
-            result == expectedMongoPath
+            result.getMongoPath() == expectedMongoPath
 
         where:
             edmPath                                                             | circularLimit | expectedMongoPath
@@ -311,7 +315,7 @@ class EntityPropertiesMongoPathContextTest extends Specification {
             def result = tested.resolveMongoPathForEDMPath(edmPath, searchContext)
 
         then:
-            result == expectedMongoPath
+            result.getMongoPath() == expectedMongoPath
 
         where:
             edmPath                                                             | limit | expectedMongoPath
