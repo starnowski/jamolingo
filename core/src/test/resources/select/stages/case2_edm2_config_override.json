@@ -1,0 +1,9 @@
+{
+  "$project": {
+    "plainString": 1,
+    "Name": 1,
+    "Addresses.town": 1,
+    "Addresses.Street": 1,
+    "_id": 0
+  }
+}

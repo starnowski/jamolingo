@@ -70,10 +70,25 @@ class OdataSelectToMongoProjectParserWithOverrideConfigTest extends AbstractSpec
         }
     """
 
+    static final String EDM_2_MERGE_OVERRIDE_NESTED_PROP = """
+        {
+            "properties": {
+                "Addresses": {
+                    "properties": {
+                        "City": {
+                            "mongoName": "town"
+                        }
+                    }
+                }
+            }
+        }
+    """
+
         static oneToOneEdmPathsMappings() {
         [
                 ["select/stages/case1_edm1_config_override.json", "edm/edm1.xml", EDM_1_MERGE_OVERRIDE_MONGO_NAME, ["plainString"]],
-                ["select/stages/case1_edm1_config_override_relative.json", "edm/edm1.xml", EDM_1_MERGE_OVERRIDE_RELATIVE_PATH, ["plainString"]]
+                ["select/stages/case1_edm1_config_override_relative.json", "edm/edm1.xml", EDM_1_MERGE_OVERRIDE_RELATIVE_PATH, ["plainString"]],
+                ["select/stages/case2_edm2_config_override.json", "edm/edm2_with_nested_collections.xml", EDM_2_MERGE_OVERRIDE_NESTED_PROP, ["plainString", "Name", "Addresses/City", "Addresses/Street"]]
 //                ,
 //                ["select/stages/case_wildcard_without_id.json"       ,  "edm/edm1.xml"  , ["*"]],// ExpandAsterisk = false
 //                ["select/stages/case2.json"       ,  "edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"]], // ExpandAsterisk = false
