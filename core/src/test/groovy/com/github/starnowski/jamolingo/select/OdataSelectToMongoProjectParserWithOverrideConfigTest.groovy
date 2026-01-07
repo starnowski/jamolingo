@@ -50,7 +50,7 @@ class OdataSelectToMongoProjectParserWithOverrideConfigTest extends AbstractSpec
             [bsonFile, edmConfigFile, mergePayload, selectFields] << oneToOneEdmPathsMappings()
     }
 
-    static final String EDM_1_OVERRIDE_MERGE = """
+    static final String EDM_1_MERGE_OVERRIDE_MONGO_NAME = """
         {
             "properties": {
                 "plainString": {
@@ -58,11 +58,22 @@ class OdataSelectToMongoProjectParserWithOverrideConfigTest extends AbstractSpec
                 }
             }
         }
-    """;
+    """
+    static final String EDM_1_MERGE_OVERRIDE_RELATIVE_PATH = """
+        {
+            "properties": {
+                "plainString": {
+                    "relativeTo": "child1",
+                    "mongoName": "someString"
+                }
+            }
+        }
+    """
 
         static oneToOneEdmPathsMappings() {
         [
-                ["select/stages/case1_edm1_config_override.json",  "edm/edm1.xml", EDM_1_OVERRIDE_MERGE  , ["plainString"]]
+                ["select/stages/case1_edm1_config_override.json", "edm/edm1.xml", EDM_1_MERGE_OVERRIDE_MONGO_NAME, ["plainString"]],
+                ["select/stages/case1_edm1_config_override_relative.json", "edm/edm1.xml", EDM_1_MERGE_OVERRIDE_RELATIVE_PATH, ["plainString"]]
 //                ,
 //                ["select/stages/case_wildcard_without_id.json"       ,  "edm/edm1.xml"  , ["*"]],// ExpandAsterisk = false
 //                ["select/stages/case2.json"       ,  "edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"]], // ExpandAsterisk = false
