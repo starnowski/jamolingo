@@ -175,3 +175,8 @@ public class DefaultEdmPathContextSearch implements EdmPathContextSearch {
 }
 
 ```
+
+
+### Adding javadoc
+
+When you add javadoc do not use html tags because some maven plugin do not allow them
