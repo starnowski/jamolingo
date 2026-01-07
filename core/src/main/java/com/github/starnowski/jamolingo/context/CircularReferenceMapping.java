@@ -3,45 +3,31 @@ package com.github.starnowski.jamolingo.context;
 import java.util.Objects;
 
 public class CircularReferenceMapping {
-  public CircularReferenceMapping(
-      String anchorEdmPath, Integer maxDepth, CircularStrategy strategy) {
+  public CircularReferenceMapping withAnchorEdmPath(String anchorEdmPath) {
     this.anchorEdmPath = anchorEdmPath;
+    return this;
+  }
+
+  public CircularReferenceMapping withMaxDepth(Integer maxDepth) {
     this.maxDepth = maxDepth;
+    return this;
+  }
+
+  public CircularReferenceMapping withStrategy(CircularStrategy strategy) {
     this.strategy = strategy;
+    return this;
   }
 
-  public static CircularReferenceMappingBuilder builder() {
-    return new CircularReferenceMappingBuilder();
+  public void setAnchorEdmPath(String anchorEdmPath) {
+    this.anchorEdmPath = anchorEdmPath;
   }
 
-  public static final class CircularReferenceMappingBuilder {
-    /** Resolution strategy */
-    private CircularStrategy strategy;
+  public void setMaxDepth(Integer maxDepth) {
+    this.maxDepth = maxDepth;
+  }
 
-    /** EDM path where recursion re-anchors Example: "Item.Addresses" */
-    private String anchorEdmPath;
-
-    /** Max allowed depth (optional) */
-    private Integer maxDepth;
-
-    public CircularReferenceMappingBuilder withStrategy(CircularStrategy strategy) {
-      this.strategy = strategy;
-      return this;
-    }
-
-    public CircularReferenceMappingBuilder withAnchorEdmPath(String anchorEdmPath) {
-      this.anchorEdmPath = anchorEdmPath;
-      return this;
-    }
-
-    public CircularReferenceMappingBuilder withMaxDepth(Integer maxDepth) {
-      this.maxDepth = maxDepth;
-      return this;
-    }
-
-    public CircularReferenceMapping build() {
-      return new CircularReferenceMapping(anchorEdmPath, maxDepth, strategy);
-    }
+  public void setStrategy(CircularStrategy strategy) {
+    this.strategy = strategy;
   }
 
   @Override
@@ -72,7 +58,7 @@ public class CircularReferenceMapping {
   }
 
   /** EDM path where recursion re-anchors Example: "Item.Addresses" */
-  private final String anchorEdmPath;
+  private String anchorEdmPath;
 
   public Integer getMaxDepth() {
     return maxDepth;
@@ -83,10 +69,10 @@ public class CircularReferenceMapping {
   }
 
   /** Max allowed depth (optional) */
-  private final Integer maxDepth;
+  private Integer maxDepth;
 
   /** Resolution strategy */
-  private final CircularStrategy strategy;
+  private CircularStrategy strategy;
 
   public String getAnchorEdmPath() {
     return anchorEdmPath;

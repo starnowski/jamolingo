@@ -63,8 +63,7 @@ public class CircularReferenceMappingRecord {
         + maxDepth
         + ", strategy="
         + strategy
-        + '}'
-    ;
+        + '}';
   }
 
   @Override
