@@ -7,7 +7,7 @@ import jakarta.json.JsonReader;
 import java.io.IOException;
 import java.io.StringReader;
 
-/** TODO add tests cases */
+/** */
 public class JSONOverrideHelper {
 
   private final PatchHelper patchHelper;
@@ -41,6 +41,5 @@ public class JSONOverrideHelper {
       default:
         return null;
     }
-    // TODO
   }
 }

@@ -25,7 +25,7 @@ public class PatchHelper {
 
   // JSON Merge Patch (RFC 7396)
   public <T> T applyMergePatch(JsonMergePatch mergePatch, T target, Class<T> type)
-      throws IOException, IOException {
+      throws IOException {
     // Convert POJO -> JSON string
     String targetJson = mapper.writeValueAsString(target);
 
