@@ -72,7 +72,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                 .withProperties(Map.of("nestedObject", new PropertyMapping().withProperties(Map.of("plainString", new PropertyMapping().withFlattenedLevelUp(1)) )))
                         || Map.of("nestedObject/plainString", "plainString", "nestedObject", "nestedObject")
         // EDM Circular complex type
-        new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
+        new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(CircularReferenceMappingRecord.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
                 || Map.ofEntries(Map.entry("plainString", "plainString"), Map.entry("Addresses/City", "Addresses.City"), Map.entry("Addresses/ZipCode","Addresses.ZipCode"), Map.entry("Addresses/Street","Addresses.Street"), Map.entry("Addresses", "Addresses"), Map.entry("Name", "Name"), Map.entry("Addresses/BackUpAddresses","Addresses.BackUpAddresses"))
     }
 
@@ -95,7 +95,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                 .withProperties(Map.of(
                         "Addresses", new PropertyMapping().withProperties(Map.of(
                                 "BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(
-                                        CircularReferenceMapping.builder()
+                                        CircularReferenceMappingRecord.builder()
                                                 .withAnchorEdmPath("InvalidAnchor") // Invalid anchor path
                                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                 .build()
@@ -108,7 +108,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                         "Person", new PropertyMapping().withProperties(Map.of(
                                 "Addresses", new PropertyMapping().withProperties(Map.of(
                                         "BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(
-                                                CircularReferenceMapping.builder()
+                                                CircularReferenceMappingRecord.builder()
                                                         .withAnchorEdmPath("Person/InvalidAnchor") // Invalid anchor path
                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                         .build()
@@ -133,12 +133,12 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
             entityMapping   ||  expecteMongoPatsh
 
             // EDM Circular complex type
-            new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
+            new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(CircularReferenceMappingRecord.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
                         || Map.ofEntries(
                     Map.entry("plainString", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("plainString").withMongoPath("plainString").build()),
                     Map.entry("Name", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Name").withMongoPath("Name").build()),
                     Map.entry("Addresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses").withMongoPath("Addresses").build()),
-                    Map.entry("Addresses/BackUpAddresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/BackUpAddresses").withMongoPath("Addresses.BackUpAddresses").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
+                    Map.entry("Addresses/BackUpAddresses", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/BackUpAddresses").withMongoPath("Addresses.BackUpAddresses").withCircularReferenceMapping(CircularReferenceMappingRecord.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
                     Map.entry("Addresses/Street", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/Street").withMongoPath("Addresses.Street").build()),
                     Map.entry("Addresses/City", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/City").withMongoPath("Addresses.City").build()),
                     Map.entry("Addresses/ZipCode", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Addresses/ZipCode").withMongoPath("Addresses.ZipCode").build())
@@ -185,7 +185,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                                                                                 new PropertyMapping()
                                                                                         .withType("Demo.Model.ComplexTypeA")
                                                                                         .withCircularReferenceMapping(
-                                                                                                CircularReferenceMapping.builder()
+                                                                                                CircularReferenceMappingRecord.builder()
                                                                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                         .withAnchorEdmPath("PropA").build()
                                                                                         ),
@@ -195,7 +195,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                                                                                 new PropertyMapping()
                                                                                         .withType("Demo.Model.ComplexTypeC")
                                                                                         .withCircularReferenceMapping(
-                                                                                                CircularReferenceMapping.builder()
+                                                                                                CircularReferenceMappingRecord.builder()
                                                                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                         .withAnchorEdmPath("PropC").build()
                                                                                         )
@@ -207,7 +207,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                                                         new PropertyMapping()
                                                                 .withType("Demo.Model.ComplexTypeA")
                                                                 .withCircularReferenceMapping(
-                                                                        CircularReferenceMapping.builder()
+                                                                        CircularReferenceMappingRecord.builder()
                                                                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                 .withAnchorEdmPath("PropA").build()
                                                                 )
@@ -240,7 +240,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                                                                                 new PropertyMapping()
                                                                                         .withType("Demo.Model.ComplexTypeA")
                                                                                         .withCircularReferenceMapping(
-                                                                                                CircularReferenceMapping.builder()
+                                                                                                CircularReferenceMappingRecord.builder()
                                                                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                         .withAnchorEdmPath("PropA").build()
                                                                                         ),
@@ -250,7 +250,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                                                                                 new PropertyMapping()
                                                                                         .withType("Demo.Model.ComplexTypeC")
                                                                                         .withCircularReferenceMapping(
-                                                                                                CircularReferenceMapping.builder()
+                                                                                                CircularReferenceMappingRecord.builder()
                                                                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                         .withAnchorEdmPath("PropC").build()
                                                                                         )
@@ -261,15 +261,15 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                         )
                 )   || Map.ofEntries(
                 Map.entry("Id", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Id").withMongoPath("Id").withType("Edm.String").withKey(true).build()),
-                Map.entry("PropA/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/PropB/PropA").withType("Demo.Model.ComplexTypeA").withMongoPath("PropA.PropB.PropA").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("PropA").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
-                Map.entry("PropA/PropB/PropC", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/PropB/PropC").withType("Demo.Model.ComplexTypeC").withMongoPath("PropA.PropB.PropC").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("PropC").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
+                Map.entry("PropA/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/PropB/PropA").withType("Demo.Model.ComplexTypeA").withMongoPath("PropA.PropB.PropA").withCircularReferenceMapping(CircularReferenceMappingRecord.builder().withAnchorEdmPath("PropA").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
+                Map.entry("PropA/PropB/PropC", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/PropB/PropC").withType("Demo.Model.ComplexTypeC").withMongoPath("PropA.PropB.PropC").withCircularReferenceMapping(CircularReferenceMappingRecord.builder().withAnchorEdmPath("PropC").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
                 Map.entry("PropA/PropB/StringProperty", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/PropB/StringProperty").withType("Edm.String").withMongoPath("PropA.PropB.StringProperty").build()),
                 Map.entry("PropA/PropB", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/PropB").withType("Demo.Model.ComplexTypeB").withMongoPath("PropA.PropB").build()),
                 Map.entry("PropA/StringProperty", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA/StringProperty").withType("Edm.String").withMongoPath("PropA.StringProperty").build()),
                 Map.entry("PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropA").withMongoPath("PropA").withType("Demo.Model.ComplexTypeA").build()),
-                Map.entry("PropC/PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropA").withType("Demo.Model.ComplexTypeA").withMongoPath("PropC.PropA").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("PropA").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
-                Map.entry("PropC/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropB/PropA").withType("Demo.Model.ComplexTypeA").withMongoPath("PropC.PropB.PropA").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("PropA").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
-                Map.entry("PropC/PropB/PropC", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropB/PropC").withType("Demo.Model.ComplexTypeC").withMongoPath("PropC.PropB.PropC").withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("PropC").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
+                Map.entry("PropC/PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropA").withType("Demo.Model.ComplexTypeA").withMongoPath("PropC.PropA").withCircularReferenceMapping(CircularReferenceMappingRecord.builder().withAnchorEdmPath("PropA").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
+                Map.entry("PropC/PropB/PropA", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropB/PropA").withType("Demo.Model.ComplexTypeA").withMongoPath("PropC.PropB.PropA").withCircularReferenceMapping(CircularReferenceMappingRecord.builder().withAnchorEdmPath("PropA").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
+                Map.entry("PropC/PropB/PropC", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropB/PropC").withType("Demo.Model.ComplexTypeC").withMongoPath("PropC.PropB.PropC").withCircularReferenceMapping(CircularReferenceMappingRecord.builder().withAnchorEdmPath("PropC").withStrategy(CircularStrategy.EMBED_LIMITED).build()).build()),
                 Map.entry("PropC/PropB/StringProperty", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropB/StringProperty").withType("Edm.String").withMongoPath("PropC.PropB.StringProperty").build()),
                 Map.entry("PropC/PropB", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/PropB").withType("Demo.Model.ComplexTypeB").withMongoPath("PropC.PropB").build()),
                 Map.entry("PropC/StringProperty", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("PropC/StringProperty").withType("Edm.String").withMongoPath("PropC.StringProperty").build()),

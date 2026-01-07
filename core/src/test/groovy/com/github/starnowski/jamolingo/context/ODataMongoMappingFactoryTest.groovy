@@ -30,7 +30,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                     "City", new PropertyMapping().withType("Edm.String"),
                                     "ZipCode", new PropertyMapping().withType("Edm.String"),
                                     "BackUpAddresses", new PropertyMapping().withType("Demo.Address")
-                                        .withCircularReferenceMapping(CircularReferenceMapping.builder()
+                                        .withCircularReferenceMappingRecord(CircularReferenceMappingRecord.builder()
                                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                 .withAnchorEdmPath("Addresses").build())
                             )
@@ -42,7 +42,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                 "City", new PropertyMapping().withType("Edm.String"),
                                 "ZipCode", new PropertyMapping().withType("Edm.String"),
                                 "BackUpAddresses", new PropertyMapping().withType("Demo.Address")
-                                .withCircularReferenceMapping(CircularReferenceMapping.builder()
+                                .withCircularReferenceMappingRecord(CircularReferenceMappingRecord.builder()
                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                         .withAnchorEdmPath("Addresses").build())
                         )
@@ -61,7 +61,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                         "ExecutionTimeUtc", new PropertyMapping().withType("Edm.DateTimeOffset"),
                                         "RuntimeVariables", new PropertyMapping().withType("Edm.String"),
                                         "EvaluatedDefinition", new PropertyMapping().withType("Workflow.Model.WorkflowDefinition")
-                                            .withCircularReferenceMapping(CircularReferenceMapping.builder()
+                                            .withCircularReferenceMappingRecord(CircularReferenceMappingRecord.builder()
                                                     .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                     .withAnchorEdmPath("Definition").build()
                                             )
@@ -81,7 +81,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                         .withProperties(Map.of("Currency", new PropertyMapping().withType("Edm.String"),
                                                 "CustomerGroup", new PropertyMapping().withType("Edm.String"),
                                                 "EvaluatedConfiguration", new PropertyMapping().withType("Sales.Model.ProductConfiguration")
-                                                .withCircularReferenceMapping(CircularReferenceMapping.builder()
+                                                .withCircularReferenceMappingRecord(CircularReferenceMappingRecord.builder()
                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                         .withAnchorEdmPath("Configuration").build()
                                                 )
@@ -143,8 +143,8 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                                         "EvaluatedRule",
                                                                                                                                         new PropertyMapping()
                                                                                                                                                 .withType("Rules.Model.EligibilityRule")
-                                                                                                                                                .withCircularReferenceMapping(
-                                                                                                                                                        CircularReferenceMapping.builder()
+                                                                                                                                                .withCircularReferenceMappingRecord(
+                                                                                                                                                        CircularReferenceMappingRecord.builder()
                                                                                                                                                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                                                                                 .withAnchorEdmPath(
                                                                                                                                                                         "CoverageSnapshot/EligibilityRule"
@@ -199,8 +199,8 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                 "PropA",
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Demo.Model.ComplexTypeA")
-                                                                                                                        .withCircularReferenceMapping(
-                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                        .withCircularReferenceMappingRecord(
+                                                                                                                                CircularReferenceMappingRecord.builder()
                                                                                                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                                                         .withAnchorEdmPath("PropA").build()
                                                                                                                         ),
@@ -209,8 +209,8 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                 "PropC",
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Demo.Model.ComplexTypeC")
-                                                                                                                        .withCircularReferenceMapping(
-                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                        .withCircularReferenceMappingRecord(
+                                                                                                                                CircularReferenceMappingRecord.builder()
                                                                                                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                                                         .withAnchorEdmPath("PropC").build()
                                                                                                                         )
@@ -221,8 +221,8 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                         "PropA",
                                                                                         new PropertyMapping()
                                                                                                 .withType("Demo.Model.ComplexTypeA")
-                                                                                                .withCircularReferenceMapping(
-                                                                                                        CircularReferenceMapping.builder()
+                                                                                                .withCircularReferenceMappingRecord(
+                                                                                                        CircularReferenceMappingRecord.builder()
                                                                                                                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                                 .withAnchorEdmPath("PropA").build()
                                                                                                 )
@@ -254,8 +254,8 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                 "PropA",
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Demo.Model.ComplexTypeA")
-                                                                                                                        .withCircularReferenceMapping(
-                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                        .withCircularReferenceMappingRecord(
+                                                                                                                                CircularReferenceMappingRecord.builder()
                                                                                                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                                                         .withAnchorEdmPath("PropA").build()
                                                                                                                         ),
@@ -264,8 +264,8 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                                                                                                 "PropC",
                                                                                                                 new PropertyMapping()
                                                                                                                         .withType("Demo.Model.ComplexTypeC")
-                                                                                                                        .withCircularReferenceMapping(
-                                                                                                                                CircularReferenceMapping.builder()
+                                                                                                                        .withCircularReferenceMappingRecord(
+                                                                                                                                CircularReferenceMappingRecord.builder()
                                                                                                                                         .withStrategy(CircularStrategy.EMBED_LIMITED)
                                                                                                                                         .withAnchorEdmPath("PropC").build()
                                                                                                                         )

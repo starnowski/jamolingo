@@ -29,7 +29,7 @@ public class PropertyMapping {
   private String type;
 
   @JsonProperty("circularReferenceMapping")
-  private CircularReferenceMapping circularReferenceMapping;
+  private CircularReferenceMappingRecord circularReferenceMapping;
 
   @JsonProperty("maxCircularLimitPerEdmPath")
   private Integer maxCircularLimitPerEdmPath;
@@ -51,16 +51,16 @@ public class PropertyMapping {
     return flattenedLevelUp;
   }
 
-  public void setCircularReferenceMapping(CircularReferenceMapping circularReferenceMapping) {
+  public void setCircularReferenceMapping(CircularReferenceMappingRecord circularReferenceMapping) {
     this.circularReferenceMapping = circularReferenceMapping;
   }
 
-  public CircularReferenceMapping getCircularReferenceMapping() {
+  public CircularReferenceMappingRecord getCircularReferenceMapping() {
     return circularReferenceMapping;
   }
 
   public PropertyMapping withCircularReferenceMapping(
-      CircularReferenceMapping circularReferenceMapping) {
+      CircularReferenceMappingRecord circularReferenceMapping) {
     this.circularReferenceMapping = circularReferenceMapping;
     return this;
   }

@@ -128,7 +128,7 @@ public class ODataMongoMappingFactory {
               .getCurrentEdmPath()
               .equals(entityPropertyMappingContext.getEdmTypeAndEdmPath().get(typeName))) {
         pm.setCircularReferenceMapping(
-            CircularReferenceMapping.builder()
+            CircularReferenceMappingRecord.builder()
                 .withStrategy(CircularStrategy.EMBED_LIMITED)
                 .withAnchorEdmPath(
                     entityPropertyMappingContext.getEdmTypeAndEdmPath().get(typeName))

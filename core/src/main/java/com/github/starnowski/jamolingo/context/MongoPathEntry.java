@@ -8,10 +8,10 @@ public final class MongoPathEntry {
   private final String mongoPath;
   private final boolean key;
   private final String type;
-  private final CircularReferenceMapping circularReferenceMapping;
+  private final CircularReferenceMappingRecord circularReferenceMapping;
   private final Integer maxCircularLimitPerEdmPath;
 
-  public CircularReferenceMapping getCircularReferenceMapping() {
+  public CircularReferenceMappingRecord getCircularReferenceMapping() {
     return circularReferenceMapping;
   }
 
@@ -24,7 +24,7 @@ public final class MongoPathEntry {
     private String mongoPath;
     private boolean key;
     private String type;
-    private CircularReferenceMapping circularReferenceMapping;
+    private CircularReferenceMappingRecord circularReferenceMapping;
     private Integer maxCircularLimitPerEdmPath;
 
     public MongoPathEntryBuilder withEdmPath(String edmPath) {
@@ -48,7 +48,7 @@ public final class MongoPathEntry {
     }
 
     public MongoPathEntryBuilder withCircularReferenceMapping(
-        CircularReferenceMapping circularReferenceMapping) {
+        CircularReferenceMappingRecord circularReferenceMapping) {
       this.circularReferenceMapping = circularReferenceMapping;
       return this;
     }
@@ -109,7 +109,7 @@ public final class MongoPathEntry {
       String mongoPath,
       boolean key,
       String type,
-      CircularReferenceMapping circularReferenceMapping,
+      CircularReferenceMappingRecord circularReferenceMapping,
       Integer maxCircularLimitPerEdmPath) {
 
     this.edmPath = edmPath;
