@@ -18,7 +18,7 @@ import java.util.stream.Collectors
 class OdataSelectToMongoProjectParserWithOverrideConfigTest extends AbstractSpecification {
 
     @Unroll
-    def "should return expected stage bson object with default EdmMongoContextFacade with 1-to-1 edm to mongo mapping"() {
+    def "should return expected stage bson object with default EdmMongoContextFacade with override edm to mongo mapping"() {
         given:
             Bson expectedBson = loadBsonFromFile(bsonFile)
             Edm edm = loadEmdProvider(edmConfigFile)
