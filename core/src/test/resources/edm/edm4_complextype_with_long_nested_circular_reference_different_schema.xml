@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0"
+           xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+
+        <!-- ================================================= -->
+        <!-- Policy Schema -->
+        <!-- ================================================= -->
+        <Schema Namespace="Policy.Model"
+                xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+            <!-- ===================== -->
+            <!-- Entity -->
+            <!-- ===================== -->
+            <EntityType Name="InsurancePolicy">
+                <Key>
+                    <PropertyRef Name="PolicyNumber"/>
+                </Key>
+                <Property Name="PolicyNumber" Type="Edm.String" Nullable="false"/>
+                <Property Name="CoverageSnapshot"
+                          Type="Policy.Model.CoverageSnapshot"/>
+            </EntityType>
+
+            <!-- ===================== -->
+            <!-- Type C -->
+            <!-- ===================== -->
+            <ComplexType Name="CoverageSnapshot">
+                <Property Name="CoverageCode" Type="Edm.String"/>
+                <Property Name="EligibilityRule"
+                          Type="Rules.Model.EligibilityRule"/>
+            </ComplexType>
+
+            <!-- ===================== -->
+            <!-- Container -->
+            <!-- ===================== -->
+            <EntityContainer Name="Container">
+                <EntitySet Name="InsurancePolicies"
+                           EntityType="Policy.Model.InsurancePolicy"/>
+            </EntityContainer>
+
+        </Schema>
+
+        <!-- ================================================= -->
+        <!-- Rules Schema -->
+        <!-- ================================================= -->
+        <Schema Namespace="Rules.Model"
+                xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+            <!-- ===================== -->
+            <!-- Type A -->
+            <!-- ===================== -->
+            <ComplexType Name="EligibilityRule">
+                <Property Name="RuleCode" Type="Edm.String"/>
+                <Property Name="Description" Type="Edm.String"/>
+                <Property Name="EvaluationContext"
+                          Type="Rules.Model.RuleEvaluationContext"/>
+            </ComplexType>
+
+            <!-- ===================== -->
+            <!-- Type B -->
+            <!-- ===================== -->
+            <ComplexType Name="RuleEvaluationContext">
+                <Property Name="EvaluatedAtUtc" Type="Edm.DateTimeOffset"/>
+                <Property Name="Result" Type="Edm.String"/>
+                <Property Name="EvaluatedRule"
+                          Type="Rules.Model.EligibilityRule"/>
+            </ComplexType>
+
+        </Schema>
+
+    </edmx:DataServices>
+</edmx:Edmx>

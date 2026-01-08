@@ -1,0 +1,6 @@
+{
+  "$project": {
+    "Addresses.previousAddresses.ZipCode": 1,
+    "_id": 0
+  }
+}

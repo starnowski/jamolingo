@@ -1,0 +1,12 @@
+{
+
+    "entities": {
+        "Item": {
+            "properties": {
+                "plainString": {
+
+                }
+            }
+        }
+    }
+}

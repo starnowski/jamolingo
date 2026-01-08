@@ -1,0 +1,6 @@
+{
+  "$project": {
+    "child1.someString": 1,
+    "_id": 0
+  }
+}

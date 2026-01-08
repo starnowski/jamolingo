@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="4.0"
+           xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+
+        <!-- ================================================= -->
+        <!-- Sales Schema -->
+        <!-- ================================================= -->
+        <Schema Namespace="Sales.Model"
+                xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+            <!-- ===================== -->
+            <!-- Entity -->
+            <!-- ===================== -->
+            <EntityType Name="SalesOrder">
+                <Key>
+                    <PropertyRef Name="OrderId"/>
+                </Key>
+                <Property Name="OrderId" Type="Edm.String" Nullable="false"/>
+                <Property Name="Configuration"
+                          Type="Sales.Model.ProductConfiguration"/>
+            </EntityType>
+
+            <!-- ===================== -->
+            <!-- Complex Type (TypeA) -->
+            <!-- ===================== -->
+            <ComplexType Name="ProductConfiguration">
+                <Property Name="ProductId" Type="Edm.String"/>
+                <Property Name="SelectedOptions"
+                          Type="Collection(Edm.String)"/>
+                <Property Name="PricingContext"
+                          Type="Pricing.Model.PricingContext"/>
+            </ComplexType>
+
+            <!-- ===================== -->
+            <!-- Container -->
+            <!-- ===================== -->
+            <EntityContainer Name="Container">
+                <EntitySet Name="SalesOrders"
+                           EntityType="Sales.Model.SalesOrder"/>
+            </EntityContainer>
+
+        </Schema>
+
+        <!-- ================================================= -->
+        <!-- Pricing Schema -->
+        <!-- ================================================= -->
+        <Schema Namespace="Pricing.Model"
+                xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+            <!-- ===================== -->
+            <!-- Complex Type (TypeB) -->
+            <!-- ===================== -->
+            <ComplexType Name="PricingContext">
+                <Property Name="Currency" Type="Edm.String"/>
+                <Property Name="CustomerGroup" Type="Edm.String"/>
+                <Property Name="EvaluatedConfiguration"
+                          Type="Sales.Model.ProductConfiguration"/>
+            </ComplexType>
+
+        </Schema>
+
+    </edmx:DataServices>
+</edmx:Edmx>

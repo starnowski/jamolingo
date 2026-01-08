@@ -1,0 +1,6 @@
+{
+  "$project": {
+    "thisIsString": 1,
+    "_id": 0
+  }
+}
