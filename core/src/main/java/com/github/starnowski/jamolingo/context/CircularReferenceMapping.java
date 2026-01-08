@@ -3,31 +3,47 @@ package com.github.starnowski.jamolingo.context;
 import java.util.Objects;
 
 public class CircularReferenceMapping {
-  public CircularReferenceMapping withAnchorEdmPath(String anchorEdmPath) {
+  public CircularReferenceMapping(
+      String anchorEdmPath, Integer maxDepth, CircularStrategy strategy) {
     this.anchorEdmPath = anchorEdmPath;
-    return this;
-  }
-
-  public CircularReferenceMapping withMaxDepth(Integer maxDepth) {
     this.maxDepth = maxDepth;
-    return this;
-  }
-
-  public CircularReferenceMapping withStrategy(CircularStrategy strategy) {
     this.strategy = strategy;
-    return this;
   }
 
-  public void setAnchorEdmPath(String anchorEdmPath) {
-    this.anchorEdmPath = anchorEdmPath;
+  public CircularReferenceMapping() {}
+
+  public static CircularReferenceMappingBuilder builder() {
+    return new CircularReferenceMappingBuilder();
   }
 
-  public void setMaxDepth(Integer maxDepth) {
-    this.maxDepth = maxDepth;
-  }
+  public static final class CircularReferenceMappingBuilder {
+    /** Resolution strategy */
+    private CircularStrategy strategy;
 
-  public void setStrategy(CircularStrategy strategy) {
-    this.strategy = strategy;
+    /** EDM path where recursion re-anchors Example: "Item.Addresses" */
+    private String anchorEdmPath;
+
+    /** Max allowed depth (optional) */
+    private Integer maxDepth;
+
+    public CircularReferenceMappingBuilder withStrategy(CircularStrategy strategy) {
+      this.strategy = strategy;
+      return this;
+    }
+
+    public CircularReferenceMappingBuilder withAnchorEdmPath(String anchorEdmPath) {
+      this.anchorEdmPath = anchorEdmPath;
+      return this;
+    }
+
+    public CircularReferenceMappingBuilder withMaxDepth(Integer maxDepth) {
+      this.maxDepth = maxDepth;
+      return this;
+    }
+
+    public CircularReferenceMapping build() {
+      return new CircularReferenceMapping(anchorEdmPath, maxDepth, strategy);
+    }
   }
 
   @Override
@@ -44,7 +60,7 @@ public class CircularReferenceMapping {
     return "CircularReferenceMapping{"
         + "anchorEdmPath='"
         + anchorEdmPath
-        + '\''
+        + "'"
         + ", maxDepth="
         + maxDepth
         + ", strategy="
@@ -76,5 +92,17 @@ public class CircularReferenceMapping {
 
   public String getAnchorEdmPath() {
     return anchorEdmPath;
+  }
+
+  public void setAnchorEdmPath(String anchorEdmPath) {
+    this.anchorEdmPath = anchorEdmPath;
+  }
+
+  public void setMaxDepth(Integer maxDepth) {
+    this.maxDepth = maxDepth;
+  }
+
+  public void setStrategy(CircularStrategy strategy) {
+    this.strategy = strategy;
   }
 }
