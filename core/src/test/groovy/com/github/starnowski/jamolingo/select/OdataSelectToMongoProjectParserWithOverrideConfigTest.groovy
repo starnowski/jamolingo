@@ -103,13 +103,8 @@ class OdataSelectToMongoProjectParserWithOverrideConfigTest extends AbstractSpec
                 ["select/stages/case1_edm1_config_override.json", "edm/edm1.xml", EDM_1_MERGE_OVERRIDE_MONGO_NAME, ["plainString"]],
                 ["select/stages/case1_edm1_config_override_relative.json", "edm/edm1.xml", EDM_1_MERGE_OVERRIDE_RELATIVE_PATH, ["plainString"]],
                 ["select/stages/case2_edm2_config_override.json", "edm/edm2_with_nested_collections.xml", EDM_2_MERGE_OVERRIDE_NESTED_PROP, ["plainString", "Name", "Addresses/City", "Addresses/Street"]],
-                ["select/stages/case3_edm3_config_override.json", "edm/edm3_complextype_with_circular_reference_collection.xml", EDM_3_MERGE_OVERRIDE_NESTED_PROP, ["Addresses/BackUpAddresses/ZipCode"]]
-//                ,
-//                ["select/stages/case_wildcard_without_id.json"       ,  "edm/edm1.xml"  , ["*"]],// ExpandAsterisk = false
-//                ["select/stages/case2.json"       ,  "edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"]], // ExpandAsterisk = false
-//                ["select/stages/case2_with_whole_nested_object.json"       ,  "edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses"]], // ExpandAsterisk = false
-//                ["select/stages/case3_with_nested_complexType_circular_reference.json"       ,  "edm/edm2_complextype_with_circular_reference.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"]], // ExpandAsterisk = false
-//                ["select/stages/case3_with_nested_complexType_circular_reference.json"       ,  "edm/edm3_complextype_with_circular_reference_collection.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"]] // ExpandAsterisk = false
+                ["select/stages/case3_edm3_config_override.json", "edm/edm3_complextype_with_circular_reference_collection.xml", EDM_3_MERGE_OVERRIDE_NESTED_PROP, ["Addresses/BackUpAddresses/ZipCode"]],
+                ["select/stages/case3_edm3_config_override_nested_and_simple.json", "edm/edm3_complextype_with_circular_reference_collection.xml", EDM_3_MERGE_OVERRIDE_NESTED_PROP, ["plainString", "Addresses/BackUpAddresses/ZipCode"]]
         ]
     }
 
