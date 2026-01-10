@@ -67,7 +67,7 @@ public class MongoDatabaseSetupExtension implements BeforeEachCallback {
                         });
               });
 
-      Arrays.stream(annotation.mongoDocuments())
+      Arrays.stream(annotation.mongoDocuments()).filter(an -> !an.bsonFilePath().trim().isEmpty())
           .forEach(
               an -> {
                 MongoCollection<Document> collection =
