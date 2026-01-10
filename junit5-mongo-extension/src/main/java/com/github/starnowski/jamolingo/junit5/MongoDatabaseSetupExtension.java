@@ -18,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 
 public class MongoDatabaseSetupExtension implements BeforeEachCallback {
 
-
   @Override
   public void beforeEach(ExtensionContext context) throws IllegalAccessException {
     MongoSetup annotation =
@@ -67,7 +66,8 @@ public class MongoDatabaseSetupExtension implements BeforeEachCallback {
                         });
               });
 
-      Arrays.stream(annotation.mongoDocuments()).filter(an -> !an.bsonFilePath().trim().isEmpty())
+      Arrays.stream(annotation.mongoDocuments())
+          .filter(an -> !an.bsonFilePath().trim().isEmpty())
           .forEach(
               an -> {
                 MongoCollection<Document> collection =
