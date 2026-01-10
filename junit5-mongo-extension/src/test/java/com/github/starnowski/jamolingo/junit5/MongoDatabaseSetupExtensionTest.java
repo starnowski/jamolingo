@@ -33,7 +33,51 @@ class MongoDatabaseSetupExtensionTest {
                 Arrays.asList(
                     new MongoCollectionKey("first", "second"),
                     new MongoCollectionKey("second", "first"),
-                    new MongoCollectionKey("second", "second")))));
+                    new MongoCollectionKey("second", "second")))),
+        Arguments.of(
+            "clearFirstDatabaseSecondCollection",
+            new HashSet<>(Arrays.asList(new MongoCollectionKey("first", "second"))),
+            new HashSet<>(
+                Arrays.asList(
+                    new MongoCollectionKey("first", "first"),
+                    new MongoCollectionKey("second", "first"),
+                    new MongoCollectionKey("second", "second")))),
+        Arguments.of(
+            "clearSecondDatabaseFirstCollection",
+            new HashSet<>(Arrays.asList(new MongoCollectionKey("second", "first"))),
+            new HashSet<>(
+                Arrays.asList(
+                    new MongoCollectionKey("first", "first"),
+                    new MongoCollectionKey("first", "second"),
+                    new MongoCollectionKey("second", "second")))),
+        Arguments.of(
+            "clearSecondDatabaseSecondCollection",
+            new HashSet<>(Arrays.asList(new MongoCollectionKey("second", "second"))),
+            new HashSet<>(
+                Arrays.asList(
+                    new MongoCollectionKey("first", "first"),
+                    new MongoCollectionKey("first", "second"),
+                    new MongoCollectionKey("second", "first")))),
+        Arguments.of(
+            "clearSecondDatabaseFirstAndSecondCollection",
+            new HashSet<>(
+                Arrays.asList(
+                    new MongoCollectionKey("second", "first"),
+                    new MongoCollectionKey("second", "second"))),
+            new HashSet<>(
+                Arrays.asList(
+                    new MongoCollectionKey("first", "first"),
+                    new MongoCollectionKey("first", "second")))),
+        Arguments.of(
+            "clearFirstDatabaseFirstCollectionSecondDatabaseFirstCollection",
+            new HashSet<>(
+                Arrays.asList(
+                    new MongoCollectionKey("first", "first"),
+                    new MongoCollectionKey("second", "second"))),
+            new HashSet<>(
+                Arrays.asList(
+                    new MongoCollectionKey("first", "second"),
+                    new MongoCollectionKey("second", "first")))));
   }
 
   @MongoSetup(
@@ -59,6 +103,20 @@ class MongoDatabaseSetupExtensionTest {
         @MongoDocument(database = "second", collection = "second", bsonFilePath = "")
       })
   private void clearSecondDatabaseSecondCollection() {}
+
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(database = "second", collection = "first", bsonFilePath = ""),
+        @MongoDocument(database = "second", collection = "second", bsonFilePath = "")
+      })
+  private void clearSecondDatabaseFirstAndSecondCollection() {}
+
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(database = "first", collection = "first", bsonFilePath = ""),
+        @MongoDocument(database = "second", collection = "second", bsonFilePath = "")
+      })
+  private void clearFirstDatabaseFirstCollectionSecondDatabaseFirstCollection() {}
 
   private void insertDocuments(MongoClient client) {
     client.getDatabase("first").getCollection("first").insertOne(new Document("key", "value"));
@@ -86,6 +144,7 @@ class MongoDatabaseSetupExtensionTest {
       Set<MongoCollectionKey> expectedNoneEmptyCollections)
       throws IllegalAccessException, NoSuchMethodException {
     // GIVEN
+    clearAllCollections(mongoClient);
     insertDocuments(mongoClient);
     MongoDatabaseSetupExtension tested = new MongoDatabaseSetupExtension();
     ExtensionContext extensionContext = Mockito.mock(ExtensionContext.class);
