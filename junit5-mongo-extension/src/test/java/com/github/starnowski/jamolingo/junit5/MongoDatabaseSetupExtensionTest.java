@@ -82,6 +82,7 @@ class MongoDatabaseSetupExtensionTest {
   @MethodSource("provideShouldClearCollections")
   public void shouldClearCollections(String testMethod, Set<MongoCollectionKey> expectedEmptyCollections, Set<MongoCollectionKey> expectedNoneEmptyCollections) throws IllegalAccessException, NoSuchMethodException {
       // GIVEN
+    insertDocuments(mongoClient);
     MongoDatabaseSetupExtension tested = new MongoDatabaseSetupExtension();
     ExtensionContext extensionContext = Mockito.mock(ExtensionContext.class);
     Mockito.when(extensionContext.getTestMethod()).thenReturn(Optional.of(this.getClass().getDeclaredMethod(testMethod)));
@@ -91,10 +92,12 @@ class MongoDatabaseSetupExtensionTest {
 
     // THEN
     for (MongoCollectionKey collection : expectedEmptyCollections) {
-      Assertions.assertEquals(0, countDocuments(mongoClient, collection.getDatabase(), collection.getCollection()));
+      Assertions.assertEquals(0, countDocuments(mongoClient, collection.getDatabase(), collection.getCollection()),
+              "Collection %s.%s should be empty".formatted(collection.getDatabase(), collection.getCollection()));
     }
     for (MongoCollectionKey collection : expectedNoneEmptyCollections) {
-      Assertions.assertEquals(1, countDocuments(mongoClient, collection.getDatabase(), collection.getCollection()));
+      Assertions.assertEquals(1, countDocuments(mongoClient, collection.getDatabase(), collection.getCollection()),
+              "Collection %s.%s should not be empty".formatted(collection.getDatabase(), collection.getCollection()));
     }
   }
 }
