@@ -22,6 +22,8 @@ import org.mockito.Mockito;
 @QuarkusTestResource(EmbeddedMongoResource.class)
 class MongoDatabaseSetupExtensionTest {
 
+  private static final String EXAMPLE_1_FILE_PATH = "bson/example1.json";
+
   @Inject private MongoClient mongoClient;
 
   public static Stream<Arguments> provideShouldClearCollections() {
