@@ -9,12 +9,29 @@ import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+/**
+ * Parses OData $select system query options and translates them into MongoDB $project aggregation
+ * stages.
+ */
 public class OdataSelectToMongoProjectParser {
 
+  /**
+   * Parses the given SelectOption using a default context facade.
+   *
+   * @param selectOption the OData select option to parse
+   * @return the result of the parsing containing the MongoDB projection
+   */
   public SelectOperatorResult parse(SelectOption selectOption) {
     return parse(selectOption, DefaultEdmMongoContextFacade.builder().build());
   }
 
+  /**
+   * Parses the given SelectOption using the provided context facade.
+   *
+   * @param selectOption the OData select option to parse
+   * @param edmMongoContextFacade the context facade for resolving paths
+   * @return the result of the parsing containing the MongoDB projection
+   */
   public SelectOperatorResult parse(
       SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
     if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
