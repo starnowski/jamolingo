@@ -139,6 +139,10 @@ public class PropertyMapping {
     this.flattenedLevelUp = flattenedLevelUp;
   }
 
+
+  /**
+   * TODO Add Github issue relate to handling circular reference
+   */
   @JsonProperty("flattenedLevelUp")
   private Integer flattenedLevelUp;
 
