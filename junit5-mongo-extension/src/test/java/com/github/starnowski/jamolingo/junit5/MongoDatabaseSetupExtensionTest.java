@@ -23,6 +23,13 @@ import org.mockito.Mockito;
 class MongoDatabaseSetupExtensionTest {
 
   private static final String EXAMPLE_1_FILE_PATH = "bson/example1.json";
+  private static final String EXAMPLE_2_FILE_PATH = "bson/example2.json";
+  private static final String EXAMPLE_3_FILE_PATH = "bson/example3.json";
+  private static final String EXAMPLE_4_FILE_PATH = "bson/example4.json";
+  private static final String EXAMPLE_5_FILE_PATH = "bson/example5.json";
+  private static final String EXAMPLE_6_FILE_PATH = "bson/example6.json";
+  private static final String EXAMPLE_7_FILE_PATH = "bson/example7.json";
+  private static final String EXAMPLE_8_FILE_PATH = "bson/example8.json";
 
   @Inject private MongoClient mongoClient;
 
