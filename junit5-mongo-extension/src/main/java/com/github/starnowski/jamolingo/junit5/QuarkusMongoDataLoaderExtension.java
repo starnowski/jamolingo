@@ -16,8 +16,23 @@ import org.bson.Document;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
+/**
+ * A JUnit 5 extension that loads data into MongoDB collections before each test method execution.
+ *
+ * This extension looks for the {@link MongoSetup} annotation on the test method. If present, it
+ * retrieves the {@link MongoClient} from the Quarkus {@link Arc} container, clears the specified
+ * collections, and inserts the documents defined in the annotation.
+ */
 public class QuarkusMongoDataLoaderExtension implements BeforeEachCallback {
 
+  /**
+   * Executed before each test method.
+   *
+   * Checks for the {@link MongoSetup} annotation and performs the data loading logic.
+   *
+   * @param context the extension context
+   * @throws IllegalAccessException if accessing the test instance fails
+   */
   @Override
   public void beforeEach(ExtensionContext context) throws IllegalAccessException {
     MongoSetup annotation =
