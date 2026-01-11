@@ -19,7 +19,7 @@ public @interface MongoDocument {
   /**
    * The path to the file containing the document data.
    *
-   * The file should contain a JSON representation of the document, which may include BSON types
+   * <p>The file should contain a JSON representation of the document, which may include BSON types
    * (e.g. Extended JSON).
    *
    * @return the file path relative to the classpath

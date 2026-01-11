@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 /**
  * Annotation to configure MongoDB data setup for a test method.
  *
- * This annotation triggers the {@link QuarkusMongoDataLoaderExtension} to load the specified
+ * <p>This annotation triggers the {@link QuarkusMongoDataLoaderExtension} to load the specified
  * documents into the MongoDB database before the test method is executed.
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
