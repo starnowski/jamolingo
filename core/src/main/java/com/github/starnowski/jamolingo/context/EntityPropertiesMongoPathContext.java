@@ -31,7 +31,7 @@ public interface EntityPropertiesMongoPathContext {
   Map<String, MongoPathEntry> getEdmToMongoPath();
 
   /** Base exception for errors occurring within {@link EntityPropertiesMongoPathContext}. */
-  static class EntityPropertiesMongoPathContextException extends RuntimeException {
+  class EntityPropertiesMongoPathContextException extends RuntimeException {
     public EntityPropertiesMongoPathContextException() {}
 
     public EntityPropertiesMongoPathContextException(String message) {
@@ -44,7 +44,7 @@ public interface EntityPropertiesMongoPathContext {
   }
 
   /** Exception thrown when an invalid EDM path is encountered. */
-  static class InvalidEDMPathException extends EntityPropertiesMongoPathContextException {
+  class InvalidEDMPathException extends EntityPropertiesMongoPathContextException {
 
     public InvalidEDMPathException(String message) {
       super(message);
@@ -52,8 +52,7 @@ public interface EntityPropertiesMongoPathContext {
   }
 
   /** Exception thrown when the circular reference depth limit is exceeded. */
-  static class ExceededCircularReferenceDepthException
-      extends EntityPropertiesMongoPathContextException {
+  class ExceededCircularReferenceDepthException extends EntityPropertiesMongoPathContextException {
 
     private final String edmPathReference;
 
@@ -76,7 +75,7 @@ public interface EntityPropertiesMongoPathContext {
   }
 
   /** Exception thrown when the MongoDB path exceeds the maximum allowed depth. */
-  static class MongoPathMaxDepthException extends EntityPropertiesMongoPathContextException {
+  class MongoPathMaxDepthException extends EntityPropertiesMongoPathContextException {
 
     public MongoPathMaxDepthException(String message) {
       super(message);
@@ -86,14 +85,14 @@ public interface EntityPropertiesMongoPathContext {
   /**
    * Exception thrown when an invalid anchor path is encountered in a circular reference mapping.
    */
-  static class InvalidAnchorPathException extends EntityPropertiesMongoPathContextException {
+  class InvalidAnchorPathException extends EntityPropertiesMongoPathContextException {
     public InvalidAnchorPathException(String message) {
       super(message);
     }
   }
 
   /** Exception thrown when the total circular reference limit is exceeded. */
-  static class ExceededTotalCircularReferenceLimitException
+  class ExceededTotalCircularReferenceLimitException
       extends EntityPropertiesMongoPathContextException {
     public ExceededTotalCircularReferenceLimitException(String message) {
       super(message);
