@@ -4,12 +4,28 @@ import static com.github.starnowski.jamolingo.context.Constants.ODATA_PATH_SEPAR
 
 import java.util.*;
 
+/** Builder for creating {@link EntityPropertiesMongoPathContext} instances. */
 public class EntityPropertiesMongoPathContextBuilder {
 
+  /**
+   * Builds an {@link EntityPropertiesMongoPathContext} from the given {@link EntityMapping} using
+   * default resolver context.
+   *
+   * @param entityMapping the entity mapping configuration
+   * @return the built context
+   */
   public EntityPropertiesMongoPathContext build(EntityMapping entityMapping) {
     return build(entityMapping, new EntityPropertiesMongoPathResolverContext(false));
   }
 
+  /**
+   * Builds an {@link EntityPropertiesMongoPathContext} from the given {@link EntityMapping} using
+   * specific resolver context.
+   *
+   * @param entityMapping the entity mapping configuration
+   * @param entityPropertiesMongoPathResolverContext the resolver context
+   * @return the built context
+   */
   public EntityPropertiesMongoPathContext build(
       EntityMapping entityMapping,
       EntityPropertiesMongoPathResolverContext entityPropertiesMongoPathResolverContext) {
@@ -190,26 +206,49 @@ public class EntityPropertiesMongoPathContextBuilder {
     return normalize(base) + "." + normalize(name);
   }
 
+  /** Context for resolving entity properties mongo paths. */
   public static class EntityPropertiesMongoPathResolverContext {
     private final boolean generateOnlyLeafs;
 
+    /**
+     * Constructs a new EntityPropertiesMongoPathResolverContext.
+     *
+     * @param generateOnlyLeafs true if only leaf properties should be generated, false otherwise
+     */
     public EntityPropertiesMongoPathResolverContext(boolean generateOnlyLeafs) {
       this.generateOnlyLeafs = generateOnlyLeafs;
     }
 
+    /**
+     * Returns whether only leaf properties should be generated.
+     *
+     * @return true if only leaf properties should be generated, false otherwise
+     */
     public boolean isGenerateOnlyLeafs() {
       return generateOnlyLeafs;
     }
 
+    /** Builder for EntityPropertiesMongoPathResolverContext. */
     public static class EntityPropertiesMongoPathResolverContextBuilder {
       private boolean generateOnlyLeafs;
 
+      /**
+       * Sets whether only leaf properties should be generated.
+       *
+       * @param generateOnlyLeafs true if only leaf properties should be generated, false otherwise
+       * @return the builder instance
+       */
       public EntityPropertiesMongoPathResolverContextBuilder withGenerateOnlyLeafs(
           boolean generateOnlyLeafs) {
         this.generateOnlyLeafs = generateOnlyLeafs;
         return this;
       }
 
+      /**
+       * Builds the EntityPropertiesMongoPathResolverContext.
+       *
+       * @return the new context instance
+       */
       public EntityPropertiesMongoPathResolverContext build() {
         return new EntityPropertiesMongoPathResolverContext(generateOnlyLeafs);
       }

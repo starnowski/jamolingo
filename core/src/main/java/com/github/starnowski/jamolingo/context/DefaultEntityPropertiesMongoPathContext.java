@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/** Default implementation of {@link EntityPropertiesMongoPathContext}. */
 public class DefaultEntityPropertiesMongoPathContext implements EntityPropertiesMongoPathContext {
 
   private static final String MONGO_PATH_MAX_DEPTH_EXCEPTION_MESSAGE_PATTERN =
@@ -15,6 +16,11 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
   private static final String MONGO_EXCEEDED_CIRCULAR_REFERENCE_DEPTH_EXCEPTION_MESSAGE_PATTERN =
       "Circular edm path '%s' exceeded max depth %s in main edm path '%s'";
 
+  /**
+   * Constructs a new DefaultEntityPropertiesMongoPathContext.
+   *
+   * @param edmToMongoPath a map of EDM paths to Mongo paths
+   */
   public DefaultEntityPropertiesMongoPathContext(Map<String, MongoPathEntry> edmToMongoPath) {
     this.edmToMongoPath = Collections.unmodifiableMap(edmToMongoPath);
   }
