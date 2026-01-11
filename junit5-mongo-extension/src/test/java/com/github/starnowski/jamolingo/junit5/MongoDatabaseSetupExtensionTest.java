@@ -136,6 +136,28 @@ class MongoDatabaseSetupExtensionTest {
     return client.getDatabase(database).getCollection(collection).countDocuments();
   }
 
+  private void assertDocumentsExist(
+      MongoClient client,
+      String database,
+      String collection,
+      String propertyName,
+      String... expectedValues) {
+    List<String> actualValues = new ArrayList<>();
+    client
+        .getDatabase(database)
+        .getCollection(collection)
+        .find()
+        .map(document -> document.getString(propertyName))
+        .forEach(actualValues::add);
+
+    List<String> expectedValuesList = Arrays.asList(expectedValues);
+    Assertions.assertTrue(
+        actualValues.containsAll(expectedValuesList),
+        String.format(
+            "Expected values %s not found in actual values %s for collection %s.%s",
+            expectedValuesList, actualValues, database, collection));
+  }
+
   @ParameterizedTest
   @MethodSource("provideShouldClearCollections")
   public void shouldClearCollections(
