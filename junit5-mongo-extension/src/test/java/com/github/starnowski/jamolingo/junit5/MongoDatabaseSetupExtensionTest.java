@@ -99,36 +99,165 @@ class MongoDatabaseSetupExtensionTest {
 
   public Stream<Arguments> provideShouldAddDocumentsIntoCollections() {
     return Stream.of(
-            Arguments.of(
-                    "insertDataIntoCollectionsCase1",
-                    Map.of(
-                            new MongoCollectionKey("first", "first"),
-                            Set.of(EXAMPLE_1, EXAMPLE_2),
-                            new MongoCollectionKey("first", "second"),
-                            Set.of(EXAMPLE_2, EXAMPLE_3, EXAMPLE_4),
-                            new MongoCollectionKey("second", "first"),
-                            Set.of(EXAMPLE_3),
-                            new MongoCollectionKey("second", "second"),
-                            Set.of(EXAMPLE_5, EXAMPLE_6, EXAMPLE_7)
-                    )
-
-            )
-    );
+        Arguments.of(
+            "insertDataIntoCollectionsCase1",
+            Map.of(
+                new MongoCollectionKey("first", "first"),
+                Set.of(EXAMPLE_1, EXAMPLE_2),
+                new MongoCollectionKey("first", "second"),
+                Set.of(EXAMPLE_2, EXAMPLE_3, EXAMPLE_4),
+                new MongoCollectionKey("second", "first"),
+                Set.of(EXAMPLE_3),
+                new MongoCollectionKey("second", "second"),
+                Set.of(EXAMPLE_5, EXAMPLE_6, EXAMPLE_7))),
+        Arguments.of(
+            "insertDataIntoCollectionsCase2",
+            Map.of(
+                new MongoCollectionKey("first", "first"),
+                Set.of(EXAMPLE_1, EXAMPLE_8),
+                new MongoCollectionKey("second", "second"),
+                Set.of(EXAMPLE_5))),
+        Arguments.of(
+            "insertDataIntoCollectionsCase3",
+            Map.of(
+                new MongoCollectionKey("first", "second"),
+                Set.of(EXAMPLE_2, EXAMPLE_3, EXAMPLE_4, EXAMPLE_5))),
+        Arguments.of(
+            "insertDataIntoCollectionsCase4",
+            Map.of(
+                new MongoCollectionKey("second", "first"),
+                Set.of(EXAMPLE_6),
+                new MongoCollectionKey("second", "second"),
+                Set.of(EXAMPLE_7, EXAMPLE_8))),
+        Arguments.of(
+            "insertDataIntoCollectionsCase5",
+            Map.of(
+                new MongoCollectionKey("first", "first"),
+                Set.of(EXAMPLE_1),
+                new MongoCollectionKey("first", "second"),
+                Set.of(EXAMPLE_2),
+                new MongoCollectionKey("second", "first"),
+                Set.of(EXAMPLE_3),
+                new MongoCollectionKey("second", "second"),
+                Set.of(EXAMPLE_4))));
   }
 
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(database = "first", collection = "first", bsonFilePath = EXAMPLE_1_FILE_PATH),
-                  @MongoDocument(database = "first", collection = "first", bsonFilePath = EXAMPLE_2_FILE_PATH),
-                  @MongoDocument(database = "first", collection = "second", bsonFilePath = EXAMPLE_2_FILE_PATH),
-                  @MongoDocument(database = "first", collection = "second", bsonFilePath = EXAMPLE_3_FILE_PATH),
-                  @MongoDocument(database = "first", collection = "second", bsonFilePath = EXAMPLE_4_FILE_PATH),
-                  @MongoDocument(database = "second", collection = "first", bsonFilePath = EXAMPLE_3_FILE_PATH),
-                  @MongoDocument(database = "second", collection = "second", bsonFilePath = EXAMPLE_5_FILE_PATH),
-                  @MongoDocument(database = "second", collection = "second", bsonFilePath = EXAMPLE_6_FILE_PATH),
-                  @MongoDocument(database = "second", collection = "second", bsonFilePath = EXAMPLE_7_FILE_PATH)
-          })
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = EXAMPLE_1_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = EXAMPLE_2_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "second",
+            bsonFilePath = EXAMPLE_2_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "second",
+            bsonFilePath = EXAMPLE_3_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "second",
+            bsonFilePath = EXAMPLE_4_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "first",
+            bsonFilePath = EXAMPLE_3_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = EXAMPLE_5_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = EXAMPLE_6_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = EXAMPLE_7_FILE_PATH)
+      })
   private void insertDataIntoCollectionsCase1() {}
+
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = EXAMPLE_1_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = EXAMPLE_8_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = EXAMPLE_5_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsCase2() {}
+
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "second",
+            bsonFilePath = EXAMPLE_2_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "second",
+            bsonFilePath = EXAMPLE_3_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "second",
+            bsonFilePath = EXAMPLE_4_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "second",
+            bsonFilePath = EXAMPLE_5_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsCase3() {}
+
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "second",
+            collection = "first",
+            bsonFilePath = EXAMPLE_6_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = EXAMPLE_7_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = EXAMPLE_8_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsCase4() {}
+
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = EXAMPLE_1_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "second",
+            bsonFilePath = EXAMPLE_2_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "first",
+            bsonFilePath = EXAMPLE_3_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = EXAMPLE_4_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsCase5() {}
 
   @MongoSetup(
       mongoDocuments = {
@@ -242,26 +371,30 @@ class MongoDatabaseSetupExtensionTest {
               .formatted(collection.getDatabase(), collection.getCollection()));
     }
   }
+
   @ParameterizedTest
   @MethodSource("provideShouldAddDocumentsIntoCollections")
   public void shouldAddDocumentsIntoCollections(
-          String testMethod,
-          Map<MongoCollectionKey, Set<String>> expectedCollectionsContent)
-          throws IllegalAccessException, NoSuchMethodException {
+      String testMethod, Map<MongoCollectionKey, Set<String>> expectedCollectionsContent)
+      throws IllegalAccessException, NoSuchMethodException {
     // GIVEN
     clearAllCollections(mongoClient);
     MongoDatabaseSetupExtension tested = new MongoDatabaseSetupExtension();
     ExtensionContext extensionContext = Mockito.mock(ExtensionContext.class);
     Mockito.when(extensionContext.getTestMethod())
-            .thenReturn(Optional.of(this.getClass().getDeclaredMethod(testMethod)));
+        .thenReturn(Optional.of(this.getClass().getDeclaredMethod(testMethod)));
 
     // WHEN
     tested.beforeEach(extensionContext);
 
     // THEN
     for (Map.Entry<MongoCollectionKey, Set<String>> entry : expectedCollectionsContent.entrySet()) {
-      assertDocumentsExist(mongoClient, entry.getKey().getDatabase(), entry.getKey().getCollection(), "stringKey",
-              entry.getValue().toArray(new String[0]));
+      assertDocumentsExist(
+          mongoClient,
+          entry.getKey().getDatabase(),
+          entry.getKey().getCollection(),
+          "stringKey",
+          entry.getValue().toArray(new String[0]));
     }
   }
 }
