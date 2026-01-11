@@ -86,4 +86,35 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
 
 
     // TODO ExpandAsterisk = true (all fields defined in EDM)
+
+    @Unroll
+    def "should return expected wildCard flag"() {
+        given:
+        Edm edm = loadEmdProvider(edmConfigFile)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("Items",
+                        "\$select=" +
+                                selectFields.stream().filter(Objects::nonNull)
+                                        .filter(s -> !s.trim().isEmpty())
+                                        .collect(Collectors.joining(","))
+                        , null, null)
+        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+
+        when:
+        def result = tested.parse(uriInfo.getSelectOption())
+
+        then:
+        result.isWildCard() == expectedWildCard
+
+        where:
+        [edmConfigFile, selectFields, expectedWildCard] << wildCardTestCases()
+    }
+
+    static wildCardTestCases() {
+        [
+                ["edm/edm1.xml"  , ["*"], true],
+                ["edm/edm1.xml"  , ["plainString"], false]
+        ]
+    }
 }
