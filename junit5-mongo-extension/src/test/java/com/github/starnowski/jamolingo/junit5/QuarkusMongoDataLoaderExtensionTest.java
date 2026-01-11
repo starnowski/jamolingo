@@ -20,7 +20,7 @@ import org.mockito.Mockito;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
-class MongoDatabaseSetupExtensionTest {
+class QuarkusMongoDataLoaderExtensionTest {
 
   private static final String EXAMPLE_1_FILE_PATH = "bson/example1.json";
   private static final String EXAMPLE_2_FILE_PATH = "bson/example2.json";
@@ -347,7 +347,7 @@ class MongoDatabaseSetupExtensionTest {
     // GIVEN
     clearAllCollections(mongoClient);
     insertDocuments(mongoClient);
-    MongoDatabaseSetupExtension tested = new MongoDatabaseSetupExtension();
+    QuarkusMongoDataLoaderExtension tested = new QuarkusMongoDataLoaderExtension();
     ExtensionContext extensionContext = Mockito.mock(ExtensionContext.class);
     Mockito.when(extensionContext.getTestMethod())
         .thenReturn(Optional.of(this.getClass().getDeclaredMethod(testMethod)));
@@ -379,7 +379,7 @@ class MongoDatabaseSetupExtensionTest {
       throws IllegalAccessException, NoSuchMethodException {
     // GIVEN
     clearAllCollections(mongoClient);
-    MongoDatabaseSetupExtension tested = new MongoDatabaseSetupExtension();
+    QuarkusMongoDataLoaderExtension tested = new QuarkusMongoDataLoaderExtension();
     ExtensionContext extensionContext = Mockito.mock(ExtensionContext.class);
     Mockito.when(extensionContext.getTestMethod())
         .thenReturn(Optional.of(this.getClass().getDeclaredMethod(testMethod)));
