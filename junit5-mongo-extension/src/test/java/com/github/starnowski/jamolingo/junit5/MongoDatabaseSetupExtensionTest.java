@@ -30,6 +30,14 @@ class MongoDatabaseSetupExtensionTest {
   private static final String EXAMPLE_6_FILE_PATH = "bson/example6.json";
   private static final String EXAMPLE_7_FILE_PATH = "bson/example7.json";
   private static final String EXAMPLE_8_FILE_PATH = "bson/example8.json";
+  private static final String EXAMPLE_1 = "example1";
+  private static final String EXAMPLE_2 = "example2";
+  private static final String EXAMPLE_3 = "example3";
+  private static final String EXAMPLE_4 = "example4";
+  private static final String EXAMPLE_5 = "example5";
+  private static final String EXAMPLE_6 = "example6";
+  private static final String EXAMPLE_7 = "example7";
+  private static final String EXAMPLE_8 = "example8";
 
   @Inject private MongoClient mongoClient;
 
@@ -88,6 +96,39 @@ class MongoDatabaseSetupExtensionTest {
                     new MongoCollectionKey("first", "second"),
                     new MongoCollectionKey("second", "first")))));
   }
+
+  public Stream<Arguments> provideShouldAddDocumentsIntoCollections() {
+    return Stream.of(
+            Arguments.of(
+                    "insertDataIntoCollectionsCase1",
+                    Map.of(
+                            new MongoCollectionKey("first", "first"),
+                            Set.of(EXAMPLE_1, EXAMPLE_2),
+                            new MongoCollectionKey("first", "second"),
+                            Set.of(EXAMPLE_2, EXAMPLE_3, EXAMPLE_4),
+                            new MongoCollectionKey("second", "first"),
+                            Set.of(EXAMPLE_3),
+                            new MongoCollectionKey("second", "second"),
+                            Set.of(EXAMPLE_5, EXAMPLE_6, EXAMPLE_7)
+                    )
+
+            )
+    );
+  }
+
+  @MongoSetup(
+          mongoDocuments = {
+                  @MongoDocument(database = "first", collection = "first", bsonFilePath = EXAMPLE_1_FILE_PATH),
+                  @MongoDocument(database = "first", collection = "first", bsonFilePath = EXAMPLE_2_FILE_PATH),
+                  @MongoDocument(database = "first", collection = "second", bsonFilePath = EXAMPLE_2_FILE_PATH),
+                  @MongoDocument(database = "first", collection = "second", bsonFilePath = EXAMPLE_3_FILE_PATH),
+                  @MongoDocument(database = "first", collection = "second", bsonFilePath = EXAMPLE_4_FILE_PATH),
+                  @MongoDocument(database = "second", collection = "first", bsonFilePath = EXAMPLE_3_FILE_PATH),
+                  @MongoDocument(database = "second", collection = "second", bsonFilePath = EXAMPLE_5_FILE_PATH),
+                  @MongoDocument(database = "second", collection = "second", bsonFilePath = EXAMPLE_6_FILE_PATH),
+                  @MongoDocument(database = "second", collection = "second", bsonFilePath = EXAMPLE_7_FILE_PATH)
+          })
+  private void insertDataIntoCollectionsCase1() {}
 
   @MongoSetup(
       mongoDocuments = {
@@ -199,6 +240,28 @@ class MongoDatabaseSetupExtensionTest {
           countDocuments(mongoClient, collection.getDatabase(), collection.getCollection()),
           "Collection %s.%s should not be empty"
               .formatted(collection.getDatabase(), collection.getCollection()));
+    }
+  }
+  @ParameterizedTest
+  @MethodSource("provideShouldAddDocumentsIntoCollections")
+  public void shouldAddDocumentsIntoCollections(
+          String testMethod,
+          Map<MongoCollectionKey, Set<String>> expectedCollectionsContent)
+          throws IllegalAccessException, NoSuchMethodException {
+    // GIVEN
+    clearAllCollections(mongoClient);
+    MongoDatabaseSetupExtension tested = new MongoDatabaseSetupExtension();
+    ExtensionContext extensionContext = Mockito.mock(ExtensionContext.class);
+    Mockito.when(extensionContext.getTestMethod())
+            .thenReturn(Optional.of(this.getClass().getDeclaredMethod(testMethod)));
+
+    // WHEN
+    tested.beforeEach(extensionContext);
+
+    // THEN
+    for (Map.Entry<MongoCollectionKey, Set<String>> entry : expectedCollectionsContent.entrySet()) {
+      assertDocumentsExist(mongoClient, entry.getKey().getDatabase(), entry.getKey().getCollection(), "stringKey",
+              entry.getValue().toArray(new String[0]));
     }
   }
 }
