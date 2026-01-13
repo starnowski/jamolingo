@@ -14,16 +14,13 @@ import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
@@ -37,11 +34,13 @@ import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
@@ -53,15 +52,19 @@ class SelectOperatorTest {
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          database = "testdb",
-                          collection = "Items",
-                          bsonFilePath = "bson/simple_item.json"),
-          })
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/simple_item.json"),
+      })
   public void shouldReturnExpectedProjectedDocument(
       String edmPath, String selectClause, String expectedId, String expectedDataPath)
-      throws UriValidationException, UriParserException, XMLStreamException, IOException {
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          IOException,
+          JSONException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
@@ -95,13 +98,16 @@ class SelectOperatorTest {
     Document actual = results.get(0);
     Document expected = loadDocument(expectedDataPath);
     Assertions.assertEquals(expected, actual);
+    JSONAssert.assertEquals(expected.toJson(), actual.toJson(), true);
   }
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {
     return Stream.of(
         Arguments.of(
-            "edm/edm1.xml", "plainString", "ce124719-3fa3-4b8b-89cd-8bab06b03edc", "bson/expected_case1.json")
-);
+            "edm/edm1.xml",
+            "plainString",
+            "ce124719-3fa3-4b8b-89cd-8bab06b03edc",
+            "bson/expected_case1.json"));
   }
 
   private Edm loadEmdProvider(String filePath) throws XMLStreamException {
@@ -117,12 +123,11 @@ class SelectOperatorTest {
   }
 
   private Document loadDocument(String filePath) throws IOException {
-    try (Reader reader =
-        new InputStreamReader(
-            getClass().getClassLoader().getResourceAsStream(filePath), StandardCharsets.UTF_8)) {
-      String json =
-          new BufferedReader(reader).lines().collect(Collectors.joining(System.lineSeparator()));
-      return Document.parse(json);
-    }
+
+    String json =
+        Files.readString(
+            Paths.get(
+                new File(getClass().getClassLoader().getResource(filePath).getFile()).getPath()));
+    return Document.parse(json);
   }
 }
