@@ -3,8 +3,6 @@ package com.github.starnowski.jamolingo;
 import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder;
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory;
-import com.github.starnowski.jamolingo.junit5.MongoDocument;
-import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
 import com.github.starnowski.jamolingo.select.OdataSelectToMongoProjectParser;
 import com.github.starnowski.jamolingo.select.SelectOperatorResult;
@@ -14,12 +12,16 @@ import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
@@ -33,8 +35,10 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
@@ -43,18 +47,18 @@ class SelectOperatorTest {
 
   @Inject MongoClient mongoClient;
 
-  @Test
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = "testdb",
-            collection = "Items",
-            bsonFilePath = "bson/simple_item.json")
-      })
-  public void shouldReturnExpectedProjectedDocument()
-      throws UriValidationException, UriParserException, XMLStreamException {
+  @ParameterizedTest
+  @MethodSource("provideTestCases")
+  public void shouldReturnExpectedProjectedDocument(
+      String edmPath, String selectClause, String inputDataPath, String expectedDataPath)
+      throws UriValidationException, UriParserException, XMLStreamException, IOException {
     // GIVEN
-    Edm edm = loadEmdProvider("edm/edm1.xml");
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("Items");
+    collection.drop();
+    collection.insertOne(loadDocument(inputDataPath));
+
+    Edm edm = loadEmdProvider(edmPath);
     ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
     var odataMapping = factory.build(edm.getSchema("Demo"));
     var entityMapping = odataMapping.getEntities().get("Item");
@@ -63,7 +67,8 @@ class SelectOperatorTest {
     var context = entityPropertiesMongoPathContextBuilder.build(entityMapping);
 
     UriInfo uriInfo =
-        new Parser(edm, OData.newInstance()).parseUri("Items", "$select=plainString", null, null);
+        new Parser(edm, OData.newInstance())
+            .parseUri("Items", "$select=" + selectClause, null, null);
     OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser();
 
     // WHEN
@@ -71,16 +76,27 @@ class SelectOperatorTest {
         tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null));
     Bson projectStage = result.getStageObject();
 
-    MongoDatabase database = mongoClient.getDatabase("testdb");
-    MongoCollection<Document> collection = database.getCollection("Items");
     List<Document> results = new ArrayList<>();
     collection.aggregate(Arrays.asList(projectStage)).into(results);
 
     // THEN
     Assertions.assertEquals(1, results.size());
     Document actual = results.get(0);
-    Assertions.assertEquals("example1", actual.getString("plainString"));
-    Assertions.assertNull(actual.getString("ignoreMe"), "Field 'ignoreMe' should not be present");
+    Document expected = loadDocument(expectedDataPath);
+    // Remove _id for comparison if present in actual but not expected
+    actual.remove("_id");
+    Assertions.assertEquals(expected, actual);
+  }
+
+  private static Stream<Arguments> provideTestCases() {
+    return Stream.of(
+        Arguments.of(
+            "edm/edm1.xml", "plainString", "bson/simple_item.json", "bson/expected_case1.json"),
+        Arguments.of(
+            "edm/edm2_with_nested_collections.xml",
+            "plainString,Name,Addresses/Street,Addresses/ZipCode",
+            "bson/item_edm2.json",
+            "bson/expected_case2.json"));
   }
 
   private Edm loadEmdProvider(String filePath) throws XMLStreamException {
@@ -93,6 +109,16 @@ class SelectOperatorTest {
 
     // Build Edm model from provider
     return new EdmProviderImpl(provider);
+  }
+
+  private Document loadDocument(String filePath) throws IOException {
+    try (Reader reader =
+        new InputStreamReader(
+            getClass().getClassLoader().getResourceAsStream(filePath), StandardCharsets.UTF_8)) {
+      String json =
+          new BufferedReader(reader).lines().collect(Collectors.joining(System.lineSeparator()));
+      return Document.parse(json);
+    }
   }
 
   //    private Edm createEdm() {
