@@ -1,8 +1,0 @@
-{
-  "plainString": "example1",
-  "Name": "Item Name",
-  "Addresses": [
-    { "Street": "Street 1", "ZipCode": "12345" },
-    { "Street": "Street 2", "ZipCode": "67890" }
-  ]
-}

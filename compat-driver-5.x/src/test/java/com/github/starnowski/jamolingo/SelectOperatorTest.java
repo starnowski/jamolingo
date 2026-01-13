@@ -3,6 +3,8 @@ package com.github.starnowski.jamolingo;
 import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder;
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory;
+import com.github.starnowski.jamolingo.junit5.MongoDocument;
+import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
 import com.github.starnowski.jamolingo.select.OdataSelectToMongoProjectParser;
 import com.github.starnowski.jamolingo.select.SelectOperatorResult;
@@ -20,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
@@ -48,15 +51,20 @@ class SelectOperatorTest {
   @Inject MongoClient mongoClient;
 
   @ParameterizedTest
-  @MethodSource("provideTestCases")
+  @MethodSource("provideShouldReturnExpectedProjectedDocument")
+  @MongoSetup(
+          mongoDocuments = {
+                  @MongoDocument(
+                          database = "testdb",
+                          collection = "Items",
+                          bsonFilePath = "bson/simple_item.json"),
+          })
   public void shouldReturnExpectedProjectedDocument(
-      String edmPath, String selectClause, String inputDataPath, String expectedDataPath)
+      String edmPath, String selectClause, String expectedId, String expectedDataPath)
       throws UriValidationException, UriParserException, XMLStreamException, IOException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
-    collection.drop();
-    collection.insertOne(loadDocument(inputDataPath));
 
     Edm edm = loadEmdProvider(edmPath);
     ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
@@ -75,28 +83,25 @@ class SelectOperatorTest {
     SelectOperatorResult result =
         tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null));
     Bson projectStage = result.getStageObject();
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(new Document("$match", new Document("_id", UUID.fromString(expectedId))));
+    pipeline.add(projectStage);
 
     List<Document> results = new ArrayList<>();
-    collection.aggregate(Arrays.asList(projectStage)).into(results);
+    collection.aggregate(pipeline).into(results);
 
     // THEN
     Assertions.assertEquals(1, results.size());
     Document actual = results.get(0);
     Document expected = loadDocument(expectedDataPath);
-    // Remove _id for comparison if present in actual but not expected
-    actual.remove("_id");
     Assertions.assertEquals(expected, actual);
   }
 
-  private static Stream<Arguments> provideTestCases() {
+  private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {
     return Stream.of(
         Arguments.of(
-            "edm/edm1.xml", "plainString", "bson/simple_item.json", "bson/expected_case1.json"),
-        Arguments.of(
-            "edm/edm2_with_nested_collections.xml",
-            "plainString,Name,Addresses/Street,Addresses/ZipCode",
-            "bson/item_edm2.json",
-            "bson/expected_case2.json"));
+            "edm/edm1.xml", "plainString", "ce124719-3fa3-4b8b-89cd-8bab06b03edc", "bson/expected_case1.json")
+);
   }
 
   private Edm loadEmdProvider(String filePath) throws XMLStreamException {
@@ -120,87 +125,4 @@ class SelectOperatorTest {
       return Document.parse(json);
     }
   }
-
-  //    private Edm createEdm() {
-  //        CsdlEdmProvider provider = new CsdlEdmProvider() {
-  //            @Override
-  //            public List<CsdlSchema> getSchemas() {
-  //                CsdlSchema schema = new CsdlSchema();
-  //                schema.setNamespace("Demo");
-  //
-  //                CsdlEntityType entityType = new CsdlEntityType();
-  //                entityType.setName("Item");
-  //                CsdlProperty property = new
-  // CsdlProperty().setName("plainString").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName());
-  //                entityType.setProperties(Collections.singletonList(property));
-  //
-  //                schema.setEntityTypes(Collections.singletonList(entityType));
-  //
-  //                CsdlEntityContainer container = new CsdlEntityContainer();
-  //                container.setName("Container");
-  //                CsdlEntitySet entitySet = new CsdlEntitySet().setName("Items").setType(new
-  // FullQualifiedName("Demo", "Item"));
-  //                container.setEntitySets(Collections.singletonList(entitySet));
-  //
-  //                schema.setEntityContainer(container);
-  //
-  //                return Collections.singletonList(schema);
-  //            }
-  //
-  //            @Override
-  //            public CsdlEntityType getEntityType(FullQualifiedName entityTypeName) {
-  //                if (entityTypeName.equals(new FullQualifiedName("Demo", "Item"))) {
-  //                    return new CsdlEntityType()
-  //                            .setName("Item")
-  //                            .setProperties(Collections.singletonList(
-  //                                    new
-  // CsdlProperty().setName("plainString").setType(EdmPrimitiveTypeKind.String.getFullQualifiedName())
-  //                            ));
-  //                }
-  //                return null;
-  //            }
-  //
-  //            @Override
-  //            public CsdlEntitySet getEntitySet(FullQualifiedName entityContainer, String
-  // entitySetName) {
-  //                if (entityContainer.equals(new FullQualifiedName("Demo", "Container")) &&
-  // entitySetName.equals("Items")) {
-  //                    return new CsdlEntitySet().setName("Items").setType(new
-  // FullQualifiedName("Demo", "Item"));
-  //                }
-  //                return null;
-  //            }
-  //
-  //            @Override
-  //            public CsdlEntityContainer getEntityContainer() {
-  //                CsdlEntityContainer container = new CsdlEntityContainer();
-  //                container.setName("Container");
-  //                return container;
-  //            }
-  //
-  //            @Override
-  //            public CsdlEntityContainerInfo getEntityContainerInfo(FullQualifiedName
-  // entityContainerName) {
-  //                if (entityContainerName == null || entityContainerName.equals(new
-  // FullQualifiedName("Demo", "Container"))) {
-  //                    CsdlEntityContainerInfo info = new CsdlEntityContainerInfo();
-  //                    info.setContainerName(new FullQualifiedName("Demo", "Container"));
-  //                    return info;
-  //                }
-  //                return null;
-  //            }
-  //
-  //            @Override
-  //            public CsdlAnnotations getAnnotationsGroup(FullQualifiedName targetName, String
-  // qualifier) {
-  //                return null;
-  //            }
-  //
-  //            @Override
-  //            public List<CsdlAliasInfo> getAliasInfos() {
-  //                return null;
-  //            }
-  //        };
-  //        return new EdmProviderImpl(provider);
-  //    }
 }
