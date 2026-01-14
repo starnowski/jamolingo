@@ -57,6 +57,14 @@ class SelectOperatorTest {
             database = "testdb",
             collection = "Items",
             bsonFilePath = "bson/simple_item.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/generated_edm3_item.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/generated_edm4_item.json")
       })
   public void shouldReturnExpectedProjectedDocument(
       String edmPath, String selectClause, String expectedId, String expectedDataPath)
@@ -103,6 +111,11 @@ class SelectOperatorTest {
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {
     return Stream.of(
+        Arguments.of(
+            "edm/edm1.xml",
+            "plainString",
+            "ce124719-3fa3-4b8b-89cd-8bab06b03edc",
+            "bson/expected_case1.json"),
         Arguments.of(
             "edm/edm1.xml",
             "plainString",
