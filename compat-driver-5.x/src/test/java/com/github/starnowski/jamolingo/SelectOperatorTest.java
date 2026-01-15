@@ -124,7 +124,7 @@ class SelectOperatorTest {
             "Item",
             "Items",
             "123e4567-e89b-12d3-a456-426614174090",
-                "bson/edm3_case1.json"),
+            "bson/edm3_case1.json"),
         Arguments.of(
             "edm/edm4_complextype_with_long_circular_reference.xml",
             Set.of(

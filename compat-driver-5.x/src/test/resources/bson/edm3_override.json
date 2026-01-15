@@ -1,0 +1,25 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "fqXjYdkPRTOzp/nSDf4Olg==",
+      "subType": "04"
+    }
+  },
+  "plainString": "Sample String",
+  "Name": "Sample Item",
+  "Addresses": [
+    {
+      "Street": "123 Main St",
+      "City": "Metropolis",
+      "ZipCode": "12345",
+      "previousAddresses": [
+        {
+          "Street": "456 Side St",
+          "City": "Smallville",
+          "ZipCode": "67890",
+          "previousAddresses": []
+        }
+      ]
+    }
+  ]
+}
