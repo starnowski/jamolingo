@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
@@ -67,7 +68,7 @@ class SelectOperatorTest {
             bsonFilePath = "bson/generated_edm4_item.json")
       })
   public void shouldReturnExpectedProjectedDocument(
-      String edmPath, String selectClause, String expectedId, String expectedDataPath)
+      String edmPath, Set<String> selectClause, String expectedId, String expectedDataPath)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
@@ -87,7 +88,7 @@ class SelectOperatorTest {
 
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
-            .parseUri("Items", "$select=" + selectClause, null, null);
+            .parseUri("Items", "$select=" + String.join(",", selectClause), null, null);
     OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser();
 
     // WHEN
@@ -113,14 +114,19 @@ class SelectOperatorTest {
     return Stream.of(
         Arguments.of(
             "edm/edm1.xml",
-            "plainString",
+            Set.of("plainString"),
             "ce124719-3fa3-4b8b-89cd-8bab06b03edc",
             "bson/expected_case1.json"),
         Arguments.of(
-            "edm/edm1.xml",
-            "plainString",
-            "ce124719-3fa3-4b8b-89cd-8bab06b03edc",
-            "bson/expected_case1.json"));
+            "edm/edm3_complextype_with_circular_reference_collection.xml",
+            Set.of("Addresses"),
+            "123e4567-e89b-12d3-a456-426614174000",
+            "bson/expected_case3.json"),
+        Arguments.of(
+            "edm/edm3_complextype_with_circular_reference_collection.xml",
+            Set.of("Addresses"),
+            "550e8400-e29b-41d4-a716-446554400000",
+            "bson/expected_case3.json"));
   }
 
   private Edm loadEmdProvider(String filePath) throws XMLStreamException {
