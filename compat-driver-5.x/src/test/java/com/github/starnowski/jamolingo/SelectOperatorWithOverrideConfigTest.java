@@ -49,10 +49,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
-@ExtendWith(QuarkusMongoDataLoaderExtension.class)
 @QuarkusTestResource(EmbeddedMongoResource.class)
-// TODO
-class SelectOperatorWithOverrideConfigTest {
+class SelectOperatorWithOverrideConfigTest extends AbstractItTest{
 
   static final String EDM_1_MERGE_OVERRIDE_MONGO_NAME =
       ""
@@ -243,24 +241,4 @@ class SelectOperatorWithOverrideConfigTest {
             EDM_3_MERGE_OVERRIDE_NESTED_PROP));
   }
 
-  private Edm loadEmdProvider(String filePath) throws XMLStreamException {
-    Reader reader =
-        new InputStreamReader(
-            getClass().getClassLoader().getResourceAsStream(filePath), StandardCharsets.UTF_8);
-    // Parse it into a CsdlEdmProvider
-    MetadataParser parser = new MetadataParser();
-    CsdlEdmProvider provider = parser.buildEdmProvider(reader);
-
-    // Build Edm model from provider
-    return new EdmProviderImpl(provider);
-  }
-
-  private Document loadDocument(String filePath) throws IOException {
-
-    String json =
-        Files.readString(
-            Paths.get(
-                new File(getClass().getClassLoader().getResource(filePath).getFile()).getPath()));
-    return Document.parse(json);
-  }
 }

@@ -44,9 +44,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
-@ExtendWith(QuarkusMongoDataLoaderExtension.class)
 @QuarkusTestResource(EmbeddedMongoResource.class)
-class SelectOperatorTest {
+class SelectOperatorTest extends AbstractItTest{
 
   @Inject MongoClient mongoClient;
 
@@ -168,26 +167,5 @@ class SelectOperatorTest {
             "WorkflowInstances",
             "550e8400-e29b-41d4-a716-446655440000",
             "bson/edm4_case3.json"));
-  }
-
-  private Edm loadEmdProvider(String filePath) throws XMLStreamException {
-    Reader reader =
-        new InputStreamReader(
-            getClass().getClassLoader().getResourceAsStream(filePath), StandardCharsets.UTF_8);
-    // Parse it into a CsdlEdmProvider
-    MetadataParser parser = new MetadataParser();
-    CsdlEdmProvider provider = parser.buildEdmProvider(reader);
-
-    // Build Edm model from provider
-    return new EdmProviderImpl(provider);
-  }
-
-  private Document loadDocument(String filePath) throws IOException {
-
-    String json =
-        Files.readString(
-            Paths.get(
-                new File(getClass().getClassLoader().getResource(filePath).getFile()).getPath()));
-    return Document.parse(json);
   }
 }
