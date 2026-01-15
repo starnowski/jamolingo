@@ -54,18 +54,18 @@ class SelectOperatorTest {
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
       mongoDocuments = {
-        @MongoDocument(
-            database = "testdb",
-            collection = "Items",
-            bsonFilePath = "bson/simple_item.json"),
+        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm1.json"),
         @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm3.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "Items",
-            bsonFilePath = "bson/generated_edm4_item.json")
+        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm4.json")
       })
   public void shouldReturnExpectedProjectedDocument(
-      String edmPath, Set<String> selectClause, String expectedId, String expectedDataPath)
+      String edmPath,
+      Set<String> selectClause,
+      String schema,
+      String entityType,
+      String entitySet,
+      String expectedId,
+      String expectedDataPath)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
@@ -77,15 +77,15 @@ class SelectOperatorTest {
 
     Edm edm = loadEmdProvider(edmPath);
     ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
-    var odataMapping = factory.build(edm.getSchema("Demo"));
-    var entityMapping = odataMapping.getEntities().get("Item");
+    var odataMapping = factory.build(edm.getSchema(schema));
+    var entityMapping = odataMapping.getEntities().get(entityType);
     EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder =
         new EntityPropertiesMongoPathContextBuilder();
     var context = entityPropertiesMongoPathContextBuilder.build(entityMapping);
 
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
-            .parseUri("Items", "$select=" + String.join(",", selectClause), null, null);
+            .parseUri(entitySet, "$select=" + String.join(",", selectClause), null, null);
     OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser();
 
     // WHEN
@@ -112,18 +112,30 @@ class SelectOperatorTest {
         Arguments.of(
             "edm/edm1.xml",
             Set.of("plainString"),
+            "Demo",
+            "Item",
+            "Items",
             "ce124719-3fa3-4b8b-89cd-8bab06b03edc",
             "bson/edm1_case1.json"),
         Arguments.of(
             "edm/edm3_complextype_with_circular_reference_collection.xml",
             Set.of("Addresses"),
+            "Demo",
+            "Item",
+            "Items",
             "123e4567-e89b-12d3-a456-426614174090",
             "bson/emd3_case1.json"),
         Arguments.of(
-            "edm/edm3_complextype_with_circular_reference_collection.xml",
-            Set.of("Addresses"),
+            "edm/edm4_complextype_with_long_circular_reference.xml",
+            Set.of(
+                "Definition/ExecutionContext/TriggeredBy",
+                "Definition/WorkflowKey",
+                "Definition/Steps"),
+            "Workflow.Model",
+            "WorkflowInstance",
+            "WorkflowInstances",
             "550e8400-e29b-41d4-a716-446655440000",
-            "bson/emd3_case1.json"));
+            "bson/edm4_case1.json"));
   }
 
   private Edm loadEmdProvider(String filePath) throws XMLStreamException {
