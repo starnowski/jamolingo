@@ -7,7 +7,6 @@ import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextB
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
-import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
 import com.github.starnowski.jamolingo.select.OdataSelectToMongoProjectParser;
 import com.github.starnowski.jamolingo.select.SelectOperatorResult;
 import com.mongodb.client.MongoClient;
@@ -16,13 +15,7 @@ import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -30,11 +23,8 @@ import java.util.UUID;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider;
-import org.apache.olingo.commons.core.edm.EdmProviderImpl;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.core.MetadataParser;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
@@ -42,7 +32,6 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -50,7 +39,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
-class SelectOperatorWithOverrideConfigTest extends AbstractItTest{
+class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
 
   static final String EDM_1_MERGE_OVERRIDE_MONGO_NAME =
       ""
@@ -240,5 +229,4 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest{
             "bson/edm3_case1_override_expected.json",
             EDM_3_MERGE_OVERRIDE_NESTED_PROP));
   }
-
 }
