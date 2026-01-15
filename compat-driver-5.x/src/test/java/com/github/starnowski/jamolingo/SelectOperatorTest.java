@@ -61,7 +61,7 @@ class SelectOperatorTest {
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/generated_edm3_item.json"),
+            bsonFilePath = "bson/edm3.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
@@ -121,12 +121,12 @@ class SelectOperatorTest {
             "edm/edm3_complextype_with_circular_reference_collection.xml",
             Set.of("Addresses"),
             "123e4567-e89b-12d3-a456-426614174090",
-            "bson/expected_case3.json"),
+                "bson/emd3_case1.json"),
         Arguments.of(
             "edm/edm3_complextype_with_circular_reference_collection.xml",
             Set.of("Addresses"),
             "550e8400-e29b-41d4-a716-446655440000",
-            "bson/expected_case3.json"));
+                "bson/emd3_case1.json"));
   }
 
   private Edm loadEmdProvider(String filePath) throws XMLStreamException {

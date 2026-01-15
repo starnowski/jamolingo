@@ -1,12 +1,4 @@
 {
-  "_id": {
-    "$binary": {
-      "base64": "Ej5FZ+ibEtOkVkJmFBdAkA==",
-      "subType": "04"
-    }
-  },
-  "plainString": "Sample String",
-  "Name": "Sample Item",
   "Addresses": [
     {
       "Street": "123 Main St",
