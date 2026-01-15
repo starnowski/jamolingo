@@ -124,7 +124,7 @@ class SelectOperatorTest {
             "Item",
             "Items",
             "123e4567-e89b-12d3-a456-426614174090",
-            "bson/emd3_case1.json"),
+                "bson/edm3_case1.json"),
         Arguments.of(
             "edm/edm4_complextype_with_long_circular_reference.xml",
             Set.of(
@@ -135,7 +135,39 @@ class SelectOperatorTest {
             "WorkflowInstance",
             "WorkflowInstances",
             "550e8400-e29b-41d4-a716-446655440000",
-            "bson/edm4_case1.json"));
+            "bson/edm4_case1.json"),
+        Arguments.of(
+            "edm/edm3_complextype_with_circular_reference_collection.xml",
+            Set.of("plainString", "Name"),
+            "Demo",
+            "Item",
+            "Items",
+            "123e4567-e89b-12d3-a456-426614174090",
+            "bson/edm3_case2.json"),
+        Arguments.of(
+            "edm/edm3_complextype_with_circular_reference_collection.xml",
+            Set.of("Addresses/City"),
+            "Demo",
+            "Item",
+            "Items",
+            "123e4567-e89b-12d3-a456-426614174090",
+            "bson/edm3_case3.json"),
+        Arguments.of(
+            "edm/edm4_complextype_with_long_circular_reference.xml",
+            Set.of("InstanceId"),
+            "Workflow.Model",
+            "WorkflowInstance",
+            "WorkflowInstances",
+            "550e8400-e29b-41d4-a716-446655440000",
+            "bson/edm4_case2.json"),
+        Arguments.of(
+            "edm/edm4_complextype_with_long_circular_reference.xml",
+            Set.of("Definition/Version"),
+            "Workflow.Model",
+            "WorkflowInstance",
+            "WorkflowInstances",
+            "550e8400-e29b-41d4-a716-446655440000",
+            "bson/edm4_case3.json"));
   }
 
   private Edm loadEmdProvider(String filePath) throws XMLStreamException {
