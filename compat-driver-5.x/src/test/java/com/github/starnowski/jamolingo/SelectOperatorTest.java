@@ -120,12 +120,12 @@ class SelectOperatorTest {
         Arguments.of(
             "edm/edm3_complextype_with_circular_reference_collection.xml",
             Set.of("Addresses"),
-            "123e4567-e89b-12d3-a456-426614174000",
+            "123e4567-e89b-12d3-a456-426614174090",
             "bson/expected_case3.json"),
         Arguments.of(
             "edm/edm3_complextype_with_circular_reference_collection.xml",
             Set.of("Addresses"),
-            "550e8400-e29b-41d4-a716-446554400000",
+            "550e8400-e29b-41d4-a716-446655440000",
             "bson/expected_case3.json"));
   }
 
