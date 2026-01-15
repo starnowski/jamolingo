@@ -1,0 +1,13 @@
+{
+  "Definition": {
+    "WorkflowKey": "StandardApproval",
+    "Steps": [
+      "Init",
+      "Review",
+      "Approve"
+    ],
+    "ExecutionContext": {
+      "TriggeredBy": "system-scheduler"
+    }
+  }
+}

@@ -4,11 +4,19 @@ import java.util.stream.Collectors;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 
+/** Default implementation of {@link EdmMongoContextFacade}. */
 public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
 
   private final EntityPropertiesMongoPathContext entityPropertiesMongoPathContext;
   private final EdmPathContextSearch edmPathContextSearch;
 
+  /**
+   * Constructs a new DefaultEdmMongoContextFacade.
+   *
+   * @param entityPropertiesMongoPathContext the context for resolving entity properties to Mongo
+   *     paths
+   * @param edmPathContextSearch configuration for searching EDM paths
+   */
   public DefaultEdmMongoContextFacade(
       EntityPropertiesMongoPathContext entityPropertiesMongoPathContext,
       EdmPathContextSearch edmPathContextSearch) {
@@ -16,6 +24,11 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
     this.edmPathContextSearch = edmPathContextSearch;
   }
 
+  /**
+   * Creates a new builder for DefaultEdmMongoContextFacade.
+   *
+   * @return a new builder instance
+   */
   public static DefaultEdmMongoContextFacadeBuilder builder() {
     return new DefaultEdmMongoContextFacadeBuilder();
   }
@@ -54,7 +67,14 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
     }
   }
 
+  /** Builder for DefaultEdmMongoContextFacade. */
   public static class DefaultEdmMongoContextFacadeBuilder {
+    /**
+     * Sets the entity properties Mongo path context.
+     *
+     * @param entityPropertiesMongoPathContext the context
+     * @return the builder instance
+     */
     public DefaultEdmMongoContextFacadeBuilder withEntityPropertiesMongoPathContext(
         EntityPropertiesMongoPathContext entityPropertiesMongoPathContext) {
       this.entityPropertiesMongoPathContext = entityPropertiesMongoPathContext;
@@ -63,6 +83,12 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
 
     private EntityPropertiesMongoPathContext entityPropertiesMongoPathContext;
 
+    /**
+     * Sets the EDM path context search configuration.
+     *
+     * @param edmPathContextSearch the configuration
+     * @return the builder instance
+     */
     public DefaultEdmMongoContextFacadeBuilder withEdmPathContextSearch(
         EdmPathContextSearch edmPathContextSearch) {
       this.edmPathContextSearch = edmPathContextSearch;
@@ -71,6 +97,12 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
 
     private EdmPathContextSearch edmPathContextSearch;
 
+    /**
+     * Initializes the builder with values from an existing DefaultEdmMongoContextFacade.
+     *
+     * @param defaultEdmMongoContextFacade the existing instance
+     * @return the builder instance
+     */
     public DefaultEdmMongoContextFacadeBuilder withDefaultEdmMongoContextFacade(
         DefaultEdmMongoContextFacade defaultEdmMongoContextFacade) {
       this.entityPropertiesMongoPathContext =
@@ -79,6 +111,11 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade {
       return this;
     }
 
+    /**
+     * Builds the DefaultEdmMongoContextFacade.
+     *
+     * @return the new facade instance
+     */
     public DefaultEdmMongoContextFacade build() {
       return new DefaultEdmMongoContextFacade(
           entityPropertiesMongoPathContext, edmPathContextSearch);

@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.context;
 
+/** Constants used throughout the context package. */
 public class Constants {
 
   /**

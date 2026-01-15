@@ -1,0 +1,17 @@
+{
+  "Addresses": [
+    {
+      "Street": "123 Main St",
+      "City": "Metropolis",
+      "ZipCode": "12345",
+      "BackUpAddresses": [
+        {
+          "Street": "456 Side St",
+          "City": "Smallville",
+          "ZipCode": "67890",
+          "BackUpAddresses": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "jLgt9a9iSfy08i3wotGVJA==",
+      "subType": "04"
+    }
+  },
+  "thisIsString": "exampleOverride"
+}

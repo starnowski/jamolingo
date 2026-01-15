@@ -1,0 +1,35 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "VQ6EAOKbQdSnFkRmVUQAAA==",
+      "subType": "04"
+    }
+  },
+  "InstanceId": "WF-1001",
+  "Definition": {
+    "WorkflowKey": "StandardApproval",
+    "Version": 2,
+    "Steps": [
+      "Init",
+      "Review",
+      "Approve"
+    ],
+    "ExecutionContext": {
+      "TriggeredBy": "system-scheduler",
+      "ExecutionTimeUtc": "2023-10-27T12:00:00Z",
+      "RuntimeVariables": [
+        "priority=high"
+      ],
+      "EvaluatedDefinition": {
+        "WorkflowKey": "StandardApproval",
+        "Version": 2,
+        "Steps": [
+          "Init",
+          "Review",
+          "Approve"
+        ],
+        "ExecutionContext": null
+      }
+    }
+  }
+}
