@@ -110,7 +110,7 @@ You can customize the default mapping (e.g., change MongoDB field names, handle 
 
 **Applying the Override:**
 
-You can use a helper (like `JSONOverrideHelper` in the `json` module, if available) or manually manipulate the `EntityMapping` object before building the context.
+You can use a helper (like `JSONOverrideHelper` in the [`json`](../common/json) module, if available) or manually manipulate the `EntityMapping` object before building the context.
 
 ```java
 // Assuming you have a helper to merge JSON into the EntityMapping object

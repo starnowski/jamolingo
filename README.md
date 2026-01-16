@@ -31,4 +31,4 @@ This module provides a JUnit 5 extension designed to simplify the process of set
 *   Seamless integration with Quarkus `Arc` container to retrieve the `MongoClient`.
 
 ### [Compatibility Driver 5.x](compat-driver-5.x/README.md)
-The `compat-driver-5.x` module serves as an integration testing suite to ensure the compatibility of the `core` module with the **MongoDB Java Driver version 5.x**. It verifies that OData-to-MongoDB translation remains functional with the newer driver versions.
+The `compat-driver-5.x` module serves as an integration testing suite to ensure the compatibility of the [`core`](core/README.md) module with the **MongoDB Java Driver version 5.x**. It verifies that OData-to-MongoDB translation remains functional with the newer driver versions.

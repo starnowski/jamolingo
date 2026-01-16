@@ -34,7 +34,7 @@ A low-level helper that handles the actual transformation of Java objects to JSO
 
 ### Applying a JSON Merge Patch
 
-This example demonstrates how to update specific fields of an existing Java object using a JSON payload. This pattern is used in the `core` module to override default OData-to-MongoDB mappings for testing purposes.
+This example demonstrates how to update specific fields of an existing Java object using a JSON payload. This pattern is used in the [`core`](../../core) module to override default OData-to-MongoDB mappings for testing purposes.
 
 ```java
 import com.github.starnowski.jamolingo.common.json.JSONOverrideHelper;
