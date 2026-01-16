@@ -180,3 +180,13 @@ public class DefaultEdmPathContextSearch implements EdmPathContextSearch {
 ### Adding javadoc
 
 When you add javadoc do not use html tags because some maven plugin do not allow them
+
+### README.md file rule
+
+When referring to different maven module in README.md file that is belongs to different, generate relative hyper link that point to 
+maven module root.
+For example:
+```
+This class is part of the [json module](/common/json)
+```
+
