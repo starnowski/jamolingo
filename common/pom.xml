@@ -13,6 +13,7 @@
         <module>json</module>
     </modules>
     <artifactId>common</artifactId>
+    <name>${project.groupId}:${project.artifactId}</name>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
