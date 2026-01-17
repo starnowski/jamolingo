@@ -12,7 +12,7 @@ public class Constants {
   /**
    * MongoDB supports no more than 100 levels of nesting for BSON documents. Each object or array
    * adds a level.
-   * https://www.mongodb.com/docs/manual/reference/limits/?atlas-class=general&atlas-provider=aws#mongodb-limit-Nested-Depth-for-BSON-Documents
+   * <a href="https://www.mongodb.com/docs/manual/reference/limits/?atlas-class=general&atlas-provider=aws#mongodb-limit-Nested-Depth-for-BSON-Documents">...</a>
    */
   public static final int MONGO_HARDCODED_BSON_DOCUMENT_NESTING_LIMIT = 100;
 }
