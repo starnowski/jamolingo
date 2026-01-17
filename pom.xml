@@ -16,6 +16,36 @@
         <module>compat-driver-5.x</module>
     </modules>
 
+
+    <description>
+        Posjsonhelper library is an open-source project that adds support of Hibernate query for postgresql json functions.
+    </description>
+    <url>https://github.com/starnowski/posjsonhelper</url>
+
+    <licenses>
+        <license>
+            <name>CC0 1.0 Universal</name>
+            <url>https://creativecommons.org/publicdomain/zero/1.0/</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Szymon Tarnowski</name>
+            <url>www.linkedin.com/in/szymon-tarnowski-a104b4150</url>
+        </developer>
+    </developers>
+
+    <issueManagement>
+        <url>https://github.com/starnowski/jamolingo/issues</url>
+        <system>GitHub Issues</system>
+    </issueManagement>
+
+    <scm>
+        <url>https://github.com/starnowski/jamolingo</url>
+        <connection>scm:git:git://github.com/starnowski/jamolingo.git</connection>
+    </scm>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
