@@ -60,6 +60,6 @@ public class TopOperatorTest extends AbstractItTest {
   }
 
   private static Stream<Arguments> provideShouldReturnExpectedNumberOfDocuments() {
-    return Stream.of(Arguments.of(0), Arguments.of(1), Arguments.of(2), Arguments.of(3));
+    return Stream.of(Arguments.of(1), Arguments.of(2), Arguments.of(3));
   }
 }

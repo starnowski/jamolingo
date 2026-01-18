@@ -45,12 +45,6 @@ public class OdataTopToMongoLimitParser {
       if (!present) {
         return Collections.emptyList();
       }
-      if (topValue == 0) {
-        return Collections.singletonList(
-            new Document(
-                "$match",
-                new Document("$expr", new Document("$eq", java.util.Arrays.asList(0, 1)))));
-      }
       return Collections.singletonList(new Document("$limit", topValue));
     }
 
