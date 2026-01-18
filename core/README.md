@@ -48,7 +48,32 @@ TODO
 TODO
 
 #### $top
-TODO
+
+The `$top` operator specifies the maximum number of items to return. The `core` module translates this into a MongoDB `$limit` aggregation stage.
+
+**Usage:**
+
+The `OdataTopToMongoLimitParser` class is responsible for this translation.
+
+```java
+import com.github.starnowski.jamolingo.top.OdataTopToMongoLimitParser;
+import com.github.starnowski.jamolingo.top.TopOperatorResult;
+import org.apache.olingo.server.api.uri.queryoption.TopOption;
+// ... other imports
+
+// 1. Initialize the parser
+OdataTopToMongoLimitParser parser = new OdataTopToMongoLimitParser();
+
+// 2. Obtain the TopOption from the Olingo UriInfo
+TopOption topOption = uriInfo.getTopOption();
+
+// 3. Parse the option
+TopOperatorResult result = parser.parse(topOption);
+
+// 4. Use the result in your MongoDB aggregation pipeline
+List<Bson> stages = result.getStageObjects(); 
+// e.g. collection.aggregate(stages);
+```
 
 #### $skip
 TODO
