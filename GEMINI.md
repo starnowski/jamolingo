@@ -190,3 +190,25 @@ For example:
 This class is part of the [json module](/common/json)
 ```
 
+### CHANGELOG.md
+
+Use the https://github.com/starnowski/posjsonhelper/blob/master/CHANGELOG.md file as reference.
+
+Before adding entries to CHANGELOG.md analyze if the change in code is new, modified or removed.
+Try to group changes to fit below sections:
+- Added
+- Changed
+- Removed
+
+To every entry add at the end the link to GitHub issue like on below example:
+
+Below example with Github issue with id 160.
+
+```markdown
+### Changed
+
+  - Added generic parameter type that extends java.lang.Comparable to type com.github.starnowski.posjsonhelper.hibernate6.operators.JsonArrayFunction [160](https://github.com/starnowski/posjsonhelper/issues/160)
+```
+
+Important! Describe only changes related to code that visibility is public (method, type, properties, type properties).
+If the visibility was changed then this also has to be mentioned in CHANGELOG.md file.
