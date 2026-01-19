@@ -200,7 +200,7 @@ Try to group changes to fit below sections:
 - Changed
 - Removed
 
-To every entry add at the end the link to Github issue like on below example:
+To every entry add at the end the link to GitHub issue like on below example:
 
 Below example with Github issue with id 160.
 
