@@ -49,7 +49,10 @@ TODO
 
 #### $top
 
-The `$top` operator specifies the maximum number of items to return. The `core` module translates this into a MongoDB `$limit` aggregation stage.
+The `$top` operator specifies the maximum number of items to return. The `core` module translates this into a MongoDB aggregation stage.
+
+**Translation Details:**
+- **Positive values:** Translates to a `$limit` aggregation stage.
 
 **Usage:**
 
