@@ -209,3 +209,6 @@ Below example with Github issue with id 160.
 
   - Added generic parameter type that extends java.lang.Comparable to type com.github.starnowski.posjsonhelper.hibernate6.operators.JsonArrayFunction [160](https://github.com/starnowski/posjsonhelper/issues/160)
 ```
+
+Important! Describe only changes related to code that visibility is public (method, type, properties, type properties).
+If the visibility was changed then this also has to be mentioned in CHANGELOG.md file.
