@@ -1,0 +1,5 @@
+{
+  "$sort": {
+    "child1.someString": -1
+  }
+}
