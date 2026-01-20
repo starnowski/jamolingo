@@ -45,7 +45,35 @@ Bson projectStage = result.getStageObject();
 TODO
 
 #### $orderby
-TODO
+
+The `$orderby` operator specifies the sort order of the returned items. The `core` module translates this into a MongoDB aggregation stage.
+
+**Translation Details:**
+- Translates to a `$sort` aggregation stage.
+
+**Usage:**
+
+The `OdataOrderByToMongoSortParser` class is responsible for this translation.
+
+```java
+import com.github.starnowski.jamolingo.orderby.OdataOrderByToMongoSortParser;
+import com.github.starnowski.jamolingo.orderby.OrderByOperatorResult;
+import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
+// ... other imports
+
+// 1. Initialize the parser
+OdataOrderByToMongoSortParser parser = new OdataOrderByToMongoSortParser();
+
+// 2. Obtain the OrderByOption from the Olingo UriInfo
+OrderByOption orderByOption = uriInfo.getOrderByOption();
+
+// 3. Parse the option
+OrderByOperatorResult result = parser.parse(orderByOption);
+
+// 4. Use the result in your MongoDB aggregation pipeline
+List<Bson> stages = result.getStageObjects(); 
+// e.g. collection.aggregate(stages);
+```
 
 #### $top
 

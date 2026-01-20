@@ -117,4 +117,37 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
                 ["edm/edm1.xml"  , ["plainString"], false]
         ]
     }
+
+    @Unroll
+    def "should return expected selected fields"() {
+        given:
+        Edm edm = loadEmdProvider(edmConfigFile)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("Items",
+                        "\$select=" +
+                                selectFields.stream().filter(Objects::nonNull)
+                                        .filter(s -> !s.trim().isEmpty())
+                                        .collect(Collectors.joining(","))
+                        , null, null)
+        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+
+        when:
+        def result = tested.parse(uriInfo.getSelectOption())
+
+        then:
+        result.getSelectedFields() == expectedSelectedFields as Set
+
+        where:
+        [edmConfigFile, selectFields, expectedSelectedFields] << selectedFieldsTestCases()
+    }
+
+    static selectedFieldsTestCases() {
+        [
+                ["edm/edm1.xml"  , ["plainString"], ["plainString"]],
+                ["edm/edm1.xml"  , ["*"], []],
+                ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode"]],
+                ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses"], ["plainString", "Name", "Addresses"]]
+        ]
+    }
 }

@@ -1,0 +1,6 @@
+{
+  "$sort": {
+    "plainString": 1,
+    "Name": -1
+  }
+}
