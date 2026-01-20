@@ -28,7 +28,7 @@ A low-level helper that handles the actual transformation of Java objects to JSO
 <dependency>
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>json</artifactId>
-    <version>0.1.0</version>
+    <version>0.2.0</version>
 </dependency>
 ```
 
