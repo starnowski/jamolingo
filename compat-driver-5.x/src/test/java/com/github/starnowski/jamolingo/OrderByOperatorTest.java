@@ -34,9 +34,18 @@ public class OrderByOperatorTest extends AbstractItTest {
   @MethodSource("provideShouldReturnSortedDocuments")
   @MongoSetup(
       mongoDocuments = {
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm1.json"), // plainString: "example1"
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm3.json"), // plainString: "Sample String"
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm5.json")  // plainString: "another example"
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/edm1.json"), // plainString: "example1"
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/edm3.json"), // plainString: "Sample String"
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/edm5.json") // plainString: "another example"
       })
   public void shouldReturnSortedDocuments(String orderByClause, String[] expectedOrder)
       throws Exception {
@@ -46,7 +55,8 @@ public class OrderByOperatorTest extends AbstractItTest {
     Edm edm = loadEmdProvider("edm/edm1.xml");
 
     UriInfo uriInfo =
-        new Parser(edm, OData.newInstance()).parseUri("Items", "$orderby=" + orderByClause, null, null);
+        new Parser(edm, OData.newInstance())
+            .parseUri("Items", "$orderby=" + orderByClause, null, null);
     OdataOrderByToMongoSortParser parser = new OdataOrderByToMongoSortParser();
 
     // WHEN
@@ -59,18 +69,25 @@ public class OrderByOperatorTest extends AbstractItTest {
     // THEN
     Assertions.assertEquals(expectedOrder.length, results.size());
     for (int i = 0; i < expectedOrder.length; i++) {
-        Assertions.assertEquals(expectedOrder[i], results.get(i).getString("plainString"));
+      Assertions.assertEquals(expectedOrder[i], results.get(i).getString("plainString"));
     }
   }
 
   private static Stream<Arguments> provideShouldReturnSortedDocuments() {
     return Stream.of(
-        Arguments.of("plainString asc", new String[]{"Sample String", "another example", "example1"}), // Default mongo sort order might be case sensitive? "Sample String" (S) < "another example" (a) < "example1" (e) ? No, 'S' is 83, 'a' is 97. So "Sample String" < "another example"
-        // Wait, "another example" starts with 'a', "example1" starts with 'e', "Sample String" starts with 'S'.
+        Arguments.of(
+            "plainString asc",
+            new String[] {
+              "Sample String", "another example", "example1"
+            }), // Default mongo sort order might be case sensitive? "Sample String" (S) < "another
+        // example" (a) < "example1" (e) ? No, 'S' is 83, 'a' is 97. So "Sample String" <
+        // "another example"
+        // Wait, "another example" starts with 'a', "example1" starts with 'e', "Sample String"
+        // starts with 'S'.
         // ASCII: 'S' (83) < 'a' (97) < 'e' (101).
         // So ascending: "Sample String", "another example", "example1"
-        
-        Arguments.of("plainString desc", new String[]{"example1", "another example", "Sample String"})
-    );
+
+        Arguments.of(
+            "plainString desc", new String[] {"example1", "another example", "Sample String"}));
   }
 }
