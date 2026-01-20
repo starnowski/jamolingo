@@ -2,6 +2,7 @@ package com.github.starnowski.jamolingo.orderby;
 
 import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.context.EdmMongoContextFacade;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -39,7 +40,8 @@ public class OdataOrderByToMongoSortParser {
   public OrderByOperatorResult parse(
       OrderByOption orderByOption, EdmMongoContextFacade edmMongoContextFacade) {
     if (orderByOption == null || orderByOption.getOrders().isEmpty()) {
-      return new DefaultOrderByOperatorResult(Collections.emptyList(), false);
+      return new DefaultOrderByOperatorResult(
+          Collections.emptyList(), false, Collections.emptyList());
     }
 
     Map<String, Object> sortFields = new LinkedHashMap<>();
@@ -57,17 +59,22 @@ public class OdataOrderByToMongoSortParser {
     }
 
     return new DefaultOrderByOperatorResult(
-        Collections.singletonList(new Document("$sort", new Document(sortFields))), true);
+        Collections.singletonList(new Document("$sort", new Document(sortFields))),
+        true,
+        new ArrayList<>(sortFields.keySet()));
   }
 
   private static class DefaultOrderByOperatorResult implements OrderByOperatorResult {
 
     private final List<Bson> stageObjects;
     private final boolean present;
+    private final List<String> usedMongoDocumentProperties;
 
-    private DefaultOrderByOperatorResult(List<Bson> stageObjects, boolean present) {
+    private DefaultOrderByOperatorResult(
+        List<Bson> stageObjects, boolean present, List<String> usedMongoDocumentProperties) {
       this.stageObjects = stageObjects;
       this.present = present;
+      this.usedMongoDocumentProperties = usedMongoDocumentProperties;
     }
 
     @Override
@@ -77,15 +84,7 @@ public class OdataOrderByToMongoSortParser {
 
     @Override
     public List<String> getUsedMongoDocumentProperties() {
-      // Logic to extract used properties could be added here if needed,
-      // for now we return empty list as in other basic implementations if not strictly required
-      // or we can extract keys from the sort document if we kept it accessible.
-      // Given the interface, strictly we should return the fields used in sort.
-      // But looking at OdataSkipToMongoSkipParser, it returns empty list.
-      // OdataSelectToMongoProjectParser returns selected fields.
-      // Let's return empty list for now to keep it simple, unless I want to parse the stageObjects
-      // back.
-      return Collections.emptyList();
+      return usedMongoDocumentProperties;
     }
 
     @Override

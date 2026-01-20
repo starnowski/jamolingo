@@ -65,4 +65,31 @@ class OdataOrderByToMongoSortParserTest extends AbstractSpecification {
                 ["orderby/stages/case3.json", "edm/edm2_with_nested_collections.xml", "plainString asc,Name desc"]
         ]
     }
+
+    @Unroll
+    def "should return expected used mongo document properties"() {
+        given:
+        Edm edm = loadEmdProvider(edmConfigFile)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("Items", "\$orderby=" + orderByClause, null, null)
+        OdataOrderByToMongoSortParser tested = new OdataOrderByToMongoSortParser()
+
+        when:
+        def result = tested.parse(uriInfo.getOrderByOption())
+
+        then:
+        result.getUsedMongoDocumentProperties() == expectedUsedProperties
+
+        where:
+        [edmConfigFile, orderByClause, expectedUsedProperties] << usedPropertiesTestCases()
+    }
+
+    static usedPropertiesTestCases() {
+        [
+                ["edm/edm1.xml", "plainString", ["plainString"]],
+                ["edm/edm1.xml", "plainString desc", ["plainString"]],
+                ["edm/edm2_with_nested_collections.xml", "plainString asc,Name desc", ["plainString", "Name"]]
+        ]
+    }
 }
