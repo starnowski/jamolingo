@@ -79,7 +79,35 @@ List<Bson> stages = result.getStageObjects();
 ```
 
 #### $skip
-TODO
+
+The `$skip` operator specifies the number of items to skip at the start of the collection. The `core` module translates this into a MongoDB aggregation stage.
+
+**Translation Details:**
+- Translates to a `$skip` aggregation stage.
+
+**Usage:**
+
+The `OdataSkipToMongoSkipParser` class is responsible for this translation.
+
+```java
+import com.github.starnowski.jamolingo.skip.OdataSkipToMongoSkipParser;
+import com.github.starnowski.jamolingo.skip.SkipOperatorResult;
+import org.apache.olingo.server.api.uri.queryoption.SkipOption;
+// ... other imports
+
+// 1. Initialize the parser
+OdataSkipToMongoSkipParser parser = new OdataSkipToMongoSkipParser();
+
+// 2. Obtain the SkipOption from the Olingo UriInfo
+SkipOption skipOption = uriInfo.getSkipOption();
+
+// 3. Parse the option
+SkipOperatorResult result = parser.parse(skipOption);
+
+// 4. Use the result in your MongoDB aggregation pipeline
+List<Bson> stages = result.getStageObjects(); 
+// e.g. collection.aggregate(stages);
+```
 
 #### $apply
 TODO

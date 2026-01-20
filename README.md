@@ -1,4 +1,5 @@
 [![Java CI with Maven](https://github.com/starnowski/jamolingo/actions/workflows/maven.yml/badge.svg)](https://github.com/starnowski/jamolingo/actions/workflows/maven.yml)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.starnowski.jamolingo/parent.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.github.starnowski.jamolingo%22%20AND%20a:%22parent%22)
 
 # jamolingo
 
