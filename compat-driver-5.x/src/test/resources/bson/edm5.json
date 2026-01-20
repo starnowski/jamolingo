@@ -1,0 +1,9 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "AAAAAAAAAAAAAAAAAAAAAA==",
+      "subType": "04"
+    }
+  },
+  "plainString": "another example"
+}
