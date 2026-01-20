@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Module
+*   `com.github.starnowski.jamolingo.skip.OdataSkipToMongoSkipParser` ([#9](https://github.com/starnowski/jamolingo/issues/9))
+*   `com.github.starnowski.jamolingo.skip.SkipOperatorResult` ([#9](https://github.com/starnowski/jamolingo/issues/9))
 *   `com.github.starnowski.jamolingo.top.OdataTopToMongoLimitParser` ([#7](https://github.com/starnowski/jamolingo/issues/7))
 *   `com.github.starnowski.jamolingo.top.TopOperatorResult` ([#7](https://github.com/starnowski/jamolingo/issues/7))
 
