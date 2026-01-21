@@ -1,4 +1,4 @@
-package com.github.starnowski.jamolingo
+package com.github.starnowski.jamolingo.core
 
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.commons.api.edm.provider.CsdlEdmProvider

@@ -1,12 +1,6 @@
-package com.github.starnowski.jamolingo.context
+package com.github.starnowski.jamolingo.core.mapping
 
-import com.github.starnowski.jamolingo.AbstractSpecification
-import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMapping
-import com.github.starnowski.jamolingo.core.mapping.CircularStrategy
-import com.github.starnowski.jamolingo.core.mapping.EntityMapping
-import com.github.starnowski.jamolingo.core.mapping.ODataMongoMapping
-import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory
-import com.github.starnowski.jamolingo.core.mapping.PropertyMapping
+import com.github.starnowski.jamolingo.core.AbstractSpecification
 import org.apache.olingo.commons.api.edm.Edm
 import spock.lang.Unroll
 
