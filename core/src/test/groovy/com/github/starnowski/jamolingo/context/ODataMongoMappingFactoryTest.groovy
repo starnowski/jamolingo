@@ -3,6 +3,8 @@ package com.github.starnowski.jamolingo.context
 import com.github.starnowski.jamolingo.AbstractSpecification
 import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMapping
 import com.github.starnowski.jamolingo.core.mapping.CircularStrategy
+import com.github.starnowski.jamolingo.core.mapping.ODataMongoMapping
+import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory
 import org.apache.olingo.commons.api.edm.Edm
 import spock.lang.Unroll
 

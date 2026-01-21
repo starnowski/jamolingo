@@ -148,8 +148,8 @@ The library requires a mapping between your OData EDM and your MongoDB database 
 The `ODataMongoMappingFactory` builds a mapping configuration from your Olingo `Edm` or `EdmSchema` provider.
 
 ```java
-import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory;
-import com.github.starnowski.jamolingo.context.ODataMongoMapping;
+import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory;
+import com.github.starnowski.jamolingo.core.mapping.ODataMongoMapping;
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContext;
 

@@ -1,4 +1,4 @@
-package com.github.starnowski.jamolingo.context;
+package com.github.starnowski.jamolingo.core.mapping;
 
 import static com.github.starnowski.jamolingo.core.utils.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
 
@@ -7,8 +7,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMapping;
-import com.github.starnowski.jamolingo.core.mapping.CircularStrategy;
+import com.github.starnowski.jamolingo.context.EntityMapping;
+import com.github.starnowski.jamolingo.context.PropertyMapping;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 
