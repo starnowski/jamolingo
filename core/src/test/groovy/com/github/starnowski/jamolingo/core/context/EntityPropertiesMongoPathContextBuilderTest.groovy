@@ -3,7 +3,7 @@ package com.github.starnowski.jamolingo.core.context
 import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMapping
 import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMappingRecord
 import com.github.starnowski.jamolingo.core.mapping.CircularStrategy
-import com.github.starnowski.jamolingo.context.EntityMapping
+import com.github.starnowski.jamolingo.core.mapping.EntityMapping
 import com.github.starnowski.jamolingo.context.MongoPathEntry
 import com.github.starnowski.jamolingo.context.PropertyMapping
 import spock.lang.Specification

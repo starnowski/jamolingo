@@ -1,7 +1,7 @@
 package com.github.starnowski.jamolingo;
 
 import com.github.starnowski.jamolingo.common.json.JSONOverrideHelper;
-import com.github.starnowski.jamolingo.context.EntityMapping;
+import com.github.starnowski.jamolingo.core.mapping.EntityMapping;
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
 import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory;
 import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade;

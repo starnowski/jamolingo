@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.github.starnowski.jamolingo.context.EntityMapping;
 import com.github.starnowski.jamolingo.context.PropertyMapping;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;

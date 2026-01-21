@@ -2,7 +2,6 @@ package com.github.starnowski.jamolingo.core.mapping;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.starnowski.jamolingo.context.EntityMapping;
 
 import java.util.Map;
 import java.util.Objects;
