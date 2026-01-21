@@ -14,12 +14,12 @@ import java.nio.file.Paths
 
 class AbstractSpecification extends Specification {
 
-    def Bson loadBsonFromFile(String filePath) {
+    protected Bson loadBsonFromFile(String filePath) {
         String bson = Files.readString(Paths.get(new File(getClass().getClassLoader().getResource(filePath).getFile()).getPath()))
         Document.parse(bson)
     }
 
-    def Edm  loadEmdProvider(String filePath){
+    protected Edm  loadEmdProvider(String filePath){
         Reader reader = new InputStreamReader(
                 getClass().getClassLoader().getResourceAsStream(filePath),
                 StandardCharsets.UTF_8
