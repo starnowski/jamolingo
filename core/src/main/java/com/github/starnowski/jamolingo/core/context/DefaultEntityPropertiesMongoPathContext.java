@@ -1,10 +1,5 @@
 package com.github.starnowski.jamolingo.core.context;
 
-import com.github.starnowski.jamolingo.context.DefaultEdmPathContextSearch;
-import com.github.starnowski.jamolingo.context.EdmPathContextSearch;
-import com.github.starnowski.jamolingo.context.MongoPathEntry;
-import com.github.starnowski.jamolingo.context.MongoPathResolution;
-
 import static com.github.starnowski.jamolingo.core.utils.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
 
 import java.util.Collections;

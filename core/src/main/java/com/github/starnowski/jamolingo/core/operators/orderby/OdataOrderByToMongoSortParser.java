@@ -1,7 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.orderby;
 
-import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;

@@ -1,4 +1,4 @@
-package com.github.starnowski.jamolingo.context;
+package com.github.starnowski.jamolingo.core.context;
 
 /** Interface for configuring search parameters when resolving EDM paths to Mongo paths. */
 public interface EdmPathContextSearch {

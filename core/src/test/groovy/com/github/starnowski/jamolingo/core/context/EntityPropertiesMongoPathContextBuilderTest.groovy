@@ -4,8 +4,7 @@ import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMapping
 import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMappingRecord
 import com.github.starnowski.jamolingo.core.mapping.CircularStrategy
 import com.github.starnowski.jamolingo.core.mapping.EntityMapping
-import com.github.starnowski.jamolingo.context.MongoPathEntry
-import com.github.starnowski.jamolingo.context.PropertyMapping
+import com.github.starnowski.jamolingo.core.mapping.PropertyMapping
 import spock.lang.Specification
 import spock.lang.Unroll
 

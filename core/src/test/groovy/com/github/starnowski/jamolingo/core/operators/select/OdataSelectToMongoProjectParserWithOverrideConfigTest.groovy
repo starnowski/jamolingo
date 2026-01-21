@@ -2,7 +2,7 @@ package com.github.starnowski.jamolingo.core.operators.select
 
 import com.github.starnowski.jamolingo.AbstractSpecification
 import com.github.starnowski.jamolingo.common.json.JSONOverrideHelper
-import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade
+import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.core.mapping.EntityMapping
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder
 import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory

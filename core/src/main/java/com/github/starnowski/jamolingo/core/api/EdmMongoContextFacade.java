@@ -1,6 +1,6 @@
 package com.github.starnowski.jamolingo.core.api;
 
-import com.github.starnowski.jamolingo.context.MongoPathResolution;
+import com.github.starnowski.jamolingo.core.context.MongoPathResolution;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 
 /** Facade for resolving Mongo paths from EDM paths. */

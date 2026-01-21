@@ -1,9 +1,5 @@
 package com.github.starnowski.jamolingo.core.context;
 
-import com.github.starnowski.jamolingo.context.EdmPathContextSearch;
-import com.github.starnowski.jamolingo.context.MongoPathEntry;
-import com.github.starnowski.jamolingo.context.MongoPathResolution;
-
 import java.util.Map;
 
 /** Context for resolving EDM property paths to MongoDB field paths. */
