@@ -1,6 +1,6 @@
 package com.github.starnowski.jamolingo.context;
 
-import static com.github.starnowski.jamolingo.context.Constants.MONGO_HARDCODED_BSON_DOCUMENT_NESTING_LIMIT;
+import static com.github.starnowski.jamolingo.core.utils.Constants.MONGO_HARDCODED_BSON_DOCUMENT_NESTING_LIMIT;
 
 import java.util.Objects;
 
