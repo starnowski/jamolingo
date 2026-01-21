@@ -1,4 +1,8 @@
-package com.github.starnowski.jamolingo.context;
+package com.github.starnowski.jamolingo.core.context;
+
+import com.github.starnowski.jamolingo.context.EdmPathContextSearch;
+import com.github.starnowski.jamolingo.context.MongoPathEntry;
+import com.github.starnowski.jamolingo.context.MongoPathResolution;
 
 import java.util.Map;
 

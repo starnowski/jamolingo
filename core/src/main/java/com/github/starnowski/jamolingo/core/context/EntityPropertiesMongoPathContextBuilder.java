@@ -1,4 +1,6 @@
-package com.github.starnowski.jamolingo.context;
+package com.github.starnowski.jamolingo.core.context;
+
+import com.github.starnowski.jamolingo.context.*;
 
 import static com.github.starnowski.jamolingo.core.utils.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
 

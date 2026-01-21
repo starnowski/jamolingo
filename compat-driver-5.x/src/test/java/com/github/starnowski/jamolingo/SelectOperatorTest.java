@@ -1,6 +1,6 @@
 package com.github.starnowski.jamolingo;
 
-import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder;
+import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory;
 import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;

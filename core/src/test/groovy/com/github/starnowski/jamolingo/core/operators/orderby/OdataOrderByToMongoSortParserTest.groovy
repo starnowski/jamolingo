@@ -2,7 +2,7 @@ package com.github.starnowski.jamolingo.core.operators.orderby
 
 import com.github.starnowski.jamolingo.AbstractSpecification
 import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade
-import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder
+import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData

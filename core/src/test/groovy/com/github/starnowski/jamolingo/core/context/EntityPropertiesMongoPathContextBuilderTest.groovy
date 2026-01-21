@@ -1,5 +1,11 @@
-package com.github.starnowski.jamolingo.context
+package com.github.starnowski.jamolingo.core.context
 
+import com.github.starnowski.jamolingo.context.CircularReferenceMapping
+import com.github.starnowski.jamolingo.context.CircularReferenceMappingRecord
+import com.github.starnowski.jamolingo.context.CircularStrategy
+import com.github.starnowski.jamolingo.context.EntityMapping
+import com.github.starnowski.jamolingo.context.MongoPathEntry
+import com.github.starnowski.jamolingo.context.PropertyMapping
 import spock.lang.Specification
 import spock.lang.Unroll
 

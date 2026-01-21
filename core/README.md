@@ -150,22 +150,22 @@ The `ODataMongoMappingFactory` builds a mapping configuration from your Olingo `
 ```java
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory;
 import com.github.starnowski.jamolingo.context.ODataMongoMapping;
-import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder;
-import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContext;
+import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
+import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContext;
 
 // 1. Load your Olingo Edm
-Edm edm = ...; 
+Edm edm = ...;
 
-// 2. Build the initial mapping for a specific schema
-ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
-ODataMongoMapping odataMapping = factory.build(edm.getSchema("MyNamespace"));
+        // 2. Build the initial mapping for a specific schema
+        ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
+        ODataMongoMapping odataMapping = factory.build(edm.getSchema("MyNamespace"));
 
-// 3. Get mapping for a specific entity
-var entityMapping = odataMapping.getEntities().get("MyEntityName");
+        // 3. Get mapping for a specific entity
+        var entityMapping = odataMapping.getEntities().get("MyEntityName");
 
-// 4. Build the context required for parsing
-EntityPropertiesMongoPathContextBuilder contextBuilder = new EntityPropertiesMongoPathContextBuilder();
-EntityPropertiesMongoPathContext context = contextBuilder.build(entityMapping);
+        // 4. Build the context required for parsing
+        EntityPropertiesMongoPathContextBuilder contextBuilder = new EntityPropertiesMongoPathContextBuilder();
+        EntityPropertiesMongoPathContext context = contextBuilder.build(entityMapping);
 ```
 
 ### Overriding Configuration
