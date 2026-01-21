@@ -1,4 +1,4 @@
-package com.github.starnowski.jamolingo.select;
+package com.github.starnowski.jamolingo.core.operators;
 
 import java.util.List;
 import org.bson.conversions.Bson;

@@ -1,6 +1,6 @@
 package com.github.starnowski.jamolingo.top;
 
-import com.github.starnowski.jamolingo.select.OlingoOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.OlingoOperatorResult;
 
 /** Represents the result of processing an OData $top system query option. */
 public interface TopOperatorResult extends OlingoOperatorResult {

@@ -1,6 +1,6 @@
 package com.github.starnowski.jamolingo.skip;
 
-import com.github.starnowski.jamolingo.select.OlingoOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.OlingoOperatorResult;
 
 /** Represents the result of processing an OData $skip system query option. */
 public interface SkipOperatorResult extends OlingoOperatorResult {

@@ -6,6 +6,7 @@ import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.context.EntityMapping
 import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory
+import com.github.starnowski.jamolingo.core.operators.orderby.select.OdataSelectToMongoProjectParser
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
 import org.apache.olingo.server.api.uri.UriInfo
@@ -38,7 +39,7 @@ class OdataSelectToMongoProjectParserWithOverrideConfigTest extends AbstractSpec
                                             .filter(s -> !s.trim().isEmpty())
                                             .collect(Collectors.joining(","))
                             , null, null)
-            OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
 
         when:
             def result = tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null))

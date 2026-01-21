@@ -15,8 +15,8 @@ The `$select` operator allows clients to specify a subset of properties to be re
 The `OdataSelectToMongoProjectParser` class is responsible for this translation.
 
 ```java
-import com.github.starnowski.jamolingo.select.OdataSelectToMongoProjectParser;
-import com.github.starnowski.jamolingo.select.SelectOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.orderby.select.OdataSelectToMongoProjectParser;
+import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 // ... other imports
 
