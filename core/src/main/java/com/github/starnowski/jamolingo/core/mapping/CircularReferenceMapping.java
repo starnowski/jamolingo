@@ -1,34 +1,37 @@
-package com.github.starnowski.jamolingo.context;
+package com.github.starnowski.jamolingo.core.mapping;
 
 import java.util.Objects;
 
-/** Represents an immutable record of a circular reference mapping configuration. */
-public class CircularReferenceMappingRecord {
+/** Represents a configuration for mapping circular references in EDM. */
+public class CircularReferenceMapping {
   /**
-   * Constructs a new CircularReferenceMappingRecord.
+   * Constructs a new CircularReferenceMapping.
    *
    * @param anchorEdmPath the EDM path where recursion re-anchors
    * @param maxDepth the maximum allowed depth for recursion
    * @param strategy the strategy to use for handling the circular reference
    */
-  public CircularReferenceMappingRecord(
+  public CircularReferenceMapping(
       String anchorEdmPath, Integer maxDepth, CircularStrategy strategy) {
     this.anchorEdmPath = anchorEdmPath;
     this.maxDepth = maxDepth;
     this.strategy = strategy;
   }
 
+  /** Default constructor. */
+  public CircularReferenceMapping() {}
+
   /**
-   * Creates a new builder for CircularReferenceMappingRecord.
+   * Creates a new builder for CircularReferenceMapping.
    *
    * @return a new builder instance
    */
-  public static CircularReferenceMappingRecordBuilder builder() {
-    return new CircularReferenceMappingRecordBuilder();
+  public static CircularReferenceMappingBuilder builder() {
+    return new CircularReferenceMappingBuilder();
   }
 
-  /** Builder for CircularReferenceMappingRecord. */
-  public static final class CircularReferenceMappingRecordBuilder {
+  /** Builder for CircularReferenceMapping. */
+  public static final class CircularReferenceMappingBuilder {
     /** Resolution strategy */
     private CircularStrategy strategy;
 
@@ -44,7 +47,7 @@ public class CircularReferenceMappingRecord {
      * @param strategy the strategy
      * @return the builder instance
      */
-    public CircularReferenceMappingRecordBuilder withStrategy(CircularStrategy strategy) {
+    public CircularReferenceMappingBuilder withStrategy(CircularStrategy strategy) {
       this.strategy = strategy;
       return this;
     }
@@ -55,7 +58,7 @@ public class CircularReferenceMappingRecord {
      * @param anchorEdmPath the EDM path
      * @return the builder instance
      */
-    public CircularReferenceMappingRecordBuilder withAnchorEdmPath(String anchorEdmPath) {
+    public CircularReferenceMappingBuilder withAnchorEdmPath(String anchorEdmPath) {
       this.anchorEdmPath = anchorEdmPath;
       return this;
     }
@@ -66,25 +69,25 @@ public class CircularReferenceMappingRecord {
      * @param maxDepth the maximum depth
      * @return the builder instance
      */
-    public CircularReferenceMappingRecordBuilder withMaxDepth(Integer maxDepth) {
+    public CircularReferenceMappingBuilder withMaxDepth(Integer maxDepth) {
       this.maxDepth = maxDepth;
       return this;
     }
 
     /**
-     * Builds the CircularReferenceMappingRecord.
+     * Builds the CircularReferenceMapping.
      *
-     * @return the new record
+     * @return the new mapping configuration
      */
-    public CircularReferenceMappingRecord build() {
-      return new CircularReferenceMappingRecord(anchorEdmPath, maxDepth, strategy);
+    public CircularReferenceMapping build() {
+      return new CircularReferenceMapping(anchorEdmPath, maxDepth, strategy);
     }
   }
 
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
-    CircularReferenceMappingRecord that = (CircularReferenceMappingRecord) o;
+    CircularReferenceMapping that = (CircularReferenceMapping) o;
     return Objects.equals(anchorEdmPath, that.anchorEdmPath)
         && Objects.equals(maxDepth, that.maxDepth)
         && strategy == that.strategy;
@@ -92,7 +95,7 @@ public class CircularReferenceMappingRecord {
 
   @Override
   public String toString() {
-    return "CircularReferenceMappingRecord{"
+    return "CircularReferenceMapping{"
         + "anchorEdmPath='"
         + anchorEdmPath
         + "'"
@@ -109,7 +112,7 @@ public class CircularReferenceMappingRecord {
   }
 
   /** EDM path where recursion re-anchors Example: "Item.Addresses" */
-  private final String anchorEdmPath;
+  private String anchorEdmPath;
 
   /**
    * Returns the maximum allowed depth.
@@ -130,10 +133,10 @@ public class CircularReferenceMappingRecord {
   }
 
   /** Max allowed depth (optional) */
-  private final Integer maxDepth;
+  private Integer maxDepth;
 
   /** Resolution strategy */
-  private final CircularStrategy strategy;
+  private CircularStrategy strategy;
 
   /**
    * Returns the anchor EDM path.
@@ -142,5 +145,32 @@ public class CircularReferenceMappingRecord {
    */
   public String getAnchorEdmPath() {
     return anchorEdmPath;
+  }
+
+  /**
+   * Sets the anchor EDM path.
+   *
+   * @param anchorEdmPath the anchor path
+   */
+  public void setAnchorEdmPath(String anchorEdmPath) {
+    this.anchorEdmPath = anchorEdmPath;
+  }
+
+  /**
+   * Sets the maximum allowed depth.
+   *
+   * @param maxDepth the maximum depth
+   */
+  public void setMaxDepth(Integer maxDepth) {
+    this.maxDepth = maxDepth;
+  }
+
+  /**
+   * Sets the resolution strategy.
+   *
+   * @param strategy the strategy
+   */
+  public void setStrategy(CircularStrategy strategy) {
+    this.strategy = strategy;
   }
 }

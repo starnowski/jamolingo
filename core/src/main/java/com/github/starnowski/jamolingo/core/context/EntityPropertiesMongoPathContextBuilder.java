@@ -1,6 +1,9 @@
 package com.github.starnowski.jamolingo.core.context;
 
 import com.github.starnowski.jamolingo.context.*;
+import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMapping;
+import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMappingRecord;
+import com.github.starnowski.jamolingo.core.mapping.CircularStrategy;
 
 import static com.github.starnowski.jamolingo.core.utils.Constants.ODATA_PATH_SEPARATOR_CHARACTER;
 

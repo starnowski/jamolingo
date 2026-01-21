@@ -2,6 +2,8 @@ package com.github.starnowski.jamolingo.context;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMapping;
+
 import java.util.Map;
 import java.util.Objects;
 

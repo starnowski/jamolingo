@@ -1,5 +1,7 @@
 package com.github.starnowski.jamolingo.context;
 
+import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMappingRecord;
+
 import java.util.Objects;
 
 public final class MongoPathEntry {

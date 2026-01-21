@@ -1,7 +1,7 @@
 package com.github.starnowski.jamolingo.core.context
 
-import com.github.starnowski.jamolingo.context.CircularReferenceMappingRecord
-import com.github.starnowski.jamolingo.context.CircularStrategy
+import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMappingRecord
+import com.github.starnowski.jamolingo.core.mapping.CircularStrategy
 import com.github.starnowski.jamolingo.context.DefaultEdmPathContextSearch
 import com.github.starnowski.jamolingo.context.MongoPathEntry
 import spock.lang.Specification

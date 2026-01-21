@@ -6,6 +6,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+
+import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMapping;
+import com.github.starnowski.jamolingo.core.mapping.CircularStrategy;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.commons.api.edm.constants.EdmTypeKind;
 

@@ -1,4 +1,4 @@
-package com.github.starnowski.jamolingo.context;
+package com.github.starnowski.jamolingo.core.mapping;
 
 /** Strategy for handling circular references in EDM mapping. */
 public enum CircularStrategy {
