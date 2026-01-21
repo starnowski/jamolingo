@@ -1,9 +1,9 @@
 package com.github.starnowski.jamolingo;
 
-import com.github.starnowski.jamolingo.junit5.MongoDocument;
-import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser;
 import com.github.starnowski.jamolingo.core.operators.skip.SkipOperatorResult;
+import com.github.starnowski.jamolingo.junit5.MongoDocument;
+import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;

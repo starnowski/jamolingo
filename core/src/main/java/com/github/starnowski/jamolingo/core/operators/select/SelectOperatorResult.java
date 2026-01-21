@@ -1,8 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.select;
 
-import java.util.Set;
-
 import com.github.starnowski.jamolingo.core.operators.OlingoOperatorResult;
+import java.util.Set;
 import org.bson.conversions.Bson;
 
 /** Represents the result of processing an OData $select system query option. */

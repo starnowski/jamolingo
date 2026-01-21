@@ -1,12 +1,12 @@
 package com.github.starnowski.jamolingo;
 
-import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder;
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory;
+import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
+import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
-import com.github.starnowski.jamolingo.core.operators.orderby.select.OdataSelectToMongoProjectParser;
-import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
