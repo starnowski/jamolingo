@@ -15,29 +15,28 @@ The `$select` operator allows clients to specify a subset of properties to be re
 The `OdataSelectToMongoProjectParser` class is responsible for this translation.
 
 ```java
-import com.github.starnowski.jamolingo.select.OdataSelectToMongoProjectParser;
-import com.github.starnowski.jamolingo.select.SelectOperatorResult;
-import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.operators.orderby.select.OdataSelectToMongoProjectParser;
+import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 // ... other imports
 
 // 1. Initialize the parser
 OdataSelectToMongoProjectParser parser = new OdataSelectToMongoProjectParser();
 
-// 2. Obtain the SelectOption from the Olingo UriInfo
-SelectOption selectOption = uriInfo.getSelectOption();
+        // 2. Obtain the SelectOption from the Olingo UriInfo
+        SelectOption selectOption = uriInfo.getSelectOption();
 
 // 3. (Optional) Provide a context facade if you have custom mappings
 // EdmMongoContextFacade contextFacade = ...; 
 
-// 4. Parse the option
+        // 4. Parse the option
 // If using default context:
 // SelectOperatorResult result = parser.parse(selectOption);
 // If using custom context:
-SelectOperatorResult result = parser.parse(selectOption, contextFacade);
+        SelectOperatorResult result = parser.parse(selectOption, contextFacade);
 
-// 5. Use the result in your MongoDB aggregation pipeline
-Bson projectStage = result.getStageObject(); 
+        // 5. Use the result in your MongoDB aggregation pipeline
+        Bson projectStage = result.getStageObject();
 // e.g. collection.aggregate(Arrays.asList(matchStage, projectStage));
 ```
 
@@ -56,22 +55,22 @@ The `$orderby` operator specifies the sort order of the returned items. The `cor
 The `OdataOrderByToMongoSortParser` class is responsible for this translation.
 
 ```java
-import com.github.starnowski.jamolingo.orderby.OdataOrderByToMongoSortParser;
-import com.github.starnowski.jamolingo.orderby.OrderByOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
+import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 // ... other imports
 
 // 1. Initialize the parser
 OdataOrderByToMongoSortParser parser = new OdataOrderByToMongoSortParser();
 
-// 2. Obtain the OrderByOption from the Olingo UriInfo
-OrderByOption orderByOption = uriInfo.getOrderByOption();
+        // 2. Obtain the OrderByOption from the Olingo UriInfo
+        OrderByOption orderByOption = uriInfo.getOrderByOption();
 
-// 3. Parse the option
-OrderByOperatorResult result = parser.parse(orderByOption);
+        // 3. Parse the option
+        OrderByOperatorResult result = parser.parse(orderByOption);
 
-// 4. Use the result in your MongoDB aggregation pipeline
-List<Bson> stages = result.getStageObjects(); 
+        // 4. Use the result in your MongoDB aggregation pipeline
+        List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
 ```
 
@@ -87,22 +86,22 @@ The `$top` operator specifies the maximum number of items to return. The `core` 
 The `OdataTopToMongoLimitParser` class is responsible for this translation.
 
 ```java
-import com.github.starnowski.jamolingo.top.OdataTopToMongoLimitParser;
-import com.github.starnowski.jamolingo.top.TopOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.top.OdataTopToMongoLimitParser;
+import com.github.starnowski.jamolingo.core.operators.top.TopOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
 // ... other imports
 
 // 1. Initialize the parser
 OdataTopToMongoLimitParser parser = new OdataTopToMongoLimitParser();
 
-// 2. Obtain the TopOption from the Olingo UriInfo
-TopOption topOption = uriInfo.getTopOption();
+        // 2. Obtain the TopOption from the Olingo UriInfo
+        TopOption topOption = uriInfo.getTopOption();
 
-// 3. Parse the option
-TopOperatorResult result = parser.parse(topOption);
+        // 3. Parse the option
+        TopOperatorResult result = parser.parse(topOption);
 
-// 4. Use the result in your MongoDB aggregation pipeline
-List<Bson> stages = result.getStageObjects(); 
+        // 4. Use the result in your MongoDB aggregation pipeline
+        List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
 ```
 
@@ -118,22 +117,22 @@ The `$skip` operator specifies the number of items to skip at the start of the c
 The `OdataSkipToMongoSkipParser` class is responsible for this translation.
 
 ```java
-import com.github.starnowski.jamolingo.skip.OdataSkipToMongoSkipParser;
-import com.github.starnowski.jamolingo.skip.SkipOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser;
+import com.github.starnowski.jamolingo.core.operators.skip.SkipOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 // ... other imports
 
 // 1. Initialize the parser
 OdataSkipToMongoSkipParser parser = new OdataSkipToMongoSkipParser();
 
-// 2. Obtain the SkipOption from the Olingo UriInfo
-SkipOption skipOption = uriInfo.getSkipOption();
+        // 2. Obtain the SkipOption from the Olingo UriInfo
+        SkipOption skipOption = uriInfo.getSkipOption();
 
-// 3. Parse the option
-SkipOperatorResult result = parser.parse(skipOption);
+        // 3. Parse the option
+        SkipOperatorResult result = parser.parse(skipOption);
 
-// 4. Use the result in your MongoDB aggregation pipeline
-List<Bson> stages = result.getStageObjects(); 
+        // 4. Use the result in your MongoDB aggregation pipeline
+        List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
 ```
 
@@ -149,24 +148,24 @@ The library requires a mapping between your OData EDM and your MongoDB database 
 The `ODataMongoMappingFactory` builds a mapping configuration from your Olingo `Edm` or `EdmSchema` provider.
 
 ```java
-import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory;
-import com.github.starnowski.jamolingo.context.ODataMongoMapping;
-import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder;
-import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContext;
+import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory;
+import com.github.starnowski.jamolingo.core.mapping.ODataMongoMapping;
+import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
+import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContext;
 
 // 1. Load your Olingo Edm
-Edm edm = ...; 
+Edm edm = ...;
 
-// 2. Build the initial mapping for a specific schema
-ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
-ODataMongoMapping odataMapping = factory.build(edm.getSchema("MyNamespace"));
+        // 2. Build the initial mapping for a specific schema
+        ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
+        ODataMongoMapping odataMapping = factory.build(edm.getSchema("MyNamespace"));
 
-// 3. Get mapping for a specific entity
-var entityMapping = odataMapping.getEntities().get("MyEntityName");
+        // 3. Get mapping for a specific entity
+        var entityMapping = odataMapping.getEntities().get("MyEntityName");
 
-// 4. Build the context required for parsing
-EntityPropertiesMongoPathContextBuilder contextBuilder = new EntityPropertiesMongoPathContextBuilder();
-EntityPropertiesMongoPathContext context = contextBuilder.build(entityMapping);
+        // 4. Build the context required for parsing
+        EntityPropertiesMongoPathContextBuilder contextBuilder = new EntityPropertiesMongoPathContextBuilder();
+        EntityPropertiesMongoPathContext context = contextBuilder.build(entityMapping);
 ```
 
 ### Overriding Configuration
