@@ -86,22 +86,22 @@ The `$top` operator specifies the maximum number of items to return. The `core` 
 The `OdataTopToMongoLimitParser` class is responsible for this translation.
 
 ```java
-import com.github.starnowski.jamolingo.top.OdataTopToMongoLimitParser;
-import com.github.starnowski.jamolingo.top.TopOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.top.OdataTopToMongoLimitParser;
+import com.github.starnowski.jamolingo.core.operators.top.TopOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.TopOption;
 // ... other imports
 
 // 1. Initialize the parser
 OdataTopToMongoLimitParser parser = new OdataTopToMongoLimitParser();
 
-// 2. Obtain the TopOption from the Olingo UriInfo
-TopOption topOption = uriInfo.getTopOption();
+        // 2. Obtain the TopOption from the Olingo UriInfo
+        TopOption topOption = uriInfo.getTopOption();
 
-// 3. Parse the option
-TopOperatorResult result = parser.parse(topOption);
+        // 3. Parse the option
+        TopOperatorResult result = parser.parse(topOption);
 
-// 4. Use the result in your MongoDB aggregation pipeline
-List<Bson> stages = result.getStageObjects(); 
+        // 4. Use the result in your MongoDB aggregation pipeline
+        List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
 ```
 
@@ -117,22 +117,22 @@ The `$skip` operator specifies the number of items to skip at the start of the c
 The `OdataSkipToMongoSkipParser` class is responsible for this translation.
 
 ```java
-import com.github.starnowski.jamolingo.skip.OdataSkipToMongoSkipParser;
-import com.github.starnowski.jamolingo.skip.SkipOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser;
+import com.github.starnowski.jamolingo.core.operators.skip.SkipOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.SkipOption;
 // ... other imports
 
 // 1. Initialize the parser
 OdataSkipToMongoSkipParser parser = new OdataSkipToMongoSkipParser();
 
-// 2. Obtain the SkipOption from the Olingo UriInfo
-SkipOption skipOption = uriInfo.getSkipOption();
+        // 2. Obtain the SkipOption from the Olingo UriInfo
+        SkipOption skipOption = uriInfo.getSkipOption();
 
-// 3. Parse the option
-SkipOperatorResult result = parser.parse(skipOption);
+        // 3. Parse the option
+        SkipOperatorResult result = parser.parse(skipOption);
 
-// 4. Use the result in your MongoDB aggregation pipeline
-List<Bson> stages = result.getStageObjects(); 
+        // 4. Use the result in your MongoDB aggregation pipeline
+        List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
 ```
 

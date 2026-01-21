@@ -1,4 +1,4 @@
-package com.github.starnowski.jamolingo.skip;
+package com.github.starnowski.jamolingo.core.operators.skip;
 
 import com.github.starnowski.jamolingo.core.operators.OlingoOperatorResult;
 

@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.skip
 
 import com.github.starnowski.jamolingo.AbstractSpecification
+import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
 import org.apache.olingo.server.api.uri.UriInfo

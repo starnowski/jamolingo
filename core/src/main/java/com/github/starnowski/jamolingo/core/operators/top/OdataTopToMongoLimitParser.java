@@ -1,4 +1,4 @@
-package com.github.starnowski.jamolingo.top;
+package com.github.starnowski.jamolingo.core.operators.top;
 
 import java.util.Collections;
 import java.util.List;
