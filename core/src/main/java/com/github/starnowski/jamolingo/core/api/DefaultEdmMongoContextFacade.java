@@ -1,6 +1,10 @@
-package com.github.starnowski.jamolingo.context;
+package com.github.starnowski.jamolingo.core.api;
 
 import java.util.stream.Collectors;
+
+import com.github.starnowski.jamolingo.context.EdmPathContextSearch;
+import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContext;
+import com.github.starnowski.jamolingo.context.MongoPathResolution;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 

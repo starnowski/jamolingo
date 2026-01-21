@@ -1,7 +1,7 @@
 package com.github.starnowski.jamolingo.select
 
 import com.github.starnowski.jamolingo.AbstractSpecification
-import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade
+import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory
 import org.apache.olingo.commons.api.edm.Edm

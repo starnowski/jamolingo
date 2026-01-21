@@ -1,7 +1,7 @@
 package com.github.starnowski.jamolingo.select;
 
-import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade;
-import com.github.starnowski.jamolingo.context.EdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import java.util.*;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;

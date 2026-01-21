@@ -17,27 +17,26 @@ The `OdataSelectToMongoProjectParser` class is responsible for this translation.
 ```java
 import com.github.starnowski.jamolingo.select.OdataSelectToMongoProjectParser;
 import com.github.starnowski.jamolingo.select.SelectOperatorResult;
-import com.github.starnowski.jamolingo.context.DefaultEdmMongoContextFacade;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 // ... other imports
 
 // 1. Initialize the parser
 OdataSelectToMongoProjectParser parser = new OdataSelectToMongoProjectParser();
 
-// 2. Obtain the SelectOption from the Olingo UriInfo
-SelectOption selectOption = uriInfo.getSelectOption();
+        // 2. Obtain the SelectOption from the Olingo UriInfo
+        SelectOption selectOption = uriInfo.getSelectOption();
 
 // 3. (Optional) Provide a context facade if you have custom mappings
 // EdmMongoContextFacade contextFacade = ...; 
 
-// 4. Parse the option
+        // 4. Parse the option
 // If using default context:
 // SelectOperatorResult result = parser.parse(selectOption);
 // If using custom context:
-SelectOperatorResult result = parser.parse(selectOption, contextFacade);
+        SelectOperatorResult result = parser.parse(selectOption, contextFacade);
 
-// 5. Use the result in your MongoDB aggregation pipeline
-Bson projectStage = result.getStageObject(); 
+        // 5. Use the result in your MongoDB aggregation pipeline
+        Bson projectStage = result.getStageObject();
 // e.g. collection.aggregate(Arrays.asList(matchStage, projectStage));
 ```
 
