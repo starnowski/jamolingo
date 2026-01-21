@@ -6,6 +6,7 @@ import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.context.EntityMapping
 import com.github.starnowski.jamolingo.context.EntityPropertiesMongoPathContextBuilder
 import com.github.starnowski.jamolingo.context.ODataMongoMappingFactory
+import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
 import org.apache.olingo.server.api.uri.UriInfo
@@ -30,7 +31,7 @@ class OdataOrderByToMongoSortParserWithOverrideConfigTest extends AbstractSpecif
 
             UriInfo uriInfo = new Parser(edm, OData.newInstance())
                     .parseUri("Items", "\$orderby=" + orderByClause, null, null)
-            OdataOrderByToMongoSortParser tested = new OdataOrderByToMongoSortParser()
+        OdataOrderByToMongoSortParser tested = new OdataOrderByToMongoSortParser()
 
         when:
             def result = tested.parse(uriInfo.getOrderByOption(), new DefaultEdmMongoContextFacade(context, null))

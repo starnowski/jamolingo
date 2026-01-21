@@ -1,4 +1,4 @@
-package com.github.starnowski.jamolingo.orderby;
+package com.github.starnowski.jamolingo.core.operators.orderby;
 
 import com.github.starnowski.jamolingo.core.api.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;

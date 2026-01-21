@@ -2,8 +2,8 @@ package com.github.starnowski.jamolingo;
 
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
-import com.github.starnowski.jamolingo.orderby.OdataOrderByToMongoSortParser;
-import com.github.starnowski.jamolingo.orderby.OrderByOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
+import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
