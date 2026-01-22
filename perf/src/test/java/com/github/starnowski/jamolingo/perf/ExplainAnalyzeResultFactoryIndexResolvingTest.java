@@ -43,7 +43,21 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
         Arguments.of(List.of(), "pipelines/example2.json", "COLLSCAN"),
         Arguments.of(
             List.of(new Document("plainString", 1)), "pipelines/example1.json", "COLLSCAN"),
-        Arguments.of(List.of(new Document("password", 1)), "pipelines/example2.json", "COLLSCAN"));
+        Arguments.of(List.of(new Document("password", 1)), "pipelines/example2.json", "COLLSCAN"),
+        Arguments.of(
+            List.of(new Document("nestedObject.tokens", 1)), "pipelines/example2.json", "IXSCAN"),
+        Arguments.of(
+            List.of(new Document("password", 1)),
+            "pipelines/example_covered_password.json",
+            "IXSCAN"),
+        Arguments.of(
+            List.of(new Document("plainString", 1)),
+            "pipelines/example_covered_plainString.json",
+            "IXSCAN"),
+        Arguments.of(
+            List.of(new Document("plainString", 1), new Document("password", 1)),
+            "pipelines/example_covered_plainString.json",
+            "IXSCAN"));
   }
 
   @ParameterizedTest
