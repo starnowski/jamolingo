@@ -38,7 +38,12 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
     return Stream.of(
         Arguments.of(DEFAULT_INDEXES, "pipelines/example1.json", "FETCH + IXSCAN"),
         Arguments.of(DEFAULT_INDEXES, "pipelines/example2.json", "IXSCAN"),
-        Arguments.of(DEFAULT_INDEXES, "pipelines/example3.json", "COLLSCAN"));
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example3.json", "COLLSCAN"),
+        Arguments.of(List.of(), "pipelines/example1.json", "COLLSCAN"),
+        Arguments.of(List.of(), "pipelines/example2.json", "COLLSCAN"),
+        Arguments.of(
+            List.of(new Document("plainString", 1)), "pipelines/example1.json", "COLLSCAN"),
+        Arguments.of(List.of(new Document("password", 1)), "pipelines/example2.json", "COLLSCAN"));
   }
 
   @ParameterizedTest
