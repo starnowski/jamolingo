@@ -35,7 +35,10 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
           new Document("nestedObject.numbers", 1));
 
   public static Stream<Arguments> provideShouldResolveCorrectIndexValue() {
-    return Stream.of(Arguments.of(DEFAULT_INDEXES, "pipelines/example1.json", "FETCH + IXSCAN"));
+    return Stream.of(
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example1.json", "FETCH + IXSCAN"),
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example2.json", "IXSCAN"),
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example3.json", "COLLSCAN"));
   }
 
   @ParameterizedTest
