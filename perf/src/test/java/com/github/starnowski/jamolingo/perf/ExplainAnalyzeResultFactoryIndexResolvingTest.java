@@ -57,7 +57,8 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
         Arguments.of(
             List.of(new Document("plainString", 1), new Document("password", 1)),
             "pipelines/example_covered_plainString.json",
-            "IXSCAN"));
+            "IXSCAN"),
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example_merge_indexes.json", "FETCH + IXSCAN"));
   }
 
   @ParameterizedTest
