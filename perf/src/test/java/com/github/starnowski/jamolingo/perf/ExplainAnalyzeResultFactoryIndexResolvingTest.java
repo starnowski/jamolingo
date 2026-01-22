@@ -99,19 +99,11 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
 
   private void createIndexes(List<Document> indexes) {
     MongoCollection<Document> col = getCollection();
-    //        col.createIndex(new Document("plainString", 1));
-    //        col.createIndex(new Document("password", 1));
-    //        col.createIndex(new Document("nestedObject.tokens", 1));
-    //        col.createIndex(new Document("nestedObject.numbers", 1));
     indexes.forEach(col::createIndex);
   }
 
   private void deleteIndexes(List<Document> indexes) {
     MongoCollection<Document> col = getCollection();
-    //        col.createIndex(new Document("plainString", 1));
-    //        col.createIndex(new Document("password", 1));
-    //        col.createIndex(new Document("nestedObject.tokens", 1));
-    //        col.createIndex(new Document("nestedObject.numbers", 1));
     indexes.forEach(col::dropIndex);
   }
 }
