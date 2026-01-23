@@ -1,0 +1,14 @@
+{
+  "value": [
+    {
+      "nestedObject": {
+        "tokens": "first example"
+      }
+    },
+    {
+      "nestedObject": {
+        "tokens": "first example"
+      }
+    }
+  ]
+}

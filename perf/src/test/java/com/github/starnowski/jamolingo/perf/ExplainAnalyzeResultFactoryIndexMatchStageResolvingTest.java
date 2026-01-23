@@ -38,28 +38,30 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
           new Document("nestedObject.numbers", 1));
 
   public static Stream<Arguments> provideShouldResolveCorrectIndexValueAndReturnCorrectData() {
-    // Shared data
-    Document doc1 =
-        new Document("_id", "doc1")
-            .append("plainString", "abc")
-            .append(
-                "nestedObject",
-                new Document("tokens", "first example").append("numbers", List.of(10, 20)));
 
     return Stream.of(
+
         // Test case 1: example1.json (tokens="first example" AND numbers in (5, 27))
+
         // doc1 matches (tokens=first, numbers has 10 which is >5 and <27).
+
         // doc2 fails tokens.
+
         // doc3 fails numbers (2 is not > 5).
-        Arguments.of(DEFAULT_INDEXES, "pipelines/example1.json", "FETCH + IXSCAN", List.of(doc1)),
+
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/example1.json",
+            "FETCH + IXSCAN",
+            "results/example1_result.json"),
+
         // Test case 2: example2.json (tokens="first example"), projects only tokens
+
         Arguments.of(
             DEFAULT_INDEXES,
             "pipelines/example2.json",
             "IXSCAN", // Covered query likely? or just IXSCAN
-            List.of(
-                new Document("nestedObject", new Document("tokens", "first example")),
-                new Document("nestedObject", new Document("tokens", "first example")))));
+            "results/example2_result.json"));
   }
 
   @ParameterizedTest
@@ -83,29 +85,59 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
       List<Document> indexes,
       String pipelineFilePath,
       String expectedIndexValue,
-      List<Document> expectedResults)
+      String expectedResultsFilePath)
       throws IOException {
+
     // GIVEN
+
     createIndexes(indexes);
+
     List<Document> pipeline = preparePipeline(pipelineFilePath);
 
+    List<Document> expectedResults = prepareExpectedResults(expectedResultsFilePath);
+
     // WHEN
+
     // 1. Get Actual Data
+
     List<Document> actualResults = new ArrayList<>();
+
     getCollection().aggregate(pipeline).into(actualResults);
 
     // 2. Get Explain Plan
+
     Document explain = getCollection().aggregate(pipeline).explain();
+
     ExplainAnalyzeResultFactory tested = new ExplainAnalyzeResultFactory();
+
     ExplainAnalyzeResult result = tested.build(explain);
 
     // THEN
+
     // Verify Data
+
     assertEquals(expectedResults.size(), actualResults.size());
+
     assertEquals(expectedResults, actualResults);
 
     // Verify Index
+
     Assertions.assertEquals(expectedIndexValue, result.getIndexValue().getValue());
+  }
+
+  private List<Document> prepareExpectedResults(String filePath) throws IOException {
+
+    String json =
+        Files.readString(
+            Paths.get(
+                new File(
+                        Objects.requireNonNull(getClass().getClassLoader().getResource(filePath))
+                            .getFile())
+                    .getPath()));
+
+    Document jsonDocument = Document.parse(json);
+
+    return (List<Document>) jsonDocument.get("value");
   }
 
   private List<Document> preparePipeline(String filePath) throws IOException {
