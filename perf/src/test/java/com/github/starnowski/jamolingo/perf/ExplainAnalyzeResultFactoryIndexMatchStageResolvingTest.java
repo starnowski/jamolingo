@@ -88,6 +88,11 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
                 new Document("nestedObject", new Document("tokens", "first example")))));
   }
 
+  @AfterEach
+  public void dropIndexes() {
+    getCollection().dropIndexes();
+  }
+
   @ParameterizedTest
   @MethodSource("provideShouldResolveCorrectIndexValueAndReturnCorrectData")
   public void shouldResolveCorrectIndexValueAndReturnCorrectData(

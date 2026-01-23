@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.bson.Document;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -71,7 +72,6 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
     List<Document> pipeline = preparePipeline(pipelineFilePath);
     // Run explain on the aggregation
     Document explain = getCollection().aggregate(pipeline).explain();
-    deleteIndexes(indexes);
     ExplainAnalyzeResultFactory tested = new ExplainAnalyzeResultFactory();
 
     // WHEN
@@ -102,8 +102,8 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
     indexes.forEach(col::createIndex);
   }
 
-  private void deleteIndexes(List<Document> indexes) {
-    MongoCollection<Document> col = getCollection();
-    indexes.forEach(col::dropIndex);
+  @AfterEach
+  public void dropIndexes() {
+    getCollection().dropIndexes();
   }
 }
