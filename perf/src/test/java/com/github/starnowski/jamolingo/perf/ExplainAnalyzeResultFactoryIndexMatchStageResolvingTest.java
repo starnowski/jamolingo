@@ -2,6 +2,8 @@ package com.github.starnowski.jamolingo.perf;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.github.starnowski.jamolingo.junit5.MongoDocument;
+import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -16,9 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.bson.Document;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -37,16 +37,6 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
           new Document("nestedObject.tokens", 1),
           new Document("nestedObject.numbers", 1));
 
-  @BeforeEach
-  public void setUp() {
-    getCollection().drop();
-  }
-
-  @AfterEach
-  public void tearDown() {
-    getCollection().drop();
-  }
-
   public static Stream<Arguments> provideShouldResolveCorrectIndexValueAndReturnCorrectData() {
     // Shared data
     Document doc1 =
@@ -55,32 +45,16 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             .append(
                 "nestedObject",
                 new Document("tokens", "first example").append("numbers", List.of(10, 20)));
-    Document doc2 =
-        new Document("_id", "doc2")
-            .append("plainString", "xyz")
-            .append(
-                "nestedObject",
-                new Document("tokens", "second example").append("numbers", List.of(30)));
-    Document doc3 =
-        new Document("_id", "doc3")
-            .append("plainString", "def")
-            .append(
-                "nestedObject",
-                new Document("tokens", "first example").append("numbers", List.of(2)));
-
-    List<Document> allDocs = List.of(doc1, doc2, doc3);
 
     return Stream.of(
         // Test case 1: example1.json (tokens="first example" AND numbers in (5, 27))
         // doc1 matches (tokens=first, numbers has 10 which is >5 and <27).
         // doc2 fails tokens.
         // doc3 fails numbers (2 is not > 5).
-        Arguments.of(
-            DEFAULT_INDEXES, allDocs, "pipelines/example1.json", "FETCH + IXSCAN", List.of(doc1)),
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example1.json", "FETCH + IXSCAN", List.of(doc1)),
         // Test case 2: example2.json (tokens="first example"), projects only tokens
         Arguments.of(
             DEFAULT_INDEXES,
-            allDocs,
             "pipelines/example2.json",
             "IXSCAN", // Covered query likely? or just IXSCAN
             List.of(
@@ -88,22 +62,30 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
                 new Document("nestedObject", new Document("tokens", "first example")))));
   }
 
-  @AfterEach
-  public void dropIndexes() {
-    getCollection().dropIndexes();
-  }
-
   @ParameterizedTest
   @MethodSource("provideShouldResolveCorrectIndexValueAndReturnCorrectData")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc3.json")
+      })
   public void shouldResolveCorrectIndexValueAndReturnCorrectData(
       List<Document> indexes,
-      List<Document> inputData,
       String pipelineFilePath,
       String expectedIndexValue,
       List<Document> expectedResults)
       throws IOException {
     // GIVEN
-    getCollection().insertMany(inputData);
     createIndexes(indexes);
     List<Document> pipeline = preparePipeline(pipelineFilePath);
 
