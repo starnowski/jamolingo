@@ -1,0 +1,17 @@
+{
+  "value": [
+    {
+      "_id": "doc1",
+      "plainString": "abc",
+      "nestedObject": {
+        "tokens": "first example",
+        "numbers": [10, 20]
+      }
+    },
+    {
+      "_id": "doc_collscan",
+      "plainString": "nothing",
+      "extra": "foo"
+    }
+  ]
+}
