@@ -1,0 +1,9 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "wildcardObj.nested.deep": "value"
+      }
+    }
+  ]
+}

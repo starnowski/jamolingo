@@ -1,0 +1,9 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "wildcardObj.color": "red"
+      }
+    }
+  ]
+}

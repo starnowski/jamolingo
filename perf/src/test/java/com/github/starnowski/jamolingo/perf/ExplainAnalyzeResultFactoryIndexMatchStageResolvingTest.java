@@ -136,6 +136,86 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         "results/or_collscan_query_result.json");
   }
 
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_wildcard.json")
+      })
+  public void shouldResolveCorrectIndexValueForWildcardIndex() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("wildcardObj.$**", 1)),
+        "pipelines/wildcard_query.json",
+        "FETCH + IXSCAN",
+        "results/wildcard_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_wildcard.json")
+      })
+  public void shouldResolveCorrectIndexValueForWildcardCompoundQuery() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("wildcardObj.$**", 1)),
+        "pipelines/wildcard_compound_query.json",
+        "FETCH + IXSCAN",
+        "results/wildcard_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_wildcard_deep.json")
+      })
+  public void shouldResolveCorrectIndexValueForWildcardDeepQuery() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("wildcardObj.$**", 1)),
+        "pipelines/wildcard_deep_query.json",
+        "FETCH + IXSCAN",
+        "results/wildcard_deep_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_wildcard_array.json")
+      })
+  public void shouldResolveCorrectIndexValueForWildcardArrayQuery() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("wildcardObj.$**", 1)),
+        "pipelines/wildcard_array_query.json",
+        "FETCH + IXSCAN",
+        "results/wildcard_array_query_result.json");
+  }
+
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
       List<Document> indexes,
       String pipelineFilePath,

@@ -1,0 +1,9 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "wildcardObj.tags": "a"
+      }
+    }
+  ]
+}
