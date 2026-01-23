@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.stream.Stream;
 import org.bson.Document;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -89,6 +90,30 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
       throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
         indexes, pipelineFilePath, expectedIndexValue, expectedResultsFilePath);
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForOrQuery() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        DEFAULT_INDEXES,
+        "pipelines/or_query.json",
+        "FETCH + IXSCAN",
+        "results/or_query_result.json");
   }
 
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
