@@ -81,7 +81,17 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             collection = "docs",
             bsonFilePath = "data/doc3.json")
       })
-  public void shouldResolveCorrectIndexValueAndReturnCorrectData(
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForSimpleExactMath(
+      List<Document> indexes,
+      String pipelineFilePath,
+      String expectedIndexValue,
+      String expectedResultsFilePath)
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        indexes, pipelineFilePath, expectedIndexValue, expectedResultsFilePath);
+  }
+
+  private void shouldResolveCorrectIndexValueAndReturnCorrectData(
       List<Document> indexes,
       String pipelineFilePath,
       String expectedIndexValue,
