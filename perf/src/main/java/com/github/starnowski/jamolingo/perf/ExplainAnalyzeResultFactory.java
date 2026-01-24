@@ -117,17 +117,58 @@ public class ExplainAnalyzeResultFactory {
       if (indexScanStage.containsKey("indexBounds")) {
         Document indexBounds = indexScanStage.get("indexBounds", Document.class);
         List<Bson> conditions = new ArrayList<>();
-        Document andOperator = new Document("$and", conditions);
-        Document matchStage = new Document("$match", andOperator);
+        
         for (String key : indexBounds.keySet()) {
-          conditions.add(new Document(key, new Document("$in", indexBounds.get(key))));
+          if (key.startsWith("$")) {
+            continue;
+          }
+          Object boundsObj = indexBounds.get(key);
+          if (boundsObj instanceof List) {
+            List<String> bounds = (List<String>) boundsObj;
+            List<Object> exactMatches = new ArrayList<>();
+            for (String bound : bounds) {
+              try {
+                org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(bound);
+                if (bsonArray.size() == 2 && bsonArray.get(0).equals(bsonArray.get(1))) {
+                   // Equality match: ["val", "val"]
+                   // Convert BsonValue to Java Object if possible, or keep as BsonValue
+                   // simple types:
+                   if (bsonArray.get(0).isString()) {
+                     exactMatches.add(bsonArray.get(0).asString().getValue());
+                   } else if (bsonArray.get(0).isInt32()) {
+                     exactMatches.add(bsonArray.get(0).asInt32().getValue());
+                   } else if (bsonArray.get(0).isInt64()) {
+                     exactMatches.add(bsonArray.get(0).asInt64().getValue());
+                   } else if (bsonArray.get(0).isDouble()) {
+                     exactMatches.add(bsonArray.get(0).asDouble().getValue());
+                   } else if (bsonArray.get(0).isBoolean()) {
+                     exactMatches.add(bsonArray.get(0).asBoolean().getValue());
+                   } else if (bsonArray.get(0).isRegularExpression()) {
+                     exactMatches.add(bsonArray.get(0).asRegularExpression());
+                   }
+                   // TODO handle other types if needed
+                }
+              } catch (Exception e) {
+                // Not a parseable JSON array or other error, ignore
+              }
+            }
+            if (!exactMatches.isEmpty()) {
+              conditions.add(new Document(key, new Document("$in", exactMatches)));
+            }
+          }
         }
-        return List.of(matchStage);
+        
+        if (!conditions.isEmpty()) {
+            Document andOperator = new Document("$and", conditions);
+            Document matchStage = new Document("$match", andOperator);
+            return List.of(matchStage);
+        }
       }
     } catch (Exception ex) {
-      // TODO Match Stages were not able to resolves
+      //TODO Match Stages were not able to resolves
+      ex.printStackTrace();
     }
-    // TODO
+    //TODO
     return Collections.emptyList();
   }
 
