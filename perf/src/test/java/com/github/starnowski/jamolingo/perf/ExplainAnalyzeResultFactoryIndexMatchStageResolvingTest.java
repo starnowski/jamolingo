@@ -256,8 +256,8 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
 
     // Verify Data for enhanced pipeline
 
-    assertEquals(actualResultsForEnhancedPipelineIndex.size(), actualResults.size());
-    assertEquals(actualResultsForEnhancedPipelineIndex, actualResults);
+    assertEquals(expectedResults.size(), actualResultsForEnhancedPipelineIndex.size());
+    assertEquals(expectedResults, actualResultsForEnhancedPipelineIndex);
 
     // Verify Index
 
