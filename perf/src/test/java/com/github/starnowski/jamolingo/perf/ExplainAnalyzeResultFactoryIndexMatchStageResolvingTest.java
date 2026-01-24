@@ -236,7 +236,7 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
     ExplainAnalyzeResult result = tested.build(explain);
 
     // TODO Resolve match stage that use index
-    List<Bson> indexMatchStages = result.indexMatchStages();
+    List<Bson> indexMatchStages = result.getIndexMatchStages();
     Assertions.assertFalse(indexMatchStages.isEmpty());
     List<Bson> enhancedPipeline = new ArrayList<>(indexMatchStages);
     enhancedPipeline.add(new Document("$set", new Document("no_such_field_test", true)));

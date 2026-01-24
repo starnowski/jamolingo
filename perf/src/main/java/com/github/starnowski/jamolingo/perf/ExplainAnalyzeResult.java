@@ -7,7 +7,7 @@ public interface ExplainAnalyzeResult {
 
   HasIndexValue getIndexValue();
 
-  List<Bson> indexMatchStages();
+  List<Bson> getIndexMatchStages();
 
   interface HasIndexValue {
     String getValue();

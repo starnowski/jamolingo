@@ -129,7 +129,7 @@ public class ExplainAnalyzeResultFactory {
     }
 
     @Override
-    public List<Bson> indexMatchStages() {
+    public List<Bson> getIndexMatchStages() {
       return List.of();
     }
   }
