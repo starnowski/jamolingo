@@ -1,0 +1,22 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$and": [
+          {
+            "nestedObject.tokens": {
+              "$in": [
+                {
+                  "$regularExpression": {
+                    "pattern": "^fir",
+                    "options": ""
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

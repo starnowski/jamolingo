@@ -70,6 +70,12 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             DEFAULT_INDEXES,
             "pipelines/startswith_query.json",
             "FETCH + IXSCAN",
+            "results/startswith_query_result.json"),
+        // Test case 4: startswith pattern but with extended form "$regularExpression" usage
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/startswith_query_extended_form.json",
+            "FETCH + IXSCAN",
             "results/startswith_query_result.json"));
   }
 
