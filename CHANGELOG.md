@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Perf Module
+*   `com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult` ([#13](https://github.com/starnowski/jamolingo/issues/13))
+*   `com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory` ([#13](https://github.com/starnowski/jamolingo/issues/13))
 
 ## [0.3.0] - 2026-01-21
 
