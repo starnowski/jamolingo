@@ -89,7 +89,7 @@ public class ExplainAnalyzeResultFactory {
         return new DefaultExplainAnalyzeResult(
             fetchExists ? FETCH_IXSCAN : IXSCAN,
             innerStage.getIndexMatchStages(),
-            innerStage.getResolutionException());
+            innerStage.getResolutionIndexMatchStagesException());
       }
       return innerStage;
     } else if (winningPlan.containsKey("inputStages")) {
@@ -116,7 +116,7 @@ public class ExplainAnalyzeResultFactory {
               stages.stream().filter(s -> "IXSCAN".equals(s.getIndexValue().getValue())).toList();
           exception =
               ixscanStages.stream()
-                  .map(ExplainAnalyzeResult::getResolutionException)
+                  .map(ExplainAnalyzeResult::getResolutionIndexMatchStagesException)
                   .filter(Objects::nonNull)
                   .findFirst()
                   .orElse(null);
@@ -164,8 +164,7 @@ public class ExplainAnalyzeResultFactory {
       return new DefaultExplainAnalyzeResult(
           indexValueRepresentation, matchStagesSupplier.get(), null);
     } catch (Throwable ex) {
-      return new DefaultExplainAnalyzeResult(
-          indexValueRepresentation, Collections.emptyList(), ex);
+      return new DefaultExplainAnalyzeResult(indexValueRepresentation, Collections.emptyList(), ex);
     }
   }
 
@@ -261,7 +260,7 @@ public class ExplainAnalyzeResultFactory {
     }
 
     @Override
-    public Throwable getResolutionException() {
+    public Throwable getResolutionIndexMatchStagesException() {
       return exception;
     }
   }

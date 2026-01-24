@@ -136,7 +136,8 @@ class ExplainAnalyzeResultFactoryCollScanTest {
     List<Bson> indexMatchStages = result.getIndexMatchStages();
 
     // THE ASSERTION REQUESTED
-    Assertions.assertTrue(indexMatchStages.isEmpty(), "Index match stages should be empty for COLLSCAN");
+    Assertions.assertTrue(
+        indexMatchStages.isEmpty(), "Index match stages should be empty for COLLSCAN");
 
     // Verify Data
 
