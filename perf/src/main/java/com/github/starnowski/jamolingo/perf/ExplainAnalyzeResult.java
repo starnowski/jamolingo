@@ -1,8 +1,13 @@
 package com.github.starnowski.jamolingo.perf;
 
+import java.util.List;
+import org.bson.conversions.Bson;
+
 public interface ExplainAnalyzeResult {
 
   HasIndexValue getIndexValue();
+
+  List<Bson> indexMatchStages();
 
   interface HasIndexValue {
     String getValue();

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -234,17 +235,41 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
 
     ExplainAnalyzeResult result = tested.build(explain);
 
+    // TODO Resolve match stage that use index
+    List<Bson> indexMatchStages = result.indexMatchStages();
+    Assertions.assertFalse(indexMatchStages.isEmpty());
+    List<Bson> enhancedPipeline = new ArrayList<>(indexMatchStages);
+    enhancedPipeline.add(new Document("$set", new Document("no_such_field_test", true)));
+    enhancedPipeline.addAll(pipeline);
+    enhancedPipeline.add(new Document("$unset", "no_such_field_test"));
+    // resolve index for enhanced pipeline
+    String enhancedPipelineIndex =
+        resolveIndexStatus(getCollection().aggregate(enhancedPipeline).explain());
+    List<Document> actualResultsForEnhancedPipelineIndex = new ArrayList<>();
+    getCollection().aggregate(enhancedPipeline).into(actualResultsForEnhancedPipelineIndex);
     // THEN
 
     // Verify Data
 
     assertEquals(expectedResults.size(), actualResults.size());
-
     assertEquals(expectedResults, actualResults);
+
+    // Verify Data for enhanced pipeline
+
+    assertEquals(actualResultsForEnhancedPipelineIndex.size(), actualResults.size());
+    assertEquals(actualResultsForEnhancedPipelineIndex, actualResults);
 
     // Verify Index
 
     Assertions.assertEquals(expectedIndexValue, result.getIndexValue().getValue());
+    Assertions.assertEquals("FETCH + IXSCAN", enhancedPipelineIndex);
+  }
+
+  private String resolveIndexStatus(Document explain) {
+    ExplainAnalyzeResultFactory tested = new ExplainAnalyzeResultFactory();
+
+    ExplainAnalyzeResult result = tested.build(explain);
+    return result.getIndexValue().getValue();
   }
 
   private List<Document> prepareExpectedResults(String filePath) throws IOException {

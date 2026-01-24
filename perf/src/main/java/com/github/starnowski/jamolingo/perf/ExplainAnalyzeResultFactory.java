@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 
 public class ExplainAnalyzeResultFactory {
 
@@ -125,6 +126,11 @@ public class ExplainAnalyzeResultFactory {
     @Override
     public HasIndexValue getIndexValue() {
       return hasIndexValue;
+    }
+
+    @Override
+    public List<Bson> indexMatchStages() {
+      return List.of();
     }
   }
 }
