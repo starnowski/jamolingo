@@ -184,6 +184,58 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
+            bsonFilePath = "data/doc2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForOrQueryWithPartialIndex()
+      throws IOException {
+    // Only index plainString, so "nestedObject.numbers" is not indexed.
+    // This might result in COLLSCAN if MongoDB decides so.
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("plainString", 1)),
+        "pipelines/or_query.json",
+        "COLLSCAN", // Likely COLLSCAN because one branch is not indexed
+        "results/or_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForOrQueryWithNestedAnd()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        DEFAULT_INDEXES,
+        "pipelines/or_query_nested_and.json",
+        "FETCH + IXSCAN",
+        "results/or_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
             bsonFilePath = "data/doc_wildcard.json")
       })
   public void shouldResolveCorrectIndexValueForWildcardIndex() throws IOException {
@@ -287,9 +339,9 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
 
     // TODO Resolve match stage that use index
     List<Bson> indexMatchStages = result.getIndexMatchStages();
-//    if (!"COLLSCAN".equals(expectedIndexValue)) {
+    if (!"COLLSCAN".equals(expectedIndexValue)) {
       Assertions.assertFalse(indexMatchStages.isEmpty());
-//    }
+    }
     List<Bson> enhancedPipeline = new ArrayList<>(indexMatchStages);
     enhancedPipeline.add(new Document("$set", new Document("no_such_field_test", true)));
     enhancedPipeline.addAll(pipeline);
