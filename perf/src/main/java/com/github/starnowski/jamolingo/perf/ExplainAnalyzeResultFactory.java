@@ -51,6 +51,9 @@ public class ExplainAnalyzeResultFactory {
         System.out.println("✅ Index scan with fetch (aggregation not covered, but index is used).");
         return new DefaultExplainAnalyzeResult(FETCH_IXSCAN, resolveMatchingStages(inputStage));
       }
+      if (inputStage != null && "OR".equals(inputStage.getString("stage"))) {
+        return tryToResolveKnowStage(winningPlan, true);
+      }
       return new DefaultExplainAnalyzeResult(FETCH);
     } else if ("COLLSCAN".equals(stage)) {
       System.out.println("❌ Collection scan (no index used in aggregation).");
@@ -68,7 +71,8 @@ public class ExplainAnalyzeResultFactory {
   private ExplainAnalyzeResult tryToResolveKnowStage(Document winningPlan, boolean mergeIndex) {
     String stage = winningPlan.getString("stage");
     if ("IXSCAN".equals(stage)) {
-      return new DefaultExplainAnalyzeResult(IXSCAN, resolveMatchingStages(winningPlan, mergeIndex));
+      return new DefaultExplainAnalyzeResult(
+          IXSCAN, resolveMatchingStages(winningPlan, mergeIndex));
     }
     if ("COLLSCAN".equals(stage)) {
       return new DefaultExplainAnalyzeResult(COLLSCAN);
@@ -86,7 +90,10 @@ public class ExplainAnalyzeResultFactory {
       List<Document> inputStages = winningPlan.getList("inputStages", Document.class);
       boolean orStage = "OR".equals(winningPlan.get("stage"));
       List<ExplainAnalyzeResult> stages =
-          inputStages.stream().map(s -> tryToResolveKnowStage(s, orStage || mergeIndex)).filter(Objects::nonNull).toList();
+          inputStages.stream()
+              .map(s -> tryToResolveKnowStage(s, orStage || mergeIndex))
+              .filter(Objects::nonNull)
+              .toList();
       if (stages.stream().anyMatch(s -> "COLLSCAN".equals(s.getIndexValue().getValue()))) {
         return new DefaultExplainAnalyzeResult(COLLSCAN);
       }
@@ -96,16 +103,19 @@ public class ExplainAnalyzeResultFactory {
               .findFirst()
               .orElse(null);
       if (firstIXSCANStage != null) {
-        List<Bson> indexMatchStages
-                = firstIXSCANStage.getIndexMatchStages();
+        List<Bson> indexMatchStages = firstIXSCANStage.getIndexMatchStages();
         if (orStage) {
-          List<ExplainAnalyzeResult> ixscanStages = stages.stream()
-                  .filter(s -> "IXSCAN".equals(s.getIndexValue().getValue())).toList();
-          indexMatchStages = List.of(new Document("$match",
-                  new Document("$or", ixscanStages.stream().flatMap(is -> is.getIndexMatchStages().stream()).toList()
-
-                          )
-                  ));
+          List<ExplainAnalyzeResult> ixscanStages =
+              stages.stream().filter(s -> "IXSCAN".equals(s.getIndexValue().getValue())).toList();
+          indexMatchStages =
+              List.of(
+                  new Document(
+                      "$match",
+                      new Document(
+                          "$or",
+                          ixscanStages.stream()
+                              .flatMap(is -> is.getIndexMatchStages().stream())
+                              .toList())));
         }
         return new DefaultExplainAnalyzeResult(
             fetchExists ? FETCH_IXSCAN : IXSCAN, indexMatchStages);
@@ -191,7 +201,7 @@ public class ExplainAnalyzeResultFactory {
     } catch (Exception ex) {
       // TODO Match Stages were not able to resolves
       // TODO log
-//      ex.printStackTrace();
+      //      ex.printStackTrace();
     }
     return Collections.emptyList();
   }

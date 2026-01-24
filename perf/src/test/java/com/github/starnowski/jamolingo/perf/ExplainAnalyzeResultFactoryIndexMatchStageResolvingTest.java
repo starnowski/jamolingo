@@ -262,6 +262,7 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
     // Verify Index
 
     Assertions.assertEquals(expectedIndexValue, result.getIndexValue().getValue());
+
     Assertions.assertTrue(
         "FETCH + IXSCAN".endsWith(enhancedPipelineIndex) || "IXSCAN".equals(enhancedPipelineIndex));
   }
