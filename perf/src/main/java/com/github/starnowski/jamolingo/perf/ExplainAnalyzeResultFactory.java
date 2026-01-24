@@ -89,7 +89,7 @@ public class ExplainAnalyzeResultFactory {
         return new DefaultExplainAnalyzeResult(
             fetchExists ? FETCH_IXSCAN : IXSCAN,
             innerStage.getIndexMatchStages(),
-            innerStage.getException());
+            innerStage.getResolutionException());
       }
       return innerStage;
     } else if (winningPlan.containsKey("inputStages")) {
@@ -116,7 +116,7 @@ public class ExplainAnalyzeResultFactory {
               stages.stream().filter(s -> "IXSCAN".equals(s.getIndexValue().getValue())).toList();
           exception =
               ixscanStages.stream()
-                  .map(ExplainAnalyzeResult::getException)
+                  .map(ExplainAnalyzeResult::getResolutionException)
                   .filter(Objects::nonNull)
                   .findFirst()
                   .orElse(null);
@@ -261,7 +261,7 @@ public class ExplainAnalyzeResultFactory {
     }
 
     @Override
-    public Throwable getException() {
+    public Throwable getResolutionException() {
       return exception;
     }
   }
