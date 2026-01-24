@@ -8,10 +8,17 @@ import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/** Factory for creating {@link ExplainAnalyzeResult} instances from MongoDB explain results. */
 public class ExplainAnalyzeResultFactory {
 
   private static final Logger logger = LoggerFactory.getLogger(ExplainAnalyzeResultFactory.class);
 
+  /**
+   * Builds an {@link ExplainAnalyzeResult} from the provided MongoDB explain document.
+   *
+   * @param explain the MongoDB explain document
+   * @return the explain analyze result, or null if the query planner info is missing
+   */
   public ExplainAnalyzeResult build(Document explain) {
     // Navigate to winning plan
     Document queryPlanner = (Document) explain.get("queryPlanner");
