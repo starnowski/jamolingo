@@ -5,8 +5,12 @@ import static com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult.IndexVal
 import java.util.*;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExplainAnalyzeResultFactory {
+
+  private static final Logger logger = LoggerFactory.getLogger(ExplainAnalyzeResultFactory.class);
 
   public ExplainAnalyzeResult build(Document explain) {
     // Navigate to winning plan
@@ -31,24 +35,24 @@ public class ExplainAnalyzeResultFactory {
     }
 
     if (queryPlanner == null) {
-      System.out.println("No query planner info found in explain output.");
+      logger.debug("No query planner info found in explain output.");
       return null;
     }
 
     Document winningPlan = (Document) queryPlanner.get("winningPlan");
     String stage = winningPlan.getString("stage");
 
-    System.out.println("Winning plan stage: " + stage);
+    logger.debug("Winning plan stage: {}", stage);
 
     // Check index usage
     if ("IXSCAN".equals(stage)) {
-      System.out.println("✅ Pure index scan (covered aggregation).");
+      logger.debug("Pure index scan (covered aggregation).");
       return new DefaultExplainAnalyzeResult(
           IXSCAN, resolveMatchingStages((Document) winningPlan.get("inputStage")));
     } else if ("FETCH".equals(stage)) {
       Document inputStage = (Document) winningPlan.get("inputStage");
       if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
-        System.out.println("✅ Index scan with fetch (aggregation not covered, but index is used).");
+        logger.debug("Index scan with fetch (aggregation not covered, but index is used).");
         return new DefaultExplainAnalyzeResult(FETCH_IXSCAN, resolveMatchingStages(inputStage));
       }
       if (inputStage != null && "OR".equals(inputStage.getString("stage"))) {
@@ -56,10 +60,10 @@ public class ExplainAnalyzeResultFactory {
       }
       return new DefaultExplainAnalyzeResult(FETCH);
     } else if ("COLLSCAN".equals(stage)) {
-      System.out.println("❌ Collection scan (no index used in aggregation).");
+      logger.debug("Collection scan (no index used in aggregation).");
       return new DefaultExplainAnalyzeResult(COLLSCAN);
     } else {
-      System.out.println("ℹ️ Other plan stage: " + stage);
+      logger.debug("Other plan stage: {}", stage);
     }
     return tryToResolveKnowStage(winningPlan);
   }
@@ -133,7 +137,7 @@ public class ExplainAnalyzeResultFactory {
         return new DefaultExplainAnalyzeResult(
             fetchExists ? FETCH_IXSCAN : IXSCAN, indexMatchStages, exception);
       }
-      System.out.println("Resolved stages are: " + stages);
+      logger.debug("Resolved stages are: {}", stages);
       return stages.stream().findFirst().orElse(new DefaultExplainAnalyzeResult(null));
     }
     return new DefaultExplainAnalyzeResult(null);
