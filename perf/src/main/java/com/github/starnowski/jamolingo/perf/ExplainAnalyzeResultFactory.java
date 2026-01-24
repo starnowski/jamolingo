@@ -3,7 +3,6 @@ package com.github.starnowski.jamolingo.perf;
 import static com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult.IndexValueRepresentation.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -44,7 +43,8 @@ public class ExplainAnalyzeResultFactory {
     // Check index usage
     if ("IXSCAN".equals(stage)) {
       System.out.println("✅ Pure index scan (covered aggregation).");
-      return new DefaultExplainAnalyzeResult(IXSCAN, resolveMatchingStages((Document) winningPlan.get("inputStage")));
+      return new DefaultExplainAnalyzeResult(
+          IXSCAN, resolveMatchingStages((Document) winningPlan.get("inputStage")));
     } else if ("FETCH".equals(stage)) {
       Document inputStage = (Document) winningPlan.get("inputStage");
       if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
@@ -58,44 +58,46 @@ public class ExplainAnalyzeResultFactory {
     } else {
       System.out.println("ℹ️ Other plan stage: " + stage);
     }
-    ExplainAnalyzeResult.HasIndexValue hasIndexValue = tryToResolveKnowStage(winningPlan);
-    return new DefaultExplainAnalyzeResult(hasIndexValue);
+    return tryToResolveKnowStage(winningPlan);
   }
 
-  private ExplainAnalyzeResult.HasIndexValue tryToResolveKnowStage(Document winningPlan) {
+  private ExplainAnalyzeResult tryToResolveKnowStage(Document winningPlan) {
     String stage = winningPlan.getString("stage");
     if ("IXSCAN".equals(stage)) {
-      return IXSCAN;
+      return new DefaultExplainAnalyzeResult(IXSCAN, resolveMatchingStages((winningPlan)));
     }
     if ("COLLSCAN".equals(stage)) {
-      return COLLSCAN;
+      return new DefaultExplainAnalyzeResult(COLLSCAN);
     }
     boolean fetchExists = "FETCH".equals(stage);
     if (winningPlan.containsKey("inputStage")) {
-      String innerStage =
-          tryToResolveKnowStage((Document) winningPlan.get("inputStage")).getValue();
-      if ("IXSCAN".equals(innerStage)) {
-        return fetchExists ? FETCH_IXSCAN : IXSCAN;
+      ExplainAnalyzeResult innerStage =
+          tryToResolveKnowStage((Document) winningPlan.get("inputStage"));
+      if ("IXSCAN".equals(innerStage.getIndexValue().getValue())) {
+        return new DefaultExplainAnalyzeResult(
+            fetchExists ? FETCH_IXSCAN : IXSCAN, innerStage.getIndexMatchStages());
       }
-      return new RawIndexValue(innerStage);
+      return innerStage;
     } else if (winningPlan.containsKey("inputStages")) {
       List<Document> inputStages = winningPlan.getList("inputStages", Document.class);
-      Set<String> stages =
-          inputStages.stream()
-              .map(this::tryToResolveKnowStage)
-              .filter(Objects::nonNull)
-              .map(ExplainAnalyzeResult.HasIndexValue::getValue)
-              .collect(Collectors.toUnmodifiableSet());
-      if (stages.contains("COLLSCAN")) {
-        return COLLSCAN;
+      List<ExplainAnalyzeResult> stages =
+          inputStages.stream().map(this::tryToResolveKnowStage).filter(Objects::nonNull).toList();
+      if (stages.stream().anyMatch(s -> "COLLSCAN".equals(s.getIndexValue().getValue()))) {
+        return new DefaultExplainAnalyzeResult(COLLSCAN);
       }
-      if (stages.equals(Set.of("IXSCAN"))) {
-        return fetchExists ? FETCH_IXSCAN : IXSCAN;
+      ExplainAnalyzeResult firstIXSCANStage =
+          stages.stream()
+              .filter(s -> "IXSCAN".equals(s.getIndexValue().getValue()))
+              .findFirst()
+              .orElse(null);
+      if (firstIXSCANStage != null) {
+        return new DefaultExplainAnalyzeResult(
+            fetchExists ? FETCH_IXSCAN : IXSCAN, firstIXSCANStage.getIndexMatchStages());
       }
       System.out.println("Resolved stages are: " + stages);
-      return new RawIndexValue(stages.stream().findFirst().orElse(null));
+      return stages.stream().findFirst().orElse(new DefaultExplainAnalyzeResult(null));
     }
-    return new RawIndexValue(null);
+    return new DefaultExplainAnalyzeResult(null);
   }
 
   private static final class RawIndexValue implements ExplainAnalyzeResult.HasIndexValue {
@@ -117,7 +119,7 @@ public class ExplainAnalyzeResultFactory {
       if (indexScanStage.containsKey("indexBounds")) {
         Document indexBounds = indexScanStage.get("indexBounds", Document.class);
         List<Bson> conditions = new ArrayList<>();
-        
+
         for (String key : indexBounds.keySet()) {
           if (key.startsWith("$")) {
             continue;
@@ -130,23 +132,23 @@ public class ExplainAnalyzeResultFactory {
               try {
                 org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(bound);
                 if (bsonArray.size() == 2 && bsonArray.get(0).equals(bsonArray.get(1))) {
-                   // Equality match: ["val", "val"]
-                   // Convert BsonValue to Java Object if possible, or keep as BsonValue
-                   // simple types:
-                   if (bsonArray.get(0).isString()) {
-                     exactMatches.add(bsonArray.get(0).asString().getValue());
-                   } else if (bsonArray.get(0).isInt32()) {
-                     exactMatches.add(bsonArray.get(0).asInt32().getValue());
-                   } else if (bsonArray.get(0).isInt64()) {
-                     exactMatches.add(bsonArray.get(0).asInt64().getValue());
-                   } else if (bsonArray.get(0).isDouble()) {
-                     exactMatches.add(bsonArray.get(0).asDouble().getValue());
-                   } else if (bsonArray.get(0).isBoolean()) {
-                     exactMatches.add(bsonArray.get(0).asBoolean().getValue());
-                   } else if (bsonArray.get(0).isRegularExpression()) {
-                     exactMatches.add(bsonArray.get(0).asRegularExpression());
-                   }
-                   // TODO handle other types if needed
+                  // Equality match: ["val", "val"]
+                  // Convert BsonValue to Java Object if possible, or keep as BsonValue
+                  // simple types:
+                  if (bsonArray.get(0).isString()) {
+                    exactMatches.add(bsonArray.get(0).asString().getValue());
+                  } else if (bsonArray.get(0).isInt32()) {
+                    exactMatches.add(bsonArray.get(0).asInt32().getValue());
+                  } else if (bsonArray.get(0).isInt64()) {
+                    exactMatches.add(bsonArray.get(0).asInt64().getValue());
+                  } else if (bsonArray.get(0).isDouble()) {
+                    exactMatches.add(bsonArray.get(0).asDouble().getValue());
+                  } else if (bsonArray.get(0).isBoolean()) {
+                    exactMatches.add(bsonArray.get(0).asBoolean().getValue());
+                  } else if (bsonArray.get(0).isRegularExpression()) {
+                    exactMatches.add(bsonArray.get(0).asRegularExpression());
+                  }
+                  // TODO handle other types if needed
                 }
               } catch (Exception e) {
                 // Not a parseable JSON array or other error, ignore
@@ -157,18 +159,18 @@ public class ExplainAnalyzeResultFactory {
             }
           }
         }
-        
+
         if (!conditions.isEmpty()) {
-            Document andOperator = new Document("$and", conditions);
-            Document matchStage = new Document("$match", andOperator);
-            return List.of(matchStage);
+          Document andOperator = new Document("$and", conditions);
+          Document matchStage = new Document("$match", andOperator);
+          return List.of(matchStage);
         }
       }
     } catch (Exception ex) {
-      //TODO Match Stages were not able to resolves
+      // TODO Match Stages were not able to resolves
       ex.printStackTrace();
     }
-    //TODO
+    // TODO
     return Collections.emptyList();
   }
 
