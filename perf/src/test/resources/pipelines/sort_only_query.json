@@ -1,0 +1,9 @@
+{
+  "pipeline": [
+    {
+      "$sort": {
+        "plainString": 1
+      }
+    }
+  ]
+}
