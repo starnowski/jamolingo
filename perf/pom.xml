@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.starnowski.jamolingo</groupId>
         <artifactId>parent</artifactId>
-        <version>0.3.0</version>
+        <version>0.4.0</version>
     </parent>
 
     <artifactId>perf</artifactId>
@@ -44,7 +44,7 @@
         <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>
             <artifactId>junit5-mongo-extension</artifactId>
-            <version>0.3.0</version>
+            <version>0.4.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
