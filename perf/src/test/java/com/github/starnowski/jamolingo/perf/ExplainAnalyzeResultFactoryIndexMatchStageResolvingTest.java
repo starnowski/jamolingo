@@ -306,6 +306,31 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         "results/wildcard_array_query_result.json");
   }
 
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForCompoundIndex()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("plainString", 1).append("nestedObject.numbers", 1)),
+        "pipelines/compound_index_query.json",
+        "FETCH + IXSCAN",
+        "results/compound_index_result.json");
+  }
+
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
       List<Document> indexes,
       String pipelineFilePath,
