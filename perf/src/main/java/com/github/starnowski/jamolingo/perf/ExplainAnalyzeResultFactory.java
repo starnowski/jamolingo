@@ -2,10 +2,7 @@ package com.github.starnowski.jamolingo.perf;
 
 import static com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult.IndexValueRepresentation.*;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -52,7 +49,7 @@ public class ExplainAnalyzeResultFactory {
       Document inputStage = (Document) winningPlan.get("inputStage");
       if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
         System.out.println("✅ Index scan with fetch (aggregation not covered, but index is used).");
-        return new DefaultExplainAnalyzeResult(FETCH_IXSCAN);
+        return new DefaultExplainAnalyzeResult(FETCH_IXSCAN, resolveMatchingStages(inputStage));
       }
       return new DefaultExplainAnalyzeResult(FETCH);
     } else if ("COLLSCAN".equals(stage)) {
@@ -115,12 +112,37 @@ public class ExplainAnalyzeResultFactory {
     }
   }
 
+  private List<Bson> resolveMatchingStages(Document indexScanStage) {
+    try {
+      if (indexScanStage.containsKey("indexBounds")) {
+        Document indexBounds = indexScanStage.get("indexBounds", Document.class);
+        List<Bson> conditions = new ArrayList<>();
+        Document andOperator = new Document("$and", conditions);
+        Document matchStage = new Document("$match", andOperator);
+        for (String key : indexBounds.keySet()) {
+          conditions.add(new Document(key, new Document("$in", indexBounds.get(key))));
+        }
+        return List.of(matchStage);
+      }
+    } catch (Exception ex) {
+      // TODO Match Stages were not able to resolves
+    }
+    // TODO
+    return Collections.emptyList();
+  }
+
   private static final class DefaultExplainAnalyzeResult implements ExplainAnalyzeResult {
 
     private final HasIndexValue hasIndexValue;
+    private final List<Bson> indexMatchStages;
 
-    private DefaultExplainAnalyzeResult(HasIndexValue hasIndexValue) {
+    public DefaultExplainAnalyzeResult(HasIndexValue hasIndexValue) {
+      this(hasIndexValue, Collections.emptyList());
+    }
+
+    public DefaultExplainAnalyzeResult(HasIndexValue hasIndexValue, List<Bson> indexMatchStages) {
       this.hasIndexValue = hasIndexValue;
+      this.indexMatchStages = indexMatchStages;
     }
 
     @Override
@@ -130,7 +152,7 @@ public class ExplainAnalyzeResultFactory {
 
     @Override
     public List<Bson> getIndexMatchStages() {
-      return List.of();
+      return indexMatchStages;
     }
   }
 }

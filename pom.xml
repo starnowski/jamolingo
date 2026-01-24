@@ -66,6 +66,16 @@
                 <version>5.6.1</version>
             </dependency>
             <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-sync</artifactId>
+                <version>5.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-core</artifactId>
+                <version>5.6.1</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.olingo</groupId>
                 <artifactId>odata-server-core</artifactId>
                 <version>${org.apache.olingo.version}</version>
