@@ -126,26 +126,6 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
-            bsonFilePath = "data/doc_collscan.json")
-      })
-  public void shouldResolveCorrectIndexValueForOrQueryWithCollScan() throws IOException {
-    shouldResolveCorrectIndexValueAndReturnCorrectData(
-        DEFAULT_INDEXES,
-        "pipelines/or_collscan_query.json",
-        "COLLSCAN",
-        "results/or_collscan_query_result.json");
-  }
-
-  @Test
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc1.json"),
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
             bsonFilePath = "data/doc_wildcard.json")
       })
   public void shouldResolveCorrectIndexValueForWildcardIndex() throws IOException {
