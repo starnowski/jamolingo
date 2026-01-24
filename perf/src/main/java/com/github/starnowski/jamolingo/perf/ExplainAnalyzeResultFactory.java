@@ -44,7 +44,7 @@ public class ExplainAnalyzeResultFactory {
     // Check index usage
     if ("IXSCAN".equals(stage)) {
       System.out.println("✅ Pure index scan (covered aggregation).");
-      return new DefaultExplainAnalyzeResult(IXSCAN);
+      return new DefaultExplainAnalyzeResult(IXSCAN, resolveMatchingStages((Document) winningPlan.get("inputStage")));
     } else if ("FETCH".equals(stage)) {
       Document inputStage = (Document) winningPlan.get("inputStage");
       if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
