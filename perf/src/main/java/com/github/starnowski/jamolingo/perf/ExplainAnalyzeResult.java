@@ -9,6 +9,8 @@ public interface ExplainAnalyzeResult {
 
   List<Bson> getIndexMatchStages();
 
+  Throwable getException();
+
   interface HasIndexValue {
     String getValue();
   }
