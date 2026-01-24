@@ -62,9 +62,13 @@ public class ExplainAnalyzeResultFactory {
   }
 
   private ExplainAnalyzeResult tryToResolveKnowStage(Document winningPlan) {
+    return tryToResolveKnowStage(winningPlan, false);
+  }
+
+  private ExplainAnalyzeResult tryToResolveKnowStage(Document winningPlan, boolean mergeIndex) {
     String stage = winningPlan.getString("stage");
     if ("IXSCAN".equals(stage)) {
-      return new DefaultExplainAnalyzeResult(IXSCAN, resolveMatchingStages((winningPlan)));
+      return new DefaultExplainAnalyzeResult(IXSCAN, resolveMatchingStages(winningPlan, mergeIndex));
     }
     if ("COLLSCAN".equals(stage)) {
       return new DefaultExplainAnalyzeResult(COLLSCAN);
@@ -72,7 +76,7 @@ public class ExplainAnalyzeResultFactory {
     boolean fetchExists = "FETCH".equals(stage);
     if (winningPlan.containsKey("inputStage")) {
       ExplainAnalyzeResult innerStage =
-          tryToResolveKnowStage((Document) winningPlan.get("inputStage"));
+          tryToResolveKnowStage((Document) winningPlan.get("inputStage"), mergeIndex);
       if ("IXSCAN".equals(innerStage.getIndexValue().getValue())) {
         return new DefaultExplainAnalyzeResult(
             fetchExists ? FETCH_IXSCAN : IXSCAN, innerStage.getIndexMatchStages());
@@ -80,8 +84,9 @@ public class ExplainAnalyzeResultFactory {
       return innerStage;
     } else if (winningPlan.containsKey("inputStages")) {
       List<Document> inputStages = winningPlan.getList("inputStages", Document.class);
+      boolean orStage = "OR".equals(winningPlan.get("stage"));
       List<ExplainAnalyzeResult> stages =
-          inputStages.stream().map(this::tryToResolveKnowStage).filter(Objects::nonNull).toList();
+          inputStages.stream().map(s -> tryToResolveKnowStage(s, orStage || mergeIndex)).filter(Objects::nonNull).toList();
       if (stages.stream().anyMatch(s -> "COLLSCAN".equals(s.getIndexValue().getValue()))) {
         return new DefaultExplainAnalyzeResult(COLLSCAN);
       }
@@ -91,8 +96,19 @@ public class ExplainAnalyzeResultFactory {
               .findFirst()
               .orElse(null);
       if (firstIXSCANStage != null) {
+        List<Bson> indexMatchStages
+                = firstIXSCANStage.getIndexMatchStages();
+        if (orStage) {
+          List<ExplainAnalyzeResult> ixscanStages = stages.stream()
+                  .filter(s -> "IXSCAN".equals(s.getIndexValue().getValue())).toList();
+          indexMatchStages = List.of(new Document("$match",
+                  new Document("$or", ixscanStages.stream().flatMap(is -> is.getIndexMatchStages().stream()).toList()
+
+                          )
+                  ));
+        }
         return new DefaultExplainAnalyzeResult(
-            fetchExists ? FETCH_IXSCAN : IXSCAN, firstIXSCANStage.getIndexMatchStages());
+            fetchExists ? FETCH_IXSCAN : IXSCAN, indexMatchStages);
       }
       System.out.println("Resolved stages are: " + stages);
       return stages.stream().findFirst().orElse(new DefaultExplainAnalyzeResult(null));
@@ -115,6 +131,10 @@ public class ExplainAnalyzeResultFactory {
   }
 
   private List<Bson> resolveMatchingStages(Document indexScanStage) {
+    return resolveMatchingStages(indexScanStage, false);
+  }
+
+  private List<Bson> resolveMatchingStages(Document indexScanStage, boolean mergeIndex) {
     try {
       if (indexScanStage.containsKey("indexBounds")) {
         Document indexBounds = indexScanStage.get("indexBounds", Document.class);
@@ -162,15 +182,17 @@ public class ExplainAnalyzeResultFactory {
 
         if (!conditions.isEmpty()) {
           Document andOperator = new Document("$and", conditions);
-          Document matchStage = new Document("$match", andOperator);
-          return List.of(matchStage);
+          if (mergeIndex) {
+            return List.of(andOperator);
+          }
+          return List.of(new Document("$match", andOperator));
         }
       }
     } catch (Exception ex) {
       // TODO Match Stages were not able to resolves
-      ex.printStackTrace();
+      // TODO log
+//      ex.printStackTrace();
     }
-    // TODO
     return Collections.emptyList();
   }
 
