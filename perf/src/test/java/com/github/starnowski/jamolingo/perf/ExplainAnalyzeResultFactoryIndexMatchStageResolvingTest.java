@@ -62,7 +62,14 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             DEFAULT_INDEXES,
             "pipelines/example2.json",
             "IXSCAN", // Covered query likely? or just IXSCAN
-            "results/example2_result.json"));
+            "results/example2_result.json"),
+
+        // Test case 3: startswith pattern
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/startswith_query.json",
+            "FETCH + IXSCAN",
+            "results/startswith_query_result.json"));
   }
 
   @ParameterizedTest
