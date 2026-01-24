@@ -1,0 +1,9 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "nestedObject.tokens": { "$regex": "^fir" }
+      }
+    }
+  ]
+}

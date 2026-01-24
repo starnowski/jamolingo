@@ -1,0 +1,25 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$and": [
+          {
+            "$and": [
+              {
+                "nestedObject.tokens": "first example"
+              },
+              {
+                "nestedObject.numbers": {
+                  "$elemMatch": {
+                    "$gt": 5,
+                    "$lt": 27
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

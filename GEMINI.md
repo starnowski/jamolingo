@@ -212,3 +212,8 @@ Below example with Github issue with id 160.
 
 Important! Describe only changes related to code that visibility is public (method, type, properties, type properties).
 If the visibility was changed then this also has to be mentioned in CHANGELOG.md file.
+
+### Tests cases in ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest
+
+When adding tests cases in ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest tests in the perf module, add tests cases when original pipeline would use some indexes and not collection scan.
+And what is important the tests case aggregation pipeline would use index for $match stage and not sorting.

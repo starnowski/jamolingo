@@ -14,6 +14,7 @@
         <module>common</module>
         <module>junit5-mongo-extension</module>
         <module>compat-driver-5.x</module>
+        <module>perf</module>
     </modules>
 
 
@@ -62,6 +63,16 @@
             <dependency>
                 <groupId>org.mongodb</groupId>
                 <artifactId>bson</artifactId>
+                <version>5.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-sync</artifactId>
+                <version>5.6.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongodb-driver-core</artifactId>
                 <version>5.6.1</version>
             </dependency>
             <dependency>

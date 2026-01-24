@@ -1,0 +1,7 @@
+{
+  "_id": "doc_wildcard",
+  "wildcardObj": {
+    "color": "red",
+    "size": "large"
+  }
+}

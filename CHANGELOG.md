@@ -6,10 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 * [Unreleased](#unreleased)
+* [0.3.0](#030---2026-01-21)
 * [0.2.0](#020---2026-01-20)
 * [0.1.0](#010---2026-01-18)
 
 ## [Unreleased]
+
+### Added
+
+#### Perf Module
+*   `com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult` ([#13](https://github.com/starnowski/jamolingo/issues/13))
+*   `com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory` ([#13](https://github.com/starnowski/jamolingo/issues/13))
+
+## [0.3.0] - 2026-01-21
 
 ### Changed
 

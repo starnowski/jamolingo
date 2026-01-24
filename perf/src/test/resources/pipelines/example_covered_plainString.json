@@ -1,0 +1,15 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "plainString": "someString"
+      }
+    },
+    {
+      "$project": {
+        "_id": 0,
+        "plainString": 1
+      }
+    }
+  ]
+}

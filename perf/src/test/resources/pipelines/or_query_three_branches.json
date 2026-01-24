@@ -1,0 +1,19 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$or": [
+          {
+            "plainString": "abc"
+          },
+          {
+            "nestedObject.numbers": 30
+          },
+          {
+            "nestedObject.tokens": "first example"
+          }
+        ]
+      }
+    }
+  ]
+}

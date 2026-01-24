@@ -1,0 +1,23 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$and": [
+          {
+            "$and": [
+              {
+                "nestedObject.tokens": "first example"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "$project": {
+        "_id": 0,
+        "nestedObject.tokens": 1
+      }
+    }
+  ]
+}

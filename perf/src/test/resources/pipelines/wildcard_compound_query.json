@@ -1,0 +1,12 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$and": [
+          { "wildcardObj.color": "red" },
+          { "wildcardObj.size": "large" }
+        ]
+      }
+    }
+  ]
+}

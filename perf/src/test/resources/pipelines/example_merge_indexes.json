@@ -1,0 +1,20 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$and": [
+          {
+            "$or": [
+              {
+                "plainString": "eOMtThyhVNLWUZNRcBaQKxI"
+              },
+              {
+                "password": "password1"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

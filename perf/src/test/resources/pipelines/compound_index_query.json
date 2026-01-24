@@ -1,0 +1,10 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "plainString": "abc",
+        "nestedObject.numbers": 20
+      }
+    }
+  ]
+}

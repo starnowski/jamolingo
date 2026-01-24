@@ -35,3 +35,11 @@ This module provides a JUnit 5 extension designed to simplify the process of set
 
 ### [Compatibility Driver 5.x](compat-driver-5.x/README.md)
 The `compat-driver-5.x` module serves as an integration testing suite to ensure the compatibility of the [`core`](core/README.md) module with the **MongoDB Java Driver version 5.x**. It verifies that OData-to-MongoDB translation remains functional with the newer driver versions.
+
+### [Performance](perf/README.md)
+The `perf` module provides tools and utilities for analyzing and verifying the performance of MongoDB queries. It allows for parsing MongoDB explain outputs to check for index usage and query efficiency.
+
+**Key Features:**
+*   Parses MongoDB explain results into a simplified `ExplainAnalyzeResult`.
+*   Identifies index usage types (IXSCAN, COLLSCAN, etc.).
+*   Experimental support for resolving index match stages.

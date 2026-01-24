@@ -1,0 +1,14 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "nestedObject.tokens": "first example"
+      }
+    },
+    {
+      "$sort": {
+        "plainString": 1
+      }
+    }
+  ]
+}

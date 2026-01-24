@@ -1,0 +1,12 @@
+{
+  "value": [
+    {
+      "_id": "doc_deep",
+      "wildcardObj": {
+        "nested": {
+          "deep": "value"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "_id": "doc1",
+  "plainString": "abc",
+  "nestedObject": {
+    "tokens": "first example",
+    "numbers": [10, 20]
+  }
+}
