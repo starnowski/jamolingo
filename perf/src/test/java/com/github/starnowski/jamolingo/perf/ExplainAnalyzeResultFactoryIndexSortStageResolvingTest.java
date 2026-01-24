@@ -49,12 +49,12 @@ class ExplainAnalyzeResultFactoryIndexSortStageResolvingTest {
         List.of(new Document("plainString", 1)),
         "pipelines/sort_only_query.json",
         "IXSCAN", // Or FETCH + IXSCAN depending on if it needs to fetch other fields. Here it
-        // fetches nestedObject, so likely FETCH + IXSCAN. But wait, if it just sorts, it
+        // fetches nestedObject, so likely FETCH + IXSCAN. if it just sorts, it
         // scans index.
-        // Actually for pure sort with no match, it scans the index.
+        // For pure sort with no match, it scans the index.
         // If the query is just sort, and we have index on plainString, and we need the whole
         // document, it is FETCH + IXSCAN.
-        // Wait, "plainString" index covers the sort order.
+        // The "plainString" index covers the sort order.
         "results/sort_only_result.json");
   }
 
