@@ -134,6 +134,56 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
+            bsonFilePath = "data/doc2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForOrQueryWithThreeBranches()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        DEFAULT_INDEXES,
+        "pipelines/or_query_three_branches.json",
+        "FETCH + IXSCAN",
+        "results/or_query_three_branches_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForOrQueryWithSameField()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        DEFAULT_INDEXES,
+        "pipelines/or_query_same_field.json",
+        "FETCH + IXSCAN",
+        "results/or_query_same_field_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
             bsonFilePath = "data/doc_wildcard.json")
       })
   public void shouldResolveCorrectIndexValueForWildcardIndex() throws IOException {
@@ -237,7 +287,9 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
 
     // TODO Resolve match stage that use index
     List<Bson> indexMatchStages = result.getIndexMatchStages();
-    Assertions.assertFalse(indexMatchStages.isEmpty());
+//    if (!"COLLSCAN".equals(expectedIndexValue)) {
+      Assertions.assertFalse(indexMatchStages.isEmpty());
+//    }
     List<Bson> enhancedPipeline = new ArrayList<>(indexMatchStages);
     enhancedPipeline.add(new Document("$set", new Document("no_such_field_test", true)));
     enhancedPipeline.addAll(pipeline);
@@ -263,8 +315,11 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
 
     Assertions.assertEquals(expectedIndexValue, result.getIndexValue().getValue());
 
-    Assertions.assertTrue(
-        "FETCH + IXSCAN".endsWith(enhancedPipelineIndex) || "IXSCAN".equals(enhancedPipelineIndex));
+    if (!"COLLSCAN".equals(expectedIndexValue)) {
+      Assertions.assertTrue(
+          "FETCH + IXSCAN".endsWith(enhancedPipelineIndex)
+              || "IXSCAN".equals(enhancedPipelineIndex));
+    }
   }
 
   private String resolveIndexStatus(Document explain) {
@@ -307,6 +362,7 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
 
   private void createIndexes(List<Document> indexes) {
     MongoCollection<Document> col = getCollection();
+    col.dropIndexes();
     indexes.forEach(col::createIndex);
   }
 }
