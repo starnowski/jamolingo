@@ -378,6 +378,27 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         "results/long_query_result.json");
   }
 
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_double_match.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_double_mismatch.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForDoubleQuery()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("doubleField", 1)),
+        "pipelines/double_query.json",
+        "FETCH + IXSCAN",
+        "results/double_query_result.json");
+  }
+
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
       List<Document> indexes,
       String pipelineFilePath,
