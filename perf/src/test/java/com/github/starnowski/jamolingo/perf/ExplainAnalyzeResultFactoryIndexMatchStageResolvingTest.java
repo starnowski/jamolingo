@@ -337,6 +337,27 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         "results/compound_index_result.json");
   }
 
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_boolean_true.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_boolean_false.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForBooleanQuery()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("isActive", 1)),
+        "pipelines/boolean_query.json",
+        "FETCH + IXSCAN",
+        "results/boolean_query_result.json");
+  }
+
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
       List<Document> indexes,
       String pipelineFilePath,
