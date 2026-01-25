@@ -1,0 +1,9 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "longField": {"$numberLong": "20000000000"}
+      }
+    }
+  ]
+}

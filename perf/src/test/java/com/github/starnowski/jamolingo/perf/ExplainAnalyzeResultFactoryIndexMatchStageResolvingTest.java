@@ -358,6 +358,26 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         "results/boolean_query_result.json");
   }
 
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_long_match.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_long_mismatch.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForLongQuery() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("longField", 1)),
+        "pipelines/long_query.json",
+        "FETCH + IXSCAN",
+        "results/long_query_result.json");
+  }
+
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
       List<Document> indexes,
       String pipelineFilePath,

@@ -1,0 +1,9 @@
+{
+  "value": [
+    {
+      "_id": "doc_long_match",
+      "longField": {"$numberLong": "20000000000"},
+      "plainString": "match"
+    }
+  ]
+}
