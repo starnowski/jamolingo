@@ -1,0 +1,12 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "plainString": {
+          "$gte": "abc",
+          "$lte": "def"
+        }
+      }
+    }
+  ]
+}

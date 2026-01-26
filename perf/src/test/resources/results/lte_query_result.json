@@ -1,0 +1,20 @@
+{
+  "value": [
+    {
+      "_id": "doc3",
+      "plainString": "def",
+      "nestedObject": {
+        "tokens": "first example",
+        "numbers": [2]
+      }
+    },
+    {
+      "_id": "doc1",
+      "plainString": "abc",
+      "nestedObject": {
+        "tokens": "first example",
+        "numbers": [10, 20]
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "value": [
+    {
+      "_id": "geo1",
+      "name": "Point 1",
+      "location": {
+        "type": "Point",
+        "coordinates": [0.0, 0.0]
+      }
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "_id": "geo3",
+  "name": "Point 3",
+  "location": {
+    "type": "Point",
+    "coordinates": [50.0, 50.0]
+  }
+}

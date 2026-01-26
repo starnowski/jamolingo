@@ -1,0 +1,12 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "plainString": {
+          "$gt": "abc",
+          "$lt": "xyz"
+        }
+      }
+    }
+  ]
+}

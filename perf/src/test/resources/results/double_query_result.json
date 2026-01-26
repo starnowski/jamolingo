@@ -1,0 +1,9 @@
+{
+  "value": [
+    {
+      "_id": "doc_double_match",
+      "doubleField": 123.456,
+      "plainString": "match"
+    }
+  ]
+}

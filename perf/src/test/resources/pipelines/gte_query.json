@@ -1,0 +1,9 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "nestedObject.numbers": { "$gte": 20 }
+      }
+    }
+  ]
+}

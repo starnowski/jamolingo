@@ -1,0 +1,5 @@
+{
+  "_id": "doc_double_mismatch",
+  "doubleField": 789.012,
+  "plainString": "mismatch"
+}

@@ -1,0 +1,11 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "plainString": {
+          "$in": ["abc", "def"]
+        }
+      }
+    }
+  ]
+}

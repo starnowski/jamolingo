@@ -3,7 +3,7 @@ package com.github.starnowski.jamolingo.perf;
 import static com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult.IndexValueRepresentation.*;
 
 import java.util.*;
-import org.bson.Document;
+import org.bson.*;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 public class ExplainAnalyzeResultFactory {
 
   private static final Logger logger = LoggerFactory.getLogger(ExplainAnalyzeResultFactory.class);
+
+  private static final List<Bson> MATCH_2DSPHERE_STage = null;
 
   /**
    * Builds an {@link ExplainAnalyzeResult} from the provided MongoDB explain document.
@@ -55,12 +57,18 @@ public class ExplainAnalyzeResultFactory {
     if ("IXSCAN".equals(stage)) {
       logger.debug("Pure index scan (covered aggregation).");
       return new DefaultExplainAnalyzeResult(
-          IXSCAN, resolveMatchingStages((Document) winningPlan.get("inputStage")));
+          IXSCAN,
+          resolveMatchingStages(
+              (Document) winningPlan.get("inputStage"),
+              (Document) winningPlan.get("filter"),
+              false));
     } else if ("FETCH".equals(stage)) {
       Document inputStage = (Document) winningPlan.get("inputStage");
       if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
         logger.debug("Index scan with fetch (aggregation not covered, but index is used).");
-        return new DefaultExplainAnalyzeResult(FETCH_IXSCAN, resolveMatchingStages(inputStage));
+        return new DefaultExplainAnalyzeResult(
+            FETCH_IXSCAN,
+            resolveMatchingStages(inputStage, (Document) winningPlan.get("filter"), false));
       }
       if (inputStage != null && "OR".equals(inputStage.getString("stage"))) {
         return tryToResolveKnowStage(winningPlan, true);
@@ -83,18 +91,29 @@ public class ExplainAnalyzeResultFactory {
     String stage = winningPlan.getString("stage");
     if ("IXSCAN".equals(stage)) {
       return resolveExplainAnalyzeResult(
-          IXSCAN, () -> resolveMatchingStages(winningPlan, mergeIndex));
+          IXSCAN,
+          () ->
+              resolveMatchingStages(winningPlan, (Document) winningPlan.get("filter"), mergeIndex));
     }
     if ("COLLSCAN".equals(stage)) {
       return new DefaultExplainAnalyzeResult(COLLSCAN);
     }
     boolean fetchExists = "FETCH".equals(stage);
     if (winningPlan.containsKey("inputStage")) {
-      ExplainAnalyzeResult innerStage =
-          tryToResolveKnowStage((Document) winningPlan.get("inputStage"), mergeIndex);
-      if ("IXSCAN".equals(innerStage.getIndexValue().getValue())) {
+      Document inputStageDoc = (Document) winningPlan.get("inputStage");
+      if (fetchExists && "IXSCAN".equals(inputStageDoc.getString("stage"))) {
+        return resolveExplainAnalyzeResult(
+            FETCH_IXSCAN,
+            () ->
+                resolveMatchingStages(
+                    inputStageDoc, (Document) winningPlan.get("filter"), mergeIndex));
+      }
+      ExplainAnalyzeResult innerStage = tryToResolveKnowStage(inputStageDoc, mergeIndex);
+      if (innerStage != null
+          && innerStage.getIndexValue() != null
+          && innerStage.getIndexValue().getValue().contains("IXSCAN")) {
         return new DefaultExplainAnalyzeResult(
-            fetchExists ? FETCH_IXSCAN : IXSCAN,
+            fetchExists ? FETCH_IXSCAN : innerStage.getIndexValue(),
             innerStage.getIndexMatchStages(),
             innerStage.getResolutionIndexMatchStagesException());
       }
@@ -112,7 +131,8 @@ public class ExplainAnalyzeResultFactory {
       }
       ExplainAnalyzeResult firstIXSCANStage =
           stages.stream()
-              .filter(s -> "IXSCAN".equals(s.getIndexValue().getValue()))
+              .filter(
+                  s -> s.getIndexValue() != null && s.getIndexValue().getValue().contains("IXSCAN"))
               .findFirst()
               .orElse(null);
       if (firstIXSCANStage != null) {
@@ -120,7 +140,12 @@ public class ExplainAnalyzeResultFactory {
         Throwable exception = null;
         if (orStage) {
           List<ExplainAnalyzeResult> ixscanStages =
-              stages.stream().filter(s -> "IXSCAN".equals(s.getIndexValue().getValue())).toList();
+              stages.stream()
+                  .filter(
+                      s ->
+                          s.getIndexValue() != null
+                              && s.getIndexValue().getValue().contains("IXSCAN"))
+                  .toList();
           exception =
               ixscanStages.stream()
                   .map(ExplainAnalyzeResult::getResolutionIndexMatchStagesException)
@@ -136,13 +161,25 @@ public class ExplainAnalyzeResultFactory {
                             "$or",
                             ixscanStages.stream()
                                 .flatMap(is -> is.getIndexMatchStages().stream())
+                                .map(
+                                    im -> {
+                                      if (im instanceof Document) {
+                                        Document dim = (Document) im;
+                                        if (dim.containsKey("$match")) {
+                                          return dim.get("$match");
+                                        }
+                                      }
+                                      return im;
+                                    })
                                 .toList())));
           } else {
             indexMatchStages = Collections.emptyList();
           }
         }
         return new DefaultExplainAnalyzeResult(
-            fetchExists ? FETCH_IXSCAN : IXSCAN, indexMatchStages, exception);
+            fetchExists ? FETCH_IXSCAN : firstIXSCANStage.getIndexValue(),
+            indexMatchStages,
+            exception);
       }
       logger.debug("Resolved stages are: {}", stages);
       return stages.stream().findFirst().orElse(new DefaultExplainAnalyzeResult(null));
@@ -150,18 +187,21 @@ public class ExplainAnalyzeResultFactory {
     return new DefaultExplainAnalyzeResult(null);
   }
 
-  private static final class RawIndexValue implements ExplainAnalyzeResult.HasIndexValue {
-
-    private final String rawValue;
-
-    private RawIndexValue(String rawValue) {
-      this.rawValue = rawValue;
+  private Document extractCondition(Document filter, String key) {
+    if (filter == null) return null;
+    if (filter.containsKey(key)) return (Document) filter.get(key);
+    if (filter.containsKey("$or")) {
+      List<Document> orList = filter.getList("$or", Document.class);
+      if (orList.size() == 1) return extractCondition(orList.get(0), key);
     }
-
-    @Override
-    public String getValue() {
-      return rawValue;
+    if (filter.containsKey("$and")) {
+      List<Document> andList = filter.getList("$and", Document.class);
+      for (Document andBranch : andList) {
+        Document cond = extractCondition(andBranch, key);
+        if (cond != null) return cond;
+      }
     }
+    return null;
   }
 
   private ExplainAnalyzeResult resolveExplainAnalyzeResult(
@@ -175,51 +215,120 @@ public class ExplainAnalyzeResultFactory {
     }
   }
 
-  private List<Bson> resolveMatchingStages(Document indexScanStage) {
-    return resolveMatchingStages(indexScanStage, false);
+  private boolean startWithInfinityKey(String range) {
+    return range.startsWith("(-inf.0") || range.startsWith("[-inf.0");
   }
 
-  private List<Bson> resolveMatchingStages(Document indexScanStage, boolean mergeIndex) {
+  private boolean endsWithInfinityKey(String range) {
+    return range.endsWith("inf.0)") || range.endsWith("inf.0]");
+  }
+
+  private List<Bson> resolveMatchingStages(
+      Document indexScanStage, Document filter, boolean mergeIndex) {
     if (indexScanStage.containsKey("indexBounds")) {
       Document indexBounds = indexScanStage.get("indexBounds", Document.class);
       List<Bson> conditions = new ArrayList<>();
-
-      for (String key : indexBounds.keySet()) {
-        if (key.startsWith("$")) {
-          continue;
-        }
-        Object boundsObj = indexBounds.get(key);
-        if (boundsObj instanceof List) {
-          List<String> bounds = (List<String>) boundsObj;
-          List<Object> exactMatches = new ArrayList<>();
-          for (String bound : bounds) {
-            try {
-              org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(bound);
-              if (bsonArray.size() == 2 && bsonArray.get(0).equals(bsonArray.get(1))) {
-                // Equality match: ["val", "val"]
-                // Convert BsonValue to Java Object if possible, or keep as BsonValue
-                // simple types:
-                if (bsonArray.get(0).isString()) {
-                  exactMatches.add(bsonArray.get(0).asString().getValue());
-                } else if (bsonArray.get(0).isInt32()) {
-                  exactMatches.add(bsonArray.get(0).asInt32().getValue());
-                } else if (bsonArray.get(0).isInt64()) {
-                  exactMatches.add(bsonArray.get(0).asInt64().getValue());
-                } else if (bsonArray.get(0).isDouble()) {
-                  exactMatches.add(bsonArray.get(0).asDouble().getValue());
-                } else if (bsonArray.get(0).isBoolean()) {
-                  exactMatches.add(bsonArray.get(0).asBoolean().getValue());
-                } else if (bsonArray.get(0).isRegularExpression()) {
-                  exactMatches.add(bsonArray.get(0).asRegularExpression());
-                }
-                // TODO handle other types if needed
-              }
-            } catch (Exception e) {
-              // Not a parseable JSON array or other error, ignore
+      Document keyPattern = indexScanStage.get("keyPattern", Document.class);
+      boolean processExactAndRangeKeys = true;
+      if (keyPattern != null && filter != null) {
+        for (String key : keyPattern.keySet()) {
+          if ("2dsphere".equals(keyPattern.get(key)) || "2d".equals(keyPattern.get(key))) {
+            Document condition = extractCondition(filter, key);
+            if (condition != null) {
+              conditions.add(new Document(key, condition));
+              processExactAndRangeKeys = false;
             }
           }
-          if (!exactMatches.isEmpty()) {
-            conditions.add(new Document(key, new Document("$in", exactMatches)));
+        }
+      }
+      if (processExactAndRangeKeys) {
+        for (String key : indexBounds.keySet()) {
+          if (key.startsWith("$")) {
+            continue;
+          }
+          Object boundsObj = indexBounds.get(key);
+          if (boundsObj instanceof List) {
+            List<?> bounds = (List<?>) boundsObj;
+            List<Object> exactMatches = new ArrayList<>();
+            List<Document> keyRanges = new ArrayList<>();
+
+            String logParsedBound = "";
+            for (Object boundObj : bounds) {
+              try {
+                if (boundObj instanceof String) {
+                  String bound = (String) boundObj;
+                  String parsableBound = bound;
+                  boolean startInclusive = true;
+                  boolean endInclusive = true;
+                  if (bound.startsWith("(") || bound.startsWith("[")) {
+                    if (bound.startsWith("(")) startInclusive = false;
+                    parsableBound = "[" + bound.substring(1);
+                  }
+                  if (bound.endsWith(")") || bound.endsWith("]")) {
+                    if (bound.endsWith(")")) endInclusive = false;
+                    parsableBound = parsableBound.substring(0, parsableBound.length() - 1) + "]";
+                  }
+
+                  logParsedBound = parsableBound;
+                  boolean minInfinity = startWithInfinityKey(parsableBound);
+                  boolean maxInfinity = endsWithInfinityKey(parsableBound);
+                  if (minInfinity) {
+                    parsableBound = parsableBound.replace("[-inf.0", "[0");
+                  }
+                  if (maxInfinity) {
+                    parsableBound = parsableBound.replace("inf.0]", "0]");
+                  }
+                  org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(parsableBound);
+                  if (minInfinity) {
+                    bsonArray.set(0, new BsonMinKey());
+                  }
+                  if (maxInfinity) {
+                    bsonArray.set(1, new BsonMaxKey());
+                  }
+                  if (bsonArray.size() == 2) {
+                    BsonValue min = bsonArray.get(0);
+                    BsonValue max = bsonArray.get(1);
+
+                    if (min.equals(max) && startInclusive && endInclusive) {
+                      Object val = convert(min);
+                      if (val != null) exactMatches.add(val);
+                    } else {
+                      Document rangeDoc = new Document();
+                      if (!isMinInfinity(min)) {
+                        Object val = convert(min);
+                        if (val != null) {
+                          rangeDoc.append(startInclusive ? "$gte" : "$gt", val);
+                        }
+                      }
+                      if (!isMaxInfinity(max)) {
+                        Object val = convert(max);
+                        if (val != null) {
+                          rangeDoc.append(endInclusive ? "$lte" : "$lt", val);
+                        }
+                      }
+                      if (!rangeDoc.isEmpty()) {
+                        keyRanges.add(new Document(key, rangeDoc));
+                      }
+                    }
+                  }
+                } else if (boundObj instanceof Number || boundObj instanceof Boolean) {
+                  exactMatches.add(boundObj);
+                }
+              } catch (Exception e) {
+                logger.debug("Failed to parse index bound: " + boundObj, e);
+              }
+            }
+            List<Document> keyConstraints = new ArrayList<>();
+            if (!exactMatches.isEmpty()) {
+              keyConstraints.add(new Document(key, new Document("$in", exactMatches)));
+            }
+            keyConstraints.addAll(keyRanges);
+
+            if (keyConstraints.size() == 1) {
+              conditions.add(keyConstraints.get(0));
+            } else if (keyConstraints.size() > 1) {
+              conditions.add(new Document("$or", keyConstraints));
+            }
           }
         }
       }
@@ -233,6 +342,36 @@ public class ExplainAnalyzeResultFactory {
       }
     }
     return Collections.emptyList();
+  }
+
+  private Object convert(BsonValue value) {
+    if (value.isString()) return value.asString().getValue();
+    if (value.isInt32()) return value.asInt32().getValue();
+    if (value.isInt64()) return value.asInt64().getValue();
+    if (value.isDouble()) return value.asDouble().getValue();
+    if (value.isBoolean()) return value.asBoolean().getValue();
+    if (value.isRegularExpression()) return value.asRegularExpression();
+    return null;
+  }
+
+  private boolean isMinInfinity(BsonValue value) {
+    if (value.getBsonType() == BsonType.MIN_KEY) return true;
+    if (value.isDouble() && value.asDouble().getValue() == Double.NEGATIVE_INFINITY) return true;
+    if (value.isString()) {
+      String s = value.asString().getValue();
+      return "-inf.0".equals(s) || "-Infinity".equals(s);
+    }
+    return false;
+  }
+
+  private boolean isMaxInfinity(BsonValue value) {
+    if (value.getBsonType() == BsonType.MAX_KEY) return true;
+    if (value.isDouble() && value.asDouble().getValue() == Double.POSITIVE_INFINITY) return true;
+    if (value.isString()) {
+      String s = value.asString().getValue();
+      return "inf.0".equals(s) || "Infinity".equals(s);
+    }
+    return false;
   }
 
   private static final class DefaultExplainAnalyzeResult implements ExplainAnalyzeResult {

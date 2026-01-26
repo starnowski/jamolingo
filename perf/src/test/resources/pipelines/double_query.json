@@ -1,0 +1,9 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "doubleField": 123.456
+      }
+    }
+  ]
+}

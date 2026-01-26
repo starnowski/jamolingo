@@ -1,0 +1,5 @@
+{
+  "_id": "doc_long_mismatch",
+  "longField": {"$numberLong": "30000000000"},
+  "plainString": "mismatch"
+}
