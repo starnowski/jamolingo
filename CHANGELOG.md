@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+*   Added support for 2d and 2dsphere indexes in `com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory` ([#18](https://github.com/starnowski/jamolingo/issues/18))
+*   Added support for range filtering in `com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory` ([#18](https://github.com/starnowski/jamolingo/issues/18))
+
+
 ## [0.4.0] - 2026-01-24
 
 ### Added
