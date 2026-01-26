@@ -503,7 +503,8 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             collection = "docs",
             bsonFilePath = "data/doc_geo_3.json")
       })
-  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeoQueryWithCenterSphere() throws IOException {
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeoQueryWithCenterSphere()
+      throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
         List.of(new Document("location", "2dsphere")),
         "pipelines/geo_query_center_sphere.json",
@@ -543,7 +544,8 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             collection = "docs",
             bsonFilePath = "data/doc_geo_2d_2.json")
       })
-  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeo2DQueryWithCenter() throws IOException {
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeo2DQueryWithCenter()
+      throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
         List.of(new Document("pos", "2d")),
         "pipelines/geo_2d_query_center.json",
@@ -557,18 +559,39 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
-            bsonFilePath = "data/doc_geo_2d_1.json"),
+            bsonFilePath = "data/doc_geo_2d_merge_1.json"),
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
-            bsonFilePath = "data/doc_geo_2d_2.json")
+            bsonFilePath = "data/doc_geo_2d_merge_2.json")
       })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeo2DMergeQuery()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("pos1", "2d"), new Document("pos2", "2d")),
+        "pipelines/geo_2d_merge_query.json",
+        "FETCH + IXSCAN",
+        "results/geo_2d_merge_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+          mongoDocuments = {
+                  @MongoDocument(
+                          database = TEST_DATABASE,
+                          collection = "docs",
+                          bsonFilePath = "data/doc_geo_2d_1.json"),
+                  @MongoDocument(
+                          database = TEST_DATABASE,
+                          collection = "docs",
+                          bsonFilePath = "data/doc_geo_2d_2.json")
+          })
   public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeo2DQueryWithPolygon() throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
-        List.of(new Document("pos", "2d")),
-        "pipelines/geo_2d_query_polygon.json",
-        "FETCH + IXSCAN",
-        "results/geo_2d_query_polygon_result.json");
+            List.of(new Document("pos", "2d")),
+            "pipelines/geo_2d_query_polygon.json",
+            "FETCH + IXSCAN",
+            "results/geo_2d_query_polygon_result.json");
   }
 
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(

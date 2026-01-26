@@ -1,0 +1,28 @@
+{
+  "value": [
+    {
+      "_id": "geo2d_merge_1",
+      "name": "Point 2D Merge 1",
+      "pos1": [
+        10.0,
+        10.0
+      ],
+      "pos2": [
+        20.0,
+        20.0
+      ]
+    },
+    {
+      "_id": "geo2d_merge_2",
+      "name": "Point 2D Merge 2",
+      "pos1": [
+        50.0,
+        50.0
+      ],
+      "pos2": [
+        60.0,
+        60.0
+      ]
+    }
+  ]
+}
