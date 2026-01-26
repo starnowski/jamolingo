@@ -106,7 +106,18 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         indexes, pipelineFilePath, expectedIndexValue, expectedResultsFilePath);
   }
 
-  @Test
+  public static Stream<Arguments>
+      provideShouldResolveCorrectIndexValueAndReturnCorrectDataForOrQuery() {
+    return Stream.of(
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/or_query.json",
+            "FETCH + IXSCAN",
+            "results/or_query_result.json"));
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideShouldResolveCorrectIndexValueAndReturnCorrectDataForOrQuery")
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(
@@ -122,12 +133,14 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             collection = "docs",
             bsonFilePath = "data/doc3.json")
       })
-  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForOrQuery() throws IOException {
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForOrQuery(
+      List<Document> indexes,
+      String pipelineFilePath,
+      String expectedIndexValue,
+      String expectedResultsFilePath)
+      throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
-        DEFAULT_INDEXES,
-        "pipelines/or_query.json",
-        "FETCH + IXSCAN",
-        "results/or_query_result.json");
+        indexes, pipelineFilePath, expectedIndexValue, expectedResultsFilePath);
   }
 
   @Test
