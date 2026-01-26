@@ -118,7 +118,17 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             DEFAULT_INDEXES,
             "pipelines/or_query_extended_form.json",
             "FETCH + IXSCAN",
-            "results/or_query_result.json"));
+            "results/or_query_result.json"),
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/or_query_same_field.json",
+            "FETCH + IXSCAN",
+            "results/or_query_same_field_result.json"),
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/in_query_same_field.json",
+            "FETCH + IXSCAN",
+            "results/in_query_same_field_result.json"));
   }
 
   @ParameterizedTest
