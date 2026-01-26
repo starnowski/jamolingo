@@ -113,6 +113,11 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             DEFAULT_INDEXES,
             "pipelines/or_query.json",
             "FETCH + IXSCAN",
+            "results/or_query_result.json"),
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/or_query_extended_form.json",
+            "FETCH + IXSCAN",
             "results/or_query_result.json"));
   }
 

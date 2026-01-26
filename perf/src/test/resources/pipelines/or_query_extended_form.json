@@ -1,0 +1,32 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$or": [
+          {
+            "$and": [
+              {
+                "plainString": {
+                  "$in": [
+                    "abc"
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            "$and": [
+              {
+                "nestedObject.numbers": {
+                  "$in": [
+                    30
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
