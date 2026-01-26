@@ -203,7 +203,7 @@ public class ExplainAnalyzeResultFactory {
       boolean processExactAndRangeKeys = true;
       if (keyPattern != null && filter != null) {
         for (String key : keyPattern.keySet()) {
-          if ("2dsphere".equals(keyPattern.get(key))) {
+          if ("2dsphere".equals(keyPattern.get(key)) || "2d".equals(keyPattern.get(key))) {
             Document condition = (Document) filter.get(key);
             if (condition != null) {
               conditions.add(new Document(key, condition));
@@ -217,74 +217,78 @@ public class ExplainAnalyzeResultFactory {
           if (key.startsWith("$")) {
             continue;
           }
-          Object boundsObj = indexBounds.get(key);
-          if (boundsObj instanceof List) {
-            List<String> bounds = (List<String>) boundsObj;
-            List<Object> exactMatches = new ArrayList<>();
-            List<Document> keyRanges = new ArrayList<>();
-
-            String logParsedBound = "";
-            for (String bound : bounds) {
-              try {
-                String parsableBound = bound;
-                boolean startInclusive = true;
-                boolean endInclusive = true;
-                if (bound.startsWith("(") || bound.startsWith("[")) {
-                  if (bound.startsWith("(")) startInclusive = false;
-                  parsableBound = "[" + bound.substring(1);
-                }
-                if (bound.endsWith(")") || bound.endsWith("]")) {
-                  if (bound.endsWith(")")) endInclusive = false;
-                  parsableBound = parsableBound.substring(0, parsableBound.length() - 1) + "]";
-                }
-
-                logParsedBound = parsableBound;
-                boolean minInfinity = startWithInfinityKey(parsableBound);
-                boolean maxInfinity = endsWithInfinityKey(parsableBound);
-                if (minInfinity) {
-                  parsableBound = parsableBound.replace("[-inf.0", "[0");
-                }
-                if (maxInfinity) {
-                  parsableBound = parsableBound.replace("inf.0]", "0]");
-                }
-                org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(parsableBound);
-                if (minInfinity) {
-                  bsonArray.set(0, new BsonMinKey());
-                }
-                if (maxInfinity) {
-                  bsonArray.set(1, new BsonMaxKey());
-                }
-                if (bsonArray.size() == 2) {
-                  BsonValue min = bsonArray.get(0);
-                  BsonValue max = bsonArray.get(1);
-
-                  if (min.equals(max) && startInclusive && endInclusive) {
-                    Object val = convert(min);
-                    if (val != null) exactMatches.add(val);
-                  } else {
-                    Document rangeDoc = new Document();
-                    if (!isMinInfinity(min)) {
-                      Object val = convert(min);
-                      if (val != null) {
-                        rangeDoc.append(startInclusive ? "$gte" : "$gt", val);
+                  Object boundsObj = indexBounds.get(key);
+                  if (boundsObj instanceof List) {
+                    List<?> bounds = (List<?>) boundsObj;
+                    List<Object> exactMatches = new ArrayList<>();
+                    List<Document> keyRanges = new ArrayList<>();
+          
+                    String logParsedBound = "";
+                    for (Object boundObj : bounds) {
+                      try {
+                        if (boundObj instanceof String) {
+                          String bound = (String) boundObj;
+                          String parsableBound = bound;
+                          boolean startInclusive = true;
+                          boolean endInclusive = true;
+                          if (bound.startsWith("(") || bound.startsWith("[")) {
+                            if (bound.startsWith("(")) startInclusive = false;
+                            parsableBound = "[" + bound.substring(1);
+                          }
+                          if (bound.endsWith(")") || bound.endsWith("]")) {
+                            if (bound.endsWith(")")) endInclusive = false;
+                            parsableBound = parsableBound.substring(0, parsableBound.length() - 1) + "]";
+                          }
+          
+                          logParsedBound = parsableBound;
+                          boolean minInfinity = startWithInfinityKey(parsableBound);
+                          boolean maxInfinity = endsWithInfinityKey(parsableBound);
+                          if (minInfinity) {
+                            parsableBound = parsableBound.replace("[-inf.0", "[0");
+                          }
+                          if (maxInfinity) {
+                            parsableBound = parsableBound.replace("inf.0]", "0]");
+                          }
+                          org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(parsableBound);
+                          if (minInfinity) {
+                            bsonArray.set(0, new BsonMinKey());
+                          }
+                          if (maxInfinity) {
+                            bsonArray.set(1, new BsonMaxKey());
+                          }
+                          if (bsonArray.size() == 2) {
+                            BsonValue min = bsonArray.get(0);
+                            BsonValue max = bsonArray.get(1);
+          
+                            if (min.equals(max) && startInclusive && endInclusive) {
+                              Object val = convert(min);
+                              if (val != null) exactMatches.add(val);
+                            } else {
+                              Document rangeDoc = new Document();
+                              if (!isMinInfinity(min)) {
+                                Object val = convert(min);
+                                if (val != null) {
+                                  rangeDoc.append(startInclusive ? "$gte" : "$gt", val);
+                                }
+                              }
+                              if (!isMaxInfinity(max)) {
+                                Object val = convert(max);
+                                if (val != null) {
+                                  rangeDoc.append(endInclusive ? "$lte" : "$lt", val);
+                                }
+                              }
+                              if (!rangeDoc.isEmpty()) {
+                                keyRanges.add(new Document(key, rangeDoc));
+                              }
+                            }
+                          }
+                        } else if (boundObj instanceof Number || boundObj instanceof Boolean) {
+                          exactMatches.add(boundObj);
+                        }
+                      } catch (Exception e) {
+                        logger.debug("Failed to parse index bound: " + boundObj, e);
                       }
                     }
-                    if (!isMaxInfinity(max)) {
-                      Object val = convert(max);
-                      if (val != null) {
-                        rangeDoc.append(endInclusive ? "$lte" : "$lt", val);
-                      }
-                    }
-                    if (!rangeDoc.isEmpty()) {
-                      keyRanges.add(new Document(key, rangeDoc));
-                    }
-                  }
-                }
-              } catch (Exception e) {
-                logger.debug("Failed to parse index bound: " + bound, e);
-              }
-            }
-
             List<Document> keyConstraints = new ArrayList<>();
             if (!exactMatches.isEmpty()) {
               keyConstraints.add(new Document(key, new Document("$in", exactMatches)));
