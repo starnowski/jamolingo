@@ -76,7 +76,31 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
             DEFAULT_INDEXES,
             "pipelines/startswith_query_extended_form.json",
             "FETCH + IXSCAN",
-            "results/startswith_query_result.json"));
+            "results/startswith_query_result.json"),
+        // Test case 5: lt query
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/lt_query.json",
+            "FETCH + IXSCAN",
+            "results/lt_query_result.json"),
+        // Test case 6: lte query
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/lte_query.json",
+            "FETCH + IXSCAN",
+            "results/lte_query_result.json"),
+        // Test case 7: gt query
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/gt_query.json",
+            "FETCH + IXSCAN",
+            "results/gt_query_result.json"),
+        // Test case 8: gte query
+        Arguments.of(
+            DEFAULT_INDEXES,
+            "pipelines/gte_query.json",
+            "FETCH + IXSCAN",
+            "results/gte_query_result.json"));
   }
 
   @ParameterizedTest

@@ -3,6 +3,8 @@ package com.github.starnowski.jamolingo.perf;
 import static com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult.IndexValueRepresentation.*;
 
 import java.util.*;
+import org.bson.BsonType;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -192,34 +194,64 @@ public class ExplainAnalyzeResultFactory {
         if (boundsObj instanceof List) {
           List<String> bounds = (List<String>) boundsObj;
           List<Object> exactMatches = new ArrayList<>();
+          List<Document> keyRanges = new ArrayList<>();
+
           for (String bound : bounds) {
             try {
-              org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(bound);
-              if (bsonArray.size() == 2 && bsonArray.get(0).equals(bsonArray.get(1))) {
-                // Equality match: ["val", "val"]
-                // Convert BsonValue to Java Object if possible, or keep as BsonValue
-                // simple types:
-                if (bsonArray.get(0).isString()) {
-                  exactMatches.add(bsonArray.get(0).asString().getValue());
-                } else if (bsonArray.get(0).isInt32()) {
-                  exactMatches.add(bsonArray.get(0).asInt32().getValue());
-                } else if (bsonArray.get(0).isInt64()) {
-                  exactMatches.add(bsonArray.get(0).asInt64().getValue());
-                } else if (bsonArray.get(0).isDouble()) {
-                  exactMatches.add(bsonArray.get(0).asDouble().getValue());
-                } else if (bsonArray.get(0).isBoolean()) {
-                  exactMatches.add(bsonArray.get(0).asBoolean().getValue());
-                } else if (bsonArray.get(0).isRegularExpression()) {
-                  exactMatches.add(bsonArray.get(0).asRegularExpression());
+              String parsableBound = bound;
+              boolean startInclusive = true;
+              boolean endInclusive = true;
+              if (bound.startsWith("(") || bound.startsWith("[")) {
+                if (bound.startsWith("(")) startInclusive = false;
+                parsableBound = "[" + bound.substring(1);
+              }
+              if (bound.endsWith(")") || bound.endsWith("]")) {
+                if (bound.endsWith(")")) endInclusive = false;
+                parsableBound = parsableBound.substring(0, parsableBound.length() - 1) + "]";
+              }
+
+              org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(parsableBound);
+              if (bsonArray.size() == 2) {
+                BsonValue min = bsonArray.get(0);
+                BsonValue max = bsonArray.get(1);
+
+                if (min.equals(max) && startInclusive && endInclusive) {
+                  Object val = convert(min);
+                  if (val != null) exactMatches.add(val);
+                } else {
+                  Document rangeDoc = new Document();
+                  if (!isMinInfinity(min)) {
+                    Object val = convert(min);
+                    if (val != null) {
+                      rangeDoc.append(startInclusive ? "$gte" : "$gt", val);
+                    }
+                  }
+                  if (!isMaxInfinity(max)) {
+                    Object val = convert(max);
+                    if (val != null) {
+                      rangeDoc.append(endInclusive ? "$lte" : "$lt", val);
+                    }
+                  }
+                  if (!rangeDoc.isEmpty()) {
+                    keyRanges.add(new Document(key, rangeDoc));
+                  }
                 }
-                // TODO handle other types if needed
               }
             } catch (Exception e) {
-              // Not a parseable JSON array or other error, ignore
+              logger.debug("Failed to parse index bound: " + bound, e);
             }
           }
+
+          List<Document> keyConstraints = new ArrayList<>();
           if (!exactMatches.isEmpty()) {
-            conditions.add(new Document(key, new Document("$in", exactMatches)));
+            keyConstraints.add(new Document(key, new Document("$in", exactMatches)));
+          }
+          keyConstraints.addAll(keyRanges);
+
+          if (keyConstraints.size() == 1) {
+            conditions.add(keyConstraints.get(0));
+          } else if (keyConstraints.size() > 1) {
+            conditions.add(new Document("$or", keyConstraints));
           }
         }
       }
@@ -233,6 +265,36 @@ public class ExplainAnalyzeResultFactory {
       }
     }
     return Collections.emptyList();
+  }
+
+  private Object convert(BsonValue value) {
+    if (value.isString()) return value.asString().getValue();
+    if (value.isInt32()) return value.asInt32().getValue();
+    if (value.isInt64()) return value.asInt64().getValue();
+    if (value.isDouble()) return value.asDouble().getValue();
+    if (value.isBoolean()) return value.asBoolean().getValue();
+    if (value.isRegularExpression()) return value.asRegularExpression();
+    return null;
+  }
+
+  private boolean isMinInfinity(BsonValue value) {
+    if (value.getBsonType() == BsonType.MIN_KEY) return true;
+    if (value.isDouble() && value.asDouble().getValue() == Double.NEGATIVE_INFINITY) return true;
+    if (value.isString()) {
+      String s = value.asString().getValue();
+      return "-inf.0".equals(s) || "-Infinity".equals(s);
+    }
+    return false;
+  }
+
+  private boolean isMaxInfinity(BsonValue value) {
+    if (value.getBsonType() == BsonType.MAX_KEY) return true;
+    if (value.isDouble() && value.asDouble().getValue() == Double.POSITIVE_INFINITY) return true;
+    if (value.isString()) {
+      String s = value.asString().getValue();
+      return "inf.0".equals(s) || "Infinity".equals(s);
+    }
+    return false;
   }
 
   private static final class DefaultExplainAnalyzeResult implements ExplainAnalyzeResult {
