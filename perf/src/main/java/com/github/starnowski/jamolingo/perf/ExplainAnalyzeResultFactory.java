@@ -244,13 +244,13 @@ public class ExplainAnalyzeResultFactory {
                   Document rangeDoc = new Document();
                   if (!isMinInfinity(min)) {
                     Object val = convert(min);
-                    if (isNumericValue(val)) {
+                    if (val != null) {
                       rangeDoc.append(startInclusive ? "$gte" : "$gt", val);
                     }
                   }
                   if (!isMaxInfinity(max)) {
                     Object val = convert(max);
-                    if (isNumericValue(val)) {
+                    if (val != null) {
                       rangeDoc.append(endInclusive ? "$lte" : "$lt", val);
                     }
                   }
@@ -309,14 +309,6 @@ public class ExplainAnalyzeResultFactory {
     return false;
   }
 
-  private boolean isNumericValue(Object value) {
-    if (value instanceof BsonValue bsonValue) {
-      return bsonValue.isDouble()
-          || bsonValue.isInt32()
-          || bsonValue.isInt64();
-    }
-    return value instanceof Number;
-  }
 
   private boolean isMaxInfinity(BsonValue value) {
     if (value.getBsonType() == BsonType.MAX_KEY) return true;
