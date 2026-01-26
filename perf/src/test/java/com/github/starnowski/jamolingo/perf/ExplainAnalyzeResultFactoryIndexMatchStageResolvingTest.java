@@ -576,22 +576,23 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
 
   @Test
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          database = TEST_DATABASE,
-                          collection = "docs",
-                          bsonFilePath = "data/doc_geo_2d_1.json"),
-                  @MongoDocument(
-                          database = TEST_DATABASE,
-                          collection = "docs",
-                          bsonFilePath = "data/doc_geo_2d_2.json")
-          })
-  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeo2DQueryWithPolygon() throws IOException {
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_2d_1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_2d_2.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeo2DQueryWithPolygon()
+      throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
-            List.of(new Document("pos", "2d")),
-            "pipelines/geo_2d_query_polygon.json",
-            "FETCH + IXSCAN",
-            "results/geo_2d_query_polygon_result.json");
+        List.of(new Document("pos", "2d")),
+        "pipelines/geo_2d_query_polygon.json",
+        "FETCH + IXSCAN",
+        "results/geo_2d_query_polygon_result.json");
   }
 
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
