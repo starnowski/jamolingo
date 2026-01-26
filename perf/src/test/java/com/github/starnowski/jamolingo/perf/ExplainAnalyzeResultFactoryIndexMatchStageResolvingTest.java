@@ -463,6 +463,30 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         "results/double_query_result.json");
   }
 
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeoQuery() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("location", "2dsphere")),
+        "pipelines/geo_query.json",
+        "FETCH + IXSCAN",
+        "results/geo_query_result.json");
+  }
+
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
       List<Document> indexes,
       String pipelineFilePath,
