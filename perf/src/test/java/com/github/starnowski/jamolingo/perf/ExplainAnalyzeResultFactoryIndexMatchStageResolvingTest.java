@@ -493,6 +493,30 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
+            bsonFilePath = "data/doc_geo_1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeoQueryWithCenterSphere() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("location", "2dsphere")),
+        "pipelines/geo_query_center_sphere.json",
+        "FETCH + IXSCAN",
+        "results/geo_query_center_sphere_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
             bsonFilePath = "data/doc_geo_2d_1.json"),
         @MongoDocument(
             database = TEST_DATABASE,
@@ -505,6 +529,46 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         "pipelines/geo_2d_query.json",
         "FETCH + IXSCAN",
         "results/geo_2d_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_2d_1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_2d_2.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeo2DQueryWithCenter() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("pos", "2d")),
+        "pipelines/geo_2d_query_center.json",
+        "FETCH + IXSCAN",
+        "results/geo_2d_query_center_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_2d_1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_geo_2d_2.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForGeo2DQueryWithPolygon() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("pos", "2d")),
+        "pipelines/geo_2d_query_polygon.json",
+        "FETCH + IXSCAN",
+        "results/geo_2d_query_polygon_result.json");
   }
 
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
@@ -540,6 +604,8 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
 
     // TODO Resolve match stage that use index
     List<Bson> indexMatchStages = result.getIndexMatchStages();
+    System.out.println("Pipeline: " + pipelineFilePath);
+    System.out.println("Index Match Stages: " + indexMatchStages);
     if (!"COLLSCAN".equals(expectedIndexValue)) {
       Assertions.assertFalse(indexMatchStages.isEmpty());
     }
