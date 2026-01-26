@@ -309,7 +309,6 @@ public class ExplainAnalyzeResultFactory {
     return false;
   }
 
-
   private boolean isMaxInfinity(BsonValue value) {
     if (value.getBsonType() == BsonType.MAX_KEY) return true;
     if (value.isDouble() && value.asDouble().getValue() == Double.POSITIVE_INFINITY) return true;
