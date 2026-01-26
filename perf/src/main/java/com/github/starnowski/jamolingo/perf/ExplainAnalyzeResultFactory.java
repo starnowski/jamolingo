@@ -313,11 +313,9 @@ public class ExplainAnalyzeResultFactory {
     if (value instanceof BsonValue bsonValue) {
       return bsonValue.isDouble()
           || bsonValue.isInt32()
-          || bsonValue.isInt32()
           || bsonValue.isInt64();
     }
-    // TODO
-    return value instanceof Double || value instanceof Integer || value instanceof Long;
+    return value instanceof Number;
   }
 
   private boolean isMaxInfinity(BsonValue value) {
