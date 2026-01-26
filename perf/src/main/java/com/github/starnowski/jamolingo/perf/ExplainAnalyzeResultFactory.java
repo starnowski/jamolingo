@@ -3,9 +3,7 @@ package com.github.starnowski.jamolingo.perf;
 import static com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult.IndexValueRepresentation.*;
 
 import java.util.*;
-import org.bson.BsonType;
-import org.bson.BsonValue;
-import org.bson.Document;
+import org.bson.*;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -181,6 +179,14 @@ public class ExplainAnalyzeResultFactory {
     return resolveMatchingStages(indexScanStage, false);
   }
 
+  private boolean startWithInfinityKey(String range) {
+    return range.startsWith("(-inf.0") || range.startsWith("[-inf.0");
+  }
+
+  private boolean endsWithInfinityKey(String range) {
+    return range.endsWith("inf.0)") || range.endsWith("inf.0]");
+  }
+
   private List<Bson> resolveMatchingStages(Document indexScanStage, boolean mergeIndex) {
     if (indexScanStage.containsKey("indexBounds")) {
       Document indexBounds = indexScanStage.get("indexBounds", Document.class);
@@ -196,6 +202,7 @@ public class ExplainAnalyzeResultFactory {
           List<Object> exactMatches = new ArrayList<>();
           List<Document> keyRanges = new ArrayList<>();
 
+          String logParsedBound = "";
           for (String bound : bounds) {
             try {
               String parsableBound = bound;
@@ -210,7 +217,22 @@ public class ExplainAnalyzeResultFactory {
                 parsableBound = parsableBound.substring(0, parsableBound.length() - 1) + "]";
               }
 
+              logParsedBound = parsableBound;
+              boolean minInfinity = startWithInfinityKey(parsableBound);
+              boolean maxInfinity = endsWithInfinityKey(parsableBound);
+              if (minInfinity) {
+                parsableBound = parsableBound.replace("[-inf.0", "[0");
+              }
+              if (maxInfinity) {
+                parsableBound = parsableBound.replace("inf.0]", "0]");
+              }
               org.bson.BsonArray bsonArray = org.bson.BsonArray.parse(parsableBound);
+              if (minInfinity) {
+                bsonArray.set(0, new BsonMinKey());
+              }
+              if (maxInfinity) {
+                bsonArray.set(1, new BsonMaxKey());
+              }
               if (bsonArray.size() == 2) {
                 BsonValue min = bsonArray.get(0);
                 BsonValue max = bsonArray.get(1);
@@ -289,12 +311,14 @@ public class ExplainAnalyzeResultFactory {
 
   private boolean isNumericValue(Object value) {
     if (value instanceof BsonValue bsonValue) {
-        return bsonValue.isDouble() || bsonValue.isInt32() || bsonValue.isInt32() || bsonValue.isInt64();
+      return bsonValue.isDouble()
+          || bsonValue.isInt32()
+          || bsonValue.isInt32()
+          || bsonValue.isInt64();
     }
-    //TODO
+    // TODO
     return value instanceof Double || value instanceof Integer || value instanceof Long;
   }
-
 
   private boolean isMaxInfinity(BsonValue value) {
     if (value.getBsonType() == BsonType.MAX_KEY) return true;
