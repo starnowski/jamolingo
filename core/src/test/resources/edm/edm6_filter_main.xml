@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="MyService">
+            <EntityType Name="Example2">
+                <Property Name="plainString" Type="Edm.String"></Property>
+                <Property Name="genericInteger" Type="Edm.Int64"></Property>
+                <Property Name="genericNumber" Type="Edm.Decimal"></Property>
+                <Property Name="uuidProp" Type="Edm.Guid"></Property>
+                <Property Name="floatValue" Type="Edm.Single"></Property>
+                <Property Name="doubleValue" Type="Edm.Double"></Property>
+                <Property Name="bigInteger" Type="Edm.Int64"></Property>
+                <Property Name="isActive" Type="Edm.Boolean"></Property>
+                <Property Name="birthDate" Type="Edm.Date"></Property>
+                <Property Name="nestedObject" Type="MyService.nestedObjectType1"></Property>
+                <Property Name="tags" Type="Collection(Edm.String)"></Property>
+                <Property Name="password" Type="Edm.String"></Property>
+                <Property Name="base64Data" Type="Edm.Binary"></Property>
+                <Property Name="smallInteger" Type="Edm.Int32"></Property>
+                <Property Name="timestamp" Type="Edm.DateTimeOffset"></Property>
+            </EntityType>
+            <ComplexType Name="MyService.nestedObjectType1">
+                <Property Name="numbers" Type="Collection(Edm.Decimal)"></Property>
+                <Property Name="index" Type="Edm.String"></Property>
+                <Property Name="tokens" Type="Collection(Edm.String)"></Property>
+            </ComplexType>
+            <EntityContainer Name="Container">
+                <EntitySet Name="examples2" EntityType="MyService.Example2"></EntitySet>
+            </EntityContainer>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>
