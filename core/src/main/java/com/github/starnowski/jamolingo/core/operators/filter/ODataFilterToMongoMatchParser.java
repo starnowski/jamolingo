@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.core.operators.filter;
 
+import java.util.Collections;
 import java.util.List;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -14,18 +15,30 @@ public class ODataFilterToMongoMatchParser {
       throws ODataApplicationException, ExpressionVisitException {
     if (filter == null) return new DefaultFilterOperatorResult();
     Expression expr = filter.getExpression();
-    //        return expr.accept(new MongoFilterVisitor(edm));
-    return new DefaultFilterOperatorResult();
+    Bson result = expr.accept(new MongoFilterVisitor(edm));
+    return new DefaultFilterOperatorResult(List.of(result));
   }
 
   private static class DefaultFilterOperatorResult implements FilterOperatorResult {
-    @Override
+
+    private final List<Bson> stageObjects;
+
+    public DefaultFilterOperatorResult() {
+      this(Collections.emptyList());
+    }
+
+      public DefaultFilterOperatorResult(List<Bson> stageObjects) {
+          this.stageObjects = stageObjects;
+      }
+
+      @Override
     public List<Bson> getStageObjects() {
-      return List.of();
+      return stageObjects;
     }
 
     @Override
     public List<String> getUsedMongoDocumentProperties() {
+      //TODO
       return List.of();
     }
 
