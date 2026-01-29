@@ -27,18 +27,18 @@ public class ODataFilterToMongoMatchParser {
       this(Collections.emptyList());
     }
 
-      public DefaultFilterOperatorResult(List<Bson> stageObjects) {
-          this.stageObjects = stageObjects;
-      }
+    public DefaultFilterOperatorResult(List<Bson> stageObjects) {
+      this.stageObjects = stageObjects;
+    }
 
-      @Override
+    @Override
     public List<Bson> getStageObjects() {
       return stageObjects;
     }
 
     @Override
     public List<String> getUsedMongoDocumentProperties() {
-      //TODO
+      // TODO
       return List.of();
     }
 
