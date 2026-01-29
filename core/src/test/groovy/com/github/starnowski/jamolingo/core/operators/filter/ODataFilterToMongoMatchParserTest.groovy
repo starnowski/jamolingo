@@ -16,8 +16,6 @@ import org.bson.conversions.Bson
 import org.bson.json.JsonWriterSettings
 import spock.lang.Unroll
 
-import java.util.stream.Collectors
-
 class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
 
     @Unroll
@@ -83,7 +81,19 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
                 ["edm/edm6_filter_main.xml", "examples2"  , "tags/any(t:tolower(t) eq 'developer')", """{"\$match": {"\$and": [{"\$expr": {"\$gt": [{"\$size": {"\$filter": {"input": "\$tags", "as": "t", "cond": {"\$eq": [{"\$toLower": "\$\$t"}, "developer"]}}}}, 0]}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2"  , "tags/any(t:startswith(t,'spider') and endswith(t, 'web'))", """{"\$match": {"\$and": [{"\$expr": {"\$gt": [{"\$size": {"\$filter": {"input": "\$tags", "as": "t", "cond": {"\$and": [{"\$regexMatch": {"input": "\$\$t", "regex": "^\\\\Qspider\\\\E", "options": "i"}}, {"\$regexMatch": {"input": "\$\$t", "regex": "\\\\Qweb\\\\E\$", "options": "i"}}]}}}}, 0]}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2"  , "tags/any(t:startswith(t,'spider') and t eq 'spiderweb')", """{"\$match": {"\$and": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$eq": "spiderweb"}}}]}}"""],
-                ["edm/edm6_filter_main.xml", "examples2"  , "tags/any(t:startswith(t,'spider') and t ne 'spiderweb')", """{"\$match": {"\$and": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}]}}"""]
+                ["edm/edm6_filter_main.xml", "examples2"  , "tags/any(t:startswith(t,'spider') and t ne 'spiderweb')", """{"\$match": {"\$and": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "trim('   Poem   ') eq 'Poem'", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$trim": {"input": "   Poem   "}}, "Poem"]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "year(birthDate) eq 2024", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$year": "\$birthDate"}, 2024]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "month(birthDate) eq 6", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$month": "\$birthDate"}, 6]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "day(birthDate) eq 18", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$dayOfMonth": "\$birthDate"}, 18]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "hour(timestamp) eq 10", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$hour": "\$timestamp"}, 10]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "minute(timestamp) eq 15", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$minute": "\$timestamp"}, 15]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "second(timestamp) eq 26", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$second": "\$timestamp"}, 26]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "ceiling(floatValue) eq 1", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$ceil": "\$floatValue"}, 1]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "floor(floatValue) eq 0", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$floor": "\$floatValue"}, 0]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "round(floatValue) eq 1", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$round": "\$floatValue"}, 1]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')", """{"\$match": {"\$and": [{"\$or": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}, {"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spider"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qwide\\\\E", "\$ne": "word wide"}}}]}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')", """{"\$match": {"\$and": [{"\$or": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qweb\\\\E\$", "\$ne": "spiderwebgg"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qwide\\\\E", "\$ne": "word wide"}}}]}]}}"""]
         ]
     }
 }
