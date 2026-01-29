@@ -40,7 +40,8 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
         [
                 ["edm/edm6_filter_main.xml", "examples2"  , "tags/all(t:t ne 'no such text' and t ne 'no such word')", """{"\$match": {"\$and": [{"\$and": [{"tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "no such text"}}}}}, {"tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "no such word"}}}}}]}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2"  , "tags/all(t:startswith(t,'star') and t ne 'starlord')", """{"\$match": {"\$and": [{"\$and": [{"tags": {"\$not": {"\$elemMatch": {"\$not": {"\$regex": "^\\\\Qstar\\\\E"}}}}}, {"tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "starlord"}}}}}]}]}}"""],
-                ["edm/edm6_filter_main.xml", "examples2"  , "nestedObject/tokens/any(t:t ne 'no such text')", """{"\$match": {"\$and": [{"nestedObject.tokens": {"\$ne": "no such text"}}]}}"""]
+                ["edm/edm6_filter_main.xml", "examples2"  , "nestedObject/tokens/any(t:t ne 'no such text')", """{"\$match": {"\$and": [{"nestedObject.tokens": {"\$ne": "no such text"}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)", """{"\$match": {"\$and": [{"\$and": [{"nestedObject.tokens": "first example"}, {"nestedObject.numbers": {"\$elemMatch": {"\$gt": 5, "\$lt": 27}}}]}]}}"""]
         ]
     }
 
