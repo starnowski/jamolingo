@@ -7,6 +7,7 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.bson.Document;
 import org.bson.conversions.Bson;
 
 public class ODataFilterToMongoMatchParser {
@@ -16,7 +17,8 @@ public class ODataFilterToMongoMatchParser {
     if (filter == null) return new DefaultFilterOperatorResult();
     Expression expr = filter.getExpression();
     Bson result = expr.accept(new MongoFilterVisitor(edm));
-    return new DefaultFilterOperatorResult(List.of(result));
+    return new DefaultFilterOperatorResult(
+        List.of(new Document("$match", new Document("$and", List.of(result)))));
   }
 
   private static class DefaultFilterOperatorResult implements FilterOperatorResult {
