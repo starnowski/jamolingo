@@ -19,7 +19,7 @@
                 <Property Name="smallInteger" Type="Edm.Int32"></Property>
                 <Property Name="timestamp" Type="Edm.DateTimeOffset"></Property>
             </EntityType>
-            <ComplexType Name="MyService.nestedObjectType1">
+            <ComplexType Name="nestedObjectType1">
                 <Property Name="numbers" Type="Collection(Edm.Decimal)"></Property>
                 <Property Name="index" Type="Edm.String"></Property>
                 <Property Name="tokens" Type="Collection(Edm.String)"></Property>

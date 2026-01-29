@@ -8,9 +8,9 @@ import org.bson.conversions.Bson;
 
 public class Filters {
 
-  public static Bson ne(Object left, Object right) {
-    // TODO
-    return new Document("$ne", right);
+  public static Bson ne(String left, Object right) {
+
+    return new Document(left, new Document("$ne", right));
   }
 
   public static Bson gt(Object left, Object right) {
