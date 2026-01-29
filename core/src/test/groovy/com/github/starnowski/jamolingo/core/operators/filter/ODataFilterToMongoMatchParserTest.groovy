@@ -1,7 +1,6 @@
 package com.github.starnowski.jamolingo.core.operators.filter
 
 import com.github.starnowski.jamolingo.core.AbstractSpecification
-import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser
 import com.mongodb.MongoClientSettings
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
