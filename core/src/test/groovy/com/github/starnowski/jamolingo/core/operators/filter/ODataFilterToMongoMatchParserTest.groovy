@@ -30,7 +30,7 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
         def result = tested.parse(uriInfo.getFilterOption(), edm)
 
         then:
-        result.getStageObjects() == [expectedBson]
+        [result.getStageObjects().get(0).toBsonDocument().toJson()] == [expectedBson.toJson()]
 
         where:
         [edmConfigFile, path , filter, bson] << oneToOneEdmPathsMappings()
