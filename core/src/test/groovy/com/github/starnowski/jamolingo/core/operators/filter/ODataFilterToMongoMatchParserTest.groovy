@@ -24,13 +24,13 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
                 .parseUri(path,
                         "\$filter=" +filter
                         , null, null)
-        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+        ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
 
         when:
-        def result = tested.parse(uriInfo.getSelectOption())
+        def result = tested.parse(uriInfo.getFilterOption(), edm)
 
         then:
-        result.getStageObject() == expectedBson
+        result.getStageObjects() == [expectedBson]
 
         where:
         [edmConfigFile, path , filter, bson] << oneToOneEdmPathsMappings()
