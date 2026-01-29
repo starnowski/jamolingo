@@ -13,20 +13,22 @@ public class Filters {
     return new Document(left, new Document("$ne", right));
   }
 
-  public static Bson gt(Object left, Object right) {
-    return new Document("$gt", Arrays.asList(left, right));
+  public static Bson gt(String left, Object right) {
+    return new Document(left, new Document("$gt", right));
   }
 
-  public static Bson gte(Object left, Object right) {
-    return new Document("$gte", Arrays.asList(left, right));
+  public static Bson gte(String left, Object right) {
+
+    return new Document(left, new Document("$gte", right));
   }
 
-  public static Bson lt(Object left, Object right) {
-    return new Document("$lt", Arrays.asList(left, right));
+  public static Bson lt(String left, Object right) {
+
+    return new Document(left, new Document("$lt", right));
   }
 
-  public static Bson lte(Object left, Object right) {
-    return new Document("lte", Arrays.asList(left, right));
+  public static Bson lte(String left, Object right) {
+    return new Document(left, new Document("$lte", right));
   }
 
   public static Bson and(Bson left, Bson right) {
