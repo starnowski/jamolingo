@@ -2,12 +2,19 @@ package com.github.starnowski.jamolingo.core.operators.filter
 
 import com.github.starnowski.jamolingo.core.AbstractSpecification
 import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser
+import com.mongodb.MongoClientSettings
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
 import org.apache.olingo.server.api.uri.UriInfo
 import org.apache.olingo.server.core.uri.parser.Parser
 import org.bson.Document
+import org.bson.UuidRepresentation
+import org.bson.codecs.DocumentCodec
+import org.bson.codecs.UuidCodecProvider
+import org.bson.codecs.configuration.CodecRegistries
+import org.bson.codecs.configuration.CodecRegistry
 import org.bson.conversions.Bson
+import org.bson.json.JsonWriterSettings
 import spock.lang.Unroll
 
 import java.util.stream.Collectors
@@ -19,6 +26,12 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
         given:
         Bson expectedBson = Document.parse(bson)
         Edm edm = loadEmdProvider(edmConfigFile)
+        JsonWriterSettings settings = JsonWriterSettings.builder().build()
+        CodecRegistry registry = CodecRegistries.fromRegistries(
+                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                MongoClientSettings.getDefaultCodecRegistry()
+        )
+        DocumentCodec codec = new DocumentCodec(registry)
 
         UriInfo uriInfo = new Parser(edm, OData.newInstance())
                 .parseUri(path,
@@ -30,7 +43,7 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
         def result = tested.parse(uriInfo.getFilterOption(), edm)
 
         then:
-        [result.getStageObjects().get(0).toBsonDocument().toJson()] == [expectedBson.toJson()]
+        [((Document)result.getStageObjects().get(0)).toJson(settings, codec)] == [((Document)expectedBson).toJson(settings, codec)]
 
         where:
         [edmConfigFile, path , filter, bson] << oneToOneEdmPathsMappings()
@@ -42,6 +55,7 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
                 ["edm/edm6_filter_main.xml", "examples2"  , "tags/all(t:startswith(t,'star') and t ne 'starlord')", """{"\$match": {"\$and": [{"\$and": [{"tags": {"\$not": {"\$elemMatch": {"\$not": {"\$regex": "^\\\\Qstar\\\\E"}}}}}, {"tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "starlord"}}}}}]}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2"  , "nestedObject/tokens/any(t:t ne 'no such text')", """{"\$match": {"\$and": [{"nestedObject.tokens": {"\$ne": "no such text"}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2"  , "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)", """{"\$match": {"\$and": [{"\$and": [{"nestedObject.tokens": "first example"}, {"nestedObject.numbers": {"\$elemMatch": {"\$gt": 5, "\$lt": 27}}}]}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2"  , "nestedObject/tokens/any(t:t eq 'normalize(''First example'')')", """{"\$match": {"\$and": [{"nestedObject.tokens": "normalize(''First example'')"}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2"  , "plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", """{"\$match": {"\$and": [{"plainString": "eOMtThyhVNLWUZNRcBaQKxI"}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2"  , "tolower(plainString) eq 'eomtthyhvnlwuznrcbaqkxi'", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$toLower": "\$plainString"}, "eomtthyhvnlwuznrcbaqkxi"]}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2"  , "tolower(plainString) eq tolower('eOMtThyhVNLWUZNRcBaQKxI')", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$toLower": "\$plainString"}, {"\$toLower": "eOMtThyhVNLWUZNRcBaQKxI"}]}}]}}"""],
@@ -57,5 +71,4 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
                 ["edm/edm6_filter_main.xml", "examples2"  , "tags/any(t:t eq 'developer') or tags/any(t:t eq 'LLM')", """{"\$match": {"\$and": [{"\$or": [{"tags": "developer"}, {"tags": "LLM"}]}]}}"""]
         ]
     }
-
 }

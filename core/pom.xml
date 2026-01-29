@@ -48,6 +48,12 @@
             <scope>test</scope>
             <version>0.5.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <!--            Dependency need only for tests purpose to use type codes when asserting data, no MongoDB connection required-->
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
