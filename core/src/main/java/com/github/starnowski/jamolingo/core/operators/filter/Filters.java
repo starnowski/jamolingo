@@ -44,7 +44,8 @@ public class Filters {
   }
 
   public static Bson in(String field, List<Object> values) {
-    return new Document("$in", Arrays.asList(field, values));
+
+    return new Document(field, new Document("$in", values));
   }
 
   public static Bson eq(String field, Object value) {
