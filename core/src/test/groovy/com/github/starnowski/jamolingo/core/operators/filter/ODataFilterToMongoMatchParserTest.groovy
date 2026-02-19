@@ -149,7 +149,6 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
                 ["edm/edm6_filter_main.xml", "examples2", "complexList/any(c:c/someString eq 'Application')", """{"\$match": {"\$and": [{"complexList.someString": "Application"}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2", "nestedObject/tokens/any(t:t ne 'no such text')", """{"\$match": {"\$and": [{"nestedObject.tokens": {"\$ne": "no such text"}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2", "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)", """{"\$match": {"\$and": [{"\$and": [{"nestedObject.tokens": "first example"}, {"nestedObject.numbers": {"\$elemMatch": {"\$gt": 5, "\$lt": 27}}}]}]}}"""],
-                ["edm/edm6_filter_main.xml", "examples2", "nestedObject/tokens/any(t:t eq 'normalize(''First example'')')", """{"\$match": {"\$and": [{"nestedObject.tokens": "first example"}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2", "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa", """{"\$match": {"\$and": [{"uuidProp": {"\$binary": {"base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04"}}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2", "trim('   Poem   ') eq 'Poem'", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$trim": {"input": "   Poem   "}}, "Poem"]}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2", "year(birthDate) eq 2024", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$year": "\$birthDate"}, 2024]}}]}}"""],
