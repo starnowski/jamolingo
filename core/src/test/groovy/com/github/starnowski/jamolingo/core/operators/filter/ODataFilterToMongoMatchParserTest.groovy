@@ -145,7 +145,31 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
                 ["edm/edm6_filter_main.xml", "examples2", "complexList/any(c:startswith(c/someString,'Ap'))", """{"\$match": {"\$and": [{"complexList.someString": {"\$regularExpression": {"pattern": "^\\\\QAp\\\\E", "options": ""}}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2", "complexList/any(c:contains(c/someString,'ana'))", """{"\$match": {"\$and": [{"complexList.someString": {"\$regularExpression": {"pattern": "\\\\Qana\\\\E", "options": ""}}}]}}"""],
                 ["edm/edm6_filter_main.xml", "examples2", "complexList/any(c:endswith(c/someString,'erry'))", """{"\$match": {"\$and": [{"complexList.someString": {"\$regularExpression": {"pattern": "\\\\Qerry\\\\E\$", "options": ""}}}]}}"""],
-                ["edm/edm6_filter_main.xml", "examples2", "complexList/any(c:contains(c/someString,'e'))", """{"\$match": {"\$and": [{"complexList.someString": {"\$regularExpression": {"pattern": "\\\\Qe\\\\E", "options": ""}}}]}}"""]
+                ["edm/edm6_filter_main.xml", "examples2", "complexList/any(c:contains(c/someString,'e'))", """{"\$match": {"\$and": [{"complexList.someString": {"\$regularExpression": {"pattern": "\\\\Qe\\\\E", "options": ""}}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "complexList/any(c:c/someString eq 'Application')", """{"\$match": {"\$and": [{"complexList.someString": "Application"}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "nestedObject/tokens/any(t:t ne 'no such text')", """{"\$match": {"\$and": [{"nestedObject.tokens": {"\$ne": "no such text"}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)", """{"\$match": {"\$and": [{"\$and": [{"nestedObject.tokens": "first example"}, {"nestedObject.numbers": {"\$elemMatch": {"\$gt": 5, "\$lt": 27}}}]}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "nestedObject/tokens/any(t:t eq 'normalize(''First example'')')", """{"\$match": {"\$and": [{"nestedObject.tokens": "first example"}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa", """{"\$match": {"\$and": [{"uuidProp": {"\$binary": {"base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04"}}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "trim('   Poem   ') eq 'Poem'", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$trim": {"input": "   Poem   "}}, "Poem"]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "year(birthDate) eq 2024", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$year": "\$birthDate"}, 2024]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "month(birthDate) eq 6", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$month": "\$birthDate"}, 6]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "day(birthDate) eq 18", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$dayOfMonth": "\$birthDate"}, 18]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "hour(timestamp) eq 10", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$hour": "\$timestamp"}, 10]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "minute(timestamp) eq 15", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$minute": "\$timestamp"}, 15]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "second(timestamp) eq 26", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$second": "\$timestamp"}, 26]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "ceiling(floatValue) eq 1", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$ceil": "\$floatValue"}, 1]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "floor(floatValue) eq 0", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$floor": "\$floatValue"}, 0]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "round(floatValue) eq 1", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$round": "\$floatValue"}, 1]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')", """{"\$match": {"\$and": [{"\$or": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}, {"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spider"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qwide\\\\E", "\$ne": "word wide"}}}]}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')", """{"\$match": {"\$and": [{"\$or": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qweb\\\\E\$", "\$ne": "spiderwebgg"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qwide\\\\E", "\$ne": "word wide"}}}]}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "tags/\$count ge 2", """{"\$match": {"\$and": [{"\$expr": {"\$gte": [{"\$size": {"\$ifNull": ["\$tags", []]}}, 2]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "tags/\$count ge 3", """{"\$match": {"\$and": [{"\$expr": {"\$gte": [{"\$size": {"\$ifNull": ["\$tags", []]}}, 3]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", """{"\$match": {"\$and": [{"plainString": "eOMtThyhVNLWUZNRcBaQKxI"}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "tolower(plainString) eq 'eomtthyhvnlwuznrcbaqkxi'", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$toLower": "\$plainString"}, "eomtthyhvnlwuznrcbaqkxi"]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "tolower(plainString) eq tolower('eOMtThyhVNLWUZNRcBaQKxI')", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$toLower": "\$plainString"}, {"\$toLower": "eOMtThyhVNLWUZNRcBaQKxI"}]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "toupper(plainString) eq 'EOMTTHYHVNLWUZNRCBAQKXI'", """{"\$match": {"\$and": [{"\$expr": {"\$eq": [{"\$toUpper": "\$plainString"}, "EOMTTHYHVNLWUZNRCBAQKXI"]}}]}}"""],
+                ["edm/edm6_filter_main.xml", "examples2", "plainString eq 'Some text'", """{"\$match": {"\$and": [{"plainString": "Some text"}]}}"""]
         ]
     }
 }
