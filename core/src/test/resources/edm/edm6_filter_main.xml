@@ -4,8 +4,10 @@
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="MyService">
             <EntityType Name="Example2">
                 <Property Name="plainString" Type="Edm.String"></Property>
+                <Property Name="numericArray" Type="Collection(Edm.Decimal)"></Property>
                 <Property Name="genericInteger" Type="Edm.Int64"></Property>
                 <Property Name="genericNumber" Type="Edm.Decimal"></Property>
+                <Property Name="complexList" Type="Collection(MyService.complexListType1)"></Property>
                 <Property Name="uuidProp" Type="Edm.Guid"></Property>
                 <Property Name="floatValue" Type="Edm.Single"></Property>
                 <Property Name="doubleValue" Type="Edm.Double"></Property>
@@ -19,6 +21,22 @@
                 <Property Name="smallInteger" Type="Edm.Int32"></Property>
                 <Property Name="timestamp" Type="Edm.DateTimeOffset"></Property>
             </EntityType>
+            <ComplexType Name="nestedComplexArrayType2">
+                <Property Name="stringVal" Type="Edm.String"></Property>
+                <Property Name="numberVal" Type="Edm.Decimal"></Property>
+            </ComplexType>
+            <ComplexType Name="complexListType1">
+                <Property Name="someNumber" Type="Edm.Decimal"></Property>
+                <Property Name="primitiveNumberList" Type="Collection(Edm.Decimal)"></Property>
+                <Property Name="strings" Type="Collection(Edm.String)"></Property>
+                <Property Name="nestedComplexArray" Type="Collection(MyService.nestedComplexArrayType2)"></Property>
+                <Property Name="someDate" Type="Edm.Date"></Property>
+                <Property Name="numbers" Type="Collection(Edm.Decimal)"></Property>
+                <Property Name="primitiveStringList" Type="Collection(Edm.String)"></Property>
+                <Property Name="someString" Type="Edm.String"></Property>
+                <Property Name="someUuid" Type="Edm.Guid"></Property>
+                <Property Name="someDateTime" Type="Edm.DateTimeOffset"></Property>
+            </ComplexType>
             <ComplexType Name="nestedObjectType1">
                 <Property Name="numbers" Type="Collection(Edm.Decimal)"></Property>
                 <Property Name="index" Type="Edm.String"></Property>
