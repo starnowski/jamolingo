@@ -167,22 +167,60 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocumentForComplexList() {
     return Stream.of(
         Arguments.of("complexList/any(c:c/someString eq 'Apple')", Set.of("Doc1", "Doc4")),
-        Arguments.of(
-            "complexList/any(c:c/someNumber gt 35)", Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
+        Arguments.of("complexList/any(c:c/someNumber gt 35)", Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
         Arguments.of(
             "complexList/any(c:c/someString eq 'Banana' or c/someString eq 'Cherry')",
             Set.of("Doc2", "Doc3")),
         Arguments.of(
             "complexList/any(c:c/nestedComplexArray/any(n:n/stringVal eq 'val1'))",
             Set.of("Doc1", "Doc2", "Doc4")),
-        Arguments.of(
-            "complexList/any(c:startswith(c/someString,'Ap'))", Set.of("Doc1", "Doc4", "Doc5")),
+        Arguments.of("complexList/any(c:startswith(c/someString,'Ap'))", Set.of("Doc1", "Doc4", "Doc5")),
         Arguments.of("complexList/any(c:contains(c/someString,'ana'))", Set.of("Doc2")),
         Arguments.of("complexList/any(c:endswith(c/someString,'erry'))", Set.of("Doc3", "Doc4")),
         Arguments.of(
-            "complexList/any(c:contains(c/someString,'e'))",
-            Set.of("Doc1", "Doc3", "Doc4", "Doc6")),
+            "complexList/any(c:contains(c/someString,'e'))", Set.of("Doc1", "Doc3", "Doc4", "Doc6")),
         Arguments.of("complexList/any(c:c/someString eq 'Application')", Set.of("Doc1", "Doc5")),
+        // Missing complex numeric tests
+        Arguments.of(
+            "complexList/any(c:c/someNumber gt 5)",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of("complexList/any(c:c/someNumber gt 25)", Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
+        Arguments.of("complexList/any(c:c/someNumber lt 25)", Set.of("Doc1", "Doc4", "Doc5")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber eq 10 or c/someNumber eq 20)",
+            Set.of("Doc1", "Doc4", "Doc5")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber add 5 gt 20)",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber gt floor(5.05))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber add 2 gt round(c/someNumber))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of("complexList/any(c:c/someNumber eq 20)", Set.of("Doc1", "Doc5")),
+        // Missing nested complex tests
+        Arguments.of(
+            "complexList/any(c:c/nestedComplexArray/any(n:startswith(n/stringVal,'val')))",
+            Set.of("Doc1", "Doc2", "Doc4")),
+        Arguments.of(
+            "complexList/any(c:c/nestedComplexArray/any(n:contains(n/stringVal,'match')))",
+            Set.of("Doc5", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/nestedComplexArray/any(n:n/stringVal eq 'val1' or n/stringVal eq 'test1'))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4")),
+        Arguments.of(
+            "complexList/any(c:c/nestedComplexArray/any(n:n/stringVal eq 'val1' or n/stringVal eq 'test1') and c/someNumber ge 20)",
+            Set.of("Doc2", "Doc3", "Doc4")),
+        Arguments.of(
+            "complexList/any(c:c/nestedComplexArray/any(n:n/numberVal gt 70))", Set.of("Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/nestedComplexArray/any(n:n/numberVal eq 71) and c/nestedComplexArray/any(n:n/numberVal eq 72))",
+            Set.of("Doc6")),
+        Arguments.of("complexList/any(c:c/nestedComplexArray/$count ge 2)", Set.of("Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/primitiveStringList/any(n:startswith(n,'item11')))", Set.of("Doc6")),
+        Arguments.of("complexList/any(c:c/primitiveNumberList/any(n:n gt 10))", Set.of("Doc6")),
         // Concat test
         Arguments.of(
             Arrays.asList("complexList/any(c:c/someNumber gt 5)", "plainString eq 'Doc1'"),
