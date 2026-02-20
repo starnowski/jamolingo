@@ -3,7 +3,6 @@ package com.github.starnowski.jamolingo;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import io.quarkus.test.junit.QuarkusTest;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -43,6 +42,14 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
             database = "testdb",
             collection = "Items",
             bsonFilePath = "bson/filter/example2_5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_6.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_7.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
@@ -112,12 +119,20 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
             "Poem",
             "Mario",
             "Oleksa",
+            "example1",
+            "example2",
             "only_id_and_plainString");
     return Stream.of(
         // Basic ALL tests
         Arguments.of(
             "numericArray/all(n:n gt 5)",
-            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa", "only_id_and_plainString")),
+            Set.of(
+                "eOMtThyhVNLWUZNRcBaQKxI",
+                "Mario",
+                "Oleksa",
+                "example1",
+                "example2",
+                "only_id_and_plainString")),
         Arguments.of(
             "numericArray/all(n:n ge 1)",
             Set.of(
@@ -126,6 +141,8 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
                 "Poem",
                 "Mario",
                 "Oleksa",
+                "example1",
+                "example2",
                 "only_id_and_plainString")),
         // Tests from GitHub example - Tags
         Arguments.of(
@@ -133,26 +150,56 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
             allExamplesInResponse),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star') and t ne 'starlord')"),
-            Set.of("Mario", "only_id_and_plainString")),
+            Set.of(
+                "Mario",
+                "example1",
+                "example2",
+                "only_id_and_plainString")), // Mario has trek/wars, Oleksa has trek/wars/starlord
+        // (starlord fails ne)
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star') or t ne 'starlord')"), allExamplesInResponse),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'star ') or t eq 'starlord')"),
-            Set.of("Mario", "Oleksa", "only_id_and_plainString")),
+            Set.of("Mario", "Oleksa", "example1", "example2", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:startswith(t,'starlord') or t in ('star trek', 'star wars'))"),
-            Set.of("Mario", "Oleksa", "only_id_and_plainString")),
+            Set.of("Mario", "Oleksa", "example1", "example2", "only_id_and_plainString")),
         Arguments.of(
-            List.of("tags/all(t:contains(t,'starlord'))"), Set.of("only_id_and_plainString")),
+            List.of("tags/all(t:contains(t,'starlord'))"),
+            Set.of("example1", "example2", "only_id_and_plainString")),
         Arguments.of(
-            List.of("tags/all(t:length(t) eq 9)"), Set.of("Mario", "only_id_and_plainString")),
+            List.of("tags/all(t:endswith(t,'web') or endswith(t,'trap'))"),
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "example1", "example2", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("tags/all(t:length(t) eq 9)"),
+            Set.of("Mario", "example1", "example2", "only_id_and_plainString")),
         Arguments.of(
             List.of("tags/all(t:contains(tolower(t),'star'))"),
-            Set.of("Mario", "Oleksa", "only_id_and_plainString")),
-        // Concat test
+            Set.of("Mario", "Oleksa", "example1", "example2", "only_id_and_plainString")),
         Arguments.of(
-            Arrays.asList("numericArray/all(n:n gt 5)", "tags/all(t:length(t) gt 1)"),
-            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa", "only_id_and_plainString")));
+            List.of("tags/all(t:contains(tolower(t),tolower('star')))"),
+            Set.of("Mario", "Oleksa", "example1", "example2", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("tags/all(t:startswith(toupper(t),toupper('star')))"),
+            Set.of("Mario", "Oleksa", "example1", "example2", "only_id_and_plainString")),
+        Arguments.of(List.of("tags/all(t:endswith(tolower(t),tolower(t)))"), allExamplesInResponse),
+        Arguments.of(
+            List.of("tags/all(t:contains(toupper(t),'STAR'))"),
+            Set.of("Mario", "Oleksa", "example1", "example2", "only_id_and_plainString")),
+        // Numeric array ALL tests
+        Arguments.of(
+            List.of("numericArray/all(n:n gt floor(5.05))"),
+            Set.of(
+                "eOMtThyhVNLWUZNRcBaQKxI",
+                "Mario",
+                "Oleksa",
+                "example1",
+                "example2",
+                "only_id_and_plainString")),
+        Arguments.of(List.of("numericArray/all(n:n add 2 gt round(n))"), allExamplesInResponse),
+        Arguments.of(
+            List.of("numericArray/all(n:n eq 10 or n eq 20 or n eq 30)"),
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "example1", "example2", "only_id_and_plainString")));
   }
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocumentForComplexList() {
@@ -162,6 +209,15 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
             List.of("complexList/all(c:startswith(c/someString,'Ap'))"),
             Set.of("Doc1", "Doc5", "only_id_and_plainString")),
         Arguments.of(
+            List.of("complexList/all(c:contains(c/someString,'ana'))"),
+            Set.of("Doc2", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:endswith(c/someString,'erry'))"),
+            Set.of("Doc3", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:contains(c/someString,'e'))"),
+            Set.of("Doc3", "Doc4", "only_id_and_plainString")),
+        Arguments.of(
             List.of("complexList/all(c:c/someString eq 'Application')"),
             Set.of("Doc5", "only_id_and_plainString")),
         // Nested complex array tests
@@ -169,10 +225,73 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
             List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1'))"),
             Set.of("Doc2", "only_id_and_plainString")),
         Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:startswith(n/stringVal,'val')))"),
+            Set.of("Doc1", "Doc2", "only_id_and_plainString")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:contains(n/stringVal,'match')))"),
+            Set.of("Doc5", "Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1'))"),
+            Set.of("Doc2", "Doc4", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1') and c/someNumber ge 20)"),
+            Set.of("Doc2", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1' or n/stringVal eq 'test1')) and complexList/any()"),
+            Set.of("Doc2", "Doc4")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1') and c/nestedComplexArray/any()) and complexList/any(c:c/nestedComplexArray/any())"),
+            Set.of("Doc2")),
+        Arguments.of(
+            List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'matchAll'))"),
+            Set.of("Doc6", "only_id_and_plainString")),
+        Arguments.of(
             List.of("complexList/all(c:c/nestedComplexArray/all(n:n/numberVal gt 70))"),
             Set.of("Doc6", "only_id_and_plainString")),
         Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/any(n:n/numberVal eq 71) and c/nestedComplexArray/any(n:n/numberVal eq 72))"),
+            Set.of("Doc6", "only_id_and_plainString")),
+        Arguments.of(
             List.of("complexList/all(c:c/nestedComplexArray/$count ge 2)"),
-            Set.of("Doc6", "only_id_and_plainString")));
+            Set.of("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/$count ge 2)  and complexList/any(c:c/nestedComplexArray/any())"),
+            Set.of("Doc6")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/any(n:n/numberVal ge 70 and n/stringVal eq 'matchAll')) and complexList/any(c:c/nestedComplexArray/any())"),
+            Set.of("Doc6")),
+        Arguments.of(
+            List.of("complexList/all(c:c/primitiveStringList/all(n:startswith(n,'item1')))"),
+            Set.of("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/primitiveStringList/all(n:startswith(n,'item1'))) and complexList/any(c:c/primitiveStringList/any())"),
+            Set.of("Doc6")),
+        Arguments.of(
+            List.of("complexList/all(c:c/primitiveNumberList/all(n:n gt 10))"),
+            Set.of("Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/primitiveNumberList/all(n:n gt 10)) and complexList/any(c:c/primitiveStringList/any())"),
+            Set.of("Doc6")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:n/numberVal eq c/someNumber))  and complexList/any(c:c/nestedComplexArray/any())"),
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:c/nestedComplexArray/all(n:c/someNumber eq n/numberVal))  and complexList/any(c:c/nestedComplexArray/any())"),
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5")),
+        Arguments.of(
+            List.of(
+                "complexList/all(c:not c/nestedComplexArray/all(n:c/someNumber eq n/numberVal))  and complexList/any(c:c/nestedComplexArray/any())"),
+            Set.of("Doc6")));
   }
 }
