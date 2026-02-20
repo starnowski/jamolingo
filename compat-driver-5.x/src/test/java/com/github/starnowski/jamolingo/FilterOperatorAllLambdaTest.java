@@ -17,7 +17,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
-public class AllLambdaFilterOperatorTest extends AbstractFilterOperatorTest {
+public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
