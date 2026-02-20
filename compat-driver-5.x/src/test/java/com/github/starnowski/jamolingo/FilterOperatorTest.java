@@ -104,7 +104,18 @@ class FilterOperatorTest extends AbstractItTest {
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {
     return Stream.of(
+        Arguments.of("plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
         Arguments.of(
-            "plainString eq 'eOMtThyhVNLWUZNRcBaQKxI'", Set.of("eOMtThyhVNLWUZNRcBaQKxI")));
+            "tolower(plainString) eq 'eomtthyhvnlwuznrcbaqkxi'", Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of(
+            "tolower(plainString) eq tolower('eOMtThyhVNLWUZNRcBaQKxI')",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of(
+            "toupper(plainString) eq 'EOMTTHYHVNLWUZNRCBAQKXI'", Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of("plainString eq 'Some text'", Set.of("Some text")),
+        Arguments.of("plainString in ('Some text', 'no such text')", Set.of("Some text")),
+        Arguments.of("startswith(plainString,'So')", Set.of("Some text")),
+        Arguments.of(
+            "startswith(plainString,'So') and plainString eq 'Some text'", Set.of("Some text")));
   }
 }
