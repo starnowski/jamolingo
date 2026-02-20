@@ -220,6 +220,30 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
         Arguments.of(
             List.of("complexList/all(c:c/someString eq 'Application')"),
             Set.of("Doc5", "only_id_and_plainString")),
+        // Complex numeric tests
+        Arguments.of(
+            "complexList/all(c:c/someNumber gt 5)",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            "complexList/all(c:c/someNumber gt 25)",
+            Set.of("Doc2", "Doc3", "Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            "complexList/all(c:c/someNumber lt 25)",
+            Set.of("Doc1", "Doc5", "only_id_and_plainString")),
+        Arguments.of(
+            "complexList/all(c:c/someNumber eq 10 or c/someNumber eq 20)",
+            Set.of("Doc1", "Doc5", "only_id_and_plainString")),
+        Arguments.of(
+            "complexList/all(c:c/someNumber add 5 gt 20)",
+            Set.of("Doc2", "Doc3", "Doc5", "Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            "complexList/all(c:c/someNumber gt floor(5.05))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            "complexList/all(c:c/someNumber add 2 gt round(c/someNumber))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6", "only_id_and_plainString")),
+        Arguments.of(
+            "complexList/all(c:c/someNumber eq 20)", Set.of("Doc5", "only_id_and_plainString")),
         // Nested complex array tests
         Arguments.of(
             List.of("complexList/all(c:c/nestedComplexArray/all(n:n/stringVal eq 'val1'))"),
