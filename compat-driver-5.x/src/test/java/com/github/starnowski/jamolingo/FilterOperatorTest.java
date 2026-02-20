@@ -12,7 +12,6 @@ import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -30,7 +29,6 @@ import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.json.JSONException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -63,8 +61,16 @@ class FilterOperatorTest extends AbstractItTest {
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
-          IOException,
-          JSONException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    shouldReturnExpectedDocumentsBasedOnFilterOperator(filter, expectedPlainStrings);
+  }
+
+  protected void shouldReturnExpectedDocumentsBasedOnFilterOperator(
+      String filter, Set<String> expectedPlainStrings)
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
           ExpressionVisitException,
           ODataApplicationException {
     // plainString
@@ -118,7 +124,8 @@ class FilterOperatorTest extends AbstractItTest {
         Arguments.of(
             "startswith(plainString,'So') and plainString eq 'Some text'", Set.of("Some text")),
         Arguments.of(
-            "startswith(plainString,'Some t') and smallInteger eq -1188957731", Set.of("Some text")),
+            "startswith(plainString,'Some t') and smallInteger eq -1188957731",
+            Set.of("Some text")),
         Arguments.of("startswith(plainString,'Po') or smallInteger eq -113", Set.of("Poem")),
         Arguments.of(
             "timestamp ge 2024-07-20T10:00:00.00Z and timestamp le 2024-07-20T20:00:00.00Z",
@@ -141,8 +148,10 @@ class FilterOperatorTest extends AbstractItTest {
             "tags/any(t:startswith(t,'spider') and endswith(t, 'web'))", Set.of("Some text")),
         Arguments.of(
             "year(birthDate) eq 2024", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("month(birthDate) eq 6", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("day(birthDate) eq 18", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+        Arguments.of(
+            "month(birthDate) eq 6", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+        Arguments.of(
+            "day(birthDate) eq 18", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "hour(timestamp) eq 10", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
@@ -150,8 +159,7 @@ class FilterOperatorTest extends AbstractItTest {
         Arguments.of("tags/$count ge 2", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("tags/$count ge 3", Set.of("Poem")),
         Arguments.of(
-            "trim('   Poem   ') eq 'Poem'",
-            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+            "trim('   Poem   ') eq 'Poem'", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "round(floatValue) eq 1", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
