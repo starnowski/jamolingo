@@ -100,6 +100,8 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "minute(timestamp) eq 15", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
-            "second(timestamp) eq 26", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")));
+            "second(timestamp) eq 26", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+        Arguments.of("floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+        Arguments.of("length(plainString) eq 4", Set.of("Poem")));
   }
 }
