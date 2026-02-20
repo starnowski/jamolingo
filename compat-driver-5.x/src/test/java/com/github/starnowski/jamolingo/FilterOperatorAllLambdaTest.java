@@ -216,7 +216,7 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
             Set.of("Doc3", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:contains(c/someString,'e'))"),
-            Set.of("Doc3", "Doc4", "only_id_and_plainString")),
+            Set.of("Doc3", "Doc4", "Doc6", "only_id_and_plainString")),
         Arguments.of(
             List.of("complexList/all(c:c/someString eq 'Application')"),
             Set.of("Doc5", "only_id_and_plainString")),
