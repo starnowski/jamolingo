@@ -1,0 +1,23 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "FivsoWtQTbS00EnGI7PbuQ==",
+      "subType": "04"
+    }
+  },
+  "plainString": "Oleksa",
+  "password": "aaa",
+  "tags": [
+    "star trek",
+    "star wars",
+    "starlord"
+  ],
+  "numericArray": [
+    40,
+    50,
+    60
+  ],
+  "nestedObject": {
+    "index": "b"
+  }
+}

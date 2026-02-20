@@ -1,0 +1,35 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "m38HJAvR60ixQlmPcggoeg==",
+      "subType": "04"
+    }
+  },
+  "plainString": "Doc4",
+  "complexList": [
+    {
+      "someString": "Apple",
+      "someNumber": 10,
+      "primitiveStringList": ["item7", "item8"],
+      "primitiveNumberList": [7, 8],
+      "someDateTime": { "$date": "2024-01-01T10:00:00Z" },
+      "someDate": { "$date": "2024-01-01T00:00:00Z" },
+      "someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
+      "nestedComplexArray": [
+        { "stringVal": "val1", "numberVal": 10 }
+      ]
+    },
+    {
+      "someString": "Berry",
+      "someNumber": 60,
+      "primitiveStringList": ["item7", "item8"],
+      "primitiveNumberList": [7, 8],
+      "someDateTime": { "$date": "2024-03-02T10:00:00Z" },
+      "someDate": { "$date": "2024-03-02T00:00:00Z" },
+      "someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
+      "nestedComplexArray": [
+        { "stringVal": "test1", "numberVal": 60 }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "FivvoWtQTbS00EnGI7PbuQ==",
+      "subType": "04"
+    }
+  },
+  "plainString": "Mario",
+  "tags": [
+    "star trek",
+    "star wars"
+  ]
+}
