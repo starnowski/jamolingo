@@ -166,8 +166,10 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)",
             Set.of("example1")),
-        Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", Set.of("example1", "example2")),
-        Arguments.of("tags/any(t:startswith(t,'spider') and t eq 'spiderweb')", Set.of("Some text")),
+        Arguments.of(
+            "nestedObject/tokens/any(t:t ne 'no such text')", Set.of("example1", "example2")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t eq 'spiderweb')", Set.of("Some text")),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderweb' or contains(t,'wide') and t ne 'word wide')",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
@@ -180,30 +182,36 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
-        Arguments.of("tags/any(t:startswith(t,'spider') and t ne 'spiderweb')", Set.of("eOMtThyhVNLWUZNRcBaQKxI")));
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t ne 'spiderweb')",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI")));
   }
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocumentForComplexList() {
     return Stream.of(
         Arguments.of("complexList/any(c:c/someString eq 'Apple')", Set.of("Doc1", "Doc4")),
-        Arguments.of("complexList/any(c:c/someNumber gt 35)", Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber gt 35)", Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
         Arguments.of(
             "complexList/any(c:c/someString eq 'Banana' or c/someString eq 'Cherry')",
             Set.of("Doc2", "Doc3")),
         Arguments.of(
             "complexList/any(c:c/nestedComplexArray/any(n:n/stringVal eq 'val1'))",
             Set.of("Doc1", "Doc2", "Doc4")),
-        Arguments.of("complexList/any(c:startswith(c/someString,'Ap'))", Set.of("Doc1", "Doc4", "Doc5")),
+        Arguments.of(
+            "complexList/any(c:startswith(c/someString,'Ap'))", Set.of("Doc1", "Doc4", "Doc5")),
         Arguments.of("complexList/any(c:contains(c/someString,'ana'))", Set.of("Doc2")),
         Arguments.of("complexList/any(c:endswith(c/someString,'erry'))", Set.of("Doc3", "Doc4")),
         Arguments.of(
-            "complexList/any(c:contains(c/someString,'e'))", Set.of("Doc1", "Doc3", "Doc4", "Doc6")),
+            "complexList/any(c:contains(c/someString,'e'))",
+            Set.of("Doc1", "Doc3", "Doc4", "Doc6")),
         Arguments.of("complexList/any(c:c/someString eq 'Application')", Set.of("Doc1", "Doc5")),
         // Missing complex numeric tests
         Arguments.of(
             "complexList/any(c:c/someNumber gt 5)",
             Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
-        Arguments.of("complexList/any(c:c/someNumber gt 25)", Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber gt 25)", Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
         Arguments.of("complexList/any(c:c/someNumber lt 25)", Set.of("Doc1", "Doc4", "Doc5")),
         Arguments.of(
             "complexList/any(c:c/someNumber eq 10 or c/someNumber eq 20)",
@@ -231,13 +239,15 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "complexList/any(c:c/nestedComplexArray/any(n:n/stringVal eq 'val1' or n/stringVal eq 'test1') and c/someNumber ge 20)",
             Set.of("Doc2", "Doc3", "Doc4")),
-        Arguments.of("complexList/any(c:c/nestedComplexArray/any(n:n/numberVal gt 70))", Set.of("Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/nestedComplexArray/any(n:n/numberVal gt 70))", Set.of("Doc6")),
         Arguments.of(
             "complexList/any(c:c/nestedComplexArray/any(n:n/numberVal eq 71) and c/nestedComplexArray/any(n:n/numberVal eq 72))",
             Set.of("Doc6")),
         Arguments.of("complexList/any(c:c/nestedComplexArray/$count ge 2)", Set.of("Doc6")),
         Arguments.of(
-            "complexList/any(c:c/primitiveStringList/any(n:startswith(n,'item11')))", Set.of("Doc6")),
+            "complexList/any(c:c/primitiveStringList/any(n:startswith(n,'item11')))",
+            Set.of("Doc6")),
         Arguments.of("complexList/any(c:c/primitiveNumberList/any(n:n gt 10))", Set.of("Doc6")),
         // Concat test
         Arguments.of(

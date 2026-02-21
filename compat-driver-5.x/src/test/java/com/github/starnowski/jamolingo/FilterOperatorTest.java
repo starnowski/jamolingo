@@ -3,8 +3,6 @@ package com.github.starnowski.jamolingo;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import io.quarkus.test.junit.QuarkusTest;
-
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
@@ -19,7 +17,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 @QuarkusTest
 public class FilterOperatorTest extends AbstractFilterOperatorTest {
 
-  private static final Set<String> ALL_PLAIN_STRINGS = Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa");
+  private static final Set<String> ALL_PLAIN_STRINGS =
+      Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa");
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
@@ -37,14 +36,14 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             database = "testdb",
             collection = "Items",
             bsonFilePath = "bson/filter/example2_3.json"),
-              @MongoDocument(
-                      database = "testdb",
-                      collection = "Items",
-                      bsonFilePath = "bson/filter/example2_4.json"),
-              @MongoDocument(
-                      database = "testdb",
-                      collection = "Items",
-                      bsonFilePath = "bson/filter/example2_5.json")
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_4.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_5.json")
       })
   public void shouldReturnExpectedDocuments(String filter, Set<String> expectedPlainStrings)
       throws UriValidationException,
@@ -103,23 +102,21 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "hour(timestamp) eq 10", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "ceiling(floatValue) eq 1", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("tags/$count ge 2", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("tags/$count ge 3", Set.of("Poem")),
-        Arguments.of(
-            "trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS),
+        Arguments.of("tags/$count ge 2", ALL_PLAIN_STRINGS),
+        Arguments.of("tags/$count ge 3", Set.of("Poem", "Oleksa")),
+        Arguments.of("trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS),
         Arguments.of(
             "round(floatValue) eq 1", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "minute(timestamp) eq 15", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "second(timestamp) eq 26", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+        Arguments.of(
+            "floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("length(plainString) eq 4", Set.of("Poem")),
-            Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", ALL_PLAIN_STRINGS),
-            Arguments.of(
-                    "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
-                    Set.of(
-                            "Mario", "Oleksa"))
-    );
+        Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", ALL_PLAIN_STRINGS),
+        Arguments.of(
+            "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
+            Set.of("Mario", "Oleksa")));
   }
 }
