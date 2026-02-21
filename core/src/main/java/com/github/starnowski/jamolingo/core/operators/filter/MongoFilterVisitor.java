@@ -994,9 +994,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   // --- Methods (functions) ---
   @Override
-  public Bson visitMethodCall(MethodKind methodCall, List<Bson> parameters)
+  public Bson visitMethodCall(MethodKind methodCall, List<Bson> wrappedParameters)
       throws ExpressionVisitException {
-    Bson result = null;
+    Bson result;
+    List<Bson> parameters = wrappedParameters == null ? null : wrappedParameters.stream().map(MongoFilterVisitor::unwrapWrapperIfNeeded).collect(Collectors.toList());
     switch (parameters.size()) {
       case 1:
         result = visitMethodWithOneParameter(methodCall, parameters);
