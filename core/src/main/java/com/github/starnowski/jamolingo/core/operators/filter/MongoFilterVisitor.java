@@ -23,8 +23,97 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   public static final String ODATA_MEMBER_LAMBDA_ROOT_PROPERTY =
       "$odata.member.lambda.root.property";
   public static final String ODATA_MEMBER_IS_LAMBDA_PROPERTY = "$odata.member.lambda.is.lambda";
+  public static final String ODATA_BSON_WRAPPER_PROPERTIES = "$odata.bson.wrapper.properties";
+  public static final String ODATA_BSON_WRAPPER_ORIGINAL = "$odata.bson.wrapper.original";
   private final Edm edm;
   private final MongoFilterVisitorContext context;
+
+  private Bson bsonWrapper(Bson bson, BsonWrapperProperties properties) {
+    return new Document(ODATA_BSON_WRAPPER_ORIGINAL, bson).append(ODATA_BSON_WRAPPER_PROPERTIES, properties);
+  }
+
+  public static boolean isBsonWrapper(Bson bson) {
+    if (bson instanceof Document doc){
+      return doc.containsKey(ODATA_BSON_WRAPPER_ORIGINAL) && doc.containsKey(ODATA_BSON_WRAPPER_PROPERTIES);
+    }
+    return false;
+  }
+
+  public static Bson unwrapWrapperIfNeeded(Bson bson) {
+    if (isBsonWrapper(bson) ){
+      Document doc = (Document) bson;
+      return (Bson) doc.get(ODATA_BSON_WRAPPER_ORIGINAL);
+    }
+    return bson;
+  }
+
+  public static BsonWrapperProperties extractBsonWrapperProperties(Bson bson) {
+    if (isBsonWrapper(bson) ){
+      return (BsonWrapperProperties) ((Document)bson).get(ODATA_BSON_WRAPPER_PROPERTIES);
+    }
+    return null;
+  }
+
+  public static final class BsonWrapperProperties {
+    private final BinaryOperatorKind binaryOperator;
+
+    public MethodKind getMethodKind() {
+      return methodKind;
+    }
+
+    private final MethodKind methodKind;
+
+    public BinaryOperatorKind getBinaryOperator() {
+      return binaryOperator;
+    }
+
+    public BsonWrapperProperties(BinaryOperatorKind binaryOperator, MethodKind methodKind) {
+      this.binaryOperator = binaryOperator;
+        this.methodKind = methodKind;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      BsonWrapperProperties that = (BsonWrapperProperties) o;
+      return binaryOperator == that.binaryOperator;
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(binaryOperator);
+    }
+
+    @Override
+    public String toString() {
+      return "BsonWrapperProperties{" + "binaryOperator=" + binaryOperator + '}';
+    }
+
+    public static BsonWrapperPropertiesBuilder builder() {
+      return new BsonWrapperPropertiesBuilder();
+    }
+
+    public static class BsonWrapperPropertiesBuilder {
+      private BinaryOperatorKind binaryOperator;
+
+      public BsonWrapperPropertiesBuilder withMethodKind(MethodKind methodKind) {
+        this.methodKind = methodKind;
+        return this;
+      }
+
+      private MethodKind methodKind;
+
+      public BsonWrapperPropertiesBuilder withBinaryOperator(BinaryOperatorKind binaryOperator) {
+        this.binaryOperator = binaryOperator;
+        return this;
+      }
+
+      public BsonWrapperProperties build() {
+        return new BsonWrapperProperties(binaryOperator, methodKind);
+      }
+    }
+  }
 
   public MongoFilterVisitor(Edm edm) {
     this(edm, MongoFilterVisitorContext.builder().isRootContext(true).build());
@@ -406,7 +495,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   any.getLambdaVariable(),
                   nestedExpression,
                   parentLambdaVariable)
-              : innerObject;
+              : prepareExprDocumentForAnyLambda(innerObject, field);
         };
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
     boolean allVariantTested = false;
@@ -533,6 +622,20 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                             .append("cond", innerPart))),
                 0));
     return nestedExpr ? innerDocument : new Document("$expr", innerDocument);
+  }
+
+  private Bson prepareExprDocumentForAnyLambda(
+          Bson innerPartBson,
+          String field) {
+    String fieldReference = "$" + field;
+    Bson innerPart = unwrapWrapperIfNeeded(innerPartBson);
+    if (isBsonWrapper(innerPartBson)){
+     BsonWrapperProperties bsonWrapperProperties = extractBsonWrapperProperties(innerPartBson);
+     if (bsonWrapperProperties.getMethodKind() != null) {
+       return prepareElementMatchDocumentForAnyLambda(innerPart, field);
+     }
+    }
+    return innerPart;
   }
 
   private Bson prepareExprDocumentForAnyLambdaThatValidatesIfCollectionIsNotEmpty(
@@ -888,14 +991,18 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   @Override
   public Bson visitMethodCall(MethodKind methodCall, List<Bson> parameters)
       throws ExpressionVisitException {
+    Bson result = null;
     switch (parameters.size()) {
       case 1:
-        return visitMethodWithOneParameter(methodCall, parameters);
+        result = visitMethodWithOneParameter(methodCall, parameters);
+        break;
       case 2:
-        return visitMethodWithTwoParameters(methodCall, parameters);
+        result = visitMethodWithTwoParameters(methodCall, parameters);
+        break;
       default:
         throw new UnsupportedOperationException("Method not supported: " + methodCall);
     }
+    return bsonWrapper(result, BsonWrapperProperties.builder().withMethodKind(methodCall).build());
   }
 
   private Bson visitMethodWithTwoParameters(MethodKind methodCall, List<Bson> parameters) {
