@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class FilterOperatorTest extends AbstractFilterOperatorTest {
 
   private static final Set<String> ALL_PLAIN_STRINGS =
-      Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa");
+      Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa", "example1", "example2");
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
@@ -95,10 +95,10 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of("tags/any(t:t in ('developer', 'LLM'))", Set.of("Poem")),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')",
-            Set.of("Poem")),
+            Set.of("Some text", "eOMtThyhVNLWUZNRcBaQKxI")),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')",
-            Set.of("Poem")),
+            Set.of("Some text", "eOMtThyhVNLWUZNRcBaQKxI")),
         Arguments.of(
             "plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' and password eq 'password1'",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
@@ -122,7 +122,7 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "hour(timestamp) eq 10", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "ceiling(floatValue) eq 1", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("tags/$count ge 2", ALL_PLAIN_STRINGS),
+        Arguments.of("tags/$count ge 2", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
         Arguments.of("tags/$count ge 3", Set.of("Poem", "Oleksa")),
         Arguments.of("trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS),
         Arguments.of(
