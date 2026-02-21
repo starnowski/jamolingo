@@ -134,7 +134,7 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("length(plainString) eq 4", Set.of("Poem")),
-        Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", ALL_PLAIN_STRINGS),
+        Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", Set.of("example1", "example2")),
         Arguments.of(
             "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
             Set.of("Mario", "Oleksa", "example1", "example2")),
