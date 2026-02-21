@@ -38,6 +38,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     this.usedMongoDBProperties.add(property);
   }
 
+  private void addUsedMongoDBProperties(Set<String> properties) {
+    this.usedMongoDBProperties.addAll(properties);
+  }
+
   private Bson bsonWrapper(Bson bson, BsonWrapperProperties properties) {
     return new Document(ODATA_BSON_WRAPPER_ORIGINAL, bson)
         .append(ODATA_BSON_WRAPPER_PROPERTIES, properties);
@@ -207,6 +211,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           if (this.context.isExprMode()) {
             return prepareMemberDocument("$$" + variable.getVariableName(), variable.getType());
           }
+          addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(this.context.elementMatchContext().property()));
           return prepareWrappedMemberDocumentForLambda(
               this.context.lambdaVariableAliases().get(variable.getVariableName()).bson());
         }
@@ -270,6 +275,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           return prepareCollectionSize(
               "$$" + variable.getVariableName() + "." + field, this.context.isExprMode());
         }
+        addUsedMongoDBProperty(rootPath + "." + field);
         if (this.context.isExprMode()) {
           return prepareMemberDocument("$$" + variable.getVariableName() + "." + field, fieldType);
         }
@@ -296,7 +302,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (!this.context.isExprMode() && !this.context.isRootContext()) {
           throw new ExpressionOperantRequiredException("$count required at root level");
         }
-        // TODO check if the ['2', '3']/$count is supported by OData
         String field = extractFieldName(member);
         return prepareCollectionSize("$" + field, true);
       }
@@ -360,6 +365,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               unwrapWrapperIfNeeded(
                   visitor.visitLambdaExpression(
                       "ALL", all.getLambdaVariable(), all.getExpression()));
+          this.addUsedMongoDBProperties(visitor.getUsedMongoDBProperties());
           return visitor.context.isExprMode()
               ? visitor.prepareExprDocumentForAllLambdaWithExpr(
                   innerObject, field, all.getLambdaVariable(), nestedExpression)
@@ -396,6 +402,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   unwrapWrapperIfNeeded(
                       innerMongoFilterVisitor.visitLambdaExpression(
                           "ALL", all.getLambdaVariable(), all.getExpression()));
+              this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
               return prepareExprDocumentForAllLambdaWithExpr(
                   innerObject, field, all.getLambdaVariable(), nestedExpression);
             };
@@ -423,6 +430,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   unwrapWrapperIfNeeded(
                       innerMongoFilterVisitor.visitLambdaExpression(
                           "ALL", all.getLambdaVariable(), all.getExpression()));
+              this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
               return innerMongoFilterVisitor.context.isExprMode()
                   ? prepareExprDocumentForAllLambdaWithExpr(
                       innerObject, field, all.getLambdaVariable(), nestedExpression)
@@ -453,6 +461,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   unwrapWrapperIfNeeded(
                       innerMongoFilterVisitor.visitLambdaExpression(
                           "ALL", all.getLambdaVariable(), all.getExpression()));
+              this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
               return innerMongoFilterVisitor.context.isExprMode()
                   ? innerMongoFilterVisitor.prepareExprDocumentForAllLambdaWithExpr(
                       innerObject, field, all.getLambdaVariable(), nestedExpression)
