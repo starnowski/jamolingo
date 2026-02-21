@@ -495,7 +495,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   any.getLambdaVariable(),
                   nestedExpression,
                   parentLambdaVariable)
-              : prepareExprDocumentForAnyLambda(innerObject, field);
+              : prepareDocumentForAnyLambda(innerObject, field);
         };
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
     boolean allVariantTested = false;
@@ -625,18 +625,18 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return nestedExpr ? innerDocument : new Document("$expr", innerDocument);
   }
 
-  private Bson prepareExprDocumentForAnyLambda(
+  private Bson prepareDocumentForAnyLambda(
           Bson innerPartBson,
           String field) {
     Bson innerPart = unwrapWrapperIfNeeded(innerPartBson);
     if (isBsonWrapper(innerPartBson)){
      BsonWrapperProperties bsonWrapperProperties = extractBsonWrapperProperties(innerPartBson);
-     if (bsonWrapperProperties.getMethodKind() != null) {
+     if (bsonWrapperProperties.getMethodKind() != null || bsonWrapperProperties.getBinaryOperator() != null) {
        return prepareElementMatchDocumentForAnyLambda(innerPart, field);
      }
-     if (BinaryOperatorKind.AND.equals(bsonWrapperProperties.getBinaryOperator())) {
-       return prepareElementMatchDocumentForAnyLambda(innerPart, field);
-     }
+//     if (BinaryOperatorKind.AND.equals(bsonWrapperProperties.getBinaryOperator())) {
+//       return prepareElementMatchDocumentForAnyLambda(innerPart, field);
+//     }
     }
     return innerPart;
   }
