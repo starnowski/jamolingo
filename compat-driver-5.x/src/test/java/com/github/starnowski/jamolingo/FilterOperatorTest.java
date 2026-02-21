@@ -102,6 +102,8 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "second(timestamp) eq 26", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("length(plainString) eq 4", Set.of("Poem")));
+        Arguments.of("length(plainString) eq 4", Set.of("Poem")),
+            Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"))
+    );
   }
 }

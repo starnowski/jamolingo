@@ -92,7 +92,7 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
         new FileOutputStream(path + File.separator + "testcases.txt", true)) {
       outputStream.write("<test>".getBytes(StandardCharsets.UTF_8));
       outputStream.write(
-          ("<filter>" + filterString + "</filter>").getBytes(StandardCharsets.UTF_8));
+          ("<filter>$filter=" + filterString + "</filter>").getBytes(StandardCharsets.UTF_8));
       outputStream.write(
           ("<pipeline>"
                   + pipeline
