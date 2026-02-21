@@ -817,8 +817,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   // --- Binary operators ---
   @Override
-  public Bson visitBinaryOperator(BinaryOperatorKind operator, Bson left, Bson right)
+  public Bson visitBinaryOperator(BinaryOperatorKind operator, Bson leftWrapper, Bson rightWrapper)
       throws ExpressionVisitException, ODataApplicationException {
+    Bson left = unwrapWrapperIfNeeded(leftWrapper);
+    Bson right = unwrapWrapperIfNeeded(rightWrapper);
     Supplier<Bson> mainSupplier =
         () -> {
           switch (operator) {
