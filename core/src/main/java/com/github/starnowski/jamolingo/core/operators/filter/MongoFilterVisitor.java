@@ -598,11 +598,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson prepareExprDocumentForAnyLambdaWithExpr(
-      Bson innerPart,
+      Bson innerPartWrapper,
       String field,
       String lambdaVariable,
       boolean nestedExpr,
       String parentLambdaVariable) {
+    Bson innerPart = unwrapWrapperIfNeeded(innerPartWrapper);
     String fieldReference = "$" + field;
     if (nestedExpr && parentLambdaVariable != null) {
       fieldReference = "$$" + parentLambdaVariable + "." + field;
@@ -627,11 +628,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private Bson prepareExprDocumentForAnyLambda(
           Bson innerPartBson,
           String field) {
-    String fieldReference = "$" + field;
     Bson innerPart = unwrapWrapperIfNeeded(innerPartBson);
     if (isBsonWrapper(innerPartBson)){
      BsonWrapperProperties bsonWrapperProperties = extractBsonWrapperProperties(innerPartBson);
      if (bsonWrapperProperties.getMethodKind() != null) {
+       return prepareElementMatchDocumentForAnyLambda(innerPart, field);
+     }
+     if (BinaryOperatorKind.AND.equals(bsonWrapperProperties.getBinaryOperator())) {
        return prepareElementMatchDocumentForAnyLambda(innerPart, field);
      }
     }
@@ -956,15 +959,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         };
     if (this.context.isRootContext()) {
       try {
-        return mainSupplier.get();
+        return bsonWrapper(mainSupplier.get(), BsonWrapperProperties.builder().withBinaryOperator(operator).build());
       } catch (ExpressionOperantRequiredException ex) {
         MongoFilterVisitor innerVisitor =
             new MongoFilterVisitor(
                 edm, MongoFilterVisitorContext.builder().isExprMode(true).build());
-        return new Document("$expr", innerVisitor.visitBinaryOperator(operator, left, right));
+        return new Document("$expr", unwrapWrapperIfNeeded(innerVisitor.visitBinaryOperator(operator, left, right)));
       }
     }
-    return mainSupplier.get();
+    return bsonWrapper(mainSupplier.get(), BsonWrapperProperties.builder().withBinaryOperator(operator).build());
   }
 
   private void enrichDocumentWithQueryDocumentValues(BsonDocument doc, Document finalDOcument) {
