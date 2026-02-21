@@ -21,31 +21,51 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
     @Unroll
     def "should return expected stage bson objects"(){
         given:
-        System.out.println("Testing filter: " + filter)
-        Bson expectedBson = Document.parse(bson)
-        Edm edm = loadEmdProvider(edmConfigFile)
-        JsonWriterSettings settings = JsonWriterSettings.builder().build()
-        CodecRegistry registry = CodecRegistries.fromRegistries(
-                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
-                MongoClientSettings.getDefaultCodecRegistry()
-        )
-        DocumentCodec codec = new DocumentCodec(registry)
+            System.out.println("Testing filter: " + filter)
+            Bson expectedBson = Document.parse(bson)
+            Edm edm = loadEmdProvider(edmConfigFile)
+            JsonWriterSettings settings = JsonWriterSettings.builder().build()
+            CodecRegistry registry = CodecRegistries.fromRegistries(
+                    CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                    MongoClientSettings.getDefaultCodecRegistry()
+            )
+            DocumentCodec codec = new DocumentCodec(registry)
 
-        UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                .parseUri(path,
-                        "\$filter=" +filter
-                        , null, null)
-        ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri(path,
+                            "\$filter=" +filter
+                            , null, null)
+            ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
 
         when:
-        def result = tested.parse(uriInfo.getFilterOption(), edm)
+            def result = tested.parse(uriInfo.getFilterOption(), edm)
 
         then:
-        [((Document)result.getStageObjects().get(0)).toJson(settings, codec)] == [((Document)expectedBson).toJson(settings, codec)]
-        result.getSelectedFields() == expectedFields as Set
+            [((Document)result.getStageObjects().get(0)).toJson(settings, codec)] == [((Document)expectedBson).toJson(settings, codec)]
 
         where:
-        [edmConfigFile, path , filter, bson, expectedFields] << oneToOneEdmPathsMappings()
+            [edmConfigFile, path , filter, bson] << oneToOneEdmPathsMappings()
+    }
+
+    @Unroll
+    def "should return expected used MongoDB properties"(){
+        given:
+            System.out.println("Testing filter: " + filter)
+            Edm edm = loadEmdProvider(edmConfigFile)
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri(path,
+                            "\$filter=" +filter
+                            , null, null)
+            ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
+
+        when:
+            def result = tested.parse(uriInfo.getFilterOption(), edm)
+
+        then:
+            new HashSet<>(result.getUsedMongoDocumentProperties()) == new HashSet(expectedFields as List)
+
+        where:
+            [edmConfigFile, path , filter, bson, expectedFields] << oneToOneEdmPathsMappings()
     }
 
     static oneToOneEdmPathsMappings() {

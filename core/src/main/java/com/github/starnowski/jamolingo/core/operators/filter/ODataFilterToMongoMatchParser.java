@@ -2,6 +2,8 @@ package com.github.starnowski.jamolingo.core.operators.filter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
@@ -16,22 +18,26 @@ public class ODataFilterToMongoMatchParser {
       throws ODataApplicationException, ExpressionVisitException {
     if (filter == null) return new DefaultFilterOperatorResult();
     Expression expr = filter.getExpression();
+    MongoFilterVisitor rootMongoFilterVisitor = new MongoFilterVisitor(edm);
     Bson result =
-        MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(new MongoFilterVisitor(edm)));
+        MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(rootMongoFilterVisitor));
     return new DefaultFilterOperatorResult(
-        List.of(new Document("$match", new Document("$and", List.of(result)))));
+        List.of(new Document("$match", new Document("$and", List.of(result)))),
+            rootMongoFilterVisitor.getUsedMongoDBProperties());
   }
 
   private static class DefaultFilterOperatorResult implements FilterOperatorResult {
 
     private final List<Bson> stageObjects;
+    private final Set<String> userMongoDBProperties;
 
     public DefaultFilterOperatorResult() {
-      this(Collections.emptyList());
+      this(Collections.emptyList(), Collections.emptySet());
     }
 
-    public DefaultFilterOperatorResult(List<Bson> stageObjects) {
+    public DefaultFilterOperatorResult(List<Bson> stageObjects, Set<String> userMongoDBProperties) {
       this.stageObjects = stageObjects;
+      this.userMongoDBProperties = userMongoDBProperties;
     }
 
     @Override
@@ -41,8 +47,7 @@ public class ODataFilterToMongoMatchParser {
 
     @Override
     public List<String> getUsedMongoDocumentProperties() {
-      // TODO
-      return List.of();
+      return userMongoDBProperties.stream().toList();
     }
 
     @Override

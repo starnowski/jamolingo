@@ -28,6 +28,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private final Edm edm;
   private final MongoFilterVisitorContext context;
 
+  private final Set<String> usedMongoDBProperties = new HashSet<>();
+  public Set<String> getUsedMongoDBProperties(){
+    return Collections.unmodifiableSet(usedMongoDBProperties);
+  }
+
   private Bson bsonWrapper(Bson bson, BsonWrapperProperties properties) {
     return new Document(ODATA_BSON_WRAPPER_ORIGINAL, bson)
         .append(ODATA_BSON_WRAPPER_PROPERTIES, properties);
