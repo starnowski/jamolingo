@@ -19,6 +19,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 @QuarkusTest
 public class FilterOperatorTest extends AbstractFilterOperatorTest {
 
+  private static final Set<String> ALL_PLAIN_STRINGS = Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa");
+
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
@@ -34,7 +36,15 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_3.json")
+            bsonFilePath = "bson/filter/example2_3.json"),
+              @MongoDocument(
+                      database = "testdb",
+                      collection = "Items",
+                      bsonFilePath = "bson/filter/example2_4.json"),
+              @MongoDocument(
+                      database = "testdb",
+                      collection = "Items",
+                      bsonFilePath = "bson/filter/example2_5.json")
       })
   public void shouldReturnExpectedDocuments(String filter, Set<String> expectedPlainStrings)
       throws UriValidationException,
@@ -96,7 +106,7 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of("tags/$count ge 2", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("tags/$count ge 3", Set.of("Poem")),
         Arguments.of(
-            "trim('   Poem   ') eq 'Poem'", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+            "trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS),
         Arguments.of(
             "round(floatValue) eq 1", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
@@ -105,11 +115,11 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "second(timestamp) eq 26", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("length(plainString) eq 4", Set.of("Poem")),
-            Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+            Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", ALL_PLAIN_STRINGS),
             Arguments.of(
                     "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
                     Set.of(
-                            "Mario", "Oleksa", "only_id_and_plainString"))
+                            "Mario", "Oleksa"))
     );
   }
 }
