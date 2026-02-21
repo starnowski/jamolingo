@@ -344,7 +344,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     Supplier<Bson> function =
         () -> {
           Bson innerObject =
-              visitor.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression());
+              unwrapWrapperIfNeeded(visitor.visitLambdaExpression("ALL", all.getLambdaVariable(), all.getExpression()));
           return visitor.context.isExprMode()
               ? visitor.prepareExprDocumentForAllLambdaWithExpr(
                   innerObject, field, all.getLambdaVariable(), nestedExpression)
@@ -378,8 +378,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                           .isExprMode(true)
                           .build());
               Bson innerObject =
-                  innerMongoFilterVisitor.visitLambdaExpression(
-                      "ALL", all.getLambdaVariable(), all.getExpression());
+                      unwrapWrapperIfNeeded(innerMongoFilterVisitor.visitLambdaExpression(
+                      "ALL", all.getLambdaVariable(), all.getExpression()));
               return prepareExprDocumentForAllLambdaWithExpr(
                   innerObject, field, all.getLambdaVariable(), nestedExpression);
             };
@@ -404,8 +404,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         function =
             () -> {
               Bson innerObject =
-                  innerMongoFilterVisitor.visitLambdaExpression(
-                      "ALL", all.getLambdaVariable(), all.getExpression());
+                      unwrapWrapperIfNeeded(innerMongoFilterVisitor.visitLambdaExpression(
+                      "ALL", all.getLambdaVariable(), all.getExpression()));
               return innerMongoFilterVisitor.context.isExprMode()
                   ? prepareExprDocumentForAllLambdaWithExpr(
                       innerObject, field, all.getLambdaVariable(), nestedExpression)
@@ -433,8 +433,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         function =
             () -> {
               Bson innerObject =
-                  innerMongoFilterVisitor.visitLambdaExpression(
-                      "ALL", all.getLambdaVariable(), all.getExpression());
+                      unwrapWrapperIfNeeded(innerMongoFilterVisitor.visitLambdaExpression(
+                      "ALL", all.getLambdaVariable(), all.getExpression()));
               return innerMongoFilterVisitor.context.isExprMode()
                   ? innerMongoFilterVisitor.prepareExprDocumentForAllLambdaWithExpr(
                       innerObject, field, all.getLambdaVariable(), nestedExpression)
