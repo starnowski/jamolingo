@@ -10,6 +10,11 @@ import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -61,7 +66,7 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     // WHEN
     FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), edm);
     List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
-
+    System.out.println(new Document("pipeline", pipeline).toJson());
     List<Document> results = new ArrayList<>();
     collection.aggregate(pipeline).into(results);
 
@@ -74,5 +79,32 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
             .map(s -> (String) s)
             .collect(Collectors.toSet());
     Assertions.assertEquals(expectedPlainStrings, actual);
+    logTestsObject(filter, pipeline);
+  }
+
+  private void logTestsObject(String filterString, List<Bson> pipeline) {
+    String path =
+        Paths.get(new File(getClass().getClassLoader().getResource(".").getFile()).getPath())
+            .toAbsolutePath()
+            .toString();
+    System.out.println("File path is " + path);
+    try (FileOutputStream outputStream =
+        new FileOutputStream(path + File.separator + "testcases.txt", true)) {
+      outputStream.write("<test>".getBytes(StandardCharsets.UTF_8));
+      outputStream.write(
+          ("<filter>$filter=" + filterString + "</filter>").getBytes(StandardCharsets.UTF_8));
+      outputStream.write(
+          ("<pipeline>"
+                  + pipeline
+                      .get(0)
+                      .toBsonDocument(Document.class, this.mongoClient.getCodecRegistry())
+                      .toJson()
+                  + "</pipeline>")
+              .getBytes(StandardCharsets.UTF_8));
+      outputStream.write("</test>".getBytes(StandardCharsets.UTF_8));
+      outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

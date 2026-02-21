@@ -17,6 +17,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 @QuarkusTest
 public class FilterOperatorTest extends AbstractFilterOperatorTest {
 
+  private static final Set<String> ALL_PLAIN_STRINGS =
+      Set.of(
+          "eOMtThyhVNLWUZNRcBaQKxI",
+          "Some text",
+          "Poem",
+          "Mario",
+          "Oleksa",
+          "example1",
+          "example2");
+
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
@@ -32,7 +42,23 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_3.json")
+            bsonFilePath = "bson/filter/example2_3.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_4.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_6.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_7.json")
       })
   public void shouldReturnExpectedDocuments(String filter, Set<String> expectedPlainStrings)
       throws UriValidationException,
@@ -69,6 +95,18 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' and uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
         Arguments.of(
+            "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Poem", "Some text")),
+        Arguments.of("toupper(plainString) eq 'POEM'", Set.of("Poem")),
+        Arguments.of("tolower(plainString) eq 'poem'", Set.of("Poem")),
+        Arguments.of("tags/any(t:t in ('developer', 'LLM'))", Set.of("Poem")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')",
+            Set.of("Some text", "eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')",
+            Set.of("Some text", "eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of(
             "plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' and password eq 'password1'",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
         Arguments.of(
@@ -91,15 +129,27 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "hour(timestamp) eq 10", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "ceiling(floatValue) eq 1", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("tags/$count ge 2", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("tags/$count ge 3", Set.of("Poem")),
         Arguments.of(
-            "trim('   Poem   ') eq 'Poem'", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+            "tags/$count ge 2",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
+        Arguments.of("tags/$count ge 3", Set.of("Poem", "Oleksa")),
+        Arguments.of("trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS),
         Arguments.of(
             "round(floatValue) eq 1", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "minute(timestamp) eq 15", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
-            "second(timestamp) eq 26", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")));
+            "second(timestamp) eq 26", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+        Arguments.of(
+            "floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+        Arguments.of("length(plainString) eq 4", Set.of("Poem")),
+        Arguments.of(
+            "nestedObject/tokens/any(t:t ne 'no such text')", Set.of("example1", "example2")),
+        Arguments.of(
+            "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
+            Set.of("Mario", "Oleksa", "example1", "example2")),
+        Arguments.of(
+            "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars')) and tags/any()",
+            Set.of("Mario", "Oleksa")));
   }
 }

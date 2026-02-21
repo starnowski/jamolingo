@@ -19,6 +19,17 @@ import org.junit.jupiter.params.provider.MethodSource;
 @QuarkusTest
 public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
 
+  private static final Set<String> ALL_PLAIN_STRING_VALUE =
+      Set.of(
+          "eOMtThyhVNLWUZNRcBaQKxI",
+          "Some text",
+          "Poem",
+          "Mario",
+          "Oleksa",
+          "example1",
+          "example2",
+          "only_id_and_plainString");
+
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
@@ -161,6 +172,29 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
         Arguments.of(
             List.of("numericArray/any(n:n eq 10 or n eq 20 or n eq 30)"),
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+        // Additional tests from user list
+        Arguments.of(
+            "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)",
+            Set.of("example1")),
+        Arguments.of(
+            "nestedObject/tokens/any(t:t ne 'no such text')", Set.of("example1", "example2")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t eq 'spiderweb')", Set.of("Some text")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderweb' or contains(t,'wide') and t ne 'word wide')",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderweb')",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text")),
+        Arguments.of(
+            "tags/any(t:startswith(t,'spider') and t ne 'spiderweb')",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")));
   }
 
