@@ -638,7 +638,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 //       return prepareElementMatchDocumentForAnyLambda(innerPart, field);
 //     }
     }
-    return innerPart;
+    return prepareElementMatchDocumentForAnyLambda(innerPart, field);
   }
 
   private Bson prepareExprDocumentForAnyLambdaThatValidatesIfCollectionIsNotEmpty(
