@@ -16,7 +16,8 @@ public class ODataFilterToMongoMatchParser {
       throws ODataApplicationException, ExpressionVisitException {
     if (filter == null) return new DefaultFilterOperatorResult();
     Expression expr = filter.getExpression();
-    Bson result = MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(new MongoFilterVisitor(edm)));
+    Bson result =
+        MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(new MongoFilterVisitor(edm)));
     return new DefaultFilterOperatorResult(
         List.of(new Document("$match", new Document("$and", List.of(result)))));
   }

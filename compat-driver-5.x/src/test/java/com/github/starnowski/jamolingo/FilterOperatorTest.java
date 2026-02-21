@@ -43,7 +43,15 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_5.json")
+            bsonFilePath = "bson/filter/example2_5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_6.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_7.json")
       })
   public void shouldReturnExpectedDocuments(String filter, Set<String> expectedPlainStrings)
       throws UriValidationException,
@@ -129,6 +137,10 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", ALL_PLAIN_STRINGS),
         Arguments.of(
             "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
-            Set.of("Mario", "Oleksa")));
+            Set.of("Mario", "Oleksa", "example1", "example2")),
+            Arguments.of(
+                    "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars')) and tags/any()",
+                    Set.of("Mario", "Oleksa"))
+    );
   }
 }
