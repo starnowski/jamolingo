@@ -29,8 +29,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private final MongoFilterVisitorContext context;
 
   private final Set<String> usedMongoDBProperties = new HashSet<>();
-  public Set<String> getUsedMongoDBProperties(){
+
+  public Set<String> getUsedMongoDBProperties() {
     return Collections.unmodifiableSet(usedMongoDBProperties);
+  }
+
+  private void addUsedMongoDBProperty(String property) {
+    this.usedMongoDBProperties.add(property);
   }
 
   private Bson bsonWrapper(Bson bson, BsonWrapperProperties properties) {
@@ -207,6 +212,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
         return prepareMemberDocument(field, variable.getType());
       } else {
+        addUsedMongoDBProperty(field);
         return prepareMemberDocument(field);
       }
     } else if (member.getResourcePath().getUriResourceParts().get(0)
