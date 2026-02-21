@@ -709,12 +709,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson prepareElementMatchDocumentForAnyLambda(Bson innerPart, String field) {
-    if (this.context.isLambdaAnyContext()
-        && !this.context.isNestedElementMatchContext()
-        && !this.context.isNestedLambdaAllContext()
-        && !this.context.isExprMode()) {
-      field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
-    }
     return new Document(field, new Document("$elemMatch", innerPart));
   }
 

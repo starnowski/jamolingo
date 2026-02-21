@@ -18,7 +18,14 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class FilterOperatorTest extends AbstractFilterOperatorTest {
 
   private static final Set<String> ALL_PLAIN_STRINGS =
-      Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa", "example1", "example2");
+      Set.of(
+          "eOMtThyhVNLWUZNRcBaQKxI",
+          "Some text",
+          "Poem",
+          "Mario",
+          "Oleksa",
+          "example1",
+          "example2");
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
@@ -122,7 +129,9 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "hour(timestamp) eq 10", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of(
             "ceiling(floatValue) eq 1", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
-        Arguments.of("tags/$count ge 2", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
+        Arguments.of(
+            "tags/$count ge 2",
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
         Arguments.of("tags/$count ge 3", Set.of("Poem", "Oleksa")),
         Arguments.of("trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS),
         Arguments.of(
@@ -134,13 +143,13 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("length(plainString) eq 4", Set.of("Poem")),
-        Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", Set.of("example1", "example2")),
+        Arguments.of(
+            "nestedObject/tokens/any(t:t ne 'no such text')", Set.of("example1", "example2")),
         Arguments.of(
             "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
             Set.of("Mario", "Oleksa", "example1", "example2")),
-            Arguments.of(
-                    "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars')) and tags/any()",
-                    Set.of("Mario", "Oleksa"))
-    );
+        Arguments.of(
+            "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars')) and tags/any()",
+            Set.of("Mario", "Oleksa")));
   }
 }
