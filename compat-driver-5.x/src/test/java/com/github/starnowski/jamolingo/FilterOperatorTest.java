@@ -3,6 +3,8 @@ package com.github.starnowski.jamolingo;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import io.quarkus.test.junit.QuarkusTest;
+
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
@@ -103,7 +105,11 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "second(timestamp) eq 26", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("floor(floatValue) eq 0", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
         Arguments.of("length(plainString) eq 4", Set.of("Poem")),
-            Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"))
+            Arguments.of("nestedObject/tokens/any(t:t ne 'no such text')", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem")),
+            Arguments.of(
+                    "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
+                    Set.of(
+                            "Mario", "Oleksa", "only_id_and_plainString"))
     );
   }
 }
