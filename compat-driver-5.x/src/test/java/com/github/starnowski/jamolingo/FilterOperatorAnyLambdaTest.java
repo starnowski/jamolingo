@@ -192,7 +192,7 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')",
-            Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text")),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and t ne 'spiderweb')",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")));

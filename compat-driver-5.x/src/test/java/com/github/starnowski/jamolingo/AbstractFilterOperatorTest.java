@@ -66,7 +66,7 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     // WHEN
     FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), edm);
     List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
-
+    System.out.println(new Document("pipeline", pipeline).toJson());
     List<Document> results = new ArrayList<>();
     collection.aggregate(pipeline).into(results);
 

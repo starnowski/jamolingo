@@ -372,6 +372,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       String parentLambdaVariable) {
     // TODO Fix Resolving like it was done to ALL lambda (check isExprMode() before return results)
     boolean nestedExpression = expressionOperantRequiredExceptionThrown;
+    boolean elementMatchOperantRequiredExceptionThrown = true;
     Supplier<Bson> function =
         () -> {
           if (any.getLambdaVariable() == null) {
@@ -391,6 +392,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                               prepareMemberDocument(field),
                               LambdaType.ANY,
                               null))
+                          .elementMatchContext(new ElementMatchContext(field, false))
                       .isLambdaAnyContext(true)
                       .isExprMode(nestedExpression)
                       .build());
@@ -406,8 +408,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   parentLambdaVariable)
               : innerObject;
         };
-
-    boolean elementMatchOperantRequiredExceptionThrown = false;
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
     boolean allVariantTested = false;
     while (!allVariantTested) {
