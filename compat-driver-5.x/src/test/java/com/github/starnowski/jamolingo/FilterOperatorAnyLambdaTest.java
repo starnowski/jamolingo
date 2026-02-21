@@ -19,6 +19,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 @QuarkusTest
 public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
 
+  private static final Set<String> ALL_PLAIN_STRING_VALUE = Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa"
+  , "example1", "example2", "only_id_and_plainString");
+
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
@@ -167,7 +170,7 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
             "nestedObject/tokens/any(t:t eq 'first example') and nestedObject/numbers/any(t:t gt 5 and t lt 27)",
             Set.of("example1")),
         Arguments.of(
-            "nestedObject/tokens/any(t:t ne 'no such text')", Set.of("example1", "example2")),
+            "nestedObject/tokens/any(t:t ne 'no such text')", ALL_PLAIN_STRING_VALUE),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and t eq 'spiderweb')", Set.of("Some text")),
         Arguments.of(

@@ -79,6 +79,24 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' and uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+            Arguments.of(
+                    "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa",
+                    Set.of("eOMtThyhVNLWUZNRcBaQKxI","Poem" ,"Some text" )),
+            Arguments.of(
+                    "toupper(plainString) eq 'POEM'",
+                    Set.of("Poem")),
+            Arguments.of(
+                    "tolower(plainString) eq 'poem'",
+                    Set.of("Poem")),
+            Arguments.of(
+                    "tags/any(t:t in ('developer', 'LLM'))",
+                    Set.of("Poem")),
+            Arguments.of(
+                    "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')",
+                    Set.of("Poem")),
+            Arguments.of(
+                    "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderwebgg' or contains(t,'wide') and t ne 'word wide')",
+                    Set.of("Poem")),
         Arguments.of(
             "plainString eq 'eOMtThyhVNLWUZNRcBaQKxI' and password eq 'password1'",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
