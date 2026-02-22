@@ -520,6 +520,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           Bson innerObject =
               innerMongoFilterVisitor.visitLambdaExpression(
                   "ANY", any.getLambdaVariable(), any.getExpression());
+          this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
           return innerMongoFilterVisitor.context.isExprMode()
               ? innerMongoFilterVisitor.prepareExprDocumentForAnyLambdaWithExpr(
                   innerObject,
