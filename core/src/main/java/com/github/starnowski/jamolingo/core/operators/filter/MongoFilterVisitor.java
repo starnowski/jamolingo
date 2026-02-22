@@ -274,11 +274,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           return getBsonForUriResourceLambdaAll(
               all, field, !this.context.isExprMode(), this.context.isExprMode());
         } else if (last instanceof UriResourceCount) {
-          addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(rootPath + "." + field));
+          addUsedMongoDBProperty(this.context.resolveFullPathForMember(member));
           return prepareCollectionSize(
               "$$" + variable.getVariableName() + "." + field, this.context.isExprMode());
         }
-        addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(rootPath + "." + field));
+        addUsedMongoDBProperty(this.context.resolveFullPathForMember(member));
         if (this.context.isExprMode()) {
           return prepareMemberDocument("$$" + variable.getVariableName() + "." + field, fieldType);
         }
@@ -1447,6 +1447,38 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               .collect(Collectors.joining("."))
               + "."
               + field;
+    }
+
+    public String resolveFullPathForMember(Member member) {
+      Iterator<UriResource> it = member.getResourcePath().getUriResourceParts().iterator();
+      StringBuilder sb = new StringBuilder();
+      while (it.hasNext()) {
+        UriResource path = it.next();
+        if (path instanceof UriResourceLambdaVariable variable){
+          sb.append(resolveFullPathForLambdaVariable(variable.getVariableName()));
+        } else if (path instanceof UriResourceProperty property) {
+          sb.append(property.getProperty().getName());
+        }
+        if (it.hasNext()) {
+          sb.append(".");
+        }
+      }
+      return sb.toString();
+    }
+
+    public String resolveFullPathForLambdaVariable(String lambdaVariable) {
+      StringBuilder sb = new StringBuilder();
+      Iterator<Map.Entry<String, LambdaLeaf>> it = lambdaVariableAliases.entrySet().iterator();
+      while (it.hasNext()) {
+        Map.Entry<String, LambdaLeaf> entry = it.next();
+        sb.append(entry.getValue().bson.toBsonDocument().get(ODATA_MEMBER_PROPERTY).asString().getValue());
+        if (entry.getKey().equals(lambdaVariable)) {
+          break;
+        } else {
+          sb.append(".");
+        }
+      }
+      return sb.toString();
     }
 
     public boolean isElementMatchContext() {
