@@ -274,10 +274,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           return getBsonForUriResourceLambdaAll(
               all, field, !this.context.isExprMode(), this.context.isExprMode());
         } else if (last instanceof UriResourceCount) {
+          addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(rootPath + "." + field));
           return prepareCollectionSize(
               "$$" + variable.getVariableName() + "." + field, this.context.isExprMode());
         }
-        addUsedMongoDBProperty(rootPath + "." + field);
+        addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(rootPath + "." + field));
         if (this.context.isExprMode()) {
           return prepareMemberDocument("$$" + variable.getVariableName() + "." + field, fieldType);
         }
@@ -305,6 +306,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           throw new ExpressionOperantRequiredException("$count required at root level");
         }
         String field = extractFieldName(member);
+        addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(field));
         return prepareCollectionSize("$" + field, true);
       }
     }
@@ -497,6 +499,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             if (!this.context.isExprMode()) {
               throw new ExpressionOperantRequiredException("any() requires expression");
             }
+            this.addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPath(field));
             return prepareExprDocumentForAnyLambdaThatValidatesIfCollectionIsNotEmpty(
                 field, nestedExpression, parentLambdaVariable);
           }
@@ -542,6 +545,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
         expressionOperantRequiredExceptionThrown = true;
         if (any.getLambdaVariable() == null) {
+          this.addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(field));
           return prepareExprDocumentForAnyLambdaThatValidatesIfCollectionIsNotEmpty(
               field, nestedExpression, parentLambdaVariable);
         }
@@ -1428,6 +1432,16 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   .limit(lambdaVariableAliases.size() - 1)
                   .map(entry -> extractField(entry.getValue().bson()))
                   .collect(Collectors.joining("."))
+              + "."
+              + field;
+    }
+
+    public String enrichFieldPathWithRootPath(String field) {
+      return lambdaVariableAliases == null || lambdaVariableAliases.isEmpty()
+              ? field
+              : lambdaVariableAliases.entrySet().stream()
+              .map(entry -> extractField(entry.getValue().bson()))
+              .collect(Collectors.joining("."))
               + "."
               + field;
     }
