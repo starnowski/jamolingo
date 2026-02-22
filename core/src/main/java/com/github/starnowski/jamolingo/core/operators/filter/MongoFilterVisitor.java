@@ -209,6 +209,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
             && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
           if (this.context.isExprMode()) {
+            String lambdaField = this.context.lambdaVariableAliases().get(variable.getVariableName()).bson().toBsonDocument().get(ODATA_MEMBER_PROPERTY).asString().getValue();
+            addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(lambdaField));
             return prepareMemberDocument("$$" + variable.getVariableName(), variable.getType());
           }
           addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(this.context.elementMatchContext().property()));
