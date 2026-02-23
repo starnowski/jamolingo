@@ -24,6 +24,9 @@ public class ODataFilterToMongoMatchParser {
       FilterOption filter, Edm edm, EdmMongoContextFacade edmMongoContextFacade)
       throws ODataApplicationException, ExpressionVisitException {
     if (filter == null) return new DefaultFilterOperatorResult();
+    if (edmMongoContextFacade == null) {
+      throw new IllegalArgumentException("The edmMongoContextFacade can not be nul;");
+    }
     Expression expr = filter.getExpression();
     MongoFilterVisitor rootMongoFilterVisitor = new MongoFilterVisitor(edm, edmMongoContextFacade);
     Bson result = MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(rootMongoFilterVisitor));
