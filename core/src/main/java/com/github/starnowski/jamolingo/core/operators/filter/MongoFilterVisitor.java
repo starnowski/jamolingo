@@ -6,6 +6,9 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.context.MongoPathResolution;
 import org.apache.olingo.commons.api.edm.*;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.*;
@@ -27,7 +30,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   public static final String ODATA_BSON_WRAPPER_PROPERTIES = "$odata.bson.wrapper.properties";
   public static final String ODATA_BSON_WRAPPER_ORIGINAL = "$odata.bson.wrapper.original";
   private final Edm edm;
-  private final EdmMongoContextFacade edmMongoContextFacade;
+  private final EdmPropertyMongoPathResolver edmPropertyMongoPathResolver;
   private final MongoFilterVisitorContext context;
 
   private final Set<String> usedMongoDBProperties = new HashSet<>();
@@ -133,17 +136,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
   }
 
-  public MongoFilterVisitor(Edm edm, EdmMongoContextFacade edmMongoContextFacade) {
+  public MongoFilterVisitor(Edm edm, EdmPropertyMongoPathResolver edmPropertyMongoPathResolver) {
     this(
         edm,
-        edmMongoContextFacade,
+            edmPropertyMongoPathResolver,
         MongoFilterVisitorContext.builder().isRootContext(true).build());
   }
 
   public MongoFilterVisitor(
-      Edm edm, EdmMongoContextFacade edmMongoContextFacade, MongoFilterVisitorContext context) {
+          Edm edm, EdmPropertyMongoPathResolver edmPropertyMongoPathResolver, MongoFilterVisitorContext context) {
     this.edm = edm;
-    this.edmMongoContextFacade = edmMongoContextFacade;
+    this.edmPropertyMongoPathResolver = edmPropertyMongoPathResolver;
     this.context = context;
   }
 
@@ -370,7 +373,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     MongoFilterVisitor visitor =
         new MongoFilterVisitor(
             edm,
-            edmMongoContextFacade,
+                edmPropertyMongoPathResolver,
             MongoFilterVisitorContext.builder()
                 .lambdaVariableAliases(
                     prepareMapOfLambadaVariableAliases(
@@ -414,7 +417,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               MongoFilterVisitor innerMongoFilterVisitor =
                   new MongoFilterVisitor(
                       edm,
-                      edmMongoContextFacade,
+                          edmPropertyMongoPathResolver,
                       MongoFilterVisitorContext.builder()
                           .lambdaVariableAliases(
                               prepareMapOfLambadaVariableAliases(
@@ -437,7 +440,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
                 edm,
-                edmMongoContextFacade,
+                    edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
@@ -469,7 +472,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
                 edm,
-                edmMongoContextFacade,
+                    edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
@@ -534,7 +537,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           MongoFilterVisitor innerMongoFilterVisitor =
               new MongoFilterVisitor(
                   edm,
-                  edmMongoContextFacade,
+                      edmPropertyMongoPathResolver,
                   MongoFilterVisitorContext.builder()
                       .lambdaVariableAliases(
                           prepareMapOfLambadaVariableAliases(
@@ -584,7 +587,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               MongoFilterVisitor innerMongoFilterVisitor =
                   new MongoFilterVisitor(
                       edm,
-                      edmMongoContextFacade,
+                          edmPropertyMongoPathResolver,
                       MongoFilterVisitorContext.builder()
                           .lambdaVariableAliases(
                               prepareMapOfLambadaVariableAliases(
@@ -611,7 +614,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
                 edm,
-                edmMongoContextFacade,
+                    edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
@@ -644,7 +647,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
                 edm,
-                edmMongoContextFacade,
+                    edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
@@ -853,7 +856,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private Document prepareMemberDocument(String field, Member member) {
     Optional<EdmEntityType> entityType =
         edm.getSchemas().get(0).getEntityTypes().stream().findFirst();
-    Document result = new Document(ODATA_MEMBER_PROPERTY, field);
+    String finalPropertyName = field;
+    if (edmPropertyMongoPathResolver != null) {
+      MongoPathResolution result = edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(context.resolveFullEdmPathForMember(member));
+      String[] paths = result.getMongoPath().split("\\.");
+      finalPropertyName = paths[paths.length - 1];
+    }
+    Document result = new Document(ODATA_MEMBER_PROPERTY, finalPropertyName);
     if (entityType.isPresent()) {
       EdmElement property = entityType.get().getProperty(field);
       if (property != null) {
@@ -1031,7 +1040,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerVisitor =
             new MongoFilterVisitor(
                 edm,
-                edmMongoContextFacade,
+                    edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder().isExprMode(true).build());
         return new Document(
             "$expr",
@@ -1485,6 +1494,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   .collect(Collectors.joining("."))
               + "."
               + field;
+    }
+
+    public String resolveFullEdmPathForMember(Member member) {
+      String path = resolveFullPathForMember(member);
+      return path.replace(".", "/");
     }
 
     public String resolveFullPathForMember(Member member) {
