@@ -107,9 +107,9 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
                 [ "plainString eq 'abc'", """{"\$match": {"\$and": [{"renamed_plainString": "abc"}]}}""", ["renamed_plainString"]],
                 [ "isActive eq true", """{"\$match": {"\$and": [{"renamed_isActive": true}]}}""", ["renamed_isActive"]],
                 [ "nestedObject/index eq 'idx1'", """{"\$match": {"\$and": [{"renamed_nestedObject.renamed_index": "idx1"}]}}""", ["renamed_nestedObject.renamed_index"]],
-                [ "tags/any(t: t eq 'tag1')", """{"\$match": {"\$and": [{"renamed_tags": {"\$elemMatch": {"\$eq": "tag1"}}}]}}""", ["renamed_tags"]],
+                [ "tags/any(t:t eq 'tag1')", """{"\$match": {"\$and": [{"renamed_tags": {"\$elemMatch": {"\$eq": "tag1"}}}]}}""", ["renamed_tags"]],
                 [ "tags/all(t:t ne 'no such text' and t ne 'no such word')", """{"\$match": {"\$and": [{"\$and": [{"renamed_tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "no such text"}}}}}, {"renamed_tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "no such word"}}}}}]}]}}""", ["renamed_tags"]],
-                [ "complexList/any(c: c/someString eq 'val1')", """{"\$match": {"\$and": [{"renamed_complexList": {"\$elemMatch": {"renamed_someString": "val1"}}}]}}""", ["renamed_complexList"]]
+                [ "complexList/any(c:c/someString eq 'val1')", """{"\$match": {"\$and": [{"renamed_complexList": {"\$elemMatch": {"renamed_someString": "val1"}}}]}}""", ["renamed_complexList"]]
         ]
     }
 }
