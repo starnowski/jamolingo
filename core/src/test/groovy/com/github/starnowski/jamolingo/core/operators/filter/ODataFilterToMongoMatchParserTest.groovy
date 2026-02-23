@@ -23,7 +23,7 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
         given:
             System.out.println("Testing filter: " + filter)
             Bson expectedBson = Document.parse(bson)
-            Edm edm = loadEmdProvider(edmConfigFile)
+            Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
             JsonWriterSettings settings = JsonWriterSettings.builder().build()
             CodecRegistry registry = CodecRegistries.fromRegistries(
                     CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
@@ -32,7 +32,7 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
             DocumentCodec codec = new DocumentCodec(registry)
 
             UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                    .parseUri(path,
+                    .parseUri("examples2",
                             "\$filter=" +filter
                             , null, null)
             ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
@@ -51,9 +51,9 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
     def "should return expected used MongoDB properties"(){
         given:
             System.out.println("Testing filter: " + filter)
-            Edm edm = loadEmdProvider(edmConfigFile)
+            Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
             UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                    .parseUri(path,
+                    .parseUri("examples2",
                             "\$filter=" +filter
                             , null, null)
             ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
