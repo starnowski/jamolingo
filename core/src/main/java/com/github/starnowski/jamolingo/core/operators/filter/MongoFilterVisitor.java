@@ -209,11 +209,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
             && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
           if (this.context.isExprMode()) {
-            String lambdaField = this.context.lambdaVariableAliases().get(variable.getVariableName()).bson().toBsonDocument().get(ODATA_MEMBER_PROPERTY).asString().getValue();
-            addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(lambdaField));
+            String lambdaField =
+                this.context
+                    .lambdaVariableAliases()
+                    .get(variable.getVariableName())
+                    .bson()
+                    .toBsonDocument()
+                    .get(ODATA_MEMBER_PROPERTY)
+                    .asString()
+                    .getValue();
+            addUsedMongoDBProperty(
+                this.context.enrichFieldPathWithRootPathIfNecessary(lambdaField));
             return prepareMemberDocument("$$" + variable.getVariableName(), variable.getType());
           }
-          addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(this.context.elementMatchContext().property()));
+          addUsedMongoDBProperty(
+              this.context.enrichFieldPathWithRootPathIfNecessary(
+                  this.context.elementMatchContext().property()));
           return prepareWrappedMemberDocumentForLambda(
               this.context.lambdaVariableAliases().get(variable.getVariableName()).bson());
         }
@@ -625,9 +636,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     .elementMatchContext(new ElementMatchContext(field, true))
                     .build());
         function =
-            () ->
-                innerMongoFilterVisitor.visitLambdaExpression(
-                    "ANY", any.getLambdaVariable(), any.getExpression());
+            () -> {
+              Bson innerObject =
+                  innerMongoFilterVisitor.visitLambdaExpression(
+                      "ANY", any.getLambdaVariable(), any.getExpression());
+              this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
+              return innerObject;
+            };
       }
     }
     return null;
@@ -1441,10 +1456,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
     public String enrichFieldPathWithRootPath(String field) {
       return lambdaVariableAliases == null || lambdaVariableAliases.isEmpty()
-              ? field
-              : lambdaVariableAliases.entrySet().stream()
-              .map(entry -> extractField(entry.getValue().bson()))
-              .collect(Collectors.joining("."))
+          ? field
+          : lambdaVariableAliases.entrySet().stream()
+                  .map(entry -> extractField(entry.getValue().bson()))
+                  .collect(Collectors.joining("."))
               + "."
               + field;
     }
@@ -1456,7 +1471,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       while (it.hasNext()) {
         UriResource path = it.next();
         String value = null;
-        if (path instanceof UriResourceLambdaVariable variable){
+        if (path instanceof UriResourceLambdaVariable variable) {
           value = resolveFullPathForLambdaVariable(variable.getVariableName());
         } else if (path instanceof UriResourceProperty property) {
           value = property.getProperty().getName();
@@ -1482,7 +1497,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (noneRootNode) {
           sb.append(".");
         }
-        sb.append(entry.getValue().bson.toBsonDocument().get(ODATA_MEMBER_PROPERTY).asString().getValue());
+        sb.append(
+            entry
+                .getValue()
+                .bson
+                .toBsonDocument()
+                .get(ODATA_MEMBER_PROPERTY)
+                .asString()
+                .getValue());
         if (entry.getKey().equals(lambdaVariable)) {
           break;
         }
