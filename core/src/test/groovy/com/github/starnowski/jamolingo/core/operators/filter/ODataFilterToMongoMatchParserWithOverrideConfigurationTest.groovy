@@ -1,10 +1,11 @@
 package com.github.starnowski.jamolingo.core.operators.filter
 
 import com.github.starnowski.jamolingo.core.AbstractSpecification
+import com.github.starnowski.jamolingo.common.json.JSONOverrideHelper
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder
+import com.github.starnowski.jamolingo.core.mapping.EntityMapping
 import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory
-import com.github.starnowski.jamolingo.core.mapping.PropertyMapping
 import com.mongodb.MongoClientSettings
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
@@ -20,6 +21,9 @@ import org.bson.conversions.Bson
 import org.bson.json.JsonWriterSettings
 import spock.lang.Unroll
 
+import java.nio.file.Files
+import java.nio.file.Paths
+
 class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends AbstractSpecification {
 
     @Unroll
@@ -30,7 +34,10 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
             ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
             def odataMapping = factory.build(edm.getSchema("MyService"))
             def entityMapping = odataMapping.getEntities().get("Example2")
-            renameProperties(entityMapping.getProperties())
+            
+            def helper = new JSONOverrideHelper()
+            String mergePayload = Files.readString(Paths.get(getClass().getClassLoader().getResource("mappings/edm6_override.json").toURI()))
+            entityMapping = helper.applyChangesToJson(entityMapping, mergePayload, EntityMapping.class, JSONOverrideHelper.PatchType.MERGE)
 
             EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
             def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
@@ -68,7 +75,10 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
             ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
             def odataMapping = factory.build(edm.getSchema("MyService"))
             def entityMapping = odataMapping.getEntities().get("Example2")
-            renameProperties(entityMapping.getProperties())
+            
+            def helper = new JSONOverrideHelper()
+            String mergePayload = Files.readString(Paths.get(getClass().getClassLoader().getResource("mappings/edm6_override.json").toURI()))
+            entityMapping = helper.applyChangesToJson(entityMapping, mergePayload, EntityMapping.class, JSONOverrideHelper.PatchType.MERGE)
 
             EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
             def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
@@ -90,15 +100,6 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
 
         where:
             [filter, bson, expectedFields] << oneToOneEdmPathsMappings()
-    }
-
-    void renameProperties(Map<String, PropertyMapping> properties) {
-        properties.each { name, mapping ->
-            mapping.setMongoName("renamed_" + name)
-            if (mapping.getProperties() != null) {
-                renameProperties(mapping.getProperties())
-            }
-        }
     }
 
     static oneToOneEdmPathsMappings() {
