@@ -1,14 +1,14 @@
 package com.github.starnowski.jamolingo.core.context;
 
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
-import java.util.stream.Collectors;
-
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import java.util.stream.Collectors;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 
 /** Default implementation of {@link EdmMongoContextFacade}. */
-public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade, EdmPropertyMongoPathResolver {
+public class DefaultEdmMongoContextFacade
+    implements EdmMongoContextFacade, EdmPropertyMongoPathResolver {
 
   private final EntityPropertiesMongoPathContext entityPropertiesMongoPathContext;
   private final EdmPathContextSearch edmPathContextSearch;
@@ -58,13 +58,13 @@ public class DefaultEdmMongoContextFacade implements EdmMongoContextFacade, EdmP
 
   @Override
   public MongoPathResolution resolveMongoPathForEDMPath(String edmPath) {
-    //TODO
+    // TODO
     if (entityPropertiesMongoPathContext == null) {
       return new InnerMongoPathResolution(edmPath.replace("/", "."));
     }
     return edmPathContextSearch == null
-            ? entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(edmPath)
-            : entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(
+        ? entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(edmPath)
+        : entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(
             edmPath, edmPathContextSearch);
   }
 

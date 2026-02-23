@@ -1,6 +1,5 @@
 package com.github.starnowski.jamolingo.core.operators.filter;
 
-import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import java.util.Collections;
