@@ -861,8 +861,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       MongoPathResolution result =
           edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
               context.resolveFullEdmPathForMember(member));
-      String[] paths = result.getMongoPath().split("\\.");
-      finalPropertyName = paths[paths.length - 1];
+      finalPropertyName = result.getMongoPath();
 
       // TODO
       // if no lambda variable then take the whole path
