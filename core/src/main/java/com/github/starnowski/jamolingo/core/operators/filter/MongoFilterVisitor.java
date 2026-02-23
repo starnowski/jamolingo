@@ -1452,16 +1452,23 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     public String resolveFullPathForMember(Member member) {
       Iterator<UriResource> it = member.getResourcePath().getUriResourceParts().iterator();
       StringBuilder sb = new StringBuilder();
+      boolean noneRootNode = false;
       while (it.hasNext()) {
         UriResource path = it.next();
+        String value = null;
         if (path instanceof UriResourceLambdaVariable variable){
-          sb.append(resolveFullPathForLambdaVariable(variable.getVariableName()));
+          value = resolveFullPathForLambdaVariable(variable.getVariableName());
         } else if (path instanceof UriResourceProperty property) {
-          sb.append(property.getProperty().getName());
+          value = property.getProperty().getName();
         }
-        if (it.hasNext()) {
+        if (value == null) {
+          break;
+        }
+        if (noneRootNode) {
           sb.append(".");
         }
+        sb.append(value);
+        noneRootNode = true;
       }
       return sb.toString();
     }
@@ -1469,14 +1476,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     public String resolveFullPathForLambdaVariable(String lambdaVariable) {
       StringBuilder sb = new StringBuilder();
       Iterator<Map.Entry<String, LambdaLeaf>> it = lambdaVariableAliases.entrySet().iterator();
+      boolean noneRootNode = false;
       while (it.hasNext()) {
         Map.Entry<String, LambdaLeaf> entry = it.next();
+        if (noneRootNode) {
+          sb.append(".");
+        }
         sb.append(entry.getValue().bson.toBsonDocument().get(ODATA_MEMBER_PROPERTY).asString().getValue());
         if (entry.getKey().equals(lambdaVariable)) {
           break;
-        } else {
-          sb.append(".");
         }
+        noneRootNode = true;
       }
       return sb.toString();
     }
