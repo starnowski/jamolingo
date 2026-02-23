@@ -1,6 +1,10 @@
 package com.github.starnowski.jamolingo.core.operators.filter
 
 import com.github.starnowski.jamolingo.core.AbstractSpecification
+import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
+import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder
+import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory
+import com.github.starnowski.jamolingo.core.mapping.PropertyMapping
 import com.mongodb.MongoClientSettings
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
@@ -18,15 +22,22 @@ import spock.lang.Unroll
 
 class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends AbstractSpecification {
 
-    //TODO Load Entity mappings from the edm.xml
-    //TODO Add merge patch and add the "renamed_" prefix to MongoDB documents and properties in mapping
-
     @Unroll
     def "should return expected stage bson objects"(){
         given:
-            System.out.println("Testing filter: " + filter)
             Bson expectedBson = Document.parse(bson)
             Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+            ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+            def odataMapping = factory.build(edm.getSchema("MyService"))
+            def entityMapping = odataMapping.getEntities().get("Example2")
+            renameProperties(entityMapping.getProperties())
+
+            EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+            def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
+            def facade = DefaultEdmMongoContextFacade.builder()
+                    .withEntityPropertiesMongoPathContext(context)
+                    .build()
+
             JsonWriterSettings settings = JsonWriterSettings.builder().build()
             CodecRegistry registry = CodecRegistries.fromRegistries(
                     CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
@@ -41,7 +52,7 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
             ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
 
         when:
-            def result = tested.parse(uriInfo.getFilterOption(), edm)
+            def result = tested.parse(uriInfo.getFilterOption(), edm, facade)
 
         then:
             [((Document)result.getStageObjects().get(0)).toJson(settings, codec)] == [((Document)expectedBson).toJson(settings, codec)]
@@ -53,8 +64,18 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
     @Unroll
     def "should return expected used MongoDB properties"(){
         given:
-            System.out.println("Testing filter: " + filter)
             Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+            ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+            def odataMapping = factory.build(edm.getSchema("MyService"))
+            def entityMapping = odataMapping.getEntities().get("Example2")
+            renameProperties(entityMapping.getProperties())
+
+            EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+            def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
+            def facade = DefaultEdmMongoContextFacade.builder()
+                    .withEntityPropertiesMongoPathContext(context)
+                    .build()
+
             UriInfo uriInfo = new Parser(edm, OData.newInstance())
                     .parseUri("examples2",
                             "\$filter=" +filter
@@ -62,7 +83,7 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
             ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
 
         when:
-            def result = tested.parse(uriInfo.getFilterOption(), edm)
+            def result = tested.parse(uriInfo.getFilterOption(), edm, facade)
 
         then:
             new HashSet<>(result.getUsedMongoDocumentProperties()) == new HashSet(expectedFields as List)
@@ -71,10 +92,23 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
             [filter, bson, expectedFields] << oneToOneEdmPathsMappings()
     }
 
+    void renameProperties(Map<String, PropertyMapping> properties) {
+        properties.each { name, mapping ->
+            mapping.setMongoName("renamed_" + name)
+            if (mapping.getProperties() != null) {
+                renameProperties(mapping.getProperties())
+            }
+        }
+    }
+
     static oneToOneEdmPathsMappings() {
         [
+                [ "plainString eq 'abc'", """{"\$match": {"\$and": [{"renamed_plainString": "abc"}]}}""", ["renamed_plainString"]],
+                [ "isActive eq true", """{"\$match": {"\$and": [{"renamed_isActive": true}]}}""", ["renamed_isActive"]],
+                [ "nestedObject/index eq 'idx1'", """{"\$match": {"\$and": [{"renamed_nestedObject.renamed_index": "idx1"}]}}""", ["renamed_nestedObject.renamed_index"]],
+                [ "tags/any(t: t eq 'tag1')", """{"\$match": {"\$and": [{"renamed_tags": {"\$elemMatch": {"\$eq": "tag1"}}}]}}""", ["renamed_tags"]],
                 [ "tags/all(t:t ne 'no such text' and t ne 'no such word')", """{"\$match": {"\$and": [{"\$and": [{"renamed_tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "no such text"}}}}}, {"renamed_tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "no such word"}}}}}]}]}}""", ["renamed_tags"]],
+                [ "complexList/any(c: c/someString eq 'val1')", """{"\$match": {"\$and": [{"renamed_complexList": {"\$elemMatch": {"renamed_someString": "val1"}}}]}}""", ["renamed_complexList"]]
         ]
     }
 }
-
