@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.core.operators.filter;
 
+import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -26,6 +27,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   public static final String ODATA_BSON_WRAPPER_PROPERTIES = "$odata.bson.wrapper.properties";
   public static final String ODATA_BSON_WRAPPER_ORIGINAL = "$odata.bson.wrapper.original";
   private final Edm edm;
+  private final EdmMongoContextFacade edmMongoContextFacade;
   private final MongoFilterVisitorContext context;
 
   private final Set<String> usedMongoDBProperties = new HashSet<>();
@@ -131,12 +133,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
   }
 
-  public MongoFilterVisitor(Edm edm) {
-    this(edm, MongoFilterVisitorContext.builder().isRootContext(true).build());
+  public MongoFilterVisitor(Edm edm, EdmMongoContextFacade edmMongoContextFacade) {
+    this(
+        edm,
+        edmMongoContextFacade,
+        MongoFilterVisitorContext.builder().isRootContext(true).build());
   }
 
-  public MongoFilterVisitor(Edm edm, MongoFilterVisitorContext context) {
+  public MongoFilterVisitor(
+      Edm edm, EdmMongoContextFacade edmMongoContextFacade, MongoFilterVisitorContext context) {
     this.edm = edm;
+    this.edmMongoContextFacade = edmMongoContextFacade;
     this.context = context;
   }
 
@@ -360,6 +367,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     MongoFilterVisitor visitor =
         new MongoFilterVisitor(
             edm,
+            edmMongoContextFacade,
             MongoFilterVisitorContext.builder()
                 .lambdaVariableAliases(
                     prepareMapOfLambadaVariableAliases(
@@ -403,6 +411,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               MongoFilterVisitor innerMongoFilterVisitor =
                   new MongoFilterVisitor(
                       edm,
+                      edmMongoContextFacade,
                       MongoFilterVisitorContext.builder()
                           .lambdaVariableAliases(
                               prepareMapOfLambadaVariableAliases(
@@ -425,6 +434,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
                 edm,
+                edmMongoContextFacade,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
@@ -456,6 +466,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
                 edm,
+                edmMongoContextFacade,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
@@ -517,6 +528,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           MongoFilterVisitor innerMongoFilterVisitor =
               new MongoFilterVisitor(
                   edm,
+                  edmMongoContextFacade,
                   MongoFilterVisitorContext.builder()
                       .lambdaVariableAliases(
                           prepareMapOfLambadaVariableAliases(
@@ -566,6 +578,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               MongoFilterVisitor innerMongoFilterVisitor =
                   new MongoFilterVisitor(
                       edm,
+                      edmMongoContextFacade,
                       MongoFilterVisitorContext.builder()
                           .lambdaVariableAliases(
                               prepareMapOfLambadaVariableAliases(
@@ -592,6 +605,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
                 edm,
+                edmMongoContextFacade,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
@@ -624,6 +638,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
                 edm,
+                edmMongoContextFacade,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
@@ -1009,7 +1024,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       } catch (ExpressionOperantRequiredException ex) {
         MongoFilterVisitor innerVisitor =
             new MongoFilterVisitor(
-                edm, MongoFilterVisitorContext.builder().isExprMode(true).build());
+                edm,
+                edmMongoContextFacade,
+                MongoFilterVisitorContext.builder().isExprMode(true).build());
         return new Document(
             "$expr",
             unwrapWrapperIfNeeded(innerVisitor.visitBinaryOperator(operator, left, right)));
