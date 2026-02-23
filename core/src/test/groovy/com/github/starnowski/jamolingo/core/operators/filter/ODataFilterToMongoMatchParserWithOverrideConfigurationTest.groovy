@@ -18,6 +18,9 @@ import spock.lang.Unroll
 
 class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends AbstractSpecification {
 
+    //TODO Load Entity mappings from the edm.xml
+    //TODO Add merge patch and add the "renamed_" prefix to MongoDB documents and properties in mapping
+
     @Unroll
     def "should return expected stage bson objects"(){
         given:

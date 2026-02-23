@@ -18,6 +18,9 @@ import spock.lang.Unroll
 
 class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
 
+    //TODO Add test with default entity mapping
+    //TODO Add test with default entity mapping
+
     @Unroll
     def "should return expected stage bson objects"(){
         given:
