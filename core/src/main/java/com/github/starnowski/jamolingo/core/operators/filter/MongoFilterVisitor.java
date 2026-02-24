@@ -560,7 +560,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   any.getLambdaVariable(),
                   nestedExpression,
                   parentLambdaVariable)
-              : prepareDocumentForAnyLambda(innerObject, field);
+              : prepareDocumentForAnyLambda(innerObject, field, member);
         };
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
     boolean allVariantTested = false;
@@ -700,7 +700,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return nestedExpr ? innerDocument : new Document("$expr", innerDocument);
   }
 
-  private Bson prepareDocumentForAnyLambda(Bson innerPartBson, String field) {
+  private Bson prepareDocumentForAnyLambda(Bson innerPartBson, String field, Member member) {
     Bson innerPart = unwrapWrapperIfNeeded(innerPartBson);
     if (isBsonWrapper(innerPartBson)) {
       BsonWrapperProperties bsonWrapperProperties = extractBsonWrapperProperties(innerPartBson);
@@ -853,27 +853,48 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return List.of(prepareElementMatchDocumentForAllLambda(innerPart, field, true));
   }
 
-  private Document prepareMemberDocument(String field, Member member) {
-    Optional<EdmEntityType> entityType =
-        edm.getSchemas().get(0).getEntityTypes().stream().findFirst();
-    String finalPropertyName = field;
+  private String resolveMongoPathForMember(Member member) {
     if (edmPropertyMongoPathResolver != null) {
       MongoPathResolution result =
-          edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
-              context.resolveFullEdmPathForMember(member));
-      finalPropertyName = result.getMongoPath();
-
+              edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
+                      context.resolveFullEdmPathForMember(member));
+      String full = result.getMongoPath();
+      if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
+        String lambdaPath = this.context.resolveFullPathForLambdaVariable(variable.getVariableName()).replace(".", "/");
+        MongoPathResolution lambdaMongoPath =
+                edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
+        return full.substring(lambdaMongoPath.getMongoPath().length() + 1);
+      }
+      return full;
       // TODO
       // if no lambda variable then take the whole path
       // if any lambda variable then (memberFullPath - lambdaPath) set as finalPath
     }
-    Document result = new Document(ODATA_MEMBER_PROPERTY, finalPropertyName);
+    //TODO resolve Member
+    return null;
+  }
+
+  private Document prepareMemberDocument(String field, Member member) {
+    Optional<EdmEntityType> entityType =
+        edm.getSchemas().get(0).getEntityTypes().stream().findFirst();
+    Document result = new Document(ODATA_MEMBER_PROPERTY, field);
     if (entityType.isPresent()) {
       EdmElement property = entityType.get().getProperty(field);
       if (property != null) {
         result.append(
             ODATA_MEMBER_TYPE_PROPERTY, property.getType().getFullQualifiedName().toString());
       }
+    }
+    if (edmPropertyMongoPathResolver != null) {
+      MongoPathResolution mongoPathResolution =
+              edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
+                      context.resolveFullEdmPathForMember(member));
+//      finalPropertyName = mongoPathResolution.getMongoPath();
+      // TODO mongo property
+      // TODO mongo full path
+      // TODO
+      // if no lambda variable then take the whole path
+      // if any lambda variable then (memberFullPath - lambdaPath) set as finalPath
     }
     return result;
   }
