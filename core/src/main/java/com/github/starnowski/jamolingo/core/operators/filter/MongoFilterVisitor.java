@@ -27,8 +27,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   public static final String ODATA_MEMBER_IS_LAMBDA_PROPERTY = "$odata.member.lambda.is.lambda";
   public static final String ODATA_BSON_WRAPPER_PROPERTIES = "$odata.bson.wrapper.properties";
   public static final String ODATA_BSON_WRAPPER_ORIGINAL = "$odata.bson.wrapper.original";
-  public static final String ODATA_MEMBER_MONGO_FIELD_REFERENCE = "$odata.member.mongo.field.reference";
-  public static final String ODATA_MEMBER_MONGO_FIELD_FULL_PATH = "$odata.member.mongo.field.full.path";
+  public static final String ODATA_MEMBER_MONGO_FIELD_REFERENCE =
+      "$odata.member.mongo.field.reference";
+  public static final String ODATA_MEMBER_MONGO_FIELD_FULL_PATH =
+      "$odata.member.mongo.field.full.path";
   private final Edm edm;
   private final EdmPropertyMongoPathResolver edmPropertyMongoPathResolver;
   private final MongoFilterVisitorContext context;
@@ -858,13 +860,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private String resolveMongoPathForMember(Member member) {
     if (edmPropertyMongoPathResolver != null) {
       MongoPathResolution result =
-              edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
-                      context.resolveFullEdmPathForMember(member));
+          edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
+              context.resolveFullEdmPathForMember(member));
       String full = result.getMongoPath();
-      if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
-        String lambdaPath = this.context.resolveFullPathForLambdaVariable(variable.getVariableName()).replace(".", "/");
+      if (member.getResourcePath().getUriResourceParts().get(0)
+          instanceof UriResourceLambdaVariable variable) {
+        String lambdaPath =
+            this.context
+                .resolveFullPathForLambdaVariable(variable.getVariableName())
+                .replace(".", "/");
         MongoPathResolution lambdaMongoPath =
-                edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
+            edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
         return full.substring(lambdaMongoPath.getMongoPath().length() + 1);
       }
       return full;
@@ -872,7 +878,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       // if no lambda variable then take the whole path
       // if any lambda variable then (memberFullPath - lambdaPath) set as finalPath
     }
-    //TODO resolve Member
+    // TODO resolve Member
     return null;
   }
 
@@ -889,16 +895,24 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
     if (edmPropertyMongoPathResolver != null) {
       MongoPathResolution mongoPathResolution =
-              edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
-                      context.resolveFullEdmPathForMember(member));
+          edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
+              context.resolveFullEdmPathForMember(member));
       result.append(ODATA_MEMBER_MONGO_FIELD_FULL_PATH, mongoPathResolution.getMongoPath());
-      if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
-        String lambdaPath = this.context.resolveFullPathForLambdaVariable(variable.getVariableName()).replace(".", "/");
+      if (member.getResourcePath().getUriResourceParts().get(0)
+          instanceof UriResourceLambdaVariable variable) {
+        String lambdaPath =
+            this.context
+                .resolveFullPathForLambdaVariable(variable.getVariableName())
+                .replace(".", "/");
         MongoPathResolution lambdaMongoPath =
-                edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
-        result.append(ODATA_MEMBER_MONGO_FIELD_REFERENCE, mongoPathResolution.getMongoPath().substring(lambdaMongoPath.getMongoPath().length() + 1));
+            edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
+        result.append(
+            ODATA_MEMBER_MONGO_FIELD_REFERENCE,
+            mongoPathResolution
+                .getMongoPath()
+                .substring(lambdaMongoPath.getMongoPath().length() + 1));
       }
-//      finalPropertyName = mongoPathResolution.getMongoPath();
+      //      finalPropertyName = mongoPathResolution.getMongoPath();
       // TODO mongo property
       // TODO mongo full path
       // TODO
@@ -1270,6 +1284,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     String type = extractFieldType(left);
     value = tryConvertValueByEdmType(value, type);
     Object rightOperant = value == null ? (rightField == null ? right : rightField) : value;
+    String mongoReference = extractMongoReference(left);
+    String mongoFullPath = extractMongoFullPath(left);
     if (field == null) {
       return this.context.isExprMode()
           ? new Document("$eq", Arrays.asList(left, rightOperant))
@@ -1288,6 +1304,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         && !this.context.isNestedLambdaAllContext()) {
       field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
     }
+    field = mongoReference == null ? mongoFullPath == null ? field : mongoFullPath : mongoReference;
     return Filters.eq(field, value);
   }
 
@@ -1350,6 +1367,20 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     BsonDocument document = bson.toBsonDocument();
     return document.containsKey(ODATA_MEMBER_PROPERTY)
         ? document.get(ODATA_MEMBER_PROPERTY).asString().getValue()
+        : null;
+  }
+
+  private static String extractMongoReference(Bson bson) {
+    BsonDocument document = bson.toBsonDocument();
+    return document.containsKey(ODATA_MEMBER_MONGO_FIELD_REFERENCE)
+        ? document.get(ODATA_MEMBER_MONGO_FIELD_REFERENCE).asString().getValue()
+        : null;
+  }
+
+  private static String extractMongoFullPath(Bson bson) {
+    BsonDocument document = bson.toBsonDocument();
+    return document.containsKey(ODATA_MEMBER_MONGO_FIELD_FULL_PATH)
+        ? document.get(ODATA_MEMBER_MONGO_FIELD_FULL_PATH).asString().getValue()
         : null;
   }
 
