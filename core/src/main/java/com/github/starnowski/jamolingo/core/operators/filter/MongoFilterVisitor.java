@@ -27,6 +27,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   public static final String ODATA_MEMBER_IS_LAMBDA_PROPERTY = "$odata.member.lambda.is.lambda";
   public static final String ODATA_BSON_WRAPPER_PROPERTIES = "$odata.bson.wrapper.properties";
   public static final String ODATA_BSON_WRAPPER_ORIGINAL = "$odata.bson.wrapper.original";
+  public static final String ODATA_MEMBER_MONGO_FIELD_REFERENCE = "$odata.member.mongo.field.reference";
+  public static final String ODATA_MEMBER_MONGO_FIELD_FULL_PATH = "$odata.member.mongo.field.full.path";
   private final Edm edm;
   private final EdmPropertyMongoPathResolver edmPropertyMongoPathResolver;
   private final MongoFilterVisitorContext context;
@@ -889,6 +891,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       MongoPathResolution mongoPathResolution =
               edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
                       context.resolveFullEdmPathForMember(member));
+      result.append(ODATA_MEMBER_MONGO_FIELD_FULL_PATH, mongoPathResolution.getMongoPath());
+      if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable variable) {
+        String lambdaPath = this.context.resolveFullPathForLambdaVariable(variable.getVariableName()).replace(".", "/");
+        MongoPathResolution lambdaMongoPath =
+                edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
+        result.append(ODATA_MEMBER_MONGO_FIELD_REFERENCE, mongoPathResolution.getMongoPath().substring(lambdaMongoPath.getMongoPath().length() + 1));
+      }
 //      finalPropertyName = mongoPathResolution.getMongoPath();
       // TODO mongo property
       // TODO mongo full path
