@@ -1314,6 +1314,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     Object value = extractValueObj(right);
     String type = extractFieldType(left);
     value = tryConvertValueByEdmType(value, type);
+    String mongoReference = extractMongoReference(left);
+    String mongoFullPath = extractMongoFullPath(left);
+    field = mongoReference == null ? mongoFullPath == null ? field : mongoFullPath : mongoReference;
     if (!this.context.isExprMode() && field == null) {
       throw new ExpressionOperantRequiredException(
           "The field is null for combineFieldOp, expression support is required");
