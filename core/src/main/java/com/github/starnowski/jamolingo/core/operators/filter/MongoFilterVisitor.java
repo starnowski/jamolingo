@@ -323,6 +323,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               .get(member.getResourcePath().getUriResourceParts().size() - 1);
       if (last instanceof UriResourceLambdaAny any) {
         String field = extractFieldName(member);
+        // TODO Pass full field object
         return getBsonForUriResourceLambdaAny(member, any, field);
       } else if (last instanceof UriResourceLambdaAll all) {
         String field = extractFieldName(member);
