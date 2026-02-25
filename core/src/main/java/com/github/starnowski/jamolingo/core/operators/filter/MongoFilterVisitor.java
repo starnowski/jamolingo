@@ -566,7 +566,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   any.getLambdaVariable(),
                   nestedExpression,
                   parentLambdaVariable)
-              : prepareDocumentForAnyLambda(innerObject, propertyContext.getEdmField(), member);
+              : prepareDocumentForAnyLambda(innerObject, propertyContext.getMongoField(), member);
         };
     boolean multipleElementMatchOperantRequiredExceptionThrown = false;
     boolean allVariantTested = false;
@@ -932,6 +932,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
                       context.resolveFullEdmPathForMember(member));
       mongoField = mongoPathResolution.getMongoPath();
+      mongoFullPath = mongoPathResolution.getMongoPath();
       if (member.getResourcePath().getUriResourceParts().get(0)
               instanceof UriResourceLambdaVariable variable) {
         String lambdaPath =
@@ -940,7 +941,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                         .replace(".", "/");
         MongoPathResolution lambdaMongoPath =
                 edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
-        mongoFullPath = mongoPathResolution
+        mongoField = mongoPathResolution
                         .getMongoPath()
                         .substring(lambdaMongoPath.getMongoPath().length() + 1);
       }
