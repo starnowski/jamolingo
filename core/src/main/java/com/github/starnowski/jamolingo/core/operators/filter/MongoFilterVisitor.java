@@ -21,6 +21,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   public static final String CUSTOM_LITERAL_VALUE_PROPERTY = "$odata.literal";
   public static final String ODATA_MEMBER_PROPERTY = "$odata.member";
+  public static final String ODATA_MEMBER_EDM_PROPERTY = "$odata.member.edm.property";
   public static final String ODATA_MEMBER_TYPE_PROPERTY = "$odata.member.type";
   public static final String ODATA_MEMBER_LAMBDA_ROOT_PROPERTY =
       "$odata.member.lambda.root.property";
@@ -311,7 +312,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
 
         if (this.context.isElementMatchContext()) {
-          return prepareMemberDocumentForLambda(field, fieldType, rootPath);
+          return prepareMemberDocumentForLambda(prepareProperty(field, member), fieldType, rootPath);
         }
         return prepareMemberDocument(rootPath + "." + field, fieldType);
       }
@@ -885,9 +886,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Document prepareMemberDocument(String field, Member member) {
+    PropertyContext propertyContext = prepareProperty(field, member);
     Optional<EdmEntityType> entityType =
         edm.getSchemas().get(0).getEntityTypes().stream().findFirst();
-    Document result = new Document(ODATA_MEMBER_PROPERTY, field);
+    Document result = new Document(ODATA_MEMBER_PROPERTY, field).append(ODATA_MEMBER_EDM_PROPERTY, propertyContext.getEdmField());
     if (entityType.isPresent()) {
       EdmElement property = entityType.get().getProperty(field);
       if (property != null) {
@@ -922,6 +924,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       // if any lambda variable then (memberFullPath - lambdaPath) set as finalPath
     }
     return result;
+  }
+
+  private Document enrichDocumentWithMongoProperties(Document document, String field, Member member) {
+    PropertyContext propertyContext = prepareProperty(field, member);
+    if (propertyContext.getMongoField() != null) {
+      document.append(ODATA_MEMBER_MONGO_FIELD_REFERENCE, propertyContext.getMongoField());
+      document.append(ODATA_MEMBER_MONGO_FIELD_FULL_PATH, propertyContext.getMongoFullPath());
+    }
+    return document;
   }
 
   private PropertyContext prepareProperty(String field, Member member) {
@@ -987,9 +998,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Document prepareMemberDocumentForLambda(
-      String field, EdmType edmType, String lambdaRootProperty) {
-    Document result = prepareMemberDocument(field, edmType);
+          PropertyContext propertyContext, EdmType edmType, String lambdaRootProperty) {
+    Document result = prepareMemberDocument(propertyContext.getMongoField(), edmType);
     result.append(ODATA_MEMBER_LAMBDA_ROOT_PROPERTY, lambdaRootProperty);
+    result.append(ODATA_MEMBER_MONGO_FIELD_REFERENCE, propertyContext.getMongoField());
+    result.append(ODATA_MEMBER_MONGO_FIELD_FULL_PATH, propertyContext.getMongoFullPath());
+    result.append(ODATA_MEMBER_EDM_PROPERTY, propertyContext.getEdmField());
     return result;
   }
 
@@ -1660,7 +1674,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 .getValue()
                 .bson
                 .toBsonDocument()
-                .get(ODATA_MEMBER_PROPERTY)
+                .get(ODATA_MEMBER_EDM_PROPERTY)
                 .asString()
                 .getValue());
         if (entry.getKey().equals(lambdaVariable)) {
