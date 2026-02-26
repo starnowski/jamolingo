@@ -174,6 +174,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     boolean nested = false;
     while (it.hasNext()) {
       UriResource property = it.next();
+      if (property instanceof UriResourceLambdaVariable) {
+        continue;
+      }
       if (property instanceof UriResourcePrimitiveProperty
           || property instanceof UriResourceComplexProperty) {
         UriResourceProperty uiProperty = (UriResourceProperty) property;
@@ -958,7 +961,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       }
 
     }
-    return new PropertyContext(field, mongoField, mongoFullPath);
+    return new PropertyContext(extractFieldName(member), mongoField, mongoFullPath);
   }
 
   private  static final class PropertyContext {
