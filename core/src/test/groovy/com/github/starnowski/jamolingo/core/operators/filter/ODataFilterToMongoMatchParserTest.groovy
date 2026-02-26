@@ -16,11 +16,21 @@ import org.bson.conversions.Bson
 import org.bson.json.JsonWriterSettings
 import spock.lang.Unroll
 
+/**
+ * Test class for ODataFilterToMongoMatchParser.
+ *
+ * This class contains tests for generating the MongoDB $match stage based on OData $filter operators.
+ * In these test cases, the mapping between the EDM model and the MongoDB document schema is one-to-one,
+ * meaning that property names in the EDM model correspond directly to field names in the MongoDB documents.
+ */
 class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
 
     //TODO Add test with default entity mapping
     //TODO Add test with default entity mapping
 
+    /**
+     * Verifies that the generated MongoDB $match stage matches the expected BSON document.
+     */
     @Unroll
     def "should return expected stage bson objects"(){
         given:
@@ -50,6 +60,9 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
             [filter, bson] << oneToOneEdmPathsMappings()
     }
 
+    /**
+     * Verifies that the parser correctly identifies all the MongoDB property paths used in the generated query.
+     */
     @Unroll
     def "should return expected used MongoDB properties"(){
         given:
@@ -71,6 +84,10 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
             [filter, bson, expectedFields] << oneToOneEdmPathsMappings()
     }
 
+    /**
+     * Provides test data mapping OData filters to expected MongoDB $match documents and used properties.
+     * In this provider, the mapping between EDM and MongoDB is one-to-one.
+     */
     static oneToOneEdmPathsMappings() {
         [
                 [ "tags/all(t:t ne 'no such text' and t ne 'no such word')", """{"\$match": {"\$and": [{"\$and": [{"tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "no such text"}}}}}, {"tags": {"\$not": {"\$elemMatch": {"\$not": {"\$ne": "no such word"}}}}}]}]}}""", ["tags"]],
