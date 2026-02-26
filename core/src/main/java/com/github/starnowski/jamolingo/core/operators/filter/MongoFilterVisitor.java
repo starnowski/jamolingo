@@ -945,6 +945,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             mongoPathResolution
                 .getMongoPath()
                 .substring(lambdaMongoPath.getMongoPath().length() + 1));
+      } else {
+        result.append(ODATA_MEMBER_MONGO_FIELD_REFERENCE, mongoPathResolution.getMongoPath());
       }
       //      finalPropertyName = mongoPathResolution.getMongoPath();
       // TODO mongo property
@@ -1342,7 +1344,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson visitMethodWithOneParameter(MethodKind methodCall, List<Bson> parameters) {
-    String field = extractField(parameters.get(0));
+    String field = resolveMongoField(parameters.get(0));
     Object value = extractValueObj(parameters.get(0));
     String type = extractFieldType(parameters.get(0));
     value = tryConvertValueByEdmType(value, type);
@@ -1402,8 +1404,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         && !this.context.isNestedLambdaAllContext()) {
       field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
     }
-    field = mongoReference == null ? mongoFullPath == null ? field : mongoFullPath : mongoReference;
+    field = resolveMongoField(left);
     return Filters.eq(field, value);
+  }
+
+  private String resolveMongoField(Bson bson) {
+    String field = extractField(bson);
+    String mongoReference = extractMongoReference(bson);
+    String mongoFullPath = extractMongoFullPath(bson);
+    return mongoReference == null ? mongoFullPath == null ? field : mongoFullPath : mongoReference;
   }
 
   private Bson combineFieldOp(
