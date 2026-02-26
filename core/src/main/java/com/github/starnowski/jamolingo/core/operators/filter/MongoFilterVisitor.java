@@ -536,9 +536,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             if (!this.context.isExprMode()) {
               throw new ExpressionOperantRequiredException("any() requires expression");
             }
-            this.addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPath(propertyContext.getEdmField()));
+            this.addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPath(propertyContext.getMongoField()));
             return prepareExprDocumentForAnyLambdaThatValidatesIfCollectionIsNotEmpty(
-                    propertyContext.getEdmField(), nestedExpression, parentLambdaVariable);
+                    propertyContext.getMongoField(), nestedExpression, parentLambdaVariable);
           }
           MongoFilterVisitor innerMongoFilterVisitor =
               new MongoFilterVisitor(
@@ -548,10 +548,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                       .lambdaVariableAliases(
                           prepareMapOfLambadaVariableAliases(
                               any.getLambdaVariable(),
-                              prepareMemberDocument(propertyContext.getEdmField(), member),
+                              prepareMemberDocument(propertyContext.getMongoField(), member),
                               LambdaType.ANY,
                               null))
-                      .elementMatchContext(new ElementMatchContext(propertyContext.getEdmField(), false))
+                      .elementMatchContext(new ElementMatchContext(propertyContext.getMongoField(), false))
                       .isLambdaAnyContext(true)
                       .isExprMode(nestedExpression)
                       .build());
@@ -562,7 +562,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           return innerMongoFilterVisitor.context.isExprMode()
               ? innerMongoFilterVisitor.prepareExprDocumentForAnyLambdaWithExpr(
                   innerObject,
-                  propertyContext.getEdmField(),
+                  propertyContext.getMongoField(),
                   any.getLambdaVariable(),
                   nestedExpression,
                   parentLambdaVariable)
@@ -584,9 +584,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
         expressionOperantRequiredExceptionThrown = true;
         if (any.getLambdaVariable() == null) {
-          this.addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(propertyContext.getEdmField()));
+          this.addUsedMongoDBProperty(this.context.enrichFieldPathWithRootPathIfNecessary(propertyContext.getMongoField()));
           return prepareExprDocumentForAnyLambdaThatValidatesIfCollectionIsNotEmpty(
-                  propertyContext.getEdmField(), nestedExpression, parentLambdaVariable);
+                  propertyContext.getMongoField(), nestedExpression, parentLambdaVariable);
         }
         function =
             () -> {
@@ -598,7 +598,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                           .lambdaVariableAliases(
                               prepareMapOfLambadaVariableAliases(
                                   any.getLambdaVariable(),
-                                  prepareMemberDocument(propertyContext.getEdmField(), member),
+                                  prepareMemberDocument(propertyContext.getMongoField(), member),
                                   LambdaType.ANY,
                                   null))
                           .isLambdaAnyContext(true)
@@ -610,7 +610,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
               return innerMongoFilterVisitor.prepareExprDocumentForAnyLambdaWithExpr(
                   innerObject,
-                      propertyContext.getEdmField(),
+                      propertyContext.getMongoField(),
                   any.getLambdaVariable(),
                   nestedExpression,
                   parentLambdaVariable);
@@ -625,12 +625,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
                             any.getLambdaVariable(),
-                            prepareMemberDocument(propertyContext.getEdmField(), member),
+                            prepareMemberDocument(propertyContext.getMongoField(), member),
                             LambdaType.ANY,
-                            new ElementMatchContext(propertyContext.getEdmField(), false)))
+                            new ElementMatchContext(propertyContext.getMongoField(), false)))
                     .isLambdaAnyContext(true)
                     .isExprMode(expressionOperantRequiredExceptionThrown)
-                    .elementMatchContext(new ElementMatchContext(propertyContext.getEdmField(), false))
+                    .elementMatchContext(new ElementMatchContext(propertyContext.getMongoField(), false))
                     .build());
         function =
             () -> {
@@ -641,12 +641,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               return innerMongoFilterVisitor.context.isExprMode()
                   ? innerMongoFilterVisitor.prepareExprDocumentForAnyLambdaWithExpr(
                       innerObject,
-                      propertyContext.getEdmField(),
+                      propertyContext.getMongoField(),
                       any.getLambdaVariable(),
                       nestedExpression,
                       parentLambdaVariable)
                   : innerMongoFilterVisitor.prepareElementMatchDocumentForAnyLambda(
-                      innerObject, propertyContext.getEdmField());
+                      innerObject, propertyContext.getMongoField());
             };
       } catch (MultipleElementMatchOperantRequiredException ex) {
         multipleElementMatchOperantRequiredExceptionThrown = true;
@@ -658,12 +658,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     .lambdaVariableAliases(
                         prepareMapOfLambadaVariableAliases(
                             any.getLambdaVariable(),
-                            prepareMemberDocument(propertyContext.getEdmField(), member),
+                            prepareMemberDocument(propertyContext.getMongoField(), member),
                             LambdaType.ANY,
-                            new ElementMatchContext(propertyContext.getEdmField(), true)))
+                            new ElementMatchContext(propertyContext.getMongoField(), true)))
                     .isLambdaAnyContext(true)
                     .isExprMode(expressionOperantRequiredExceptionThrown)
-                    .elementMatchContext(new ElementMatchContext(propertyContext.getEdmField(), true))
+                    .elementMatchContext(new ElementMatchContext(propertyContext.getMongoField(), true))
                     .build());
         function =
             () -> {
