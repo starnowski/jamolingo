@@ -24,8 +24,19 @@ import spock.lang.Unroll
 import java.nio.file.Files
 import java.nio.file.Paths
 
+/**
+ * Test class for ODataFilterToMongoMatchParser with override configuration.
+ *
+ * The purpose of these tests is to verify the generation of the $match stage based on the OData $filter operator
+ * when the EDM model is different from the MongoDB mapping.
+ * In this specific test scenario, each MongoDB property is configured with a "renamed_" prefix compared to its
+ * corresponding reference in the EDM model.
+ */
 class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends AbstractSpecification {
 
+    /**
+     * Verifies that the generated MongoDB $match stage matches the expected BSON document.
+     */
     @Unroll
     def "should return expected stage bson objects"(){
         given:
@@ -68,6 +79,9 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
             [filter, bson] << oneToOneEdmPathsMappings()
     }
 
+    /**
+     * Verifies that the parser correctly identifies all the MongoDB property paths used in the generated query.
+     */
     @Unroll
     def "should return expected used MongoDB properties"(){
         given:
@@ -102,6 +116,10 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationTest extends Abstrac
             [filter, bson, expectedFields] << oneToOneEdmPathsMappings()
     }
 
+    /**
+     * Provides test data mapping OData filters to expected MongoDB $match documents and used properties.
+     * Each test case uses the "renamed_" prefix for MongoDB properties.
+     */
     static oneToOneEdmPathsMappings() {
         [
                 [ "plainString eq 'abc'", """{"\$match": {"\$and": [{"renamed_plainString": "abc"}]}}""", ["renamed_plainString"]],
