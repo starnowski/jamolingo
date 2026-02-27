@@ -309,11 +309,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           PropertyContext propertyContext = prepareProperty(field, member);
           addUsedMongoDBProperty(propertyContext.getMongoFullPath());
           return prepareCollectionSize(
-              "$$" + variable.getVariableName() + "." + propertyContext.getMongoField(), this.context.isExprMode());
+              "$$" + variable.getVariableName() + "." + propertyContext.getMongoField(),
+              this.context.isExprMode());
         }
         addUsedMongoDBProperty(prepareProperty(field, member).getMongoFullPath());
         if (this.context.isExprMode()) {
-          return prepareMemberDocument("$$" + variable.getVariableName() + "." + field, fieldType);
+          PropertyContext propertyContext = prepareProperty(field, member);
+          return prepareMemberDocument(
+              "$$" + variable.getVariableName() + "." + propertyContext.getMongoField(), fieldType);
         }
 
         if (this.context.isElementMatchContext()) {
@@ -1402,7 +1405,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     if (this.context.isLambdaAnyContext()
         && !this.context.isElementMatchContext()
         && !this.context.isNestedLambdaAllContext()) {
-      //TODO
+      // TODO
       field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
     }
     field = resolveMongoField(left);
