@@ -1386,8 +1386,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     String type = extractFieldType(left);
     value = tryConvertValueByEdmType(value, type);
     Object rightOperant = value == null ? (rightField == null ? right : rightField) : value;
-    String mongoReference = extractMongoReference(left);
-    String mongoFullPath = extractMongoFullPath(left);
     if (field == null) {
       return this.context.isExprMode()
           ? new Document("$eq", Arrays.asList(left, rightOperant))
@@ -1404,6 +1402,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     if (this.context.isLambdaAnyContext()
         && !this.context.isElementMatchContext()
         && !this.context.isNestedLambdaAllContext()) {
+      //TODO
       field = this.context.enrichFieldPathWithRootPathIfNecessary(field);
     }
     field = resolveMongoField(left);
@@ -1564,7 +1563,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       throws ExpressionVisitException, ODataApplicationException {
     switch (operator) {
       case IN:
-        String field = extractField(left);
+        String field = resolveMongoField(left);
         String type = extractFieldType(left);
         List<Object> values =
             list.stream()
