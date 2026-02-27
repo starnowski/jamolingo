@@ -306,9 +306,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               !this.context.isExprMode(),
               this.context.isExprMode());
         } else if (last instanceof UriResourceCount) {
-          addUsedMongoDBProperty(prepareProperty(field, member).getMongoFullPath());
+          PropertyContext propertyContext = prepareProperty(field, member);
+          addUsedMongoDBProperty(propertyContext.getMongoFullPath());
           return prepareCollectionSize(
-              "$$" + variable.getVariableName() + "." + field, this.context.isExprMode());
+              "$$" + variable.getVariableName() + "." + propertyContext.getMongoField(), this.context.isExprMode());
         }
         addUsedMongoDBProperty(prepareProperty(field, member).getMongoFullPath());
         if (this.context.isExprMode()) {
@@ -340,8 +341,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           throw new ExpressionOperantRequiredException("$count required at root level");
         }
         String field = extractFieldName(member);
-        addUsedMongoDBProperty(prepareProperty(field, member).getMongoFullPath());
-        return prepareCollectionSize("$" + field, true);
+        PropertyContext propertyContext = prepareProperty(field, member);
+        addUsedMongoDBProperty(propertyContext.getMongoFullPath());
+        return prepareCollectionSize("$" + propertyContext.getMongoField(), true);
       }
     }
     String field = extractFieldName(member);
@@ -1247,7 +1249,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson visitMethodWithTwoParameters(MethodKind methodCall, List<Bson> parameters) {
-    String field = extractField(parameters.get(0));
+    String field = resolveMongoField(parameters.get(0));
     String value = extractValue(parameters.get(1));
     String pattern = null;
     if (value == null || field == null) {
