@@ -1,6 +1,5 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.filter;
 
-import com.github.starnowski.jamolingo.AbstractFilterOperatorTest;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import io.quarkus.test.junit.QuarkusTest;

@@ -1,5 +1,7 @@
-package com.github.starnowski.jamolingo;
+package com.github.starnowski.jamolingo.compat.driver.operators.select;
 
+import com.github.starnowski.jamolingo.AbstractItTest;
+import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
 import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory;
