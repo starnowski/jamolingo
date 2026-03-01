@@ -1,5 +1,7 @@
-package com.github.starnowski.jamolingo;
+package com.github.starnowski.jamolingo.compat.driver.operators.top;
 
+import com.github.starnowski.jamolingo.AbstractItTest;
+import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.core.operators.top.OdataTopToMongoLimitParser;
 import com.github.starnowski.jamolingo.core.operators.top.TopOperatorResult;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;

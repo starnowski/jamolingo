@@ -1,0 +1,35 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "sivsoWtQTbS00EnGI7PbuQ==",
+      "subType": "04"
+    }
+  },
+  "plainString_wrapper": {
+    "plainString": "example2"
+  },
+  "password_wrapper": {
+    "password": "aaa"
+  },
+  "nestedObject_wrapper": {
+    "nestedObject": {
+      "tokens_wrapper": {
+        "tokens": [
+          "007",
+          "7",
+          "Bond",
+          "James"
+        ]
+      },
+      "numbers_wrapper": {
+        "numbers": [
+          107,
+          113
+        ]
+      },
+      "index_wrapper": {
+        "index": "a"
+      }
+    }
+  }
+}

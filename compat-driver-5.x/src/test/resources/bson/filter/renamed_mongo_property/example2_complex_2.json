@@ -1,0 +1,35 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "zhJHGT+jS4uJzYurBrA+4A==",
+      "subType": "04"
+    }
+  },
+  "renamed_plainString": "Doc2",
+  "renamed_complexList": [
+    {
+      "renamed_someString": "Banana",
+      "renamed_someNumber": 30,
+      "renamed_primitiveStringList": ["item3", "item4"],
+      "renamed_primitiveNumberList": [3, 4],
+      "renamed_someDateTime": { "$date": "2024-02-01T10:00:00Z" },
+      "renamed_someDate": { "$date": "2024-02-01T00:00:00Z" },
+      "renamed_someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
+      "renamed_nestedComplexArray": [
+        { "renamed_stringVal": "val1", "renamed_numberVal": 30 }
+      ]
+    },
+    {
+      "renamed_someString": "Bandana",
+      "renamed_someNumber": 40,
+      "renamed_primitiveStringList": ["item3", "item4"],
+      "renamed_primitiveNumberList": [3, 4],
+      "renamed_someDateTime": { "$date": "2024-02-02T10:00:00Z" },
+      "renamed_someDate": { "$date": "2024-02-02T00:00:00Z" },
+      "renamed_someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
+      "renamed_nestedComplexArray": [
+        { "renamed_stringVal": "val1", "renamed_numberVal": 40 }
+      ]
+    }
+  ]
+}

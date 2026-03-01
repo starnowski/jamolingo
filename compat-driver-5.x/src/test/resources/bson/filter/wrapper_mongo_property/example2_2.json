@@ -1,0 +1,147 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "n71rSvQ/ROWt2MHKrevMFg==",
+      "subType": "04"
+    }
+  },
+  "plainString_wrapper": {
+    "plainString": "Some text"
+  },
+  "base64Data_wrapper": {
+    "base64Data": {
+      "$binary": {
+        "base64": "3ZXRqhY=",
+        "subType": "00"
+      }
+    }
+  },
+  "renamed_fileUpload": null,
+  "birthDate_wrapper": {
+    "birthDate": {
+      "$date": "2024-06-18T00:00:00Z"
+    }
+  },
+  "timestamp_wrapper": {
+    "timestamp": {
+      "$date": "2024-06-19T10:15:26.99Z"
+    }
+  },
+  "password_wrapper": {
+    "password": "secret2"
+  },
+  "uuidProp_wrapper": {
+    "uuidProp": {
+      "$binary": {
+        "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
+        "subType": "04"
+      }
+    }
+  },
+  "genericNumber_wrapper": {
+    "genericNumber": 0.7231742029971469
+  },
+  "floatValue_wrapper": {
+    "floatValue": 0.7231741547584534
+  },
+  "doubleValue_wrapper": {
+    "doubleValue": 0.7231742029971469
+  },
+  "genericInteger_wrapper": {
+    "genericInteger": "295011414634219278107705585431435293517"
+  },
+  "smallInteger_wrapper": {
+    "smallInteger": -1188957731
+  },
+  "bigInteger_wrapper": {
+    "bigInteger": -5106534569952410475
+  },
+  "tags_wrapper": {
+    "tags": [
+      "JxkyvRnL",
+      "spiderweb"
+    ]
+  },
+  "numericArray_wrapper": {
+    "numericArray": [
+      5,
+      15
+    ]
+  },
+  "renamed_metadata": {
+    "tOXr": -1218747178,
+    "jNBgpTmxx": 1819649476,
+    "FkG": -102611627,
+    "JuhuUTlSCYdTVoSsJGyClHNnCWZGwZ": 1548639878,
+    "rDetIVodUvethundXqBJQ": 1173142300,
+    "ODRhfGEfX": -18793355,
+    "JUt": -279593552,
+    "GGiDYDmCRViOaAXNumPGEBX": 1402403549,
+    "zQeAydAJIwkGuKWiVZLRcElhreuxvw": 1538992494,
+    "YaahxwwkK": 756077633,
+    "MedmIqFUtdxTB": 1109083973,
+    "DiACnbEKIFidn": 1855378634,
+    "ExoLZAnxWro": 452222430,
+    "BIJtaer": 74686070,
+    "QEskqEWDSDObmCGpVd": -791361539,
+    "bplgXS": -1876627799,
+    "cTVyrXOaoLCFQUOEXynhaz": -1494574988,
+    "xlpKnXmsjfwUTYgfExSOnq": 1625509042,
+    "MMSKu": 202913755,
+    "yLUuEMaNwExpndMYYptSXZv": 1824475686,
+    "pIoQM": -615915155,
+    "IgYnmBOoTiRwXILYPxNoVlgkbSZ": 2135896063,
+    "WtKhlfZzDZ": 1000732456,
+    "XgLyqkDjxtCDIj": 1629246624,
+    "oBeMdQkAoYZDjfWhbzkmA": 1150697725,
+    "YVeSelxWdEtYtJHV": 1907053870,
+    "veErKUBEqCrhrtgx": -1417229928,
+    "HuubOREhRXJoDCVcLCRmll": 1862156959,
+    "cdpW": 1348253910,
+    "IoTtOmcBeivNUYv": 751543794,
+    "qPFJOkHIpWuqUBpPiSGKutNzPuBDe": -100114207,
+    "FthRIkE": 735888541,
+    "DwmrfUyJVSbdBFIyjTfpDItaXB": 1345353034,
+    "ImfitPVWqHXHNeZIUAYI": 1440004332,
+    "jWgnTkIeIrtqMPl": -566244162,
+    "ToPMiWqHMXgOUxQpXiGHHqr": -1634445559,
+    "VIhYOTAybWXyBzGqRe": -1719041087,
+    "YFBlWcoVdFXlfhbUilkMpiHDMU": 1100041384,
+    "etqguztl": -208411712,
+    "PAgcjtZAOBahwMGwNikIaKuxYYVASJc": -1148559101,
+    "wXgwbUXmExZAqY": -989730048,
+    "BXjwiQjQKBhPbNYa": -1402020971,
+    "LcdeWTdXPlQgjMVXbpRYzBT": -236037134,
+    "M": -891389932,
+    "O": 1653474221,
+    "dJStFJtVTQqOCjYYKFPwjvFKLQnmKD": -1717614962,
+    "IaSPolvldIfZTciudeieeoLVjkmgvz": 404252350,
+    "JkjHewSlMWOIVYZjIEB": -661632475,
+    "wKkOqxJSqDjAtcDF": 502986907,
+    "Wru": 1523947811,
+    "AzTaco": 1740785840,
+    "teOlrImKiDpJbLDnvK": 1213745596,
+    "THjDRbPaqGjvVLsIUO": 1789126717,
+    "yybxVLsNlAeLWVhnIULZAyLBms": -1912219759,
+    "etgDUdmb": 1845450570,
+    "aNVLssRUe": -995075,
+    "zGVyIdgFUYNdkFYkkjNIeENlreqFLC": 1271716321,
+    "oDLDPR": 1807082036,
+    "YIvewgAhbiAslSgvGJGPPEpl": 1580583596,
+    "PBzMiJFouxILNv": 1862000174,
+    "OV": 1286371395,
+    "jzlglRKAeamYUmWJtnJZLqwakeYcea": 641468284,
+    "NBaxYoMSiMNxLXFLxIok": 832990302,
+    "TiQaUNWftniOAotnzWvkQt": 2120639726,
+    "hXJISTd": 1550276790,
+    "dwprLNbgNvZUMpqAXLJbjE": 635749788,
+    "RRVabC": -1565264275,
+    "BItmxBtJpbqEfQgWhKXmKMICCEU": -1212589743,
+    "gEYzhlSTPkcSUyTSbBkU": 1754736311,
+    "MFOPluIOMfSnzX": 407207665,
+    "IQrWtYnHcO": 134014910
+  },
+  "isActive_wrapper": {
+    "isActive": true
+  }
+}

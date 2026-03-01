@@ -1,0 +1,73 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "zhJHGT+jS4uJzYurBrA+6A==",
+      "subType": "04"
+    }
+  },
+  "plainString_wrapper": {
+    "plainString": "Doc6"
+  },
+  "complexList_wrapper": {
+    "complexList": [
+      {
+        "someString_wrapper": {
+          "someString": "MultipleNested"
+        },
+        "someNumber_wrapper": {
+          "someNumber": 70
+        },
+        "primitiveStringList_wrapper": {
+          "primitiveStringList": [
+            "item11",
+            "item12"
+          ]
+        },
+        "primitiveNumberList_wrapper": {
+          "primitiveNumberList": [
+            11,
+            12
+          ]
+        },
+        "someDateTime_wrapper": {
+          "someDateTime": {
+            "$date": "2024-04-01T10:00:00Z"
+          }
+        },
+        "someDate_wrapper": {
+          "someDate": {
+            "$date": "2024-04-01T00:00:00Z"
+          }
+        },
+        "someUuid_wrapper": {
+          "someUuid": {
+            "$binary": {
+              "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
+              "subType": "04"
+            }
+          }
+        },
+        "nestedComplexArray_wrapper": {
+          "nestedComplexArray": [
+            {
+              "stringVal_wrapper": {
+                "stringVal": "matchAll"
+              },
+              "numberVal_wrapper": {
+                "numberVal": 71
+              }
+            },
+            {
+              "stringVal_wrapper": {
+                "stringVal": "matchAll"
+              },
+              "numberVal_wrapper": {
+                "numberVal": 72
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "zhJHGT+jS4uJzYurBrA+5A==",
+      "subType": "04"
+    }
+  },
+  "plainString_wrapper": {
+    "plainString": "Doc3"
+  },
+  "complexList_wrapper": {
+    "complexList": [
+      {
+        "someString_wrapper": {
+          "someString": "Cherry"
+        },
+        "someNumber_wrapper": {
+          "someNumber": 50
+        },
+        "primitiveStringList_wrapper": {
+          "primitiveStringList": [
+            "item5",
+            "item6"
+          ]
+        },
+        "primitiveNumberList_wrapper": {
+          "primitiveNumberList": [
+            5,
+            6
+          ]
+        },
+        "someDateTime_wrapper": {
+          "someDateTime": {
+            "$date": "2024-03-01T10:00:00Z"
+          }
+        },
+        "someDate_wrapper": {
+          "someDate": {
+            "$date": "2024-03-01T00:00:00Z"
+          }
+        },
+        "someUuid_wrapper": {
+          "someUuid": {
+            "$binary": {
+              "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
+              "subType": "04"
+            }
+          }
+        },
+        "nestedComplexArray_wrapper": {
+          "nestedComplexArray": [
+            {
+              "stringVal_wrapper": {
+                "stringVal": "test1"
+              },
+              "numberVal_wrapper": {
+                "numberVal": 50
+              }
+            }
+          ]
+        }
+      },
+      {
+        "someString_wrapper": {
+          "someString": "Berry"
+        },
+        "someNumber_wrapper": {
+          "someNumber": 60
+        },
+        "primitiveStringList_wrapper": {
+          "primitiveStringList": [
+            "item5",
+            "item6"
+          ]
+        },
+        "primitiveNumberList_wrapper": {
+          "primitiveNumberList": [
+            5,
+            6
+          ]
+        },
+        "someDateTime_wrapper": {
+          "someDateTime": {
+            "$date": "2024-03-02T10:00:00Z"
+          }
+        },
+        "someDate_wrapper": {
+          "someDate": {
+            "$date": "2024-03-02T00:00:00Z"
+          }
+        },
+        "someUuid_wrapper": {
+          "someUuid": {
+            "$binary": {
+              "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
+              "subType": "04"
+            }
+          }
+        },
+        "nestedComplexArray_wrapper": {
+          "nestedComplexArray": [
+            {
+              "stringVal_wrapper": {
+                "stringVal": "test2"
+              },
+              "numberVal_wrapper": {
+                "numberVal": 60
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

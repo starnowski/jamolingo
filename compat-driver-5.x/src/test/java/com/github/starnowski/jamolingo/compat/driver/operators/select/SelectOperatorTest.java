@@ -1,9 +1,9 @@
-package com.github.starnowski.jamolingo;
+package com.github.starnowski.jamolingo.compat.driver.operators.select;
 
-import com.github.starnowski.jamolingo.common.json.JSONOverrideHelper;
+import com.github.starnowski.jamolingo.AbstractItTest;
+import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
-import com.github.starnowski.jamolingo.core.mapping.EntityMapping;
 import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory;
 import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
 import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult;
@@ -15,7 +15,7 @@ import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -39,31 +39,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
-class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
-
-  static final String EDM_1_MERGE_OVERRIDE_MONGO_NAME =
-      ""
-          + "        {\n"
-          + "            \"properties\": {\n"
-          + "                \"plainString\": {\n"
-          + "                    \"mongoName\": \"thisIsString\"\n"
-          + "                }\n"
-          + "            }\n"
-          + "        }";
-
-  static final String EDM_3_MERGE_OVERRIDE_NESTED_PROP =
-      ""
-          + "        {\n"
-          + "            \"properties\": {\n"
-          + "                \"Addresses\": {\n"
-          + "                    \"properties\": {\n"
-          + "                        \"BackUpAddresses\": {\n"
-          + "                            \"mongoName\": \"previousAddresses\"\n"
-          + "                        }\n"
-          + "                    }\n"
-          + "                }\n"
-          + "            }\n"
-          + "        }";
+class SelectOperatorTest extends AbstractItTest {
 
   @Inject MongoClient mongoClient;
 
@@ -73,15 +49,7 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
       mongoDocuments = {
         @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm1.json"),
         @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm3.json"),
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm4.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "Items",
-            bsonFilePath = "bson/edm1_override.json"),
-        @MongoDocument(
-            database = "testdb",
-            collection = "Items",
-            bsonFilePath = "bson/edm3_override.json")
+        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/edm4.json")
       })
   public void shouldReturnExpectedProjectedDocument(
       String edmPath,
@@ -90,8 +58,7 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
       String entityType,
       String entitySet,
       String expectedId,
-      String expectedDataPath,
-      String overridePayload)
+      String expectedDataPath)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
@@ -105,15 +72,6 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
     ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
     var odataMapping = factory.build(edm.getSchema(schema));
     var entityMapping = odataMapping.getEntities().get(entityType);
-    if (overridePayload != null) {
-      JSONOverrideHelper helper = new JSONOverrideHelper();
-      entityMapping =
-          helper.applyChangesToJson(
-              entityMapping,
-              overridePayload,
-              EntityMapping.class,
-              JSONOverrideHelper.PatchType.MERGE);
-    }
     EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder =
         new EntityPropertiesMongoPathContextBuilder();
     var context = entityPropertiesMongoPathContextBuilder.build(entityMapping);
@@ -151,8 +109,7 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
             "Item",
             "Items",
             "ce124719-3fa3-4b8b-89cd-8bab06b03edc",
-            "bson/edm1_case1.json",
-            null),
+            "bson/edm1_case1.json"),
         Arguments.of(
             "edm/edm3_complextype_with_circular_reference_collection.xml",
             Set.of("Addresses"),
@@ -160,8 +117,7 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
             "Item",
             "Items",
             "123e4567-e89b-12d3-a456-426614174090",
-            "bson/edm3_case1.json",
-            null),
+            "bson/edm3_case1.json"),
         Arguments.of(
             "edm/edm4_complextype_with_long_circular_reference.xml",
             Set.of(
@@ -172,8 +128,7 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
             "WorkflowInstance",
             "WorkflowInstances",
             "550e8400-e29b-41d4-a716-446655440000",
-            "bson/edm4_case1.json",
-            null),
+            "bson/edm4_case1.json"),
         Arguments.of(
             "edm/edm3_complextype_with_circular_reference_collection.xml",
             Set.of("plainString", "Name"),
@@ -181,8 +136,7 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
             "Item",
             "Items",
             "123e4567-e89b-12d3-a456-426614174090",
-            "bson/edm3_case2.json",
-            null),
+            "bson/edm3_case2.json"),
         Arguments.of(
             "edm/edm3_complextype_with_circular_reference_collection.xml",
             Set.of("Addresses/City"),
@@ -190,8 +144,7 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
             "Item",
             "Items",
             "123e4567-e89b-12d3-a456-426614174090",
-            "bson/edm3_case3.json",
-            null),
+            "bson/edm3_case3.json"),
         Arguments.of(
             "edm/edm4_complextype_with_long_circular_reference.xml",
             Set.of("InstanceId"),
@@ -199,8 +152,7 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
             "WorkflowInstance",
             "WorkflowInstances",
             "550e8400-e29b-41d4-a716-446655440000",
-            "bson/edm4_case2.json",
-            null),
+            "bson/edm4_case2.json"),
         Arguments.of(
             "edm/edm4_complextype_with_long_circular_reference.xml",
             Set.of("Definition/Version"),
@@ -208,25 +160,6 @@ class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
             "WorkflowInstance",
             "WorkflowInstances",
             "550e8400-e29b-41d4-a716-446655440000",
-            "bson/edm4_case3.json",
-            null),
-        Arguments.of(
-            "edm/edm1.xml",
-            Set.of("plainString"),
-            "Demo",
-            "Item",
-            "Items",
-            "8cb82df5-af62-49fc-b4f2-2df0a2d19524",
-            "bson/edm1_case1_override_expected.json",
-            EDM_1_MERGE_OVERRIDE_MONGO_NAME),
-        Arguments.of(
-            "edm/edm3_complextype_with_circular_reference_collection.xml",
-            Set.of("Addresses/BackUpAddresses/ZipCode"),
-            "Demo",
-            "Item",
-            "Items",
-            "7ea5e361-d90f-4533-b3a7-f9d20dfe0e96",
-            "bson/edm3_case1_override_expected.json",
-            EDM_3_MERGE_OVERRIDE_NESTED_PROP));
+            "bson/edm4_case3.json"));
   }
 }

@@ -1,0 +1,35 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "m38HJAvR60ixQlmPcggoeg==",
+      "subType": "04"
+    }
+  },
+  "renamed_plainString": "Doc4",
+  "renamed_complexList": [
+    {
+      "renamed_someString": "Apple",
+      "renamed_someNumber": 10,
+      "renamed_primitiveStringList": ["item7", "item8"],
+      "renamed_primitiveNumberList": [7, 8],
+      "renamed_someDateTime": { "$date": "2024-01-01T10:00:00Z" },
+      "renamed_someDate": { "$date": "2024-01-01T00:00:00Z" },
+      "renamed_someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
+      "renamed_nestedComplexArray": [
+        { "renamed_stringVal": "val1", "renamed_numberVal": 10 }
+      ]
+    },
+    {
+      "renamed_someString": "Berry",
+      "renamed_someNumber": 60,
+      "renamed_primitiveStringList": ["item7", "item8"],
+      "renamed_primitiveNumberList": [7, 8],
+      "renamed_someDateTime": { "$date": "2024-03-02T10:00:00Z" },
+      "renamed_someDate": { "$date": "2024-03-02T00:00:00Z" },
+      "renamed_someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
+      "renamed_nestedComplexArray": [
+        { "renamed_stringVal": "test1", "renamed_numberVal": 60 }
+      ]
+    }
+  ]
+}

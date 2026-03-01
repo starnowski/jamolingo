@@ -1,5 +1,7 @@
-package com.github.starnowski.jamolingo;
+package com.github.starnowski.jamolingo.compat.driver.operators.order;
 
+import com.github.starnowski.jamolingo.AbstractItTest;
+import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;

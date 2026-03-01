@@ -1,8 +1,10 @@
-package com.github.starnowski.jamolingo;
+package com.github.starnowski.jamolingo.compat.driver.operators.filter.mapping;
 
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import io.quarkus.test.junit.QuarkusTest;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -16,7 +18,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
-public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
+public class FilterOperatorAllLambdaRenameMongoPropertyTest
+    extends AbstractFilterOperatorRenameMongoPropertyTest {
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
@@ -25,42 +28,44 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_1.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_1.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_2.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_2.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_3.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_3.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_4.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_4.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_5.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_5.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_6.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_6.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_7.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_7.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_only_id.json")
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_only_id.json")
       })
   public void shouldReturnExpectedDocuments(Object filter, Set<String> expectedPlainStrings)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException {
+          ODataApplicationException,
+          URISyntaxException,
+          IOException {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
     shouldReturnExpectedDocumentsBasedOnFilterOperator(filterString, expectedPlainStrings);
@@ -73,31 +78,31 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_1.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_1.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_2.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_2.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_3.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_3.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_4.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_4.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_5.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_5.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_6.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_6.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_only_id.json")
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_only_id.json")
       })
   public void shouldReturnExpectedDocumentsForComplexList(
       Object filter, Set<String> expectedPlainStrings)
@@ -105,7 +110,9 @@ public class FilterOperatorAllLambdaTest extends AbstractFilterOperatorTest {
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException {
+          ODataApplicationException,
+          URISyntaxException,
+          IOException {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
     shouldReturnExpectedDocumentsBasedOnFilterOperator(filterString, expectedPlainStrings);

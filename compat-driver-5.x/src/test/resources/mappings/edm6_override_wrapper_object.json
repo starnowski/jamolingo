@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "plainString": { "mongoName": "plainString_wrapper.plainString" },
+    "numericArray": { "mongoName": "numericArray_wrapper.numericArray" },
+    "genericInteger": { "mongoName": "genericInteger_wrapper.genericInteger" },
+    "genericNumber": { "mongoName": "genericNumber_wrapper.genericNumber" },
+    "complexList": {
+      "mongoName": "complexList_wrapper.complexList",
+      "properties": {
+        "someNumber": { "mongoName": "someNumber_wrapper.someNumber" },
+        "primitiveNumberList": { "mongoName": "primitiveNumberList_wrapper.primitiveNumberList" },
+        "strings": { "mongoName": "strings_wrapper.strings" },
+        "nestedComplexArray": {
+          "mongoName": "nestedComplexArray_wrapper.nestedComplexArray",
+          "properties": {
+            "stringVal": { "mongoName": "stringVal_wrapper.stringVal" },
+            "numberVal": { "mongoName": "numberVal_wrapper.numberVal" }
+          }
+        },
+        "someDate": { "mongoName": "someDate_wrapper.someDate" },
+        "numbers": { "mongoName": "numbers_wrapper.numbers" },
+        "primitiveStringList": { "mongoName": "primitiveStringList_wrapper.primitiveStringList" },
+        "someString": { "mongoName": "someString_wrapper.someString" },
+        "someUuid": { "mongoName": "someUuid_wrapper.someUuid" },
+        "someDateTime": { "mongoName": "someDateTime_wrapper.someDateTime" }
+      }
+    },
+    "uuidProp": { "mongoName": "uuidProp_wrapper.uuidProp" },
+    "floatValue": { "mongoName": "floatValue_wrapper.floatValue" },
+    "doubleValue": { "mongoName": "doubleValue_wrapper.doubleValue" },
+    "bigInteger": { "mongoName": "bigInteger_wrapper.bigInteger" },
+    "isActive": { "mongoName": "isActive_wrapper.isActive" },
+    "birthDate": { "mongoName": "birthDate_wrapper.birthDate" },
+    "nestedObject": {
+      "mongoName": "nestedObject_wrapper.nestedObject",
+      "properties": {
+        "numbers": { "mongoName": "numbers_wrapper.numbers" },
+        "index": { "mongoName": "index_wrapper.index" },
+        "tokens": { "mongoName": "tokens_wrapper.tokens" }
+      }
+    },
+    "tags": { "mongoName": "tags_wrapper.tags" },
+    "password": { "mongoName": "password_wrapper.password" },
+    "base64Data": { "mongoName": "base64Data_wrapper.base64Data" },
+    "smallInteger": { "mongoName": "smallInteger_wrapper.smallInteger" },
+    "timestamp": { "mongoName": "timestamp_wrapper.timestamp" }
+  }
+}

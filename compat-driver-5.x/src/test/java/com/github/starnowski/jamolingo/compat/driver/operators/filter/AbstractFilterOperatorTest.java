@@ -1,24 +1,14 @@
-package com.github.starnowski.jamolingo;
+package com.github.starnowski.jamolingo.compat.driver.operators.filter;
 
-import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
-import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory;
 import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
+import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult;
+import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import io.quarkus.test.common.QuarkusTestResource;
-import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
@@ -33,9 +23,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
 
-@QuarkusTest
-@QuarkusTestResource(EmbeddedMongoResource.class)
-public abstract class AbstractFilterOperatorTest extends AbstractItTest {
+public abstract class AbstractFilterOperatorTest extends AbstractBaseFilterOperatorTest {
 
   @Inject protected MongoClient mongoClient;
 
@@ -50,15 +38,7 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
-
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
-    ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
-    var odataMapping = factory.build(edm.getSchema("MyService"));
-    var entityMapping = odataMapping.getEntities().get("Example2");
-    EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder =
-        new EntityPropertiesMongoPathContextBuilder();
-    var context = entityPropertiesMongoPathContextBuilder.build(entityMapping);
-
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
     ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser();
@@ -82,29 +62,36 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     logTestsObject(filter, pipeline);
   }
 
-  private void logTestsObject(String filterString, List<Bson> pipeline) {
-    String path =
-        Paths.get(new File(getClass().getClassLoader().getResource(".").getFile()).getPath())
-            .toAbsolutePath()
-            .toString();
-    System.out.println("File path is " + path);
-    try (FileOutputStream outputStream =
-        new FileOutputStream(path + File.separator + "testcases.txt", true)) {
-      outputStream.write("<test>".getBytes(StandardCharsets.UTF_8));
-      outputStream.write(
-          ("<filter>$filter=" + filterString + "</filter>").getBytes(StandardCharsets.UTF_8));
-      outputStream.write(
-          ("<pipeline>"
-                  + pipeline
-                      .get(0)
-                      .toBsonDocument(Document.class, this.mongoClient.getCodecRegistry())
-                      .toJson()
-                  + "</pipeline>")
-              .getBytes(StandardCharsets.UTF_8));
-      outputStream.write("</test>".getBytes(StandardCharsets.UTF_8));
-      outputStream.write("\n".getBytes(StandardCharsets.UTF_8));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  protected void shouldUsedExpectedIndexesBasedOnFilterOperator(String filter, String expectedIndex)
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    // GIVEN
+    dropIndexesForCollection("testdb", "Items");
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("Items");
+    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
+    ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser();
+    FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), edm);
+    /*
+     * Important! This test purpose is not to validate correct used properties.
+     * Such tests are part of the core module where tests checks if the ODataFilterToMongoMatchParser
+     * returns correct properties.
+     */
+    List<String> usedProperties = result.getUsedMongoDocumentProperties();
+    createIndexesForPropertyInCollection("testdb", "Items", new HashSet<>(usedProperties));
+    List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
+    ExplainAnalyzeResultFactory explainAnalyzeResultFactory = new ExplainAnalyzeResultFactory();
+    Document explainDoc = collection.aggregate(pipeline).explain();
+
+    // WHEN
+    ExplainAnalyzeResult explainResult = explainAnalyzeResultFactory.build(explainDoc);
+
+    // THEN
+    Assertions.assertEquals(expectedIndex, explainResult.getIndexValue().getValue());
   }
 }

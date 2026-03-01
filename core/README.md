@@ -15,7 +15,7 @@ The `$select` operator allows clients to specify a subset of properties to be re
 The `OdataSelectToMongoProjectParser` class is responsible for this translation.
 
 ```java
-import com.github.starnowski.jamolingo.core.operators.orderby.select.OdataSelectToMongoProjectParser;
+import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
 import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
 // ... other imports
@@ -41,7 +41,55 @@ OdataSelectToMongoProjectParser parser = new OdataSelectToMongoProjectParser();
 ```
 
 #### $filter
-TODO
+
+The `$filter` operator allows clients to filter a collection of resources. The `core` module translates this into a MongoDB `$match` aggregation stage.
+
+**Translation Details:**
+- Translates to a `$match` aggregation stage.
+- Supports a wide range of OData filter expressions, including:
+    - **Comparison operators:** `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `in`.
+    - **Logical operators:** `and`, `or`, `not`.
+    - **String functions:** `tolower`, `toupper`, `trim`, `contains`, `startswith`, `endswith`, `length`.
+    - **Math functions:** `floor`, `ceiling`, `round`.
+    - **Date and time functions:** `year`, `month`, `day`, `hour`, `minute`, `second`.
+    - **Collection operators:** `any()`, `all()`.
+        - **all operator:** Applies a Boolean expression to each member of a collection and returns true if the expression is true for all members of the collection, otherwise it returns false. As per [OData specification](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_all), the `all` operator always returns true for an empty collection. This also applies when the collection property is `null` or does not exist in the document.
+        - **any operator:** Applies a Boolean expression to each member of a collection and returns true if and only if the expression is true for any member of the collection, otherwise it returns false. This implies that the `any` operator always returns false for an empty collection. The `any` operator can also be used without an argument expression (e.g., `any()`); this short form returns true if the collection is not empty and false if the collection is empty, as per [OData specification](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_any). This makes `any()` a useful way to check if a collection is not empty.
+    - **Collection count:** `/$count`.
+- Handles nested property paths and complex types.
+- Supports mapping overrides for MongoDB field names and nested structures (e.g., wrapper objects).
+
+**Usage:**
+
+The `ODataFilterToMongoMatchParser` class is responsible for this translation.
+
+```java
+import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
+import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
+import org.apache.olingo.server.api.uri.queryoption.FilterOption;
+import org.apache.olingo.commons.api.edm.Edm;
+// ... other imports
+
+// 1. Initialize the parser
+ODataFilterToMongoMatchParser parser = new ODataFilterToMongoMatchParser();
+
+// 2. Obtain the FilterOption and Edm
+FilterOption filterOption = uriInfo.getFilterOption();
+Edm edm = ...;
+
+// 3. (Optional) Provide a context facade if you have custom mappings
+// EdmPropertyMongoPathResolver contextFacade = ...; 
+
+// 4. Parse the option
+// If using default context:
+FilterOperatorResult result = parser.parse(filterOption, edm);
+// If using custom context:
+// FilterOperatorResult result = parser.parse(filterOption, edm, contextFacade);
+
+// 5. Use the result in your MongoDB aggregation pipeline
+List<Bson> stages = result.getStageObjects();
+// e.g. collection.aggregate(stages);
+```
 
 #### $orderby
 
