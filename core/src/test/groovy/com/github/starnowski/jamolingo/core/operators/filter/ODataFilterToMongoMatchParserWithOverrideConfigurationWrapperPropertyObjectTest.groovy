@@ -24,8 +24,18 @@ import spock.lang.Unroll
 import java.nio.file.Files
 import java.nio.file.Paths
 
+/**
+ * Test class for ODataFilterToMongoMatchParser with override configuration using wrapper objects.
+ *
+ * The purpose of these tests is to verify the generation of the $match stage based on the OData $filter operator
+ * when the EDM model property is mapped to a MongoDB property that is nested within a wrapper object.
+ * This scenario uses the configuration defined in "mappings/edm6_override_wrapper_object.json".
+ */
 class ODataFilterToMongoMatchParserWithOverrideConfigurationWrapperPropertyObjectTest extends AbstractSpecification {
 
+    /**
+     * Verifies that the generated MongoDB $match stage matches the expected BSON document when using wrapper objects for properties.
+     */
     @Unroll
     def "should return expected stage bson objects"(){
         given:
@@ -68,6 +78,9 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationWrapperPropertyObjec
             [filter, bson] << oneToOneEdmPathsMappings()
     }
 
+    /**
+     * Verifies that the parser correctly identifies all the MongoDB property paths (including nested wrapper paths) used in the generated query.
+     */
     @Unroll
     def "should return expected used MongoDB properties"(){
         given:
