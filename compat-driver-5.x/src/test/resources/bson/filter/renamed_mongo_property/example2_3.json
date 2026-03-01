@@ -5,7 +5,7 @@
       "subType": "04"
     }
   },
-  "plainString": "Poem",
+  "renamed_plainString": "Poem",
   "base64Data": {
     "$binary": {
       "base64": "3ZXRqhY=",

@@ -5,7 +5,7 @@
       "subType": "04"
     }
   },
-  "plainString": "Doc6",
+  "renamed_plainString": "Doc6",
   "complexList": [
     {
       "someString": "MultipleNested",

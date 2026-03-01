@@ -5,7 +5,7 @@
       "subType": "04"
     }
   },
-  "plainString": "Doc2",
+  "renamed_plainString": "Doc2",
   "complexList": [
     {
       "someString": "Banana",

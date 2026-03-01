@@ -5,7 +5,7 @@
       "subType": "04"
     }
   },
-  "plainString": "Some text",
+  "renamed_plainString": "Some text",
   "base64Data": {
     "$binary": {
       "base64": "3ZXRqhY=",
