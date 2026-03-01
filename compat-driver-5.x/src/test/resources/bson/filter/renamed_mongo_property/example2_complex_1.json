@@ -12,7 +12,7 @@
       "renamed_someNumber": 10,
       "renamed_primitiveStringList": ["item1", "item2"],
       "renamed_primitiveNumberList": [1, 2],
-      "someDateTime": { "$date": "2024-01-01T10:00:00Z" },
+      "renamed_someDateTime": { "$date": "2024-01-01T10:00:00Z" },
       "someDate": { "$date": "2024-01-01T00:00:00Z" },
       "someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
       "nestedComplexArray": [
@@ -24,7 +24,7 @@
       "renamed_someNumber": 20,
       "renamed_primitiveStringList": ["item1", "item2"],
       "renamed_primitiveNumberList": [1, 2],
-      "someDateTime": { "$date": "2024-01-02T10:00:00Z" },
+      "renamed_someDateTime": { "$date": "2024-01-02T10:00:00Z" },
       "someDate": { "$date": "2024-01-02T00:00:00Z" },
       "someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
       "nestedComplexArray": [
