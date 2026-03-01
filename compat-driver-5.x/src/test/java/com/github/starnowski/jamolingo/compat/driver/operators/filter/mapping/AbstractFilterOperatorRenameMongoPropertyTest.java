@@ -64,7 +64,7 @@ public abstract class AbstractFilterOperatorRenameMongoPropertyTest extends Abst
     var odataMapping = factory.build(edm.getSchema("MyService"));
     var entityMapping = odataMapping.getEntities().get("Example2");
     JSONOverrideHelper helper = new JSONOverrideHelper();
-    String mergePayload = Files.readString(Paths.get(getClass().getClassLoader().getResource("mappings/edm6_override.json").toURI()));
+    String mergePayload = Files.readString(Paths.get(getClass().getClassLoader().getResource("mappings/edm6_override_renamed_prefix.json").toURI()));
     entityMapping = helper.applyChangesToJson(entityMapping, mergePayload, EntityMapping.class, JSONOverrideHelper.PatchType.MERGE);
 
     EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder =

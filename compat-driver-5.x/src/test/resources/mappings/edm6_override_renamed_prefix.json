@@ -1,0 +1,48 @@
+{
+  "properties": {
+    "plainString": { "mongoName": "renamed_plainString" },
+    "numericArray": { "mongoName": "renamed_numericArray" },
+    "genericInteger": { "mongoName": "renamed_genericInteger" },
+    "genericNumber": { "mongoName": "renamed_genericNumber" },
+    "complexList": {
+      "mongoName": "renamed_complexList",
+      "properties": {
+        "someNumber": { "mongoName": "renamed_someNumber" },
+        "primitiveNumberList": { "mongoName": "renamed_primitiveNumberList" },
+        "strings": { "mongoName": "renamed_strings" },
+        "nestedComplexArray": {
+          "mongoName": "renamed_nestedComplexArray",
+          "properties": {
+            "stringVal": { "mongoName": "renamed_stringVal" },
+            "numberVal": { "mongoName": "renamed_numberVal" }
+          }
+        },
+        "someDate": { "mongoName": "renamed_someDate" },
+        "numbers": { "mongoName": "renamed_numbers" },
+        "primitiveStringList": { "mongoName": "renamed_primitiveStringList" },
+        "someString": { "mongoName": "renamed_someString" },
+        "someUuid": { "mongoName": "renamed_someUuid" },
+        "someDateTime": { "mongoName": "renamed_someDateTime" }
+      }
+    },
+    "uuidProp": { "mongoName": "renamed_uuidProp" },
+    "floatValue": { "mongoName": "renamed_floatValue" },
+    "doubleValue": { "mongoName": "renamed_doubleValue" },
+    "bigInteger": { "mongoName": "renamed_bigInteger" },
+    "isActive": { "mongoName": "renamed_isActive" },
+    "birthDate": { "mongoName": "renamed_birthDate" },
+    "nestedObject": {
+      "mongoName": "renamed_nestedObject",
+      "properties": {
+        "numbers": { "mongoName": "renamed_numbers" },
+        "index": { "mongoName": "renamed_index" },
+        "tokens": { "mongoName": "renamed_tokens" }
+      }
+    },
+    "tags": { "mongoName": "renamed_tags" },
+    "password": { "mongoName": "renamed_password" },
+    "base64Data": { "mongoName": "renamed_base64Data" },
+    "smallInteger": { "mongoName": "renamed_smallInteger" },
+    "timestamp": { "mongoName": "renamed_timestamp" }
+  }
+}
