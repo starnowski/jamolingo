@@ -5,46 +5,74 @@
       "subType": "04"
     }
   },
-  "renamed_plainString": "Poem",
-  "renamed_base64Data": {
-    "$binary": {
-      "base64": "3ZXRqhY=",
-      "subType": "00"
+  "plainString_wrapper": {
+    "plainString": "Poem"
+  },
+  "base64Data_wrapper": {
+    "base64Data": {
+      "$binary": {
+        "base64": "3ZXRqhY=",
+        "subType": "00"
+      }
     }
   },
   "renamed_fileUpload": null,
-  "renamed_birthDate": {
-    "$date": "2024-06-18T00:00:00Z"
-  },
-  "renamed_timestamp": {
-    "$date": "2024-06-19T10:15:26.99Z"
-  },
-  "renamed_password": "yedUsFwdkelQbxeTeQOvaScfqIOOmaa",
-  "renamed_uuidProp": {
-    "$binary": {
-      "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
-      "subType": "04"
+  "birthDate_wrapper": {
+    "birthDate": {
+      "$date": "2024-06-18T00:00:00Z"
     }
   },
-  "renamed_genericNumber": 0.7231742029971469,
-  "renamed_floatValue": 0.7231741547584534,
-  "renamed_doubleValue": 0.7231742029971469,
-  "renamed_genericInteger": "295011414634219278107705585431435293517",
-  "renamed_smallInteger": -113,
-  "renamed_bigInteger": -5106534569952410475,
-  "renamed_tags": [
-    "developer",
-    "founder",
-    "visioner",
-    "focus",
-    "llm agent",
-    "LLM"
-  ],
-  "renamed_numericArray": [
-    1,
-    2,
-    3
-  ],
+  "timestamp_wrapper": {
+    "timestamp": {
+      "$date": "2024-06-19T10:15:26.99Z"
+    }
+  },
+  "password_wrapper": {
+    "password": "yedUsFwdkelQbxeTeQOvaScfqIOOmaa"
+  },
+  "uuidProp_wrapper": {
+    "uuidProp": {
+      "$binary": {
+        "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
+        "subType": "04"
+      }
+    }
+  },
+  "genericNumber_wrapper": {
+    "genericNumber": 0.7231742029971469
+  },
+  "floatValue_wrapper": {
+    "floatValue": 0.7231741547584534
+  },
+  "doubleValue_wrapper": {
+    "doubleValue": 0.7231742029971469
+  },
+  "genericInteger_wrapper": {
+    "genericInteger": "295011414634219278107705585431435293517"
+  },
+  "smallInteger_wrapper": {
+    "smallInteger": -113
+  },
+  "bigInteger_wrapper": {
+    "bigInteger": -5106534569952410475
+  },
+  "tags_wrapper": {
+    "tags": [
+      "developer",
+      "founder",
+      "visioner",
+      "focus",
+      "llm agent",
+      "LLM"
+    ]
+  },
+  "numericArray_wrapper": {
+    "numericArray": [
+      1,
+      2,
+      3
+    ]
+  },
   "renamed_metadata": {
     "tOXr": 180436825,
     "jNBgpTmxx": 180619263,
@@ -118,5 +146,7 @@
     "MFOPluIOMfSnzX": 1355778222,
     "IQrWtYnHcO": 1223316712
   },
-  "renamed_active": true
+  "isActive_wrapper": {
+    "isActive": true
+  }
 }

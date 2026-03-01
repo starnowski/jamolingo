@@ -5,13 +5,19 @@
       "subType": "04"
     }
   },
-  "renamed_plainString": "Mario",
-  "renamed_tags": [
-    "star trek",
-    "star wars"
-  ],
-  "renamed_numericArray": [
-    100,
-    200
-  ]
+  "plainString_wrapper": {
+    "plainString": "Mario"
+  },
+  "tags_wrapper": {
+    "tags": [
+      "star trek",
+      "star wars"
+    ]
+  },
+  "numericArray_wrapper": {
+    "numericArray": [
+      100,
+      200
+    ]
+  }
 }

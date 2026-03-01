@@ -5,19 +5,31 @@
       "subType": "04"
     }
   },
-  "renamed_plainString": "Oleksa",
-  "renamed_password": "aaa",
-  "renamed_tags": [
-    "star trek",
-    "star wars",
-    "starlord"
-  ],
-  "renamed_numericArray": [
-    40,
-    50,
-    60
-  ],
-  "renamed_nestedObject": {
-    "renamed_index": "b"
+  "plainString_wrapper": {
+    "plainString": "Oleksa"
+  },
+  "password_wrapper": {
+    "password": "aaa"
+  },
+  "tags_wrapper": {
+    "tags": [
+      "star trek",
+      "star wars",
+      "starlord"
+    ]
+  },
+  "numericArray_wrapper": {
+    "numericArray": [
+      40,
+      50,
+      60
+    ]
+  },
+  "nestedObject_wrapper": {
+    "nestedObject": {
+      "index_wrapper": {
+        "index": "b"
+      }
+    }
   }
 }

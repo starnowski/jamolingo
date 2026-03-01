@@ -5,11 +5,36 @@
       "subType": "04"
     }
   },
-  "renamed_plainString": "example1",
-  "renamed_password": "bbb",
-  "renamed_nestedObject": {
-    "renamed_tokens": ["first example", "1 ex"],
-    "renamed_numbers": [1, 2, 3, 4, 5, 6, 26, 27, 28],
-    "renamed_index": "c"
+  "plainString_wrapper": {
+    "plainString": "example1"
+  },
+  "password_wrapper": {
+    "password": "bbb"
+  },
+  "nestedObject_wrapper": {
+    "nestedObject": {
+      "tokens_wrapper": {
+        "tokens": [
+          "first example",
+          "1 ex"
+        ]
+      },
+      "numbers_wrapper": {
+        "numbers": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          26,
+          27,
+          28
+        ]
+      },
+      "index_wrapper": {
+        "index": "c"
+      }
+    }
   }
 }

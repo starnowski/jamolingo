@@ -5,5 +5,7 @@
       "subType": "04"
     }
   },
-  "renamed_plainString": "only_id_and_plainString"
+  "plainString_wrapper": {
+    "plainString": "only_id_and_plainString"
+  }
 }

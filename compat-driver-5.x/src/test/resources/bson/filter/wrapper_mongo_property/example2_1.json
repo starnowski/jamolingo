@@ -5,42 +5,70 @@
       "subType": "04"
     }
   },
-  "renamed_plainString": "eOMtThyhVNLWUZNRcBaQKxI",
-  "renamed_base64Data": {
-    "$binary": {
-      "base64": "3ZXRqhY=",
-      "subType": "00"
+  "plainString_wrapper": {
+    "plainString": "eOMtThyhVNLWUZNRcBaQKxI"
+  },
+  "base64Data_wrapper": {
+    "base64Data": {
+      "$binary": {
+        "base64": "3ZXRqhY=",
+        "subType": "00"
+      }
     }
   },
   "renamed_fileUpload": null,
-  "renamed_birthDate": {
-    "$date": "2024-06-18T00:00:00Z"
-  },
-  "renamed_timestamp": {
-    "$date": "2024-07-20T10:15:26.99Z"
-  },
-  "renamed_password": "password1",
-  "renamed_uuidProp": {
-    "$binary": {
-      "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
-      "subType": "04"
+  "birthDate_wrapper": {
+    "birthDate": {
+      "$date": "2024-06-18T00:00:00Z"
     }
   },
-  "renamed_genericNumber": 0.7231742029971469,
-  "renamed_floatValue": 0.7231741547584534,
-  "renamed_doubleValue": 0.7231742029971469,
-  "renamed_genericInteger": "295011414634219278107705585431435293517",
-  "renamed_smallInteger": -1188957731,
-  "renamed_bigInteger": -5106534569952410475,
-  "renamed_tags": [
-    "word wide web",
-    "spider trap"
-  ],
-  "renamed_numericArray": [
-    10,
-    20,
-    30
-  ],
+  "timestamp_wrapper": {
+    "timestamp": {
+      "$date": "2024-07-20T10:15:26.99Z"
+    }
+  },
+  "password_wrapper": {
+    "password": "password1"
+  },
+  "uuidProp_wrapper": {
+    "uuidProp": {
+      "$binary": {
+        "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
+        "subType": "04"
+      }
+    }
+  },
+  "genericNumber_wrapper": {
+    "genericNumber": 0.7231742029971469
+  },
+  "floatValue_wrapper": {
+    "floatValue": 0.7231741547584534
+  },
+  "doubleValue_wrapper": {
+    "doubleValue": 0.7231742029971469
+  },
+  "genericInteger_wrapper": {
+    "genericInteger": "295011414634219278107705585431435293517"
+  },
+  "smallInteger_wrapper": {
+    "smallInteger": -1188957731
+  },
+  "bigInteger_wrapper": {
+    "bigInteger": -5106534569952410475
+  },
+  "tags_wrapper": {
+    "tags": [
+      "word wide web",
+      "spider trap"
+    ]
+  },
+  "numericArray_wrapper": {
+    "numericArray": [
+      10,
+      20,
+      30
+    ]
+  },
   "renamed_metadata": {
     "tOXr": -1375400888,
     "jNBgpTmxx": 322309844,
@@ -114,5 +142,7 @@
     "MFOPluIOMfSnzX": -1187060640,
     "IQrWtYnHcO": -549291623
   },
-  "renamed_active": true
+  "isActive_wrapper": {
+    "isActive": true
+  }
 }
