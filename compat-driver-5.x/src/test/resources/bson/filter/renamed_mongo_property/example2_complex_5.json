@@ -16,7 +16,7 @@
       "renamed_someDate": { "$date": "2024-01-01T00:00:00Z" },
       "renamed_someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
       "renamed_nestedComplexArray": [
-        { "stringVal": "match", "numberVal": 20 }
+        { "renamed_stringVal": "match", "numberVal": 20 }
       ]
     },
     {
@@ -28,7 +28,7 @@
       "renamed_someDate": { "$date": "2024-01-02T00:00:00Z" },
       "renamed_someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
       "renamed_nestedComplexArray": [
-        { "stringVal": "match", "numberVal": 20 }
+        { "renamed_stringVal": "match", "numberVal": 20 }
       ]
     }
   ]

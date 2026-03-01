@@ -16,8 +16,8 @@
       "renamed_someDate": { "$date": "2024-04-01T00:00:00Z" },
       "renamed_someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
       "renamed_nestedComplexArray": [
-        { "stringVal": "matchAll", "numberVal": 71 },
-        { "stringVal": "matchAll", "numberVal": 72 }
+        { "renamed_stringVal": "matchAll", "numberVal": 71 },
+        { "renamed_stringVal": "matchAll", "numberVal": 72 }
       ]
     }
   ]
