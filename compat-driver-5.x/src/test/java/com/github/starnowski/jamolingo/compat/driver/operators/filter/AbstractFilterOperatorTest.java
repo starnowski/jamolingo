@@ -73,9 +73,8 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     logTestsObject(filter, pipeline);
   }
 
-  protected void shouldUsedExpectedIndexesBasedOnFilterOperator(
-          String filter, String expectedIndex)
-          throws UriValidationException,
+  protected void shouldUsedExpectedIndexesBasedOnFilterOperator(String filter, String expectedIndex)
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
@@ -85,7 +84,7 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     MongoCollection<Document> collection = database.getCollection("Items");
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
     UriInfo uriInfo =
-            new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
+        new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
     ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser();
     FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), edm);
     /*
@@ -106,14 +105,15 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     Assertions.assertEquals(expectedIndex, explainResult.getIndexValue().getValue());
   }
 
-  protected void createIndexesForPropertyInCollection(String database, String collectionName, Set<String> properties) {
+  protected void createIndexesForPropertyInCollection(
+      String database, String collectionName, Set<String> properties) {
     properties.forEach(pro -> createIndexForPropertyInCollection(database, collectionName, pro));
   }
 
-  protected void createIndexForPropertyInCollection(String database, String collectionName, String property) {
-    MongoCollection<Document> col =
-              mongoClient.getDatabase(database).getCollection(collectionName);
-      col.createIndex(new Document(property, 1));
+  protected void createIndexForPropertyInCollection(
+      String database, String collectionName, String property) {
+    MongoCollection<Document> col = mongoClient.getDatabase(database).getCollection(collectionName);
+    col.createIndex(new Document(property, 1));
   }
 
   protected void dropIndexesForCollections(String database, Set<String> collectionNames) {
@@ -124,7 +124,7 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     try {
 
       MongoCollection<Document> col =
-              mongoClient.getDatabase(database).getCollection(collectionName);
+          mongoClient.getDatabase(database).getCollection(collectionName);
       col.dropIndexes();
     } catch (Exception exception) {
       // Do nothing
