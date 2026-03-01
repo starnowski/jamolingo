@@ -13,9 +13,13 @@ The project is organized into several modules, each serving a specific purpose:
 The `core` module contains the primary logic for translating OData concepts and queries into MongoDB-compatible formats. It provides the essential building blocks for mapping OData Entity Data Models (EDM) to MongoDB document structures and parsing OData system query options.
 
 **Key Features:**
+*   Translates `$filter` to MongoDB `$match` stages with support for:
+    *   Comparison (`eq`, `ne`, `in`, etc.) and Logical (`and`, `or`, `not`) operators.
+    *   String, Math, and Date/Time functions.
+    *   Collection operators (`any`, `all`) and `/$count`.
 *   Translates `$select` to MongoDB `$project` stages.
-*   Handles OData-to-MongoDB mapping configuration.
-*   Supports customizing mappings via overrides.
+*   Translates `$orderby`, `$top`, and `$skip` to corresponding MongoDB stages (`$sort`, `$limit`, `$skip`).
+*   Handles OData-to-MongoDB mapping configuration and supports customizing mappings via overrides.
 
 ### [Common JSON](common/json/README.md)
 The `jamolingo-json` module provides utility classes for applying JSON-based modifications to Java objects. It acts as a bridge between JSON patch specifications (Merge Patch, JSON Patch) and Java POJOs.
