@@ -338,13 +338,13 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
             "complexList/any(c:startswith(c/someString,'Ap'))",
             Set.of("Doc1", "Doc4", "Doc5"),
             "FETCH + IXSCAN"),
-        Arguments.of("complexList/any(c:contains(c/someString,'ana'))", Set.of("Doc2"), "COLLSCAN"),
+        Arguments.of("complexList/any(c:contains(c/someString,'ana'))", Set.of("Doc2"), "FETCH + IXSCAN"),
         Arguments.of(
-            "complexList/any(c:endswith(c/someString,'erry'))", Set.of("Doc3", "Doc4"), "COLLSCAN"),
+            "complexList/any(c:endswith(c/someString,'erry'))", Set.of("Doc3", "Doc4"), "FETCH + IXSCAN"),
         Arguments.of(
             "complexList/any(c:contains(c/someString,'e'))",
             Set.of("Doc1", "Doc3", "Doc4", "Doc6"),
-            "COLLSCAN"),
+            "FETCH + IXSCAN"),
         Arguments.of(
             "complexList/any(c:c/someString eq 'Application')",
             Set.of("Doc1", "Doc5"),
@@ -388,7 +388,7 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "complexList/any(c:c/nestedComplexArray/any(n:contains(n/stringVal,'match')))",
             Set.of("Doc5", "Doc6"),
-            "COLLSCAN"),
+            "FETCH + IXSCAN"),
         Arguments.of(
             "complexList/any(c:c/nestedComplexArray/any(n:n/stringVal eq 'val1' or n/stringVal eq 'test1'))",
             Set.of("Doc1", "Doc2", "Doc3", "Doc4"),
@@ -404,7 +404,7 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "complexList/any(c:c/nestedComplexArray/any(n:n/numberVal eq 71) and c/nestedComplexArray/any(n:n/numberVal eq 72))",
             Set.of("Doc6"),
-            "FETCH + IXSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "complexList/any(c:c/nestedComplexArray/$count ge 2)", Set.of("Doc6"), "COLLSCAN"),
         Arguments.of(
