@@ -91,7 +91,7 @@ public abstract class AbstractFilterOperatorMongoPropertyWrapperTest
     Assertions.assertEquals(expectedPlainStrings.size(), results.size());
     Set<String> actual =
         results.stream()
-            .map(d -> d.get("wrapper_plainString"))
+            .map(d -> d.get("plainString_wrapper"))
             .map(d -> (Document) d)
             .map(d -> d.get("plainString"))
             .filter(Objects::nonNull)

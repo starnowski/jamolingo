@@ -41,35 +41,35 @@ public class FilterOperatorAnyLambdaMongoPropertyWrapperTest
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_1.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_1.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_2.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_2.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_3.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_3.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_4.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_4.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_5.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_5.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_6.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_6.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_7.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_7.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_only_id.json")
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_only_id.json")
       })
   public void shouldReturnExpectedDocuments(Object filter, Set<String> expectedPlainStrings)
       throws UriValidationException,
@@ -91,31 +91,31 @@ public class FilterOperatorAnyLambdaMongoPropertyWrapperTest
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_1.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_complex_1.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_2.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_complex_2.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_3.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_complex_3.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_4.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_complex_4.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_5.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_complex_5.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_6.json"),
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_complex_6.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/renamed_mongo_property/example2_only_id.json")
+            bsonFilePath = "bson/filter/wrapper_mongo_property/example2_only_id.json")
       })
   public void shouldReturnExpectedDocumentsForComplexList(
       Object filter, Set<String> expectedPlainStrings)
