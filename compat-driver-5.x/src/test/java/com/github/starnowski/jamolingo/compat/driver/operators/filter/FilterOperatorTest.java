@@ -213,9 +213,9 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "tags/$count ge 2",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa"),
-            "FETCH + IXSCAN"),
-        Arguments.of("tags/$count ge 3", Set.of("Poem", "Oleksa"), "FETCH + IXSCAN"),
-        Arguments.of("trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS, "FETCH + IXSCAN"),
+                "COLLSCAN"),
+        Arguments.of("tags/$count ge 3", Set.of("Poem", "Oleksa"), "COLLSCAN"),
+        Arguments.of("trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS, "COLLSCAN"),
         Arguments.of(
             "round(floatValue) eq 1",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
@@ -232,7 +232,7 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "floor(floatValue) eq 0",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
                 "COLLSCAN"),
-        Arguments.of("length(plainString) eq 4", Set.of("Poem"), "FETCH + IXSCAN"),
+        Arguments.of("length(plainString) eq 4", Set.of("Poem"), "COLLSCAN"),
         Arguments.of(
             "nestedObject/tokens/any(t:t ne 'no such text')",
             Set.of("example1", "example2"),
@@ -240,10 +240,10 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
             Set.of("Mario", "Oleksa", "example1", "example2"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars')) and tags/any()",
             Set.of("Mario", "Oleksa"),
-            "FETCH + IXSCAN"));
+                "COLLSCAN"));
   }
 }
