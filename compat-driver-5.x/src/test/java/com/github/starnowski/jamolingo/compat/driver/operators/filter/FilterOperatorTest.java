@@ -60,7 +60,8 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             collection = "Items",
             bsonFilePath = "bson/filter/example2_7.json")
       })
-  public void shouldReturnExpectedDocuments(String filter, Set<String> expectedPlainStrings)
+  public void shouldReturnExpectedDocuments(
+      String filter, Set<String> expectedPlainStrings, String expectedIndex)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
@@ -72,38 +73,39 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
-          mongoDocuments = {
-                  @MongoDocument(
-                          database = "testdb",
-                          collection = "Items",
-                          bsonFilePath = "bson/filter/example2_1.json"),
-                  @MongoDocument(
-                          database = "testdb",
-                          collection = "Items",
-                          bsonFilePath = "bson/filter/example2_2.json"),
-                  @MongoDocument(
-                          database = "testdb",
-                          collection = "Items",
-                          bsonFilePath = "bson/filter/example2_3.json"),
-                  @MongoDocument(
-                          database = "testdb",
-                          collection = "Items",
-                          bsonFilePath = "bson/filter/example2_4.json"),
-                  @MongoDocument(
-                          database = "testdb",
-                          collection = "Items",
-                          bsonFilePath = "bson/filter/example2_5.json"),
-                  @MongoDocument(
-                          database = "testdb",
-                          collection = "Items",
-                          bsonFilePath = "bson/filter/example2_6.json"),
-                  @MongoDocument(
-                          database = "testdb",
-                          collection = "Items",
-                          bsonFilePath = "bson/filter/example2_7.json")
-          })
-  public void shouldUsedExpectedIndexesBasedOnFilterOperator(String filter, Set<String> expectedPlainStrings, String expectedIndex)
-          throws UriValidationException,
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_2.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_3.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_4.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_6.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_7.json")
+      })
+  public void shouldUsedExpectedIndexesBasedOnFilterOperator(
+      String filter, Set<String> expectedPlainStrings, String expectedIndex)
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
@@ -120,15 +122,15 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "tolower(plainString) eq 'eomtthyhvnlwuznrcbaqkxi'",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "tolower(plainString) eq tolower('eOMtThyhVNLWUZNRcBaQKxI')",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "toupper(plainString) eq 'EOMTTHYHVNLWUZNRCBAQKXI'",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of("plainString eq 'Some text'", Set.of("Some text"), "FETCH + IXSCAN"),
         Arguments.of(
             "plainString in ('Some text', 'no such text')", Set.of("Some text"), "FETCH + IXSCAN"),
@@ -183,8 +185,7 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of("tags/any(t:startswith(t,'dev'))", Set.of("Poem"), "FETCH + IXSCAN"),
         Arguments.of(
             "tags/any(t:startswith(t,'dev') and length(t) eq 9)", Set.of("Poem"), "COLLSCAN"),
-        Arguments.of(
-            "tags/any(t:length(t) eq 13)", Set.of("eOMtThyhVNLWUZNRcBaQKxI"), "COLLSCAN"),
+        Arguments.of("tags/any(t:length(t) eq 13)", Set.of("eOMtThyhVNLWUZNRcBaQKxI"), "COLLSCAN"),
         Arguments.of("tags/any(t:tolower(t) eq 'developer')", Set.of("Poem"), "COLLSCAN"),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and endswith(t, 'web'))",
@@ -193,45 +194,45 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "year(birthDate) eq 2024",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "month(birthDate) eq 6",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "day(birthDate) eq 18",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "hour(timestamp) eq 10",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "ceiling(floatValue) eq 1",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "tags/$count ge 2",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of("tags/$count ge 3", Set.of("Poem", "Oleksa"), "COLLSCAN"),
         Arguments.of("trim('   Poem   ') eq 'Poem'", ALL_PLAIN_STRINGS, "COLLSCAN"),
         Arguments.of(
             "round(floatValue) eq 1",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "minute(timestamp) eq 15",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "second(timestamp) eq 26",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "floor(floatValue) eq 0",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of("length(plainString) eq 4", Set.of("Poem"), "COLLSCAN"),
         Arguments.of(
             "nestedObject/tokens/any(t:t ne 'no such text')",
@@ -240,10 +241,10 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))",
             Set.of("Mario", "Oleksa", "example1", "example2"),
-                "COLLSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "tags/all(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars')) and tags/any()",
             Set.of("Mario", "Oleksa"),
-                "COLLSCAN"));
+            "COLLSCAN"));
   }
 }
