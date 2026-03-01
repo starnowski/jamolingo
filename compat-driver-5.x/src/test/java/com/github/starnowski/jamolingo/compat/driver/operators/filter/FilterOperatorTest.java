@@ -120,15 +120,15 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "tolower(plainString) eq 'eomtthyhvnlwuznrcbaqkxi'",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "tolower(plainString) eq tolower('eOMtThyhVNLWUZNRcBaQKxI')",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "toupper(plainString) eq 'EOMTTHYHVNLWUZNRCBAQKXI'",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of("plainString eq 'Some text'", Set.of("Some text"), "FETCH + IXSCAN"),
         Arguments.of(
             "plainString in ('Some text', 'no such text')", Set.of("Some text"), "FETCH + IXSCAN"),
@@ -157,8 +157,8 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "uuidProp eq b921f1dd-3cbc-0495-fdab-8cd14d33f0aa",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Poem", "Some text"),
             "FETCH + IXSCAN"),
-        Arguments.of("toupper(plainString) eq 'POEM'", Set.of("Poem"), "FETCH + IXSCAN"),
-        Arguments.of("tolower(plainString) eq 'poem'", Set.of("Poem"), "FETCH + IXSCAN"),
+        Arguments.of("toupper(plainString) eq 'POEM'", Set.of("Poem"), "COLLSCAN"),
+        Arguments.of("tolower(plainString) eq 'poem'", Set.of("Poem"), "COLLSCAN"),
         Arguments.of("tags/any(t:t in ('developer', 'LLM'))", Set.of("Poem"), "FETCH + IXSCAN"),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or startswith(t,'spider') and t ne 'spider' or contains(t,'wide') and t ne 'word wide')",
@@ -182,34 +182,34 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "FETCH + IXSCAN"),
         Arguments.of("tags/any(t:startswith(t,'dev'))", Set.of("Poem"), "FETCH + IXSCAN"),
         Arguments.of(
-            "tags/any(t:startswith(t,'dev') and length(t) eq 9)", Set.of("Poem"), "FETCH + IXSCAN"),
+            "tags/any(t:startswith(t,'dev') and length(t) eq 9)", Set.of("Poem"), "COLLSCAN"),
         Arguments.of(
-            "tags/any(t:length(t) eq 13)", Set.of("eOMtThyhVNLWUZNRcBaQKxI"), "FETCH + IXSCAN"),
-        Arguments.of("tags/any(t:tolower(t) eq 'developer')", Set.of("Poem"), "FETCH + IXSCAN"),
+            "tags/any(t:length(t) eq 13)", Set.of("eOMtThyhVNLWUZNRcBaQKxI"), "COLLSCAN"),
+        Arguments.of("tags/any(t:tolower(t) eq 'developer')", Set.of("Poem"), "COLLSCAN"),
         Arguments.of(
             "tags/any(t:startswith(t,'spider') and endswith(t, 'web'))",
             Set.of("Some text"),
-            "FETCH + IXSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             "year(birthDate) eq 2024",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "month(birthDate) eq 6",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "day(birthDate) eq 18",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "hour(timestamp) eq 10",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "ceiling(floatValue) eq 1",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "tags/$count ge 2",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa"),
@@ -219,19 +219,19 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "round(floatValue) eq 1",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "minute(timestamp) eq 15",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "second(timestamp) eq 26",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of(
             "floor(floatValue) eq 0",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem"),
-            "FETCH + IXSCAN"),
+                "COLLSCAN"),
         Arguments.of("length(plainString) eq 4", Set.of("Poem"), "FETCH + IXSCAN"),
         Arguments.of(
             "nestedObject/tokens/any(t:t ne 'no such text')",
