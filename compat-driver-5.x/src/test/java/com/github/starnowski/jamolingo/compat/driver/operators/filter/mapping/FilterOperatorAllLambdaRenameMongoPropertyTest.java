@@ -1,9 +1,14 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.filter.mapping;
 
-import com.github.starnowski.jamolingo.compat.driver.operators.filter.AbstractFilterOperatorTest;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import io.quarkus.test.junit.QuarkusTest;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
@@ -12,15 +17,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
-
 @QuarkusTest
-public class FilterOperatorAllLambdaRenameMongoPropertyTest extends AbstractFilterOperatorRenameMongoPropertyTest {
+public class FilterOperatorAllLambdaRenameMongoPropertyTest
+    extends AbstractFilterOperatorRenameMongoPropertyTest {
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
@@ -29,42 +28,44 @@ public class FilterOperatorAllLambdaRenameMongoPropertyTest extends AbstractFilt
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_1.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_1.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_2.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_2.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_3.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_3.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_4.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_4.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_5.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_5.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_6.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_6.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_7.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_7.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_only_id.json")
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_only_id.json")
       })
   public void shouldReturnExpectedDocuments(Object filter, Set<String> expectedPlainStrings)
-          throws UriValidationException,
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException, URISyntaxException, IOException {
+          ODataApplicationException,
+          URISyntaxException,
+          IOException {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
     shouldReturnExpectedDocumentsBasedOnFilterOperator(filterString, expectedPlainStrings);
@@ -77,39 +78,41 @@ public class FilterOperatorAllLambdaRenameMongoPropertyTest extends AbstractFilt
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_1.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_1.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_2.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_2.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_3.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_3.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_4.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_4.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_5.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_5.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_complex_6.json"),
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_complex_6.json"),
         @MongoDocument(
             database = "testdb",
             collection = "Items",
-            bsonFilePath = "bson/filter/example2_only_id.json")
+            bsonFilePath = "bson/filter/renamed_mongo_property/example2_only_id.json")
       })
   public void shouldReturnExpectedDocumentsForComplexList(
       Object filter, Set<String> expectedPlainStrings)
-          throws UriValidationException,
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException, URISyntaxException, IOException {
+          ODataApplicationException,
+          URISyntaxException,
+          IOException {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
     shouldReturnExpectedDocumentsBasedOnFilterOperator(filterString, expectedPlainStrings);

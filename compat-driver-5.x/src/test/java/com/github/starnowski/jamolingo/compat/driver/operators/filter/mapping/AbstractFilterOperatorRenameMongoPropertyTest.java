@@ -15,19 +15,6 @@ import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import org.apache.olingo.commons.api.edm.Edm;
-import org.apache.olingo.server.api.OData;
-import org.apache.olingo.server.api.ODataApplicationException;
-import org.apache.olingo.server.api.uri.UriInfo;
-import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
-import org.apache.olingo.server.core.uri.parser.Parser;
-import org.apache.olingo.server.core.uri.parser.UriParserException;
-import org.apache.olingo.server.core.uri.validator.UriValidationException;
-import org.bson.Document;
-import org.bson.conversions.Bson;
-import org.junit.jupiter.api.Assertions;
-
-import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,6 +27,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.xml.stream.XMLStreamException;
+import org.apache.olingo.commons.api.edm.Edm;
+import org.apache.olingo.server.api.OData;
+import org.apache.olingo.server.api.ODataApplicationException;
+import org.apache.olingo.server.api.uri.UriInfo;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.apache.olingo.server.core.uri.parser.Parser;
+import org.apache.olingo.server.core.uri.parser.UriParserException;
+import org.apache.olingo.server.core.uri.validator.UriValidationException;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import org.junit.jupiter.api.Assertions;
 
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
@@ -49,11 +48,13 @@ public abstract class AbstractFilterOperatorRenameMongoPropertyTest extends Abst
 
   protected void shouldReturnExpectedDocumentsBasedOnFilterOperator(
       String filter, Set<String> expectedPlainStrings)
-          throws UriValidationException,
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException, URISyntaxException, IOException {
+          ODataApplicationException,
+          URISyntaxException,
+          IOException {
     // plainString
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
@@ -64,13 +65,22 @@ public abstract class AbstractFilterOperatorRenameMongoPropertyTest extends Abst
     var odataMapping = factory.build(edm.getSchema("MyService"));
     var entityMapping = odataMapping.getEntities().get("Example2");
     JSONOverrideHelper helper = new JSONOverrideHelper();
-    String mergePayload = Files.readString(Paths.get(getClass().getClassLoader().getResource("mappings/edm6_override_renamed_prefix.json").toURI()));
-    entityMapping = helper.applyChangesToJson(entityMapping, mergePayload, EntityMapping.class, JSONOverrideHelper.PatchType.MERGE);
+    String mergePayload =
+        Files.readString(
+            Paths.get(
+                getClass()
+                    .getClassLoader()
+                    .getResource("mappings/edm6_override_renamed_prefix.json")
+                    .toURI()));
+    entityMapping =
+        helper.applyChangesToJson(
+            entityMapping, mergePayload, EntityMapping.class, JSONOverrideHelper.PatchType.MERGE);
 
     EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder =
         new EntityPropertiesMongoPathContextBuilder();
     var context = entityPropertiesMongoPathContextBuilder.build(entityMapping);
-    var facade = DefaultEdmMongoContextFacade.builder()
+    var facade =
+        DefaultEdmMongoContextFacade.builder()
             .withEntityPropertiesMongoPathContext(context)
             .build();
 
