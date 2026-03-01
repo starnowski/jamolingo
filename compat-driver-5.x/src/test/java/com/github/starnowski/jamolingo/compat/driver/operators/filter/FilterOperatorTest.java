@@ -69,6 +69,48 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
     shouldReturnExpectedDocumentsBasedOnFilterOperator(filter, expectedPlainStrings);
   }
 
+  @ParameterizedTest
+  @MethodSource("provideShouldReturnExpectedProjectedDocument")
+  @MongoSetup(
+          mongoDocuments = {
+                  @MongoDocument(
+                          database = "testdb",
+                          collection = "Items",
+                          bsonFilePath = "bson/filter/example2_1.json"),
+                  @MongoDocument(
+                          database = "testdb",
+                          collection = "Items",
+                          bsonFilePath = "bson/filter/example2_2.json"),
+                  @MongoDocument(
+                          database = "testdb",
+                          collection = "Items",
+                          bsonFilePath = "bson/filter/example2_3.json"),
+                  @MongoDocument(
+                          database = "testdb",
+                          collection = "Items",
+                          bsonFilePath = "bson/filter/example2_4.json"),
+                  @MongoDocument(
+                          database = "testdb",
+                          collection = "Items",
+                          bsonFilePath = "bson/filter/example2_5.json"),
+                  @MongoDocument(
+                          database = "testdb",
+                          collection = "Items",
+                          bsonFilePath = "bson/filter/example2_6.json"),
+                  @MongoDocument(
+                          database = "testdb",
+                          collection = "Items",
+                          bsonFilePath = "bson/filter/example2_7.json")
+          })
+  public void shouldUsedExpectedIndexesBasedOnFilterOperator(String filter, Set<String> expectedPlainStrings, String expectedIndex)
+          throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    shouldUsedExpectedIndexesBasedOnFilterOperator(filter, expectedIndex);
+  }
+
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {
     return Stream.of(
         Arguments.of(
