@@ -17,6 +17,7 @@ import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+/** Expression visitor that converts OData filter expressions into MongoDB BSON documents. */
 public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   public static final String CUSTOM_LITERAL_VALUE_PROPERTY = "$odata.literal";
@@ -38,6 +39,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private final Set<String> usedMongoDBProperties = new HashSet<>();
 
+  /**
+   * Returns the set of MongoDB properties used in the filter expression.
+   *
+   * @return the set of used properties
+   */
   public Set<String> getUsedMongoDBProperties() {
     return Collections.unmodifiableSet(usedMongoDBProperties);
   }
@@ -55,6 +61,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         .append(ODATA_BSON_WRAPPER_PROPERTIES, properties);
   }
 
+  /**
+   * Checks if the given BSON is a wrapper containing additional metadata.
+   *
+   * @param bson the BSON to check
+   * @return true if it is a wrapper, false otherwise
+   */
   public static boolean isBsonWrapper(Bson bson) {
     if (bson instanceof Document doc) {
       return doc.containsKey(ODATA_BSON_WRAPPER_ORIGINAL)
@@ -63,6 +75,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return false;
   }
 
+  /**
+   * Unwraps the given BSON if it is a wrapper.
+   *
+   * @param bson the BSON to unwrap
+   * @return the original BSON
+   */
   public static Bson unwrapWrapperIfNeeded(Bson bson) {
     if (isBsonWrapper(bson)) {
       Document doc = (Document) bson;
@@ -71,6 +89,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return bson;
   }
 
+  /**
+   * Extracts the wrapper properties from the given BSON.
+   *
+   * @param bson the BSON wrapper
+   * @return the wrapper properties, or null if not a wrapper
+   */
   public static BsonWrapperProperties extractBsonWrapperProperties(Bson bson) {
     if (isBsonWrapper(bson)) {
       return (BsonWrapperProperties) ((Document) bson).get(ODATA_BSON_WRAPPER_PROPERTIES);
@@ -78,19 +102,36 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return null;
   }
 
+  /** Properties for the BSON wrapper. */
   public static final class BsonWrapperProperties {
     private final BinaryOperatorKind binaryOperator;
 
+    /**
+     * Returns the method kind associated with the expression.
+     *
+     * @return the method kind
+     */
     public MethodKind getMethodKind() {
       return methodKind;
     }
 
     private final MethodKind methodKind;
 
+    /**
+     * Returns the binary operator kind associated with the expression.
+     *
+     * @return the binary operator kind
+     */
     public BinaryOperatorKind getBinaryOperator() {
       return binaryOperator;
     }
 
+    /**
+     * Creates new wrapper properties.
+     *
+     * @param binaryOperator the binary operator
+     * @param methodKind the method kind
+     */
     public BsonWrapperProperties(BinaryOperatorKind binaryOperator, MethodKind methodKind) {
       this.binaryOperator = binaryOperator;
       this.methodKind = methodKind;
@@ -114,13 +155,25 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       return "BsonWrapperProperties{" + "binaryOperator=" + binaryOperator + '}';
     }
 
+    /**
+     * Creates a new builder for BsonWrapperProperties.
+     *
+     * @return the builder
+     */
     public static BsonWrapperPropertiesBuilder builder() {
       return new BsonWrapperPropertiesBuilder();
     }
 
+    /** Builder for BsonWrapperProperties. */
     public static class BsonWrapperPropertiesBuilder {
       private BinaryOperatorKind binaryOperator;
 
+      /**
+       * Sets the method kind.
+       *
+       * @param methodKind the method kind
+       * @return the builder
+       */
       public BsonWrapperPropertiesBuilder withMethodKind(MethodKind methodKind) {
         this.methodKind = methodKind;
         return this;
@@ -128,17 +181,34 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
       private MethodKind methodKind;
 
+      /**
+       * Sets the binary operator kind.
+       *
+       * @param binaryOperator the binary operator kind
+       * @return the builder
+       */
       public BsonWrapperPropertiesBuilder withBinaryOperator(BinaryOperatorKind binaryOperator) {
         this.binaryOperator = binaryOperator;
         return this;
       }
 
+      /**
+       * Builds the BsonWrapperProperties.
+       *
+       * @return the wrapper properties
+       */
       public BsonWrapperProperties build() {
         return new BsonWrapperProperties(binaryOperator, methodKind);
       }
     }
   }
 
+  /**
+   * Creates a new visitor.
+   *
+   * @param edm the Entity Data Model
+   * @param edmPropertyMongoPathResolver the path resolver
+   */
   public MongoFilterVisitor(Edm edm, EdmPropertyMongoPathResolver edmPropertyMongoPathResolver) {
     this(
         edm,
@@ -146,6 +216,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitorContext.builder().isRootContext(true).build());
   }
 
+  /**
+   * Creates a new visitor with the specified context.
+   *
+   * @param edm the Entity Data Model
+   * @param edmPropertyMongoPathResolver the path resolver
+   * @param context the visitor context
+   */
   public MongoFilterVisitor(
       Edm edm,
       EdmPropertyMongoPathResolver edmPropertyMongoPathResolver,
@@ -155,6 +232,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     this.context = context;
   }
 
+  /**
+   * Creates a literal document.
+   *
+   * @param value the literal value
+   * @return the literal document
+   */
   public static Document literal(Object value) {
     return new Document(CUSTOM_LITERAL_VALUE_PROPERTY, value);
   }
@@ -225,13 +308,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       if (member.getResourcePath().getUriResourceParts().get(0)
           instanceof UriResourceLambdaVariable variable) {
         if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
-            && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
+            && this.context.getLambdaVariableAliases().containsKey(variable.getVariableName())) {
           if (this.context.isExprMode()) {
             String lambdaField =
                 this.context
-                    .lambdaVariableAliases()
+                    .getLambdaVariableAliases()
                     .get(variable.getVariableName())
-                    .bson()
+                    .getBson()
                     .toBsonDocument()
                     .get(ODATA_MEMBER_PROPERTY)
                     .asString()
@@ -241,7 +324,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           }
           addUsedMongoDBProperty(prepareProperty(field, member).getMongoFullPath());
           return prepareWrappedMemberDocumentForLambda(
-              this.context.lambdaVariableAliases().get(variable.getVariableName()).bson());
+              this.context.getLambdaVariableAliases().get(variable.getVariableName()).getBson());
         }
         return prepareMemberDocument(field, variable.getType());
       } else {
@@ -273,12 +356,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         }
       }
       if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
-          && this.context.lambdaVariableAliases().containsKey(variable.getVariableName())) {
+          && this.context.getLambdaVariableAliases().containsKey(variable.getVariableName())) {
         String rootPath =
             this.context
-                .lambdaVariableAliases()
+                .getLambdaVariableAliases()
                 .get(variable.getVariableName())
-                .bson()
+                .getBson()
                 .toBsonDocument()
                 .get(ODATA_MEMBER_PROPERTY)
                 .asString()
@@ -366,9 +449,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       LambdaType lambdaType,
       ElementMatchContext elementMatchContext) {
     LinkedHashMap<String, LambdaLeaf> result;
-    if (this.context.lambdaVariableAliases() != null
-        && !this.context.lambdaVariableAliases().isEmpty()) {
-      result = new LinkedHashMap<>(this.context.lambdaVariableAliases());
+    if (this.context.getLambdaVariableAliases() != null
+        && !this.context.getLambdaVariableAliases().isEmpty()) {
+      result = new LinkedHashMap<>(this.context.getLambdaVariableAliases());
     } else {
       result = new LinkedHashMap<>();
     }
@@ -823,9 +906,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private Bson prepareElementMatchDocumentForAllLambda(
       Bson innerPart, String field, boolean returnUnwrappedBson) {
     if (this.context.isElementMatchContext()) {
-      if (innerPart.toBsonDocument().containsKey(this.context.elementMatchContext().property())) {
+      if (innerPart
+          .toBsonDocument()
+          .containsKey(this.context.getElementMatchContext().getProperty())) {
         BsonValue innerValuePart =
-            innerPart.toBsonDocument().get(this.context.elementMatchContext().property());
+            innerPart.toBsonDocument().get(this.context.getElementMatchContext().getProperty());
         if (!innerValuePart.isDocument() && !innerValuePart.isRegularExpression()) {
           if (returnUnwrappedBson) {
             return new Document("$eq", innerValuePart);
@@ -1081,14 +1166,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               }
               if (this.context.isElementMatchContext()) {
                 if (this.context.isLambdaAllContext()
-                    && !this.context.elementMatchContext().multipleElemMatch()
+                    && !this.context.getElementMatchContext().isMultipleElemMatch()
                     && !this.context.isExprMode()) {
                   throw new MultipleElementMatchOperantRequiredException(
                       "Multiple elemMatch required");
                 }
 
                 if (this.context.isLambdaAllContext()
-                    && this.context.elementMatchContext().multipleElemMatch()) {
+                    && this.context.getElementMatchContext().isMultipleElemMatch()) {
                   BsonDocument leftDoc = left.toBsonDocument();
                   BsonDocument rightDoc = right.toBsonDocument();
                   Document leftPartDocument = new Document();
@@ -1098,10 +1183,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   List<Bson> andFilters =
                       Stream.concat(
                               tryExtractElementMatchDocumentForAllLambdaWithAndOperator(
-                                  leftPartDocument, this.context.elementMatchContext().property())
+                                  leftPartDocument,
+                                  this.context.getElementMatchContext().getProperty())
                                   .stream(),
                               tryExtractElementMatchDocumentForAllLambdaWithAndOperator(
-                                  partPartDocument, this.context.elementMatchContext().property())
+                                  partPartDocument,
+                                  this.context.getElementMatchContext().getProperty())
                                   .stream())
                           .toList();
                   return new Document("$and", andFilters);
@@ -1117,7 +1204,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   //                  if (this.context.isLambdaAnyContext() &&
                   // !this.context.isExprMode() &&
                   //                          !this.context.isNestedLambdaAllContext() &&
-                  // !this.context.elementMatchContext().multipleElemMatch()) {
+                  // !this.context.getElementMatchContext().isMultipleElemMatch()) {
                   //                    throw new MultipleElementMatchOperantRequiredException(
                   //                            "Multiple elemMatch required for ANY lambda");
                   //                  }
@@ -1138,7 +1225,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                         .formatted(operator, left, right));
               }
               if (this.context.isElementMatchContext()) {
-                if (!this.context.elementMatchContext().multipleElemMatch()) {
+                if (!this.context.getElementMatchContext().isMultipleElemMatch()) {
                   throw new MultipleElementMatchOperantRequiredException(
                       "Multiple elemMatch required");
                 }
@@ -1146,10 +1233,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   List<Bson> orFilters =
                       Stream.concat(
                               tryExtractElementMatchDocumentForAnyLambda(
-                                  left, this.context.elementMatchContext().property())
+                                  left, this.context.getElementMatchContext().getProperty())
                                   .stream(),
                               tryExtractElementMatchDocumentForAnyLambda(
-                                  right, this.context.elementMatchContext().property())
+                                  right, this.context.getElementMatchContext().getProperty())
                                   .stream())
                           .toList();
                   return new Document("$or", orFilters);
@@ -1162,10 +1249,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   List<Bson> orFilters =
                       Stream.concat(
                               tryExtractElementMatchDocumentForAllLambdaWithOrOperator(
-                                  left, this.context.elementMatchContext().property())
+                                  left, this.context.getElementMatchContext().getProperty())
                                   .stream(),
                               tryExtractElementMatchDocumentForAllLambdaWithOrOperator(
-                                  right, this.context.elementMatchContext().property())
+                                  right, this.context.getElementMatchContext().getProperty())
                                   .stream())
                           .toList();
                   // TODO validate if expression required
@@ -1173,7 +1260,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   //            main.putAll(orFilters.get(0).toBsonDocument());
                   //            main.putAll(orFilters.get(1).toBsonDocument());
                   //            return new Document(
-                  //                this.context.elementMatchContext().property(),
+                  //                this.context.getElementMatchContext().getProperty(),
                   //                new Document("$not", new Document("$elemMatch", new
                   // Document("$not",
                   // main))));
@@ -1206,8 +1293,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private void enrichDocumentWithQueryDocumentValues(BsonDocument doc, Document finalDOcument) {
-    if (doc.containsKey(this.context.elementMatchContext().property())) {
-      BsonValue value = doc.get(this.context.elementMatchContext().property());
+    if (doc.containsKey(this.context.getElementMatchContext().getProperty())) {
+      BsonValue value = doc.get(this.context.getElementMatchContext().getProperty());
       if (value.isDocument()) {
         finalDOcument.putAll(value.asDocument());
       } else {
@@ -1337,7 +1424,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     if (field != null
         && !field.startsWith("$")
         && this.context.isElementMatchContext()
-        && !field.equals(this.context.elementMatchContext().property())) {
+        && !field.equals(this.context.getElementMatchContext().getProperty())) {
       return new Document(field, regexObject);
     }
     return regexObject;
@@ -1367,10 +1454,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (!this.context.isExprMode()) {
           throw new ExpressionOperantRequiredException(
               "Operant [%s] mapped from [%s] requires expr"
-                  .formatted(mongoOperator.mappedFunction(), methodCall.toString()));
+                  .formatted(mongoOperator.getMappedFunction(), methodCall.toString()));
         }
       }
-      return new Document(mongoOperator.mappedFunction(), passedValue);
+      return new Document(mongoOperator.getMappedFunction(), passedValue);
     } else {
 
       switch (methodCall) {
@@ -1593,24 +1680,386 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return false;
   }
 
-  public record ElementMatchContext(String property, boolean multipleElemMatch) {}
+  /** Context for element matching in MongoDB. */
+  public static class ElementMatchContext {
+    private final String property;
+    private final boolean multipleElemMatch;
 
+    /**
+     * Creates a new element match context.
+     *
+     * @param property the property name
+     * @param multipleElemMatch whether multiple element matching is required
+     */
+    public ElementMatchContext(String property, boolean multipleElemMatch) {
+      this.property = property;
+      this.multipleElemMatch = multipleElemMatch;
+    }
+
+    /**
+     * Returns the property name.
+     *
+     * @return the property name
+     */
+    public String getProperty() {
+      return property;
+    }
+
+    /**
+     * Returns whether multiple element matching is required.
+     *
+     * @return true if multiple element matching is required, false otherwise
+     */
+    public boolean isMultipleElemMatch() {
+      return multipleElemMatch;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      ElementMatchContext that = (ElementMatchContext) o;
+      return multipleElemMatch == that.multipleElemMatch && Objects.equals(property, that.property);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(property, multipleElemMatch);
+    }
+
+    @Override
+    public String toString() {
+      return "ElementMatchContext{"
+          + "property='"
+          + property
+          + '\''
+          + ", multipleElemMatch="
+          + multipleElemMatch
+          + '}';
+    }
+
+    /**
+     * Creates a new builder for ElementMatchContext.
+     *
+     * @return the builder
+     */
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    /** Builder for ElementMatchContext. */
+    public static class Builder {
+      private String property;
+      private boolean multipleElemMatch;
+
+      /**
+       * Sets the property name.
+       *
+       * @param property the property name
+       * @return the builder
+       */
+      public Builder withProperty(String property) {
+        this.property = property;
+        return this;
+      }
+
+      /**
+       * Sets whether multiple element matching is required.
+       *
+       * @param multipleElemMatch whether multiple element matching is required
+       * @return the builder
+       */
+      public Builder withMultipleElemMatch(boolean multipleElemMatch) {
+        this.multipleElemMatch = multipleElemMatch;
+        return this;
+      }
+
+      /**
+       * Builds the ElementMatchContext.
+       *
+       * @return the element match context
+       */
+      public ElementMatchContext build() {
+        return new ElementMatchContext(property, multipleElemMatch);
+      }
+    }
+  }
+
+  /** Enumeration of lambda expression types. */
   public enum LambdaType {
+    /** Represents an ALL lambda expression. */
     ALL,
+    /** Represents an ANY lambda expression. */
     ANY
   }
 
-  public record LambdaLeaf(
-      Bson bson, LambdaType lambdaType, ElementMatchContext elementMatchContext) {}
+  /** Represents a leaf node in a lambda expression. */
+  public static class LambdaLeaf {
+    private final Bson bson;
+    private final LambdaType lambdaType;
+    private final ElementMatchContext elementMatchContext;
 
-  public record MongoFilterVisitorContext(
-      boolean isLambdaAnyContext,
-      Map<String, LambdaLeaf> lambdaVariableAliases,
-      boolean isExprMode,
-      ElementMatchContext elementMatchContext,
-      boolean isLambdaAllContext,
-      boolean isRootContext) {
+    /**
+     * Creates a new lambda leaf.
+     *
+     * @param bson the BSON expression
+     * @param lambdaType the lambda type
+     * @param elementMatchContext the element match context
+     */
+    public LambdaLeaf(Bson bson, LambdaType lambdaType, ElementMatchContext elementMatchContext) {
+      this.bson = bson;
+      this.lambdaType = lambdaType;
+      this.elementMatchContext = elementMatchContext;
+    }
 
+    /**
+     * Returns the BSON expression.
+     *
+     * @return the BSON expression
+     */
+    public Bson getBson() {
+      return bson;
+    }
+
+    /**
+     * Returns the lambda type.
+     *
+     * @return the lambda type
+     */
+    public LambdaType getLambdaType() {
+      return lambdaType;
+    }
+
+    /**
+     * Returns the element match context.
+     *
+     * @return the element match context
+     */
+    public ElementMatchContext getElementMatchContext() {
+      return elementMatchContext;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      LambdaLeaf that = (LambdaLeaf) o;
+      return Objects.equals(bson, that.getBson())
+          && lambdaType == that.getLambdaType()
+          && Objects.equals(elementMatchContext, that.getElementMatchContext());
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(bson, lambdaType, elementMatchContext);
+    }
+
+    @Override
+    public String toString() {
+      return "LambdaLeaf{"
+          + "bson="
+          + bson
+          + ", lambdaType="
+          + lambdaType
+          + ", elementMatchContext="
+          + elementMatchContext
+          + '}';
+    }
+
+    /**
+     * Creates a new builder for LambdaLeaf.
+     *
+     * @return the builder
+     */
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    /** Builder for LambdaLeaf. */
+    public static class Builder {
+      private Bson bson;
+      private LambdaType lambdaType;
+      private ElementMatchContext elementMatchContext;
+
+      /**
+       * Sets the BSON expression.
+       *
+       * @param bson the BSON expression
+       * @return the builder
+       */
+      public Builder withBson(Bson bson) {
+        this.bson = bson;
+        return this;
+      }
+
+      /**
+       * Sets the lambda type.
+       *
+       * @param lambdaType the lambda type
+       * @return the builder
+       */
+      public Builder withLambdaType(LambdaType lambdaType) {
+        this.lambdaType = lambdaType;
+        return this;
+      }
+
+      /**
+       * Sets the element match context.
+       *
+       * @param elementMatchContext the element match context
+       * @return the builder
+       */
+      public Builder withElementMatchContext(ElementMatchContext elementMatchContext) {
+        this.elementMatchContext = elementMatchContext;
+        return this;
+      }
+
+      /**
+       * Builds the LambdaLeaf.
+       *
+       * @return the lambda leaf
+       */
+      public LambdaLeaf build() {
+        return new LambdaLeaf(bson, lambdaType, elementMatchContext);
+      }
+    }
+  }
+
+  /** Context for the MongoFilterVisitor. */
+  public static class MongoFilterVisitorContext {
+    private final boolean isLambdaAnyContext;
+    private final Map<String, LambdaLeaf> lambdaVariableAliases;
+    private final boolean isExprMode;
+    private final ElementMatchContext elementMatchContext;
+    private final boolean isLambdaAllContext;
+    private final boolean isRootContext;
+
+    /**
+     * Creates a new visitor context.
+     *
+     * @param isLambdaAnyContext whether it's an ANY lambda context
+     * @param lambdaVariableAliases map of lambda variable aliases
+     * @param isExprMode whether it's in expression mode
+     * @param elementMatchContext the element match context
+     * @param isLambdaAllContext whether it's an ALL lambda context
+     * @param isRootContext whether it's the root context
+     */
+    public MongoFilterVisitorContext(
+        boolean isLambdaAnyContext,
+        Map<String, LambdaLeaf> lambdaVariableAliases,
+        boolean isExprMode,
+        ElementMatchContext elementMatchContext,
+        boolean isLambdaAllContext,
+        boolean isRootContext) {
+      this.isLambdaAnyContext = isLambdaAnyContext;
+      this.lambdaVariableAliases = lambdaVariableAliases;
+      this.isExprMode = isExprMode;
+      this.elementMatchContext = elementMatchContext;
+      this.isLambdaAllContext = isLambdaAllContext;
+      this.isRootContext = isRootContext;
+    }
+
+    /**
+     * Returns whether it's an ANY lambda context.
+     *
+     * @return true if it's an ANY lambda context, false otherwise
+     */
+    public boolean isLambdaAnyContext() {
+      return isLambdaAnyContext;
+    }
+
+    /**
+     * Returns the map of lambda variable aliases.
+     *
+     * @return the lambda variable aliases
+     */
+    public Map<String, LambdaLeaf> getLambdaVariableAliases() {
+      return lambdaVariableAliases;
+    }
+
+    /**
+     * Returns whether it's in expression mode.
+     *
+     * @return true if it's in expression mode, false otherwise
+     */
+    public boolean isExprMode() {
+      return isExprMode;
+    }
+
+    /**
+     * Returns the element match context.
+     *
+     * @return the element match context
+     */
+    public ElementMatchContext getElementMatchContext() {
+      return elementMatchContext;
+    }
+
+    /**
+     * Returns whether it's an ALL lambda context.
+     *
+     * @return true if it's an ALL lambda context, false otherwise
+     */
+    public boolean isLambdaAllContext() {
+      return isLambdaAllContext;
+    }
+
+    /**
+     * Returns whether it's the root context.
+     *
+     * @return true if it's the root context, false otherwise
+     */
+    public boolean isRootContext() {
+      return isRootContext;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      MongoFilterVisitorContext that = (MongoFilterVisitorContext) o;
+      return isLambdaAnyContext == that.isLambdaAnyContext
+          && isExprMode == that.isExprMode
+          && isLambdaAllContext == that.isLambdaAllContext
+          && isRootContext == that.isRootContext
+          && Objects.equals(lambdaVariableAliases, that.lambdaVariableAliases)
+          && Objects.equals(elementMatchContext, that.elementMatchContext);
+    }
+
+    @Override
+    public int hashCode() {
+      return Objects.hash(
+          isLambdaAnyContext,
+          lambdaVariableAliases,
+          isExprMode,
+          elementMatchContext,
+          isLambdaAllContext,
+          isRootContext);
+    }
+
+    @Override
+    public String toString() {
+      return "MongoFilterVisitorContext{"
+          + "isLambdaAnyContext="
+          + isLambdaAnyContext
+          + ", lambdaVariableAliases="
+          + lambdaVariableAliases
+          + ", isExprMode="
+          + isExprMode
+          + ", elementMatchContext="
+          + elementMatchContext
+          + ", isLambdaAllContext="
+          + isLambdaAllContext
+          + ", isRootContext="
+          + isRootContext
+          + '}';
+    }
+
+    /**
+     * Returns the parent lambda variable name.
+     *
+     * @return the parent lambda variable, or null if not available
+     */
     public String parentLambdaVariable() {
       return lambdaVariableAliases == null || lambdaVariableAliases.size() < 2
           ? null
@@ -1621,6 +2070,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               .get();
     }
 
+    /**
+     * Returns the last lambda variable name.
+     *
+     * @return the last lambda variable, or null if not available
+     */
     public String lastLambdaVariable() {
       return lambdaVariableAliases == null || lambdaVariableAliases.isEmpty()
           ? null
@@ -1631,56 +2085,95 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               .get();
     }
 
+    /**
+     * Returns whether it's a nested ALL lambda context.
+     *
+     * @return true if it's a nested ALL lambda context, false otherwise
+     */
     public boolean isNestedLambdaAllContext() {
       // TODO rename it to is any
       return lambdaVariableAliases != null
           && !lambdaVariableAliases.isEmpty()
           && lambdaVariableAliases.entrySet().stream()
-              .anyMatch(entry -> LambdaType.ALL.equals(entry.getValue().lambdaType()));
+              .anyMatch(entry -> LambdaType.ALL.equals(entry.getValue().getLambdaType()));
     }
 
+    /**
+     * Returns whether it's a nested element match context.
+     *
+     * @return true if it's a nested element match context, false otherwise
+     */
     public boolean isNestedElementMatchContext() {
       return lambdaVariableAliases != null
           && !lambdaVariableAliases.isEmpty()
           && lambdaVariableAliases.entrySet().stream()
-                  .filter(entry -> entry.getValue().elementMatchContext() != null)
+                  .filter(entry -> entry.getValue().getElementMatchContext() != null)
                   .count()
               > 1;
     }
 
+    /**
+     * Returns whether there is at least one element match context on the current branch.
+     *
+     * @return true if there is an element match context, false otherwise
+     */
     public boolean isAtLeastOneElementMatchContextOnBranch() {
       return lambdaVariableAliases != null
           && !lambdaVariableAliases.isEmpty()
           && lambdaVariableAliases.entrySet().stream()
-              .anyMatch(entry -> entry.getValue().elementMatchContext() != null);
+              .anyMatch(entry -> entry.getValue().getElementMatchContext() != null);
     }
 
+    /**
+     * Enriches the field path with the root path if necessary.
+     *
+     * @param field the field name
+     * @return the enriched field path
+     */
     public String enrichFieldPathWithRootPathIfNecessary(String field) {
       return lambdaVariableAliases == null || lambdaVariableAliases.size() < 2
           ? field
           : lambdaVariableAliases.entrySet().stream()
                   .limit(lambdaVariableAliases.size() - 1)
-                  .map(entry -> extractField(entry.getValue().bson()))
+                  .map(entry -> extractField(entry.getValue().getBson()))
                   .collect(Collectors.joining("."))
               + "."
               + field;
     }
 
+    /**
+     * Enriches the field path with the root path.
+     *
+     * @param field the field name
+     * @return the enriched field path
+     */
     public String enrichFieldPathWithRootPath(String field) {
       return lambdaVariableAliases == null || lambdaVariableAliases.isEmpty()
           ? field
           : lambdaVariableAliases.entrySet().stream()
-                  .map(entry -> extractField(entry.getValue().bson()))
+                  .map(entry -> extractField(entry.getValue().getBson()))
                   .collect(Collectors.joining("."))
               + "."
               + field;
     }
 
+    /**
+     * Resolves the full EDM path for the given member.
+     *
+     * @param member the member
+     * @return the full EDM path
+     */
     public String resolveFullEdmPathForMember(Member member) {
       String path = resolveFullPathForMember(member);
       return path.replace(".", "/");
     }
 
+    /**
+     * Resolves the full path for the given member.
+     *
+     * @param member the member
+     * @return the full path
+     */
     public String resolveFullPathForMember(Member member) {
       Iterator<UriResource> it = member.getResourcePath().getUriResourceParts().iterator();
       StringBuilder sb = new StringBuilder();
@@ -1705,6 +2198,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       return sb.toString();
     }
 
+    /**
+     * Resolves the full path for the given lambda variable.
+     *
+     * @param lambdaVariable the lambda variable name
+     * @return the full path
+     */
     public String resolveFullPathForLambdaVariable(String lambdaVariable) {
       StringBuilder sb = new StringBuilder();
       Iterator<Map.Entry<String, LambdaLeaf>> it = lambdaVariableAliases.entrySet().iterator();
@@ -1717,7 +2216,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         sb.append(
             entry
                 .getValue()
-                .bson
+                .getBson()
                 .toBsonDocument()
                 .get(ODATA_MEMBER_EDM_PROPERTY)
                 .asString()
@@ -1730,54 +2229,106 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       return sb.toString();
     }
 
+    /**
+     * Returns whether it's an element match context.
+     *
+     * @return true if it's an element match context, false otherwise
+     */
     public boolean isElementMatchContext() {
       return elementMatchContext != null;
     }
 
+    /**
+     * Creates a new builder for MongoFilterVisitorContext.
+     *
+     * @return the builder
+     */
     public static MongoFilterVisitorContextBuilder builder() {
       return new MongoFilterVisitorContextBuilder();
     }
 
+    /** Builder for MongoFilterVisitorContext. */
     public static class MongoFilterVisitorContextBuilder {
       private boolean isLambdaAnyContext;
-      private LinkedHashMap<String, LambdaLeaf> lambdaVariableAliases;
+      private Map<String, LambdaLeaf> lambdaVariableAliases;
       private boolean isExprMode;
       private ElementMatchContext elementMatchContext;
       private boolean isLambdaAllContext;
       private boolean isRootContext;
 
+      /**
+       * Sets whether it's an ANY lambda context.
+       *
+       * @param isLambdaAnyContext whether it's an ANY lambda context
+       * @return the builder
+       */
       public MongoFilterVisitorContextBuilder isLambdaAnyContext(boolean isLambdaAnyContext) {
         this.isLambdaAnyContext = isLambdaAnyContext;
         return this;
       }
 
+      /**
+       * Sets the lambda variable aliases.
+       *
+       * @param lambdaVariableAliases map of lambda variable aliases
+       * @return the builder
+       */
       public MongoFilterVisitorContextBuilder lambdaVariableAliases(
-          LinkedHashMap<String, LambdaLeaf> lambdaVariableAliases) {
+          Map<String, LambdaLeaf> lambdaVariableAliases) {
         this.lambdaVariableAliases = lambdaVariableAliases;
         return this;
       }
 
+      /**
+       * Sets whether it's in expression mode.
+       *
+       * @param isExprMode whether it's in expression mode
+       * @return the builder
+       */
       public MongoFilterVisitorContextBuilder isExprMode(boolean isExprMode) {
         this.isExprMode = isExprMode;
         return this;
       }
 
+      /**
+       * Sets the element match context.
+       *
+       * @param elementMatchContext the element match context
+       * @return the builder
+       */
       public MongoFilterVisitorContextBuilder elementMatchContext(
           ElementMatchContext elementMatchContext) {
         this.elementMatchContext = elementMatchContext;
         return this;
       }
 
+      /**
+       * Sets whether it's an ALL lambda context.
+       *
+       * @param isLambdaAllContext whether it's an ALL lambda context
+       * @return the builder
+       */
       public MongoFilterVisitorContextBuilder isLambdaAllContext(boolean isLambdaAllContext) {
         this.isLambdaAllContext = isLambdaAllContext;
         return this;
       }
 
-      private MongoFilterVisitorContextBuilder isRootContext(boolean isRootContext) {
+      /**
+       * Sets whether it's the root context.
+       *
+       * @param isRootContext whether it's the root context
+       * @return the builder
+       */
+      public MongoFilterVisitorContextBuilder isRootContext(boolean isRootContext) {
         this.isRootContext = isRootContext;
         return this;
       }
 
+      /**
+       * Builds the MongoFilterVisitorContext.
+       *
+       * @return the visitor context
+       */
       public MongoFilterVisitorContext build() {
         return new MongoFilterVisitorContext(
             isLambdaAnyContext,

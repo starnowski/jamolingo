@@ -9,6 +9,7 @@ import java.util.UUID;
 import org.bson.types.Binary;
 import org.bson.types.Decimal128;
 
+/** Converter that transforms OData literal values into BSON-compatible objects. */
 public class ODataToBsonConverter {
 
   /**

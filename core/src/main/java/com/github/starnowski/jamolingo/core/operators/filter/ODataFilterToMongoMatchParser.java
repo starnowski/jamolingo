@@ -13,13 +13,34 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+/** Parser that converts OData filter options into MongoDB match stages. */
 public class ODataFilterToMongoMatchParser {
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorResult.
+   *
+   * @param filter the OData filter option
+   * @param edm the Entity Data Model
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
   public FilterOperatorResult parse(FilterOption filter, Edm edm)
       throws ODataApplicationException, ExpressionVisitException {
     return parse(filter, edm, DefaultEdmMongoContextFacade.builder().build());
   }
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorResult using the specified path
+   * resolver.
+   *
+   * @param filter the OData filter option
+   * @param edm the Entity Data Model
+   * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
   public FilterOperatorResult parse(
       FilterOption filter, Edm edm, EdmPropertyMongoPathResolver edmMongoContextFacade)
       throws ODataApplicationException, ExpressionVisitException {
