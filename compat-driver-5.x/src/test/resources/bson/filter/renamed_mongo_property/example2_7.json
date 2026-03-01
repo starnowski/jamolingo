@@ -9,7 +9,7 @@
   "renamed_password": "aaa",
   "renamed_nestedObject": {
     "renamed_tokens": ["007", "7", "Bond", "James"],
-    "numbers": [107, 113],
+    "renamed_numbers": [107, 113],
     "renamed_index": "a"
   }
 }
