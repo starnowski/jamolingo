@@ -13,7 +13,7 @@
       "renamed_primitiveStringList": ["item11", "item12"],
       "renamed_primitiveNumberList": [11, 12],
       "renamed_someDateTime": { "$date": "2024-04-01T10:00:00Z" },
-      "someDate": { "$date": "2024-04-01T00:00:00Z" },
+      "renamed_someDate": { "$date": "2024-04-01T00:00:00Z" },
       "someUuid": { "$binary": { "base64": "uSHx3Ty8BJX9q4zRTTPwqg==", "subType": "04" } },
       "nestedComplexArray": [
         { "stringVal": "matchAll", "numberVal": 71 },
