@@ -19,7 +19,7 @@
   "renamed_timestamp": {
     "$date": "2024-07-20T10:15:26.99Z"
   },
-  "password": "password1",
+  "renamed_password": "password1",
   "uuidProp": {
     "$binary": {
       "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
