@@ -9,7 +9,7 @@
   "renamed_complexList": [
     {
       "renamed_someString": "Cherry",
-      "someNumber": 50,
+      "renamed_someNumber": 50,
       "primitiveStringList": ["item5", "item6"],
       "primitiveNumberList": [5, 6],
       "someDateTime": { "$date": "2024-03-01T10:00:00Z" },
@@ -21,7 +21,7 @@
     },
     {
       "renamed_someString": "Berry",
-      "someNumber": 60,
+      "renamed_someNumber": 60,
       "primitiveStringList": ["item5", "item6"],
       "primitiveNumberList": [5, 6],
       "someDateTime": { "$date": "2024-03-02T10:00:00Z" },

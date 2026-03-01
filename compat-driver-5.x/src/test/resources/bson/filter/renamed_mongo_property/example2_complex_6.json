@@ -9,7 +9,7 @@
   "renamed_complexList": [
     {
       "renamed_someString": "MultipleNested",
-      "someNumber": 70,
+      "renamed_someNumber": 70,
       "primitiveStringList": ["item11", "item12"],
       "primitiveNumberList": [11, 12],
       "someDateTime": { "$date": "2024-04-01T10:00:00Z" },
