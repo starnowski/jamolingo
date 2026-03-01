@@ -7,7 +7,7 @@
   },
   "renamed_plainString": "example2",
   "renamed_password": "aaa",
-  "nestedObject": {
+  "renamed_nestedObject": {
     "tokens": ["007", "7", "Bond", "James"],
     "numbers": [107, 113],
     "index": "a"

@@ -17,7 +17,7 @@
     50,
     60
   ],
-  "nestedObject": {
+  "renamed_nestedObject": {
     "index": "b"
   }
 }
