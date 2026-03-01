@@ -1371,10 +1371,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         if (!this.context.isExprMode()) {
           throw new ExpressionOperantRequiredException(
               "Operant [%s] mapped from [%s] requires expr"
-                  .formatted(mongoOperator.mappedFunction(), methodCall.toString()));
+                  .formatted(mongoOperator.getMappedFunction(), methodCall.toString()));
         }
       }
-      return new Document(mongoOperator.mappedFunction(), passedValue);
+      return new Document(mongoOperator.getMappedFunction(), passedValue);
     } else {
 
       switch (methodCall) {

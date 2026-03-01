@@ -8,7 +8,73 @@ public class ODataMongoFunctionMapper {
   private static final Map<String, String> ZERO_ARGUMENT_FUNCTION_MAP = new HashMap<>();
   private static final Map<String, MappedFunction> ONE_ARGUMENT_FUNCTION_MAP = new HashMap<>();
 
-  public record MappedFunction(String mappedFunction, boolean isResultBoolean) {}
+  public static class MappedFunction {
+
+    private final String mappedFunction;
+    private final boolean isResultBoolean;
+
+    public MappedFunction(String mappedFunction, boolean isResultBoolean) {
+      this.mappedFunction = mappedFunction;
+      this.isResultBoolean = isResultBoolean;
+    }
+
+    public String getMappedFunction() {
+      return mappedFunction;
+    }
+
+    public boolean isResultBoolean() {
+      return isResultBoolean;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      MappedFunction that = (MappedFunction) o;
+      return isResultBoolean == that.isResultBoolean
+          && java.util.Objects.equals(mappedFunction, that.mappedFunction);
+    }
+
+    @Override
+    public int hashCode() {
+      return java.util.Objects.hash(mappedFunction, isResultBoolean);
+    }
+
+    @Override
+    public String toString() {
+      return "MappedFunction{"
+          + "mappedFunction='"
+          + mappedFunction
+          + '\''
+          + ", isResultBoolean="
+          + isResultBoolean
+          + '}';
+    }
+
+    public static Builder builder() {
+      return new Builder();
+    }
+
+    public static class Builder {
+
+      private String mappedFunction;
+      private boolean isResultBoolean;
+
+      public Builder withMappedFunction(String mappedFunction) {
+        this.mappedFunction = mappedFunction;
+        return this;
+      }
+
+      public Builder withIsResultBoolean(boolean isResultBoolean) {
+        this.isResultBoolean = isResultBoolean;
+        return this;
+      }
+
+      public MappedFunction build() {
+        return new MappedFunction(mappedFunction, isResultBoolean);
+      }
+    }
+  }
 
   public static MappedFunction mf(String mappedFunction, boolean isResultBoolean) {
     return new MappedFunction(mappedFunction, isResultBoolean);
