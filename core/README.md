@@ -53,6 +53,7 @@ The `$filter` operator allows clients to filter a collection of resources. The `
     - **Math functions:** `floor`, `ceiling`, `round`.
     - **Date and time functions:** `year`, `month`, `day`, `hour`, `minute`, `second`.
     - **Collection operators:** `any()`, `all()`.
+        - **all operator:** Applies a Boolean expression to each member of a collection and returns true if the expression is true for all members of the collection, otherwise it returns false. As per [OData specification](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_all), the `all` operator always returns true for an empty collection.
     - **Collection count:** `/$count`.
 - Handles nested property paths and complex types.
 - Supports mapping overrides for MongoDB field names and nested structures (e.g., wrapper objects).
