@@ -108,6 +108,7 @@ public abstract class AbstractFilterOperatorRenameMongoPropertyTest
           IOException,
           URISyntaxException {
     // GIVEN
+    dropIndexesForCollection("testdb", "Items");
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
