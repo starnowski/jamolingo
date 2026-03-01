@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 * [Unreleased](#unreleased)
+* [0.5.0](#050---2026-03-01)
 * [0.4.1](#041---2026-01-26)
 * [0.4.0](#040---2026-01-24)
 * [0.3.0](#030---2026-01-21)
@@ -13,6 +14,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [0.1.0](#010---2026-01-18)
 
 ## [Unreleased]
+
+## [0.5.0] - 2026-03-01
+
+### Added
+
+#### Core Module
+*   Added support for `$filter` operator translation to MongoDB `$match` stage ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   Added support for OData comparison operators: `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `in` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   Added support for OData logical operators: `and`, `or`, `not` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   Added support for OData collection operators: `any()`, `all()` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   Added support for OData string functions: `tolower`, `toupper`, `trim`, `contains`, `startswith`, `endswith`, `length` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   Added support for OData math functions: `floor`, `ceiling`, `round` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   Added support for OData date and time functions: `year`, `month`, `day`, `hour`, `minute`, `second` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   `com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   `com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   `com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   Added support for MongoDB field renaming and wrapper objects in filter mappings ([#17](https://github.com/starnowski/jamolingo/issues/17))
+
+#### Compatibility Driver 5.x Module
+*   Added integration tests for OData `$filter` operators ([#17](https://github.com/starnowski/jamolingo/issues/17))
+
+### Changed
+
+#### Core Module
+*   Updated `com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade` to implement `com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver` ([#17](https://github.com/starnowski/jamolingo/issues/17))
+*   Added `resolveMongoPathForEDMPath(String edmPath)` method to `com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade` ([#17](https://github.com/starnowski/jamolingo/issues/17))
 
 ## [0.4.1] - 2026-01-26
 
