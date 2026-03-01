@@ -20,7 +20,7 @@
     "$date": "2024-06-19T10:15:26.99Z"
   },
   "renamed_password": "yedUsFwdkelQbxeTeQOvaScfqIOOmaa",
-  "uuidProp": {
+  "renamed_uuidProp": {
     "$binary": {
       "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
       "subType": "04"
