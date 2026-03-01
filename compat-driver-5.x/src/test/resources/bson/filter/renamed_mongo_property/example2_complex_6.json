@@ -8,7 +8,7 @@
   "renamed_plainString": "Doc6",
   "renamed_complexList": [
     {
-      "someString": "MultipleNested",
+      "renamed_someString": "MultipleNested",
       "someNumber": 70,
       "primitiveStringList": ["item11", "item12"],
       "primitiveNumberList": [11, 12],

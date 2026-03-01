@@ -8,7 +8,7 @@
   "renamed_plainString": "Doc2",
   "renamed_complexList": [
     {
-      "someString": "Banana",
+      "renamed_someString": "Banana",
       "someNumber": 30,
       "primitiveStringList": ["item3", "item4"],
       "primitiveNumberList": [3, 4],
@@ -20,7 +20,7 @@
       ]
     },
     {
-      "someString": "Bandana",
+      "renamed_someString": "Bandana",
       "someNumber": 40,
       "primitiveStringList": ["item3", "item4"],
       "primitiveNumberList": [3, 4],
