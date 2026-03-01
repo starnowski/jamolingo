@@ -10,7 +10,7 @@
     "star trek",
     "star wars"
   ],
-  "numericArray": [
+  "renamed_numericArray": [
     100,
     200
   ]
