@@ -2,8 +2,6 @@ package com.github.starnowski.jamolingo.compat.driver.operators.filter;
 
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
-import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder;
-import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory;
 import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.mongodb.client.MongoClient;
@@ -17,10 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
@@ -52,15 +47,7 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
-
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
-    ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
-    var odataMapping = factory.build(edm.getSchema("MyService"));
-    var entityMapping = odataMapping.getEntities().get("Example2");
-    EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder =
-        new EntityPropertiesMongoPathContextBuilder();
-    var context = entityPropertiesMongoPathContextBuilder.build(entityMapping);
-
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
     ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser();
@@ -82,6 +69,62 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
             .collect(Collectors.toSet());
     Assertions.assertEquals(expectedPlainStrings, actual);
     logTestsObject(filter, pipeline);
+  }
+
+  protected void shouldUsedExpectedIndexesBasedOnFilterOperator(
+          String filter, String expectedIndex)
+          throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("Items");
+    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
+    UriInfo uriInfo =
+            new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
+    ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser();
+    FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), edm);
+    /*
+     * Important! This test purpose is not to validate correct used properties.
+     * Such tests are part of the core module where tests checks if the ODataFilterToMongoMatchParser
+     * returns correct properties.
+     */
+    List<String> usedProperties = result.getUsedMongoDocumentProperties();
+    createIndexesForPropertyInCollection("testdb", "Items", new HashSet<>(usedProperties));
+
+    // WHEN
+
+
+    // THEN
+
+  }
+
+  protected void createIndexesForPropertyInCollection(String database, String collectionName, Set<String> properties) {
+    properties.forEach(pro -> createIndexForPropertyInCollection(database, collectionName, pro));
+  }
+
+  protected void createIndexForPropertyInCollection(String database, String collectionName, String property) {
+    MongoCollection<Document> col =
+              mongoClient.getDatabase(database).getCollection(collectionName);
+      col.createIndex(new Document(property, 1));
+  }
+
+  protected void dropIndexesForCollections(String database, Set<String> collectionNames) {
+    collectionNames.forEach(col -> dropIndexesForCollection(database, col));
+  }
+
+  protected void dropIndexesForCollection(String database, String collectionName) {
+    try {
+
+      MongoCollection<Document> col =
+              mongoClient.getDatabase(database).getCollection(collectionName);
+      col.dropIndexes();
+    } catch (Exception exception) {
+      // Do nothing
+      exception.printStackTrace();
+    }
   }
 
   private void logTestsObject(String filterString, List<Bson> pipeline) {
