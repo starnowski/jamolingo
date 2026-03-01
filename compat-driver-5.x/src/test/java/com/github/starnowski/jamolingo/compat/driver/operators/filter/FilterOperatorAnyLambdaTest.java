@@ -258,7 +258,8 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
                 "tags/any(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))"),
             Set.of("Mario", "Oleksa"),
             "FETCH + IXSCAN"),
-        Arguments.of(List.of("tags/any(t:contains(t,'starlord'))"), Set.of("Oleksa"), "FETCH + IXSCAN"),
+        Arguments.of(
+            List.of("tags/any(t:contains(t,'starlord'))"), Set.of("Oleksa"), "FETCH + IXSCAN"),
         Arguments.of(
             List.of("tags/any(t:endswith(t,'web') or endswith(t,'trap'))"),
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text"),
@@ -338,9 +339,12 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
             "complexList/any(c:startswith(c/someString,'Ap'))",
             Set.of("Doc1", "Doc4", "Doc5"),
             "FETCH + IXSCAN"),
-        Arguments.of("complexList/any(c:contains(c/someString,'ana'))", Set.of("Doc2"), "FETCH + IXSCAN"),
         Arguments.of(
-            "complexList/any(c:endswith(c/someString,'erry'))", Set.of("Doc3", "Doc4"), "FETCH + IXSCAN"),
+            "complexList/any(c:contains(c/someString,'ana'))", Set.of("Doc2"), "FETCH + IXSCAN"),
+        Arguments.of(
+            "complexList/any(c:endswith(c/someString,'erry'))",
+            Set.of("Doc3", "Doc4"),
+            "FETCH + IXSCAN"),
         Arguments.of(
             "complexList/any(c:contains(c/someString,'e'))",
             Set.of("Doc1", "Doc3", "Doc4", "Doc6"),
