@@ -1,0 +1,15 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "sivsoWtQTbS00EnGI7PbuQ==",
+      "subType": "04"
+    }
+  },
+  "renamed_plainString": "example2",
+  "renamed_password": "aaa",
+  "renamed_nestedObject": {
+    "renamed_tokens": ["007", "7", "Bond", "James"],
+    "renamed_numbers": [107, 113],
+    "renamed_index": "a"
+  }
+}
