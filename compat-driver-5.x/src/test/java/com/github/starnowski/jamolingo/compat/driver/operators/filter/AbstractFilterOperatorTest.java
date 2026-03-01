@@ -4,6 +4,8 @@ import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
+import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult;
+import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -93,12 +95,15 @@ public abstract class AbstractFilterOperatorTest extends AbstractItTest {
      */
     List<String> usedProperties = result.getUsedMongoDocumentProperties();
     createIndexesForPropertyInCollection("testdb", "Items", new HashSet<>(usedProperties));
+    List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
+    ExplainAnalyzeResultFactory explainAnalyzeResultFactory = new ExplainAnalyzeResultFactory();
+    Document explainDoc = collection.aggregate(pipeline).explain();
 
     // WHEN
-
+    ExplainAnalyzeResult explainResult = explainAnalyzeResultFactory.build(explainDoc);
 
     // THEN
-
+    Assertions.assertEquals(expectedIndex, explainResult.getIndexValue().getValue());
   }
 
   protected void createIndexesForPropertyInCollection(String database, String collectionName, Set<String> properties) {
