@@ -19,17 +19,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 @QuarkusTest
 public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
 
-  private static final Set<String> ALL_PLAIN_STRING_VALUE =
-      Set.of(
-          "eOMtThyhVNLWUZNRcBaQKxI",
-          "Some text",
-          "Poem",
-          "Mario",
-          "Oleksa",
-          "example1",
-          "example2",
-          "only_id_and_plainString");
-
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
@@ -229,7 +218,7 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
         Arguments.of(
             "tags/any(t:contains(t,'spider'))",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text"),
-            "COLLSCAN"),
+            "FETCH + IXSCAN"),
         Arguments.of(
             "numericArray/any(n:n gt 25)",
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Mario", "Oleksa"),
@@ -247,7 +236,7 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
         Arguments.of(
             List.of("tags/any(t:t ne 'no such text' and t ne 'no such word')"),
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa"),
-            "FETCH + IXSCAN"),
+            "COLLSCAN"),
         Arguments.of(
             List.of("tags/any(t:startswith(t,'star') and t ne 'starlord')"),
             Set.of("Mario", "Oleksa"),
@@ -268,12 +257,12 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
             List.of(
                 "tags/any(t:contains(t,'starlord') or contains(t,'trek') or contains(t,'wars'))"),
             Set.of("Mario", "Oleksa"),
-            "COLLSCAN"),
-        Arguments.of(List.of("tags/any(t:contains(t,'starlord'))"), Set.of("Oleksa"), "COLLSCAN"),
+            "FETCH + IXSCAN"),
+        Arguments.of(List.of("tags/any(t:contains(t,'starlord'))"), Set.of("Oleksa"), "FETCH + IXSCAN"),
         Arguments.of(
             List.of("tags/any(t:endswith(t,'web') or endswith(t,'trap'))"),
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text"),
-            "COLLSCAN"),
+            "FETCH + IXSCAN"),
         Arguments.of(
             List.of("tags/any(t:length(t) eq 9)"),
             Set.of("Some text", "Poem", "Mario", "Oleksa"),
