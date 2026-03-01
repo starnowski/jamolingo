@@ -14,6 +14,13 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import jakarta.inject.Inject;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -25,14 +32,6 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
-
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public abstract class AbstractFilterOperatorMongoPropertyWrapperTest
     extends AbstractBaseFilterOperatorTest {
@@ -92,7 +91,9 @@ public abstract class AbstractFilterOperatorMongoPropertyWrapperTest
     Assertions.assertEquals(expectedPlainStrings.size(), results.size());
     Set<String> actual =
         results.stream()
-            .map(d -> d.get("renamed_plainString"))
+            .map(d -> d.get("wrapper_plainString"))
+            .map(d -> (Document) d)
+            .map(d -> d.get("plainString"))
             .filter(Objects::nonNull)
             .map(s -> (String) s)
             .collect(Collectors.toSet());
