@@ -1,0 +1,122 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "FiNvoWtQTbS00EnGI7PbuQ==",
+      "subType": "04"
+    }
+  },
+  "plainString": "Poem",
+  "base64Data": {
+    "$binary": {
+      "base64": "3ZXRqhY=",
+      "subType": "00"
+    }
+  },
+  "fileUpload": null,
+  "birthDate": {
+    "$date": "2024-06-18T00:00:00Z"
+  },
+  "timestamp": {
+    "$date": "2024-06-19T10:15:26.99Z"
+  },
+  "password": "yedUsFwdkelQbxeTeQOvaScfqIOOmaa",
+  "uuidProp": {
+    "$binary": {
+      "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
+      "subType": "04"
+    }
+  },
+  "genericNumber": 0.7231742029971469,
+  "floatValue": 0.7231741547584534,
+  "doubleValue": 0.7231742029971469,
+  "genericInteger": "295011414634219278107705585431435293517",
+  "smallInteger": -113,
+  "bigInteger": -5106534569952410475,
+  "tags": [
+    "developer",
+    "founder",
+    "visioner",
+    "focus",
+    "llm agent",
+    "LLM"
+  ],
+  "numericArray": [
+    1,
+    2,
+    3
+  ],
+  "metadata": {
+    "tOXr": 180436825,
+    "jNBgpTmxx": 180619263,
+    "FkG": -399314315,
+    "JuhuUTlSCYdTVoSsJGyClHNnCWZGwZ": 1554447712,
+    "rDetIVodUvethundXqBJQ": -381351713,
+    "ODRhfGEfX": 564447673,
+    "JUt": -1874478852,
+    "GGiDYDmCRViOaAXNumPGEBX": 1794424409,
+    "zQeAydAJIwkGuKWiVZLRcElhreuxvw": -227662555,
+    "YaahxwwkK": -1371515703,
+    "MedmIqFUtdxTB": 984794272,
+    "DiACnbEKIFidn": 999944940,
+    "ExoLZAnxWro": -115385874,
+    "BIJtaer": 2039750358,
+    "QEskqEWDSDObmCGpVd": -1641930116,
+    "bplgXS": 1160028666,
+    "cTVyrXOaoLCFQUOEXynhaz": -1922546308,
+    "xlpKnXmsjfwUTYgfExSOnq": -981329138,
+    "MMSKu": -40338876,
+    "yLUuEMaNwExpndMYYptSXZv": 100537626,
+    "pIoQM": -1740301282,
+    "IgYnmBOoTiRwXILYPxNoVlgkbSZ": -876464727,
+    "WtKhlfZzDZ": 1029728341,
+    "XgLyqkDjxtCDIj": 338183148,
+    "oBeMdQkAoYZDjfWhbzkmA": 2012401666,
+    "YVeSelxWdEtYtJHV": -270038349,
+    "veErKUBEqCrhrtgx": -1202251234,
+    "HuubOREhRXJoDCVcLCRmll": 1722333797,
+    "cdpW": 386661611,
+    "IoTtOmcBeivNUYv": 676304360,
+    "qPFJOkHIpWuqUBpPiSGKutNzPuBDe": 74538472,
+    "FthRIkE": -222292723,
+    "DwmrfUyJVSbdBFIyjTfpDItaXB": 331137598,
+    "ImfitPVWqHXHNeZIUAYI": 2113174829,
+    "jWgnTkIeIrtqMPl": 1738302176,
+    "ToPMiWqHMXgOUxQpXiGHHqr": -1676529524,
+    "VIhYOTAybWXyBzGqRe": 530242857,
+    "YFBlWcoVdFXlfhbUilkMpiHDMU": 1322113266,
+    "etqguztl": -746828122,
+    "PAgcjtZAOBahwMGwNikIaKuxYYVASJc": 1736500374,
+    "wXgwbUXmExZAqY": -991172969,
+    "BXjwiQjQKBhPbNYa": -1559850634,
+    "LcdeWTdXPlQgjMVXbpRYzBT": 275180545,
+    "M": -639157124,
+    "O": 489890503,
+    "dJStFJtVTQqOCjYYKFPwjvFKLQnmKD": -2066650551,
+    "IaSPolvldIfZTciudeieeoLVjkmgvz": -359449647,
+    "JkjHewSlMWOIVYZjIEB": -713122723,
+    "wKkOqxJSqDjAtcDF": -1976875313,
+    "Wru": -95951681,
+    "AzTaco": -1125634209,
+    "teOlrImKiDpJbLDnvK": -17943144,
+    "THjDRbPaqGjvVLsIUO": 732319207,
+    "yybxVLsNlAeLWVhnIULZAyLBms": -959193207,
+    "etgDUdmb": 1595478504,
+    "aNVLssRUe": 426918864,
+    "zGVyIdgFUYNdkFYkkjNIeENlreqFLC": 1096370502,
+    "oDLDPR": 1005317236,
+    "YIvewgAhbiAslSgvGJGPPEpl": -1059874157,
+    "PBzMiJFouxILNv": -1611558832,
+    "OV": 2144702081,
+    "jzlglRKAeamYUmWJtnJZLqwakeYcea": -344075686,
+    "NBaxYoMSiMNxLXFLxIok": 1924337364,
+    "TiQaUNWftniOAotnzWvkQt": -590267109,
+    "hXJISTd": 2009084338,
+    "dwprLNbgNvZUMpqAXLJbjE": -8607369,
+    "RRVabC": 1125930013,
+    "BItmxBtJpbqEfQgWhKXmKMICCEU": -1346031625,
+    "gEYzhlSTPkcSUyTSbBkU": 990014867,
+    "MFOPluIOMfSnzX": 1355778222,
+    "IQrWtYnHcO": 1223316712
+  },
+  "active": true
+}

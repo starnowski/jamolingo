@@ -89,7 +89,7 @@ public abstract class AbstractFilterOperatorRenameMongoPropertyTest extends Abst
     Assertions.assertEquals(expectedPlainStrings.size(), results.size());
     Set<String> actual =
         results.stream()
-            .map(d -> d.get("plainString"))
+            .map(d -> d.get("renamed_plainString"))
             .filter(Objects::nonNull)
             .map(s -> (String) s)
             .collect(Collectors.toSet());
