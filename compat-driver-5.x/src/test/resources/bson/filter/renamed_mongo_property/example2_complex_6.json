@@ -6,7 +6,7 @@
     }
   },
   "renamed_plainString": "Doc6",
-  "complexList": [
+  "renamed_complexList": [
     {
       "someString": "MultipleNested",
       "someNumber": 70,

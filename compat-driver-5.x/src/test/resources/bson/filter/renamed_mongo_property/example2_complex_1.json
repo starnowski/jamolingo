@@ -6,7 +6,7 @@
     }
   },
   "renamed_plainString": "Doc1",
-  "complexList": [
+  "renamed_complexList": [
     {
       "someString": "Apple",
       "someNumber": 10,
