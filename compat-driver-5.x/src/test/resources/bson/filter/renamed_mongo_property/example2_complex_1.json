@@ -10,7 +10,7 @@
     {
       "renamed_someString": "Apple",
       "renamed_someNumber": 10,
-      "primitiveStringList": ["item1", "item2"],
+      "renamed_primitiveStringList": ["item1", "item2"],
       "primitiveNumberList": [1, 2],
       "someDateTime": { "$date": "2024-01-01T10:00:00Z" },
       "someDate": { "$date": "2024-01-01T00:00:00Z" },
@@ -22,7 +22,7 @@
     {
       "renamed_someString": "Application",
       "renamed_someNumber": 20,
-      "primitiveStringList": ["item1", "item2"],
+      "renamed_primitiveStringList": ["item1", "item2"],
       "primitiveNumberList": [1, 2],
       "someDateTime": { "$date": "2024-01-02T10:00:00Z" },
       "someDate": { "$date": "2024-01-02T00:00:00Z" },
