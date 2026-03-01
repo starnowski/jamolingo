@@ -68,7 +68,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
    * @return true if it is a wrapper, false otherwise
    */
   public static boolean isBsonWrapper(Bson bson) {
-    if (bson instanceof Document doc) {
+    if (bson instanceof Document) {
+      Document doc = (Document) bson;
       return doc.containsKey(ODATA_BSON_WRAPPER_ORIGINAL)
           && doc.containsKey(ODATA_BSON_WRAPPER_PROPERTIES);
     }
@@ -306,7 +307,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     if (member.getResourcePath().getUriResourceParts().size() == 1) {
       String field = extractFieldName(member);
       if (member.getResourcePath().getUriResourceParts().get(0)
-          instanceof UriResourceLambdaVariable variable) {
+          instanceof UriResourceLambdaVariable) {
+        UriResourceLambdaVariable variable =
+            (UriResourceLambdaVariable) member.getResourcePath().getUriResourceParts().get(0);
         if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
             && this.context.getLambdaVariableAliases().containsKey(variable.getVariableName())) {
           if (this.context.isExprMode()) {
@@ -332,7 +335,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         return prepareMemberDocument(field, member);
       }
     } else if (member.getResourcePath().getUriResourceParts().get(0)
-        instanceof UriResourceLambdaVariable variable) {
+        instanceof UriResourceLambdaVariable) {
+      UriResourceLambdaVariable variable =
+          (UriResourceLambdaVariable) member.getResourcePath().getUriResourceParts().get(0);
       if (!variable.getVariableName().equals(this.context.lastLambdaVariable())
           && !this.context.isExprMode()) {
         throw new ExpressionOperantRequiredException(
@@ -344,7 +349,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               .getResourcePath()
               .getUriResourceParts()
               .get(member.getResourcePath().getUriResourceParts().size() - 1)
-          instanceof UriResourceProperty uriResourceProperty) {
+          instanceof UriResourceProperty) {
+        UriResourceProperty uriResourceProperty =
+            (UriResourceProperty)
+                member
+                    .getResourcePath()
+                    .getUriResourceParts()
+                    .get(member.getResourcePath().getUriResourceParts().size() - 1);
         fieldType = uriResourceProperty.getType();
       } else {
         List<UriResource> tmpList =
@@ -372,8 +383,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 .getResourcePath()
                 .getUriResourceParts()
                 .get(member.getResourcePath().getUriResourceParts().size() - 1);
-        if (last instanceof UriResourceLambdaAny any) {
-
+        if (last instanceof UriResourceLambdaAny) {
+          UriResourceLambdaAny any = (UriResourceLambdaAny) last;
           return getBsonForUriResourceLambdaAny(
               member,
               any,
@@ -381,7 +392,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               !this.context.isExprMode(),
               this.context.isExprMode(),
               variable.getVariableName());
-        } else if (last instanceof UriResourceLambdaAll all) {
+        } else if (last instanceof UriResourceLambdaAll) {
+          UriResourceLambdaAll all = (UriResourceLambdaAll) last;
           return getBsonForUriResourceLambdaAll(
               member,
               all,
@@ -415,11 +427,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               .getResourcePath()
               .getUriResourceParts()
               .get(member.getResourcePath().getUriResourceParts().size() - 1);
-      if (last instanceof UriResourceLambdaAny any) {
+      if (last instanceof UriResourceLambdaAny) {
+        UriResourceLambdaAny any = (UriResourceLambdaAny) last;
         String field = extractFieldName(member);
         // TODO Pass full field object
         return getBsonForUriResourceLambdaAny(member, any, prepareProperty(field, member));
-      } else if (last instanceof UriResourceLambdaAll all) {
+      } else if (last instanceof UriResourceLambdaAll) {
+        UriResourceLambdaAll all = (UriResourceLambdaAll) last;
         String field = extractFieldName(member);
         return getBsonForUriResourceLambdaAll(member, all, prepareProperty(field, member));
       } else if (last instanceof UriResourceCount) {
@@ -985,7 +999,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               context.resolveFullEdmPathForMember(member));
       String full = result.getMongoPath();
       if (member.getResourcePath().getUriResourceParts().get(0)
-          instanceof UriResourceLambdaVariable variable) {
+          instanceof UriResourceLambdaVariable) {
+        UriResourceLambdaVariable variable =
+            (UriResourceLambdaVariable) member.getResourcePath().getUriResourceParts().get(0);
         String lambdaPath =
             this.context
                 .resolveFullPathForLambdaVariable(variable.getVariableName())
@@ -1023,7 +1039,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               context.resolveFullEdmPathForMember(member));
       result.append(ODATA_MEMBER_MONGO_FIELD_FULL_PATH, mongoPathResolution.getMongoPath());
       if (member.getResourcePath().getUriResourceParts().get(0)
-          instanceof UriResourceLambdaVariable variable) {
+          instanceof UriResourceLambdaVariable) {
+        UriResourceLambdaVariable variable =
+            (UriResourceLambdaVariable) member.getResourcePath().getUriResourceParts().get(0);
         String lambdaPath =
             this.context
                 .resolveFullPathForLambdaVariable(variable.getVariableName())
@@ -1067,9 +1085,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               context.resolveFullEdmPathForMember(member));
       mongoField = mongoPathResolution.getMongoPath();
       mongoFullPath = mongoPathResolution.getMongoPath();
-      if (member.getResourcePath().getUriResourceParts().get(0)
-              instanceof UriResourceLambdaVariable variable
+      if (member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceLambdaVariable
           && member.getResourcePath().getUriResourceParts().size() > 1) {
+        UriResourceLambdaVariable variable =
+            (UriResourceLambdaVariable) member.getResourcePath().getUriResourceParts().get(0);
         String lambdaPath =
             this.context
                 .resolveFullPathForLambdaVariable(variable.getVariableName())
@@ -2181,9 +2200,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       while (it.hasNext()) {
         UriResource path = it.next();
         String value = null;
-        if (path instanceof UriResourceLambdaVariable variable) {
+        if (path instanceof UriResourceLambdaVariable) {
+          UriResourceLambdaVariable variable = (UriResourceLambdaVariable) path;
           value = resolveFullPathForLambdaVariable(variable.getVariableName());
-        } else if (path instanceof UriResourceProperty property) {
+        } else if (path instanceof UriResourceProperty) {
+          UriResourceProperty property = (UriResourceProperty) path;
           value = property.getProperty().getName();
         }
         if (value == null) {
