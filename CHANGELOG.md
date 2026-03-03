@@ -21,8 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Module
-*   `com.github.starnowski.jamolingo.core.operators.count.CountOperatorResult`
-*   `com.github.starnowski.jamolingo.core.operators.count.OdataCountToMongoCountParser`
+*   `com.github.starnowski.jamolingo.core.operators.count.CountOperatorResult` ([#28](https://github.com/starnowski/jamolingo/issues/28))
+*   `com.github.starnowski.jamolingo.core.operators.count.OdataCountToMongoCountParser` ([#28](https://github.com/starnowski/jamolingo/issues/28))
 
 ## [0.5.0] - 2026-03-01
  
