@@ -52,8 +52,8 @@ public class DefaultMongoFilterVisitorCommonContext implements MongoFilterVisito
   }
 
   public static class Builder {
-    private LiteralToBsonConverter literalToBsonConverter;
-    private ODataToBsonConverter oDataToBsonConverter;
+    private LiteralToBsonConverter literalToBsonConverter = new DefaultLiteralToBsonConverter();
+    private ODataToBsonConverter oDataToBsonConverter = new DefaultODataToBsonConverter();
 
     public Builder withDefaultMongoFilterVisitorCommonContext(
         DefaultMongoFilterVisitorCommonContext context) {

@@ -1613,9 +1613,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private Object tryConvertValueByEdmType(Object value, String type) {
     if (value instanceof String && type != null) {
-      return DefaultODataToBsonConverter.toBsonValue((String) value, type);
+      return DefaultODataToBsonConverter.toBsonValueStatic((String) value, type);
     } else if (value instanceof BsonString && type != null) {
-      return DefaultODataToBsonConverter.toBsonValue(
+      return DefaultODataToBsonConverter.toBsonValueStatic(
           ((BsonString) value).asString().getValue(), type);
     }
     return value;
