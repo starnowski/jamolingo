@@ -10,7 +10,7 @@ import org.bson.types.Binary;
 import org.bson.types.Decimal128;
 
 /** Converter that transforms OData literal values into BSON-compatible objects. */
-public class ODataToBsonConverter {
+public class DefaultODataToBsonConverter {
 
   /**
    * Converts a Java String into the correct BSON-typed object based on the given OData EDM type.
