@@ -1019,19 +1019,19 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return null;
   }
 
+  private String resolvePropertyTypeBasedOnMember(Member member) {
+    return member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceProperty ? ((UriResourceProperty)member.getResourcePath().getUriResourceParts().get(0)).getType().getFullQualifiedName().toString() : null;
+  }
+
   private Document prepareMemberDocument(String field, Member member) {
     PropertyContext propertyContext = prepareProperty(field, member);
-    Optional<EdmEntityType> entityType =
-        edm.getSchemas().get(0).getEntityTypes().stream().findFirst();
     Document result =
         new Document(ODATA_MEMBER_PROPERTY, field)
             .append(ODATA_MEMBER_EDM_PROPERTY, propertyContext.getEdmField());
-    if (entityType.isPresent()) {
-      EdmElement property = entityType.get().getProperty(field);
-      if (property != null) {
-        result.append(
-            ODATA_MEMBER_TYPE_PROPERTY, property.getType().getFullQualifiedName().toString());
-      }
+    String propertyType = resolvePropertyTypeBasedOnMember(member);
+    if (propertyType != null) {
+      result.append(
+              ODATA_MEMBER_TYPE_PROPERTY, resolvePropertyTypeBasedOnMember(member));
     }
     if (edmPropertyMongoPathResolver != null) {
       MongoPathResolution mongoPathResolution =
