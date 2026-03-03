@@ -14,6 +14,7 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.uri.UriInfo;
@@ -32,7 +33,7 @@ public class CountOperatorTest extends AbstractItTest {
   @Test
   @MongoSetup(
       mongoDocuments = {
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json")
+        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "")
       })
   public void shouldReturnCountOfOneWithDefaultFieldName() throws Exception {
     testCount(1, null, "count");
@@ -41,8 +42,7 @@ public class CountOperatorTest extends AbstractItTest {
   @Test
   @MongoSetup(
       mongoDocuments = {
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json"),
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json")
+        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "")
       })
   public void shouldReturnCountOfTwoWithDefaultFieldName() throws Exception {
     testCount(2, null, "count");
@@ -51,9 +51,7 @@ public class CountOperatorTest extends AbstractItTest {
   @Test
   @MongoSetup(
       mongoDocuments = {
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json"),
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json"),
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json")
+        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "")
       })
   public void shouldReturnCountOfThreeWithDefaultFieldName() throws Exception {
     testCount(3, null, "count");
@@ -62,10 +60,7 @@ public class CountOperatorTest extends AbstractItTest {
   @Test
   @MongoSetup(
       mongoDocuments = {
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json"),
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json"),
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json"),
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "bson/item.json")
+        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "")
       })
   public void shouldReturnCountOfFourWithCustomFieldName() throws Exception {
     testCount(4, "total", "total");
@@ -76,6 +71,11 @@ public class CountOperatorTest extends AbstractItTest {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
+    List<Document> documents =
+        IntStream.rangeClosed(1, expectedCount)
+            .mapToObj(i -> new Document().append("index", i))
+            .toList();
+    collection.insertMany(documents);
     Edm edm = loadEmdProvider("edm/edm1.xml");
 
     UriInfo uriInfo =
