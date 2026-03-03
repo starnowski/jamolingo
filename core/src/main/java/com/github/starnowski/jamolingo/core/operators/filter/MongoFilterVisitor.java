@@ -33,7 +33,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       "$odata.member.mongo.field.reference";
   public static final String ODATA_MEMBER_MONGO_FIELD_FULL_PATH =
       "$odata.member.mongo.field.full.path";
-  private final Edm edm;
   private final EdmPropertyMongoPathResolver edmPropertyMongoPathResolver;
   private final MongoFilterVisitorContext context;
 
@@ -207,12 +206,10 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   /**
    * Creates a new visitor.
    *
-   * @param edm the Entity Data Model
    * @param edmPropertyMongoPathResolver the path resolver
    */
-  public MongoFilterVisitor(Edm edm, EdmPropertyMongoPathResolver edmPropertyMongoPathResolver) {
+  public MongoFilterVisitor(EdmPropertyMongoPathResolver edmPropertyMongoPathResolver) {
     this(
-        edm,
         edmPropertyMongoPathResolver,
         MongoFilterVisitorContext.builder().isRootContext(true).build());
   }
@@ -220,15 +217,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   /**
    * Creates a new visitor with the specified context.
    *
-   * @param edm the Entity Data Model
    * @param edmPropertyMongoPathResolver the path resolver
    * @param context the visitor context
    */
   public MongoFilterVisitor(
-      Edm edm,
       EdmPropertyMongoPathResolver edmPropertyMongoPathResolver,
       MongoFilterVisitorContext context) {
-    this.edm = edm;
     this.edmPropertyMongoPathResolver = edmPropertyMongoPathResolver;
     this.context = context;
   }
@@ -486,7 +480,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     boolean nestedExpression = expressionOperantRequiredExceptionThrown;
     MongoFilterVisitor visitor =
         new MongoFilterVisitor(
-            edm,
             edmPropertyMongoPathResolver,
             MongoFilterVisitorContext.builder()
                 .lambdaVariableAliases(
@@ -536,7 +529,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             () -> {
               MongoFilterVisitor innerMongoFilterVisitor =
                   new MongoFilterVisitor(
-                      edm,
                       edmPropertyMongoPathResolver,
                       MongoFilterVisitorContext.builder()
                           .lambdaVariableAliases(
@@ -562,7 +554,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       } catch (ElementMatchOperantRequiredException ex) {
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
-                edm,
                 edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
@@ -600,7 +591,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         multipleElementMatchOperantRequiredExceptionThrown = true;
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
-                edm,
                 edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
@@ -670,7 +660,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           }
           MongoFilterVisitor innerMongoFilterVisitor =
               new MongoFilterVisitor(
-                  edm,
                   edmPropertyMongoPathResolver,
                   MongoFilterVisitorContext.builder()
                       .lambdaVariableAliases(
@@ -721,7 +710,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             () -> {
               MongoFilterVisitor innerMongoFilterVisitor =
                   new MongoFilterVisitor(
-                      edm,
                       edmPropertyMongoPathResolver,
                       MongoFilterVisitorContext.builder()
                           .lambdaVariableAliases(
@@ -748,7 +736,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         elementMatchOperantRequiredExceptionThrown = true;
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
-                edm,
                 edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
@@ -782,7 +769,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         multipleElementMatchOperantRequiredExceptionThrown = true;
         MongoFilterVisitor innerMongoFilterVisitor =
             new MongoFilterVisitor(
-                edm,
                 edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder()
                     .lambdaVariableAliases(
@@ -1303,7 +1289,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       } catch (ExpressionOperantRequiredException ex) {
         MongoFilterVisitor innerVisitor =
             new MongoFilterVisitor(
-                edm,
                 edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder().isExprMode(true).build());
         return new Document(
