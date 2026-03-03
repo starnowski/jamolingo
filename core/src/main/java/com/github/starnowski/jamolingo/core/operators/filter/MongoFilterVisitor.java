@@ -12,7 +12,6 @@ import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.*;
 import org.apache.olingo.server.api.uri.queryoption.expression.*;
 import org.bson.BsonDocument;
-import org.bson.BsonString;
 import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
@@ -286,26 +285,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   // --- Literals ---
   @Override
   public Bson visitLiteral(Literal literal) {
-    String text = literal.getText();
-    if ("null".equals(text)) {
-      return literal(null);
-    }
-    if (text.startsWith("'") && text.endsWith("'")) {
-      /*
-       * Custom support of "normalize" method because there is a problem with adding custom method to Olingo project.
-       */
-      // TODO Add string literal value custom handler
-      return literal(text.substring(1, text.length() - 1)); // placeholder, field comes later
-    }
-    try {
-      return literal(Integer.parseInt(text));
-    } catch (NumberFormatException e) {
-      try {
-        return literal(Double.parseDouble(text));
-      } catch (NumberFormatException ignored) {
-      }
-    }
-    return literal(text);
+    return this.mongoFilterVisitorCommonContext.literalToBsonConverter().convert(literal);
   }
 
   // --- Members (fields) ---
@@ -1634,13 +1614,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Object tryConvertValueByEdmType(Object value, String type) {
-    if (value instanceof String && type != null) {
-      return DefaultODataToBsonConverter.toBsonValueStatic((String) value, type);
-    } else if (value instanceof BsonString && type != null) {
-      return DefaultODataToBsonConverter.toBsonValueStatic(
-          ((BsonString) value).asString().getValue(), type);
-    }
-    return value;
+    return this.mongoFilterVisitorCommonContext.oDataToBsonConverter().toBsonValue(value, type);
   }
 
   // --- Not used in this example ---
