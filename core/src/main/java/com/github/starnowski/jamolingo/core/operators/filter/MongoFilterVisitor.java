@@ -35,6 +35,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       "$odata.member.mongo.field.full.path";
   private final EdmPropertyMongoPathResolver edmPropertyMongoPathResolver;
   private final MongoFilterVisitorContext context;
+  private final MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext;
 
   private final Set<String> usedMongoDBProperties = new HashSet<>();
 
@@ -211,20 +212,32 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   public MongoFilterVisitor(EdmPropertyMongoPathResolver edmPropertyMongoPathResolver) {
     this(
         edmPropertyMongoPathResolver,
-        MongoFilterVisitorContext.builder().isRootContext(true).build());
+        MongoFilterVisitorContext.builder().isRootContext(true).build(),
+        DefaultMongoFilterVisitorCommonContext.builder().build());
   }
 
   /**
    * Creates a new visitor with the specified context.
    *
    * @param edmPropertyMongoPathResolver the path resolver
-   * @param context the visitor context
+   * @param commonContext the visitor context
    */
   public MongoFilterVisitor(
       EdmPropertyMongoPathResolver edmPropertyMongoPathResolver,
-      MongoFilterVisitorContext context) {
+      MongoFilterVisitorCommonContext commonContext) {
+    this(
+        edmPropertyMongoPathResolver,
+        MongoFilterVisitorContext.builder().isRootContext(true).build(),
+        commonContext);
+  }
+
+  public MongoFilterVisitor(
+      EdmPropertyMongoPathResolver edmPropertyMongoPathResolver,
+      MongoFilterVisitorContext context,
+      MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext) {
     this.edmPropertyMongoPathResolver = edmPropertyMongoPathResolver;
     this.context = context;
+    this.mongoFilterVisitorCommonContext = mongoFilterVisitorCommonContext;
   }
 
   /**
@@ -496,7 +509,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     new ElementMatchContext(
                         propertyContext.getMongoField(),
                         multipleElementMatchOperantRequiredExceptionThrown))
-                .build());
+                .build(),
+            this.mongoFilterVisitorCommonContext);
     Supplier<Bson> function =
         () -> {
           Bson innerObject =
@@ -539,7 +553,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                   null))
                           .isLambdaAllContext(true)
                           .isExprMode(true)
-                          .build());
+                          .build(),
+                      this.mongoFilterVisitorCommonContext);
               Bson innerObject =
                   unwrapWrapperIfNeeded(
                       innerMongoFilterVisitor.visitLambdaExpression(
@@ -570,7 +585,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                         new ElementMatchContext(
                             propertyContext.getMongoField(),
                             multipleElementMatchOperantRequiredExceptionThrown))
-                    .build());
+                    .build(),
+                this.mongoFilterVisitorCommonContext);
         function =
             () -> {
               Bson innerObject =
@@ -607,7 +623,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                         new ElementMatchContext(
                             propertyContext.getMongoField(),
                             multipleElementMatchOperantRequiredExceptionThrown))
-                    .build());
+                    .build(),
+                this.mongoFilterVisitorCommonContext);
         function =
             () -> {
               Bson innerObject =
@@ -672,7 +689,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                           new ElementMatchContext(propertyContext.getMongoField(), false))
                       .isLambdaAnyContext(true)
                       .isExprMode(nestedExpression)
-                      .build());
+                      .build(),
+                  this.mongoFilterVisitorCommonContext);
           Bson innerObject =
               innerMongoFilterVisitor.visitLambdaExpression(
                   "ANY", any.getLambdaVariable(), any.getExpression());
@@ -720,7 +738,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                                   null))
                           .isLambdaAnyContext(true)
                           .isExprMode(true)
-                          .build());
+                          .build(),
+                      this.mongoFilterVisitorCommonContext);
               Bson innerObject =
                   innerMongoFilterVisitor.visitLambdaExpression(
                       "ANY", any.getLambdaVariable(), any.getExpression());
@@ -748,7 +767,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     .isExprMode(expressionOperantRequiredExceptionThrown)
                     .elementMatchContext(
                         new ElementMatchContext(propertyContext.getMongoField(), false))
-                    .build());
+                    .build(),
+                this.mongoFilterVisitorCommonContext);
         function =
             () -> {
               Bson innerObject =
@@ -781,7 +801,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                     .isExprMode(expressionOperantRequiredExceptionThrown)
                     .elementMatchContext(
                         new ElementMatchContext(propertyContext.getMongoField(), true))
-                    .build());
+                    .build(),
+                this.mongoFilterVisitorCommonContext);
         function =
             () -> {
               Bson innerObject =
@@ -1290,7 +1311,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         MongoFilterVisitor innerVisitor =
             new MongoFilterVisitor(
                 edmPropertyMongoPathResolver,
-                MongoFilterVisitorContext.builder().isExprMode(true).build());
+                MongoFilterVisitorContext.builder().isExprMode(true).build(),
+                this.mongoFilterVisitorCommonContext);
         return new Document(
             "$expr",
             unwrapWrapperIfNeeded(innerVisitor.visitBinaryOperator(operator, left, right)));

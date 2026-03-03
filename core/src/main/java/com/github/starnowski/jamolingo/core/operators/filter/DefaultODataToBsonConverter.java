@@ -10,7 +10,7 @@ import org.bson.types.Binary;
 import org.bson.types.Decimal128;
 
 /** Converter that transforms OData literal values into BSON-compatible objects. */
-public class DefaultODataToBsonConverter implements ODataToBsonConverter{
+public class DefaultODataToBsonConverter implements ODataToBsonConverter {
 
   /**
    * Converts a Java String into the correct BSON-typed object based on the given OData EDM type.
@@ -135,11 +135,11 @@ public class DefaultODataToBsonConverter implements ODataToBsonConverter{
         // For simplicity, store as raw binary
         return new Binary(value.getBytes(StandardCharsets.UTF_8));
 
-      // TODO
-      //            case "Edm.ComplexType":
-      //                // Would require JSON -> Document mapping
-      //                throw new UnsupportedOperationException("Complex types require JSON
-      // parsing into Document");
+        // TODO
+        //            case "Edm.ComplexType":
+        //                // Would require JSON -> Document mapping
+        //                throw new UnsupportedOperationException("Complex types require JSON
+        // parsing into Document");
 
       default:
         // Fallback: keep as string
