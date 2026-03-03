@@ -204,18 +204,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   /**
-   * Creates a new visitor.
-   *
-   * @param edmPropertyMongoPathResolver the path resolver
-   */
-  public MongoFilterVisitor(EdmPropertyMongoPathResolver edmPropertyMongoPathResolver) {
-    this(
-        edmPropertyMongoPathResolver,
-        MongoFilterVisitorContext.builder().isRootContext(true).build(),
-        DefaultMongoFilterVisitorCommonContext.builder().build());
-  }
-
-  /**
    * Creates a new visitor with the specified context.
    *
    * @param edmPropertyMongoPathResolver the path resolver

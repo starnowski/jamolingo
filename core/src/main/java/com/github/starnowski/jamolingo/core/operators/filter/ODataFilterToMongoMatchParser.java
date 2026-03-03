@@ -28,6 +28,20 @@ public class ODataFilterToMongoMatchParser {
     return parse(filter, DefaultEdmMongoContextFacade.builder().build());
   }
 
+  public FilterOperatorResult parse(
+      FilterOption filter, MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
+      throws ODataApplicationException, ExpressionVisitException {
+    return parse(
+        filter, DefaultEdmMongoContextFacade.builder().build(), mongoFilterVisitorCommonContext);
+  }
+
+  public FilterOperatorResult parse(
+      FilterOption filter, EdmPropertyMongoPathResolver edmMongoContextFacade)
+      throws ODataApplicationException, ExpressionVisitException {
+    return parse(
+        filter, edmMongoContextFacade, DefaultMongoFilterVisitorCommonContext.builder().build());
+  }
+
   /**
    * Parses the given OData filter option into a FilterOperatorResult using the specified path
    * resolver.
@@ -39,14 +53,17 @@ public class ODataFilterToMongoMatchParser {
    * @throws ExpressionVisitException if an error occurs during expression visiting
    */
   public FilterOperatorResult parse(
-      FilterOption filter, EdmPropertyMongoPathResolver edmMongoContextFacade)
+      FilterOption filter,
+      EdmPropertyMongoPathResolver edmMongoContextFacade,
+      MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
       throws ODataApplicationException, ExpressionVisitException {
     if (filter == null) return new DefaultFilterOperatorResult();
     if (edmMongoContextFacade == null) {
       throw new IllegalArgumentException("The edmMongoContextFacade can not be nul;");
     }
     Expression expr = filter.getExpression();
-    MongoFilterVisitor rootMongoFilterVisitor = new MongoFilterVisitor(edmMongoContextFacade);
+    MongoFilterVisitor rootMongoFilterVisitor =
+        new MongoFilterVisitor(edmMongoContextFacade, mongoFilterVisitorCommonContext);
     Bson result = MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(rootMongoFilterVisitor));
     return new DefaultFilterOperatorResult(
         List.of(new Document("$match", new Document("$and", List.of(result)))),
