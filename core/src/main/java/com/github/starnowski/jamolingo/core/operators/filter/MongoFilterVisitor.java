@@ -1020,7 +1020,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private String resolvePropertyTypeBasedOnMember(Member member) {
-    return member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceProperty ? ((UriResourceProperty)member.getResourcePath().getUriResourceParts().get(0)).getType().getFullQualifiedName().toString() : null;
+    return member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceProperty
+        ? ((UriResourceProperty) member.getResourcePath().getUriResourceParts().get(0))
+            .getType()
+            .getFullQualifiedName()
+            .toString()
+        : null;
   }
 
   private Document prepareMemberDocument(String field, Member member) {
@@ -1030,8 +1035,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             .append(ODATA_MEMBER_EDM_PROPERTY, propertyContext.getEdmField());
     String propertyType = resolvePropertyTypeBasedOnMember(member);
     if (propertyType != null) {
-      result.append(
-              ODATA_MEMBER_TYPE_PROPERTY, resolvePropertyTypeBasedOnMember(member));
+      result.append(ODATA_MEMBER_TYPE_PROPERTY, resolvePropertyTypeBasedOnMember(member));
     }
     if (edmPropertyMongoPathResolver != null) {
       MongoPathResolution mongoPathResolution =
