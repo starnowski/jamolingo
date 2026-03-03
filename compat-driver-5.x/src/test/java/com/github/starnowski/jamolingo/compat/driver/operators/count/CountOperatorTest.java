@@ -22,7 +22,8 @@ import org.apache.olingo.server.core.uri.parser.Parser;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
@@ -30,40 +31,28 @@ public class CountOperatorTest extends AbstractItTest {
 
   @Inject MongoClient mongoClient;
 
-  @Test
+  @ParameterizedTest
+  @CsvSource(
+      value = {"1, null, count", "2, null, count", "3, null, count"},
+      nullValues = "null")
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "")
       })
-  public void shouldReturnCountOfOneWithDefaultFieldName() throws Exception {
-    testCount(1, null, "count");
+  public void shouldReturnCountWithDefaultFieldName(
+      int expectedCount, String customFieldName, String resultFieldName) throws Exception {
+    testCount(expectedCount, customFieldName, resultFieldName);
   }
 
-  @Test
+  @ParameterizedTest
+  @CsvSource(value = {"4, total, total"})
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "")
       })
-  public void shouldReturnCountOfTwoWithDefaultFieldName() throws Exception {
-    testCount(2, null, "count");
-  }
-
-  @Test
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "")
-      })
-  public void shouldReturnCountOfThreeWithDefaultFieldName() throws Exception {
-    testCount(3, null, "count");
-  }
-
-  @Test
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(database = "testdb", collection = "Items", bsonFilePath = "")
-      })
-  public void shouldReturnCountOfFourWithCustomFieldName() throws Exception {
-    testCount(4, "total", "total");
+  public void shouldReturnCountWithCustomFieldName(
+      int expectedCount, String customFieldName, String resultFieldName) throws Exception {
+    testCount(expectedCount, customFieldName, resultFieldName);
   }
 
   private void testCount(int expectedCount, String customFieldName, String resultFieldName)
