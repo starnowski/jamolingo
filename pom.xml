@@ -6,7 +6,7 @@
 
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>parent</artifactId>
-    <version>0.5.1</version>
+    <version>0.6.0</version>
     <packaging>pom</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <modules>
@@ -19,7 +19,7 @@
 
 
     <description>
-        Posjsonhelper library is an open-source project that adds support of Hibernate query for postgresql json functions.
+        Implementation of OData specification for Mongo with usage of Apache Olingo project
     </description>
     <url>https://github.com/starnowski/jamolingo</url>
 
