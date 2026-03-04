@@ -108,6 +108,31 @@
                 <version>${org.spockframework.spock.version}</version>
                 <scope>test</scope>
             </dependency>
+            <dependency>
+                <groupId>com.github.starnowski.jamolingo</groupId>
+                <artifactId>core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.starnowski.jamolingo</groupId>
+                <artifactId>common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.starnowski.jamolingo</groupId>
+                <artifactId>junit5-mongo-extension</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.starnowski.jamolingo</groupId>
+                <artifactId>perf</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.starnowski.jamolingo</groupId>
+                <artifactId>json</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -119,13 +144,6 @@
                 <version>3.8.0</version>
                 <configuration>
                     <release>17</release>  <!--or <release>10</release>-->
-<!--                    <annotationProcessorPaths>-->
-<!--                        <path>-->
-<!--                            <groupId>org.projectlombok</groupId>-->
-<!--                            <artifactId>lombok</artifactId>-->
-<!--                            <version>${org.projectlombok.lombok.version}</version>-->
-<!--                        </path>-->
-<!--                    </annotationProcessorPaths>-->
                 </configuration>
             </plugin>
             <plugin>
