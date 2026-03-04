@@ -218,6 +218,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         commonContext);
   }
 
+  /**
+   * Creates a new visitor with the specified contexts.
+   *
+   * @param edmPropertyMongoPathResolver the path resolver
+   * @param context the visitor context
+   * @param mongoFilterVisitorCommonContext the common visitor context
+   */
   public MongoFilterVisitor(
       EdmPropertyMongoPathResolver edmPropertyMongoPathResolver,
       MongoFilterVisitorContext context,

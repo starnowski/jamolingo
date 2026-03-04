@@ -28,6 +28,16 @@ public class ODataFilterToMongoMatchParser {
     return parse(filter, DefaultEdmMongoContextFacade.builder().build());
   }
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorResult using the specified common
+   * context.
+   *
+   * @param filter the OData filter option
+   * @param mongoFilterVisitorCommonContext the common context for the filter visitor
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
   public FilterOperatorResult parse(
       FilterOption filter, MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
       throws ODataApplicationException, ExpressionVisitException {
@@ -35,6 +45,16 @@ public class ODataFilterToMongoMatchParser {
         filter, DefaultEdmMongoContextFacade.builder().build(), mongoFilterVisitorCommonContext);
   }
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorResult using the specified path
+   * resolver.
+   *
+   * @param filter the OData filter option
+   * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
   public FilterOperatorResult parse(
       FilterOption filter, EdmPropertyMongoPathResolver edmMongoContextFacade)
       throws ODataApplicationException, ExpressionVisitException {
@@ -44,10 +64,11 @@ public class ODataFilterToMongoMatchParser {
 
   /**
    * Parses the given OData filter option into a FilterOperatorResult using the specified path
-   * resolver.
+   * resolver and common context.
    *
    * @param filter the OData filter option
    * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
+   * @param mongoFilterVisitorCommonContext the common context for the filter visitor
    * @return the result of the parsing operation
    * @throws ODataApplicationException if an error occurs during parsing
    * @throws ExpressionVisitException if an error occurs during expression visiting
@@ -70,15 +91,24 @@ public class ODataFilterToMongoMatchParser {
         rootMongoFilterVisitor.getUsedMongoDBProperties());
   }
 
+  /** Default implementation of the FilterOperatorResult. */
   private static class DefaultFilterOperatorResult implements FilterOperatorResult {
 
     private final List<Bson> stageObjects;
     private final Set<String> userMongoDBProperties;
 
+    /** Creates a new empty DefaultFilterOperatorResult. */
     public DefaultFilterOperatorResult() {
       this(Collections.emptyList(), Collections.emptySet());
     }
 
+    /**
+     * Creates a new DefaultFilterOperatorResult with the specified stage objects and used
+     * properties.
+     *
+     * @param stageObjects the list of BSON stage objects
+     * @param userMongoDBProperties the set of used MongoDB properties
+     */
     public DefaultFilterOperatorResult(List<Bson> stageObjects, Set<String> userMongoDBProperties) {
       this.stageObjects = stageObjects;
       this.userMongoDBProperties = userMongoDBProperties;
