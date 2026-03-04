@@ -12,7 +12,7 @@
     <modules>
         <module>core</module>
         <module>common</module>
-        <module>junit5-mongo-extension</module>
+        <module>junit5-mongo-extension-quarkus</module>
         <module>compat-driver-5.x</module>
         <module>perf</module>
         <module>demos</module>
@@ -121,7 +121,7 @@
             </dependency>
             <dependency>
                 <groupId>com.github.starnowski.jamolingo</groupId>
-                <artifactId>junit5-mongo-extension</artifactId>
+                <artifactId>junit5-mongo-extension-quarkus</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

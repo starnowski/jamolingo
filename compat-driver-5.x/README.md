@@ -5,7 +5,7 @@ The primary goal of this module is to test the compatibility of the [`core`](../
 It serves as an integration testing suite to ensure that the OData-to-MongoDB translation and projection logic remains functional and correct with the 5.x driver series.
 
 To facilitate these tests, the module utilizes:
-*   **[`junit5-mongo-extension`](../junit5-mongo-extension)**: To manage MongoDB data loading and lifecycle during tests.
+*   **[`junit5-mongo-extension`](../junit5-mongo-extension-quarkus)**: To manage MongoDB data loading and lifecycle during tests.
 *   **[`json`](../common/json) module**: To handle configuration overrides and dynamic mapping adjustments for specific test cases.
 
 ## Running Tests

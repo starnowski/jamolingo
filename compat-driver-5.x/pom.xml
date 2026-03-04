@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>
-            <artifactId>junit5-mongo-extension</artifactId>
+            <artifactId>junit5-mongo-extension-quarkus</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
