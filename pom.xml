@@ -15,6 +15,7 @@
         <module>junit5-mongo-extension</module>
         <module>compat-driver-5.x</module>
         <module>perf</module>
+        <module>demos</module>
     </modules>
 
 
