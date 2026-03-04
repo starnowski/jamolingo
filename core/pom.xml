@@ -46,7 +46,6 @@
             <groupId>com.github.starnowski.jamolingo</groupId>
             <artifactId>json</artifactId>
             <scope>test</scope>
-            <version>0.5.1</version>
         </dependency>
         <dependency>
             <!--            Dependency need only for tests purpose to use type codes when asserting data, no MongoDB connection required-->

@@ -34,18 +34,17 @@
         <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>
             <artifactId>core</artifactId>
-            <version>0.5.1</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>
             <artifactId>junit5-mongo-extension</artifactId>
-            <version>0.5.1</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>
             <artifactId>json</artifactId>
             <scope>test</scope>
-            <version>0.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.olingo</groupId>
@@ -76,7 +75,6 @@
         <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>
             <artifactId>perf</artifactId>
-            <version>0.5.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
