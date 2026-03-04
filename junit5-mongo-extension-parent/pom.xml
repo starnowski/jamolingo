@@ -12,6 +12,7 @@
     <modules>
         <module>junit5-mongo-extension</module>
         <module>junit5-mongo-extension-quarkus</module>
+        <module>junit5-mongo-extension-spring</module>
     </modules>
 
     <artifactId>junit5-mongo-extension-parent</artifactId>

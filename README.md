@@ -37,6 +37,7 @@ This module provides a suite of JUnit 5 extensions designed to simplify setting 
 *   Automatic cleanup of collections before tests.
 *   **Generic Core**: Can be used in any Java environment (Spring, Micronaut, etc.) by implementing a simple `MongoClient` resolver.
 *   **Quarkus Support**: A specialized extension that integrates with the Quarkus `Arc` container.
+*   **Spring Support**: A specialized extension that integrates with the Spring `ApplicationContext`.
 
 ### [Compatibility Driver 5.x](compat-driver-5.x/README.md)
 The `compat-driver-5.x` module serves as an integration testing suite to ensure the compatibility of the [`core`](core/README.md) module with the **MongoDB Java Driver version 5.x**. It verifies that OData-to-MongoDB translation remains functional with the newer driver versions.

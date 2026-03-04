@@ -10,6 +10,9 @@ The foundational module containing the generic data loading logic. It provides t
 ### [Quarkus Support (junit5-mongo-extension-quarkus)](junit5-mongo-extension-quarkus/README.md)
 A specialized module that provides a ready-to-use extension for **Quarkus** applications. It automatically resolves the `MongoClient` from the Quarkus `Arc` container.
 
+### [Spring Support (junit5-mongo-extension-spring)](junit5-mongo-extension-spring/README.md)
+A specialized module that provides a ready-to-use extension for **Spring** and **Spring Boot** applications. It automatically resolves the `MongoClient` from the Spring `ApplicationContext`.
+
 ## Architecture
 
 The system uses an abstract base class `AbstractMongoDataLoaderExtension`. To use this tool in a new environment, you simply need to extend this class and implement the `resolveMongoClient()` method.
