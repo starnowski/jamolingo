@@ -52,7 +52,7 @@ The primary entry point. It contains an array of `mongoDocuments`.
 ### `@MongoDocument`
 *   `database`: Name of the database.
 *   `collection`: Name of the collection.
-*   `bsonFilePath`: Path to the JSON/BSON file on the classpath.
+*   `bsonFilePath`: Path to the JSON/BSON file on the classpath. **If left empty (default), the collection will be erased.** If you provide multiple `@MongoDocument` entries for the same collection and at least one has a file path, the collection is cleared first and then all specified files are loaded.
 
 ## Requirements
 
