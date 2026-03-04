@@ -29,13 +29,14 @@ The `jamolingo-json` module provides utility classes for applying JSON-based mod
 *   Type-safe application of changes to Java classes.
 *   Used for configuration overrides and test data setup.
 
-### [JUnit 5 Mongo Extension](junit5-mongo-extension/README.md)
-This module provides a JUnit 5 extension designed to simplify the process of setting up MongoDB data for tests in a **Quarkus** application.
+### [JUnit 5 Mongo Extension](junit5-mongo-extension-parent/README.md)
+This module provides a suite of JUnit 5 extensions designed to simplify setting up MongoDB data for tests. It includes a generic, environment-agnostic core and a pre-configured extension for Quarkus.
 
 **Key Features:**
 *   Declarative data setup using `@MongoSetup` and `@MongoDocument` annotations.
 *   Automatic cleanup of collections before tests.
-*   Seamless integration with Quarkus `Arc` container to retrieve the `MongoClient`.
+*   **Generic Core**: Can be used in any Java environment (Spring, Micronaut, etc.) by implementing a simple `MongoClient` resolver.
+*   **Quarkus Support**: A specialized extension that integrates with the Quarkus `Arc` container.
 
 ### [Compatibility Driver 5.x](compat-driver-5.x/README.md)
 The `compat-driver-5.x` module serves as an integration testing suite to ensure the compatibility of the [`core`](core/README.md) module with the **MongoDB Java Driver version 5.x**. It verifies that OData-to-MongoDB translation remains functional with the newer driver versions.
