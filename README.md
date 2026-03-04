@@ -18,7 +18,7 @@ The `core` module contains the primary logic for translating OData concepts and 
     *   String, Math, and Date/Time functions.
     *   Collection operators (`any`, `all`) and `/$count`.
 *   Translates `$select` to MongoDB `$project` stages.
-*   Translates `$orderby`, `$top`, and `$skip` to corresponding MongoDB stages (`$sort`, `$limit`, `$skip`).
+*   Translates `$orderby`, `$top`, `$skip`, and `$count` to corresponding MongoDB stages (`$sort`, `$limit`, `$skip`, `$count`).
 *   Handles OData-to-MongoDB mapping configuration and supports customizing mappings via overrides.
 
 ### [Common JSON](common/json/README.md)

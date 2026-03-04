@@ -183,6 +183,42 @@ OdataSkipToMongoSkipParser parser = new OdataSkipToMongoSkipParser();
 // e.g. collection.aggregate(stages);
 ```
 
+#### $count
+
+The `$count` operator specifies whether the total number of items in the result-set should be returned along with the results. The `core` module translates this into a MongoDB `$count` aggregation stage.
+
+**Translation Details:**
+- Translates to a `$count` aggregation stage.
+- Handles the `$count` system query option (e.g., `?$count=true`).
+- Allows specifying a custom field name for the count result (default is "count").
+
+**Usage:**
+
+The `OdataCountToMongoCountParser` class is responsible for this translation.
+
+```java
+import com.github.starnowski.jamolingo.core.operators.count.OdataCountToMongoCountParser;
+import com.github.starnowski.jamolingo.core.operators.count.CountOperatorResult;
+import org.apache.olingo.server.api.uri.queryoption.CountOption;
+// ... other imports
+
+// 1. Initialize the parser
+OdataCountToMongoCountParser parser = new OdataCountToMongoCountParser();
+
+// 2. Obtain the CountOption from the Olingo UriInfo
+CountOption countOption = uriInfo.getCountOption();
+
+// 3. Parse the option
+// If using default count field name ("count"):
+CountOperatorResult result = parser.parse(countOption);
+// If using custom count field name:
+// CountOperatorResult result = parser.parse(countOption, "totalCount");
+
+// 4. Use the result in your MongoDB aggregation pipeline
+List<Bson> stages = result.getStageObjects();
+// e.g. collection.aggregate(stages);
+```
+
 #### $apply
 TODO
 
