@@ -2,6 +2,7 @@ package com.github.starnowski.jamolingo.perf;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -17,12 +18,14 @@ import java.util.stream.Stream;
 import org.bson.Document;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
+@ExtendWith(QuarkusMongoDataLoaderExtension.class)
 class ExplainAnalyzeResultFactoryIndexResolvingTest {
 
   private static final String TEST_DATABASE = "test_db";

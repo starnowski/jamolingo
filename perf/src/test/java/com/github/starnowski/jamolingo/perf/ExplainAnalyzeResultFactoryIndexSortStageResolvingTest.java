@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
+import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -20,9 +21,11 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
+@ExtendWith(QuarkusMongoDataLoaderExtension.class)
 class ExplainAnalyzeResultFactoryIndexSortStageResolvingTest {
 
   private static final String TEST_DATABASE = "test_db";

@@ -24,5 +24,5 @@ public @interface MongoDocument {
    *
    * @return the file path relative to the classpath
    */
-  String bsonFilePath();
+  String bsonFilePath() default "";
 }

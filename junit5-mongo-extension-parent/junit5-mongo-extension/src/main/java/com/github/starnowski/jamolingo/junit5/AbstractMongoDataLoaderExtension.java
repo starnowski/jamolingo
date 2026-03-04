@@ -47,6 +47,13 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
             .filter(Objects::nonNull)
             .findFirst()
             .orElse(null);
+    if (annotation == null) {
+        annotation = context.getTestClass().stream()
+                .map(t -> t.getAnnotation(MongoSetup.class))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+    }
     if (annotation != null) {
       MongoClient mongoClient = resolveMongoClient();
 

@@ -16,6 +16,7 @@ public class EmbeddedMongoResource implements QuarkusTestResourceLifecycleManage
 
   private MongodExecutable mongodExecutable;
   private MongodProcess mongodProcess;
+  public static final String TEST_DATABASE = "test_db";
 
   @Override
   public Map<String, String> start() {

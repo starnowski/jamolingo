@@ -1,9 +1,11 @@
 package com.github.starnowski.jamolingo.perf;
 
+import static com.github.starnowski.jamolingo.perf.EmbeddedMongoResource.TEST_DATABASE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
+import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import io.quarkus.test.common.QuarkusTestResource;
@@ -21,30 +23,31 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 @QuarkusTest
 @QuarkusTestResource(EmbeddedMongoResource.class)
+@ExtendWith(QuarkusMongoDataLoaderExtension.class)
+@MongoSetup(
+        mongoDocuments = {
+                @MongoDocument(
+                        database = TEST_DATABASE,
+                        collection = "docs",
+                        bsonFilePath = "data/doc1.json"),
+                @MongoDocument(
+                        database = TEST_DATABASE,
+                        collection = "docs",
+                        bsonFilePath = "data/doc2.json"),
+                @MongoDocument(
+                        database = TEST_DATABASE,
+                        collection = "docs",
+                        bsonFilePath = "data/doc3.json")
+        })
 class ExplainAnalyzeResultFactoryCollScanTest {
 
-  private static final String TEST_DATABASE = "test_db";
   @Inject MongoClient mongoClient;
 
   @Test
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc1.json"),
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc2.json"),
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc3.json")
-      })
   public void shouldReturnEmptyIndexMatchStagesForSimpleMatchWithNoIndex() throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
         Collections.emptyList(), // No indexes -> COLLSCAN
@@ -54,21 +57,6 @@ class ExplainAnalyzeResultFactoryCollScanTest {
   }
 
   @Test
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc1.json"),
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc2.json"),
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc3.json")
-      })
   public void shouldReturnEmptyIndexMatchStagesForSortWithNoIndex() throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
         Collections.emptyList(), // No indexes -> COLLSCAN
@@ -78,21 +66,6 @@ class ExplainAnalyzeResultFactoryCollScanTest {
   }
 
   @Test
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc1.json"),
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc2.json"),
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/doc3.json")
-      })
   public void shouldReturnEmptyIndexMatchStagesForOrQueryWithNoIndex() throws IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(
         Collections.emptyList(), // No indexes -> COLLSCAN
