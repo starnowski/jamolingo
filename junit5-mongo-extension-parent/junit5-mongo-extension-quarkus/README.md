@@ -1,4 +1,4 @@
-# JUnit 5 Mongo Extension
+# JUnit 5 Mongo Extension Quarkus
 
 This module provides a JUnit 5 extension designed to simplify the process of setting up MongoDB data for tests in a **Quarkus** application. It allows you to declaratively define the data that should be loaded into your MongoDB collections before each test method execution.
 
@@ -16,7 +16,7 @@ Add the following dependency to your `pom.xml`:
 ```xml
 <dependency>
     <groupId>com.github.starnowski.jamolingo</groupId>
-    <artifactId>junit5-mongo-extension</artifactId>
+    <artifactId>junit5-mongo-extension-quarkus</artifactId>
     <version>0.6.0</version>
     <scope>test</scope>
 </dependency>

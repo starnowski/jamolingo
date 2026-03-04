@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>junit5-mongo-extension</module>
+        <module>junit5-mongo-extension-quarkus</module>
     </modules>
 
     <artifactId>junit5-mongo-extension-parent</artifactId>
