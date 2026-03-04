@@ -41,7 +41,21 @@ class ODataFilterToMongoMatchParserWithOverrideODataToBsonConverterTest extends 
             ODataToBsonConverter oDataToBsonConverter = new DefaultODataToBsonConverter() {
                 @Override
                 Object toBsonValue(Object value, String type) {
-                    //TODO
+                    if ("Edm.DateTimeOffset".equals(type)) {
+                        String stringValue = null
+                        if (value instanceof String) {
+                            stringValue = (String) value
+                        } else if (value instanceof org.bson.BsonString) {
+                            stringValue = ((org.bson.BsonString) value).getValue()
+                        }
+
+                        if (stringValue != null) {
+                            java.time.Instant instant = java.time.Instant.parse(stringValue)
+                            java.time.ZonedDateTime zonedDateTime = instant.atZone(java.time.ZoneOffset.UTC)
+                            java.time.ZonedDateTime firstDayOfYear = zonedDateTime.withMonth(1).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0)
+                            return java.util.Date.from(firstDayOfYear.toInstant())
+                        }
+                    }
                     return super.toBsonValue(value, type)
                 }
             }
