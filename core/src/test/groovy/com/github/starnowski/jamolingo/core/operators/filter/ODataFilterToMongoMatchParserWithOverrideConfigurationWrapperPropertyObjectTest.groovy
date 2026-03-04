@@ -69,7 +69,7 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationWrapperPropertyObjec
             ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
 
         when:
-            def result = tested.parse(uriInfo.getFilterOption(), edm, facade)
+            def result = tested.parse(uriInfo.getFilterOption(), facade)
 
         then:
             [((Document)result.getStageObjects().get(0)).toJson(settings, codec)] == [((Document)expectedBson).toJson(settings, codec)]
@@ -106,7 +106,7 @@ class ODataFilterToMongoMatchParserWithOverrideConfigurationWrapperPropertyObjec
             ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
 
         when:
-            def result = tested.parse(uriInfo.getFilterOption(), edm, facade)
+            def result = tested.parse(uriInfo.getFilterOption(), facade)
 
         then:
             new HashSet<>(result.getUsedMongoDocumentProperties()) == new HashSet(expectedFields as List)

@@ -5,7 +5,6 @@ import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
@@ -20,14 +19,30 @@ public class ODataFilterToMongoMatchParser {
    * Parses the given OData filter option into a FilterOperatorResult.
    *
    * @param filter the OData filter option
-   * @param edm the Entity Data Model
    * @return the result of the parsing operation
    * @throws ODataApplicationException if an error occurs during parsing
    * @throws ExpressionVisitException if an error occurs during expression visiting
    */
-  public FilterOperatorResult parse(FilterOption filter, Edm edm)
+  public FilterOperatorResult parse(FilterOption filter)
       throws ODataApplicationException, ExpressionVisitException {
-    return parse(filter, edm, DefaultEdmMongoContextFacade.builder().build());
+    return parse(filter, DefaultEdmMongoContextFacade.builder().build());
+  }
+
+  /**
+   * Parses the given OData filter option into a FilterOperatorResult using the specified common
+   * context.
+   *
+   * @param filter the OData filter option
+   * @param mongoFilterVisitorCommonContext the common context for the filter visitor
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
+  public FilterOperatorResult parse(
+      FilterOption filter, MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
+      throws ODataApplicationException, ExpressionVisitException {
+    return parse(
+        filter, DefaultEdmMongoContextFacade.builder().build(), mongoFilterVisitorCommonContext);
   }
 
   /**
@@ -35,36 +50,65 @@ public class ODataFilterToMongoMatchParser {
    * resolver.
    *
    * @param filter the OData filter option
-   * @param edm the Entity Data Model
    * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
    * @return the result of the parsing operation
    * @throws ODataApplicationException if an error occurs during parsing
    * @throws ExpressionVisitException if an error occurs during expression visiting
    */
   public FilterOperatorResult parse(
-      FilterOption filter, Edm edm, EdmPropertyMongoPathResolver edmMongoContextFacade)
+      FilterOption filter, EdmPropertyMongoPathResolver edmMongoContextFacade)
+      throws ODataApplicationException, ExpressionVisitException {
+    return parse(
+        filter, edmMongoContextFacade, DefaultMongoFilterVisitorCommonContext.builder().build());
+  }
+
+  /**
+   * Parses the given OData filter option into a FilterOperatorResult using the specified path
+   * resolver and common context.
+   *
+   * @param filter the OData filter option
+   * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
+   * @param mongoFilterVisitorCommonContext the common context for the filter visitor
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
+  public FilterOperatorResult parse(
+      FilterOption filter,
+      EdmPropertyMongoPathResolver edmMongoContextFacade,
+      MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
       throws ODataApplicationException, ExpressionVisitException {
     if (filter == null) return new DefaultFilterOperatorResult();
     if (edmMongoContextFacade == null) {
       throw new IllegalArgumentException("The edmMongoContextFacade can not be nul;");
     }
     Expression expr = filter.getExpression();
-    MongoFilterVisitor rootMongoFilterVisitor = new MongoFilterVisitor(edm, edmMongoContextFacade);
+    MongoFilterVisitor rootMongoFilterVisitor =
+        new MongoFilterVisitor(edmMongoContextFacade, mongoFilterVisitorCommonContext);
     Bson result = MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(rootMongoFilterVisitor));
     return new DefaultFilterOperatorResult(
         List.of(new Document("$match", new Document("$and", List.of(result)))),
         rootMongoFilterVisitor.getUsedMongoDBProperties());
   }
 
+  /** Default implementation of the FilterOperatorResult. */
   private static class DefaultFilterOperatorResult implements FilterOperatorResult {
 
     private final List<Bson> stageObjects;
     private final Set<String> userMongoDBProperties;
 
+    /** Creates a new empty DefaultFilterOperatorResult. */
     public DefaultFilterOperatorResult() {
       this(Collections.emptyList(), Collections.emptySet());
     }
 
+    /**
+     * Creates a new DefaultFilterOperatorResult with the specified stage objects and used
+     * properties.
+     *
+     * @param stageObjects the list of BSON stage objects
+     * @param userMongoDBProperties the set of used MongoDB properties
+     */
     public DefaultFilterOperatorResult(List<Bson> stageObjects, Set<String> userMongoDBProperties) {
       this.stageObjects = stageObjects;
       this.userMongoDBProperties = userMongoDBProperties;

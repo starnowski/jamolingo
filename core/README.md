@@ -75,14 +75,13 @@ ODataFilterToMongoMatchParser parser = new ODataFilterToMongoMatchParser();
 
 // 2. Obtain the FilterOption and Edm
 FilterOption filterOption = uriInfo.getFilterOption();
-Edm edm = ...;
 
 // 3. (Optional) Provide a context facade if you have custom mappings
 // EdmPropertyMongoPathResolver contextFacade = ...; 
 
 // 4. Parse the option
 // If using default context:
-FilterOperatorResult result = parser.parse(filterOption, edm);
+FilterOperatorResult result = parser.parse(filterOption);
 // If using custom context:
 // FilterOperatorResult result = parser.parse(filterOption, edm, contextFacade);
 

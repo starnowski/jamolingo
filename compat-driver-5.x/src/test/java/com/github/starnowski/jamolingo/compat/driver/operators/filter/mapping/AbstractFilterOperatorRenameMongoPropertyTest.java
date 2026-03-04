@@ -81,7 +81,7 @@ public abstract class AbstractFilterOperatorRenameMongoPropertyTest
     ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser();
 
     // WHEN
-    FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), edm, facade);
+    FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), facade);
     List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
     System.out.println(new Document("pipeline", pipeline).toJson());
     List<Document> results = new ArrayList<>();
@@ -138,7 +138,7 @@ public abstract class AbstractFilterOperatorRenameMongoPropertyTest
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
     ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser();
-    FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), edm, facade);
+    FilterOperatorResult result = tested.parse(uriInfo.getFilterOption(), facade);
     /*
      * Important! This test purpose is not to validate correct used properties.
      * Such tests are part of the core module where tests checks if the ODataFilterToMongoMatchParser
