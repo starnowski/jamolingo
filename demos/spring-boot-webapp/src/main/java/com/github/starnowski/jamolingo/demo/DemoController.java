@@ -1,9 +1,10 @@
 package com.github.starnowski.jamolingo.demo;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.bson.Document;
-import org.bson.conversions.Bson;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,7 @@ public class DemoController {
   @Autowired private MongoTemplate mongoTemplate;
 
   @GetMapping("/query")
-  public List<Document> query(
+  public Map<String, Object> query(
       @RequestParam(name = "filter", required = false) String filter,
       @RequestParam(name = "select", required = false) String select,
       @RequestParam(name = "orderby", required = false) String orderby,
@@ -39,9 +40,20 @@ public class DemoController {
       query = query.substring(0, query.length() - 1);
     }
 
-    List<Bson> pipeline = oDataQueryService.buildAggregationPipeline(query);
+    ODataQueryService.QueryPlan plan = oDataQueryService.buildQueryPlan(query);
+    Map<String, Object> response = new LinkedHashMap<>();
+
+    if (plan.isCountRequested()) {
+      List<Document> countResult = new ArrayList<>();
+      mongoTemplate.getCollection("items").aggregate(plan.getCountPipeline()).into(countResult);
+      long totalCount =
+          countResult.isEmpty() ? 0 : ((Number) countResult.get(0).get("count")).longValue();
+      response.put("@odata.count", totalCount);
+    }
+
     List<Document> results = new ArrayList<>();
-    mongoTemplate.getCollection("items").aggregate(pipeline).into(results);
-    return results;
+    mongoTemplate.getCollection("items").aggregate(plan.getDataPipeline()).into(results);
+    response.put("value", results);
+    return response;
   }
 }

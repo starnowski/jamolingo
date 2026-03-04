@@ -36,35 +36,60 @@ public class ODataQueryService {
   private final OdataSkipToMongoSkipParser skipParser = new OdataSkipToMongoSkipParser();
   private final OdataCountToMongoCountParser countParser = new OdataCountToMongoCountParser();
 
-  public List<Bson> buildAggregationPipeline(String query)
+  public static class QueryPlan {
+    private final List<Bson> dataPipeline;
+    private final List<Bson> countPipeline;
+    private final boolean countRequested;
+
+    public QueryPlan(List<Bson> dataPipeline, List<Bson> countPipeline, boolean countRequested) {
+      this.dataPipeline = dataPipeline;
+      this.countPipeline = countPipeline;
+      this.countRequested = countRequested;
+    }
+
+    public List<Bson> getDataPipeline() {
+      return dataPipeline;
+    }
+
+    public List<Bson> getCountPipeline() {
+      return countPipeline;
+    }
+
+    public boolean isCountRequested() {
+      return countRequested;
+    }
+  }
+
+  public QueryPlan buildQueryPlan(String query)
       throws UriParserException,
           UriValidationException,
           ODataApplicationException,
           ExpressionVisitException {
     UriInfo uriInfo = new Parser(edm, OData.newInstance()).parseUri("examples2", query, null, null);
-    List<Bson> pipeline = new ArrayList<>();
+    List<Bson> filterStages =
+        filterParser.parse(uriInfo.getFilterOption(), edmMongoContextFacade).getStageObjects();
 
-    // 1. $filter -> $match
-    pipeline.addAll(
-        filterParser.parse(uriInfo.getFilterOption(), edmMongoContextFacade).getStageObjects());
-
+    List<Bson> dataPipeline = new ArrayList<>(filterStages);
     // 2. $orderby -> $sort
-    pipeline.addAll(
+    dataPipeline.addAll(
         orderByParser.parse(uriInfo.getOrderByOption(), edmMongoContextFacade).getStageObjects());
 
     // 3. $skip -> $skip
-    pipeline.addAll(skipParser.parse(uriInfo.getSkipOption()).getStageObjects());
+    dataPipeline.addAll(skipParser.parse(uriInfo.getSkipOption()).getStageObjects());
 
     // 4. $top -> $limit
-    pipeline.addAll(topParser.parse(uriInfo.getTopOption()).getStageObjects());
+    dataPipeline.addAll(topParser.parse(uriInfo.getTopOption()).getStageObjects());
 
     // 5. $select -> $project
-    pipeline.addAll(
+    dataPipeline.addAll(
         selectParser.parse(uriInfo.getSelectOption(), edmMongoContextFacade).getStageObjects());
 
-    // 6. $count -> $count
-    pipeline.addAll(countParser.parse(uriInfo.getCountOption()).getStageObjects());
+    List<Bson> countPipeline = new ArrayList<>(filterStages);
+    countPipeline.add(new org.bson.Document("$count", "count"));
 
-    return pipeline;
+    boolean countRequested =
+        uriInfo.getCountOption() != null && uriInfo.getCountOption().getValue();
+
+    return new QueryPlan(dataPipeline, countPipeline, countRequested);
   }
 }

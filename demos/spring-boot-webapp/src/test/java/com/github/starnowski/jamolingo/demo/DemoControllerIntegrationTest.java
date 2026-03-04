@@ -29,8 +29,8 @@ public class DemoControllerIntegrationTest {
     mockMvc
         .perform(get("/query").param("filter", "plainString eq 'Poem'"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].plainString", is("Poem")));
+        .andExpect(jsonPath("$.value", hasSize(1)))
+        .andExpect(jsonPath("$.value[0].plainString", is("Poem")));
   }
 
   @Test
@@ -38,9 +38,9 @@ public class DemoControllerIntegrationTest {
     mockMvc
         .perform(get("/query").param("orderby", "plainString desc").param("top", "2"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(2)))
-        .andExpect(jsonPath("$[0].plainString", is("example2")))
-        .andExpect(jsonPath("$[1].plainString", is("example1")));
+        .andExpect(jsonPath("$.value", hasSize(2)))
+        .andExpect(jsonPath("$.value[0].plainString", is("example2")))
+        .andExpect(jsonPath("$.value[1].plainString", is("example1")));
   }
 
   @Test
@@ -50,8 +50,8 @@ public class DemoControllerIntegrationTest {
         .perform(
             get("/query").param("orderby", "plainString desc").param("skip", "3").param("top", "1"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].plainString", is("Some text")));
+        .andExpect(jsonPath("$.value", hasSize(1)))
+        .andExpect(jsonPath("$.value[0].plainString", is("Some text")));
   }
 
   @Test
@@ -60,8 +60,8 @@ public class DemoControllerIntegrationTest {
         .perform(
             get("/query").param("filter", "plainString eq 'Poem'").param("select", "plainString"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$[0].plainString", is("Poem")))
-        .andExpect(jsonPath("$[0].tags").doesNotExist());
+        .andExpect(jsonPath("$.value[0].plainString", is("Poem")))
+        .andExpect(jsonPath("$.value[0].tags").doesNotExist());
   }
 
   @Test
@@ -69,10 +69,7 @@ public class DemoControllerIntegrationTest {
     mockMvc
         .perform(get("/query").param("filter", "contains(plainString, 'e')").param("count", "true"))
         .andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(
-            jsonPath(
-                "$[0].count",
-                is(6))); // Poem, Oleksa, example1, example2, Some text, eOMtThyhVNLWUZNRcBaQKxI
+        .andExpect(jsonPath("$.value", hasSize(6)))
+        .andExpect(jsonPath("$['@odata.count']", is(6)));
   }
 }
