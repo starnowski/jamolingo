@@ -47,3 +47,9 @@ The `perf` module provides tools and utilities for analyzing and verifying the p
 *   Parses MongoDB explain results into a simplified `ExplainAnalyzeResult`.
 *   Identifies index usage types (IXSCAN, COLLSCAN, etc.).
 *   Experimental support for resolving index match stages.
+
+### [Demos](demos/README.md)
+The `demos` module contains example applications that demonstrate how to use `jamolingo` in real-world scenarios.
+
+**Available Demos:**
+*   **[Spring Boot Webapp](demos/spring-boot-webapp/README.md)**: A complete Spring Boot application with a `/query` endpoint supporting OData filtering, selection, ordering, and paging.
