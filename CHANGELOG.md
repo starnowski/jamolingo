@@ -16,6 +16,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Core Module
+*   `com.github.starnowski.jamolingo.core.operators.filter.LiteralToBsonConverter` interface for custom OData literal to BSON conversion. ([#24](https://github.com/starnowski/jamolingo/issues/24))
+*   `com.github.starnowski.jamolingo.core.operators.filter.MongoFilterVisitorCommonContext` interface to provide shared context to the filter visitor. ([#24](https://github.com/starnowski/jamolingo/issues/24))
+*   `com.github.starnowski.jamolingo.core.operators.filter.DefaultODataToBsonConverter` class providing default BSON conversion logic. ([#24](https://github.com/starnowski/jamolingo/issues/24))
+*   `com.github.starnowski.jamolingo.core.operators.filter.DefaultLiteralToBsonConverter` class providing default literal conversion logic. ([#24](https://github.com/starnowski/jamolingo/issues/24))
+*   `com.github.starnowski.jamolingo.core.operators.filter.DefaultMongoFilterVisitorCommonContext` class with builder support for easy context configuration. ([#24](https://github.com/starnowski/jamolingo/issues/24))
+
+### Changed
+
+#### Core Module
+*   `com.github.starnowski.jamolingo.core.operators.filter.ODataToBsonConverter` converted from class to interface with updated `toBsonValue` method signature. ([#24](https://github.com/starnowski/jamolingo/issues/24))
+*   Modified `com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser` to remove `org.apache.olingo.commons.api.edm.Edm` parameter from all `parse` methods and added support for `MongoFilterVisitorCommonContext`. ([#24](https://github.com/starnowski/jamolingo/issues/24))
+*   Refactored `com.github.starnowski.jamolingo.core.operators.filter.MongoFilterVisitor` to use `MongoFilterVisitorCommonContext` instead of direct `Edm` dependency and hardcoded conversion logic. ([#24](https://github.com/starnowski/jamolingo/issues/24))
+*   Updated project URL in `pom.xml` to `https://github.com/starnowski/jamolingo`. ([#28](https://github.com/starnowski/jamolingo/issues/28))
+
 ## [0.5.1] - 2026-03-03
 
 ### Added
