@@ -29,20 +29,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @QuarkusTestResource(EmbeddedMongoResource.class)
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
 @MongoSetup(
-        mongoDocuments = {
-                @MongoDocument(
-                        database = TEST_DATABASE,
-                        collection = "docs",
-                        bsonFilePath = "data/doc1.json"),
-                @MongoDocument(
-                        database = TEST_DATABASE,
-                        collection = "docs",
-                        bsonFilePath = "data/doc2.json"),
-                @MongoDocument(
-                        database = TEST_DATABASE,
-                        collection = "docs",
-                        bsonFilePath = "data/doc3.json")
-        })
+    mongoDocuments = {
+      @MongoDocument(
+          database = TEST_DATABASE,
+          collection = "docs",
+          bsonFilePath = "data/doc1.json"),
+      @MongoDocument(
+          database = TEST_DATABASE,
+          collection = "docs",
+          bsonFilePath = "data/doc2.json"),
+      @MongoDocument(database = TEST_DATABASE, collection = "docs", bsonFilePath = "data/doc3.json")
+    })
 class ExplainAnalyzeResultFactoryCollScanTest {
 
   @Inject MongoClient mongoClient;
