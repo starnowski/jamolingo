@@ -35,25 +35,25 @@ public class TestMongoConfig {
     mongodExecutable = starter.prepare(mongodConfig);
     mongodExecutable.start();
 
-    // Manually insert data to be sure it is there
-    try (MongoClient mongoClient = MongoClients.create("mongodb://localhost:27018")) {
-      MongoDatabase database = mongoClient.getDatabase("demos");
-      MongoCollection<Document> collection = database.getCollection("items");
-      collection.insertMany(
-          List.of(
-              Document.parse(
-                  "{ \"plainString\": \"eOMtThyhVNLWUZNRcBaQKxI\", \"tags\": [ \"word wide web\", \"spider trap\" ], \"active\": true }"),
-              Document.parse(
-                  "{ \"plainString\": \"Some text\", \"tags\": [ \"JxkyvRnL\", \"spiderweb\" ], \"active\": true }"),
-              Document.parse(
-                  "{ \"plainString\": \"Poem\", \"tags\": [ \"developer\", \"founder\", \"visioner\", \"focus\", \"llm agent\", \"LLM\" ], \"active\": true }"),
-              Document.parse(
-                  "{ \"plainString\": \"Mario\", \"tags\": [ \"star trek\", \"star wars\" ] }"),
-              Document.parse(
-                  "{ \"plainString\": \"Oleksa\", \"tags\": [ \"star trek\", \"star wars\", \"starlord\" ] }"),
-              Document.parse("{ \"plainString\": \"example1\" }"),
-              Document.parse("{ \"plainString\": \"example2\" }")));
-    }
+//    // Manually insert data to be sure it is there
+//    try (MongoClient mongoClient = MongoClients.create("mongodb://localhost:27018")) {
+//      MongoDatabase database = mongoClient.getDatabase("demos");
+//      MongoCollection<Document> collection = database.getCollection("items");
+//      collection.insertMany(
+//          List.of(
+//              Document.parse(
+//                  "{ \"plainString\": \"eOMtThyhVNLWUZNRcBaQKxI\", \"tags\": [ \"word wide web\", \"spider trap\" ], \"active\": true }"),
+//              Document.parse(
+//                  "{ \"plainString\": \"Some text\", \"tags\": [ \"JxkyvRnL\", \"spiderweb\" ], \"active\": true }"),
+//              Document.parse(
+//                  "{ \"plainString\": \"Poem\", \"tags\": [ \"developer\", \"founder\", \"visioner\", \"focus\", \"llm agent\", \"LLM\" ], \"active\": true }"),
+//              Document.parse(
+//                  "{ \"plainString\": \"Mario\", \"tags\": [ \"star trek\", \"star wars\" ] }"),
+//              Document.parse(
+//                  "{ \"plainString\": \"Oleksa\", \"tags\": [ \"star trek\", \"star wars\", \"starlord\" ] }"),
+//              Document.parse("{ \"plainString\": \"example1\" }"),
+//              Document.parse("{ \"plainString\": \"example2\" }")));
+//    }
   }
 
   @PreDestroy

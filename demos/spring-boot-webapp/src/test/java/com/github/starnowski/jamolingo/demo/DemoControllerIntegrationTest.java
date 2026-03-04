@@ -15,9 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(
     classes = {JamolingoDemoApplication.class, TestMongoConfig.class},
     properties = {
-      "spring.data.mongodb.uri=mongodb://localhost:27018/demos",
-      "spring.liquibase.url=mongodb://localhost:27018/demos",
-      "spring.liquibase.enabled=true"
+      "spring.data.mongodb.uri=mongodb://localhost:27018/demos"
     })
 @AutoConfigureMockMvc
 public class DemoControllerIntegrationTest {

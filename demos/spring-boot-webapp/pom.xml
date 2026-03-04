@@ -63,6 +63,11 @@
             <version>3.5.4</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.starnowski.jamolingo</groupId>
+            <artifactId>junit5-mongo-extension-spring</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
