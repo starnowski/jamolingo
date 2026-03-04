@@ -4,17 +4,15 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import org.junit.jupiter.api.extension.ExtendWith;
 
 /**
  * Annotation to configure MongoDB data setup for a test method.
  *
- * <p>This annotation triggers the {@link QuarkusMongoDataLoaderExtension} to load the specified
- * documents into the MongoDB database before the test method is executed.
+ * <p>This annotation triggers a MongoDB data loader extension to load the specified documents into
+ * the MongoDB database before the test method is executed.
  */
 @Target({ElementType.METHOD, ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(QuarkusMongoDataLoaderExtension.class)
 public @interface MongoSetup {
 
   /**

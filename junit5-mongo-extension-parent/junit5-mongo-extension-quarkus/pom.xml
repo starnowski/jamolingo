@@ -34,6 +34,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.github.starnowski.jamolingo</groupId>
+            <artifactId>junit5-mongo-extension</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-junit5</artifactId>
             <optional>true</optional>
