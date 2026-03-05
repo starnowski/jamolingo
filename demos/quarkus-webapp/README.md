@@ -1,6 +1,6 @@
-# Jamolingo - Spring Boot Demo Webapp
+# Jamolingo - Quarkus Demo Webapp
 
-This module provides a demo Spring Boot application that integrates the `core` library to translate OData queries into MongoDB aggregation pipelines.
+This module provides a demo Quarkus application that integrates the `core` library to translate OData queries into MongoDB aggregation pipelines.
 
 ## Features
 
@@ -21,10 +21,9 @@ Supported OData system query options:
 ## Technology Stack
 
 *   **Java 21**
-*   **Spring Boot 3.4.2**
-*   **MongoDB** (via Spring Data MongoDB)
+*   **Quarkus 3.22.2**
+*   **MongoDB** (via Quarkus MongoDB Client)
 *   **Apache Olingo 5.0** (for OData parsing)
-*   **Liquibase** (for MongoDB data loading)
 *   **Jamolingo Core** (for OData to MongoDB translation)
 
 ## Configuration
@@ -32,8 +31,8 @@ Supported OData system query options:
 The application is configured via `src/main/resources/application.properties`. By default, it connects to a MongoDB instance at `mongodb://localhost:27017/demos`.
 
 ```properties
-spring.data.mongodb.database=demos
-spring.data.mongodb.uri=mongodb://localhost:27017/demos
+quarkus.mongodb.connection-string=mongodb://localhost:27017
+quarkus.mongodb.database=demos
 ```
 
 ## Running the Application
@@ -48,9 +47,9 @@ spring.data.mongodb.uri=mongodb://localhost:27017/demos
     ```bash
     ./mvnw clean install -DskipTests
     ```
-2.  Run the Spring Boot application:
+2.  Run the Quarkus application in dev mode:
     ```bash
-    ./mvnw spring-boot:run -pl demos/spring-boot-webapp
+    ./mvnw quarkus:dev -pl demos/quarkus-webapp
     ```
 
 ## Usage Examples
@@ -58,18 +57,18 @@ spring.data.mongodb.uri=mongodb://localhost:27017/demos
 Once the application is running, you can use `curl` or a web browser to query the data:
 
 *   **Filter and Select:**
-    `GET http://localhost:8080/query?filter=plainString eq 'Poem'&select=plainString`
+    `GET http://localhost:8081/query?filter=plainString eq 'Poem'&select=plainString`
 *   **Ordering and Paging:**
-    `GET http://localhost:8080/query?orderby=plainString desc&top=2&skip=1`
+    `GET http://localhost:8081/query?orderby=plainString desc&top=2&skip=1`
 *   **Count:**
-    `GET http://localhost:8080/query?filter=contains(plainString, 'e')&count=true`
+    `GET http://localhost:8081/query?filter=contains(plainString, 'e')&count=true`
 *   **Index Check (returns 400 if no index):**
-    `GET http://localhost:8080/query-index-check?filter=plainString eq 'Poem'`
+    `GET http://localhost:8081/query-index-check?filter=plainString eq 'Poem'`
 
 ## Running Tests
 
-The module includes integration tests that use an embedded MongoDB instance.
+The module includes integration tests that use a containerized or embedded MongoDB instance managed by Quarkus Dev Services or the `junit5-mongo-extension-quarkus`.
 
 ```bash
-./mvnw test -pl demos/spring-boot-webapp
+./mvnw test -pl demos/quarkus-webapp
 ```
