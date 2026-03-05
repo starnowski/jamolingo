@@ -6,7 +6,11 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.github.starnowski.jamolingo.junit5.MongoDocument;
+import com.github.starnowski.jamolingo.junit5.MongoSetup;
+import com.github.starnowski.jamolingo.junit5.SpringMongoDataLoaderExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,9 +19,21 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest(
     classes = {JamolingoDemoApplication.class, TestMongoConfig.class},
     properties = {
-      "spring.data.mongodb.uri=mongodb://localhost:27018/demos"
+      "spring.data.mongodb.uri=mongodb://localhost:27018/demos",
+      "spring.liquibase.enabled=false"
     })
 @AutoConfigureMockMvc
+@ExtendWith(SpringMongoDataLoaderExtension.class)
+@MongoSetup(
+    mongoDocuments = {
+      @MongoDocument(database = "demos", collection = "items", bsonFilePath = "bson/doc1.json"),
+      @MongoDocument(database = "demos", collection = "items", bsonFilePath = "bson/doc2.json"),
+      @MongoDocument(database = "demos", collection = "items", bsonFilePath = "bson/doc3.json"),
+      @MongoDocument(database = "demos", collection = "items", bsonFilePath = "bson/doc4.json"),
+      @MongoDocument(database = "demos", collection = "items", bsonFilePath = "bson/doc5.json"),
+      @MongoDocument(database = "demos", collection = "items", bsonFilePath = "bson/doc6.json"),
+      @MongoDocument(database = "demos", collection = "items", bsonFilePath = "bson/doc7.json")
+    })
 public class DemoControllerIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
