@@ -55,6 +55,10 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
               .findFirst()
               .orElse(null);
     }
+    loadData(annotation);
+  }
+
+  protected void loadData(MongoSetup annotation) {
     if (annotation != null) {
       MongoClient mongoClient = resolveMongoClient();
 

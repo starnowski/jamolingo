@@ -6,8 +6,8 @@ import io.quarkus.test.junit.callback.QuarkusTestBeforeEachCallback;
 import io.quarkus.test.junit.callback.QuarkusTestMethodContext;
 
 /**
- * A JUnit 5 extension that loads data into MongoDB collections before each test method execution
- * in a Quarkus environment.
+ * A JUnit 5 extension that loads data into MongoDB collections before each test method execution in
+ * a Quarkus environment.
  *
  * <p>This extension looks for the {@link MongoSetup} annotation on the test method. If present, it
  * retrieves the {@link MongoClient} from the Quarkus {@link Arc} container, clears the specified
@@ -21,15 +21,19 @@ public class QuarkusMongoDataLoaderExtension extends AbstractMongoDataLoaderExte
     if (Arc.container() == null) {
       return null;
     }
-    return Arc.container().instance(MongoClient.class).get();
+    try {
+      return Arc.container().instance(MongoClient.class).get();
+    } catch (Exception e) {
+      return null;
+    }
   }
 
   @Override
   public void beforeEach(QuarkusTestMethodContext context) {
-    try {
-      this.beforeEach(context.getRequiredTestContext());
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException(e);
+    MongoSetup annotation = context.getTestMethod().getAnnotation(MongoSetup.class);
+    if (annotation == null) {
+      annotation = context.getTestInstance().getClass().getAnnotation(MongoSetup.class);
     }
+    loadData(annotation);
   }
 }
