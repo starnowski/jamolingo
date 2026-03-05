@@ -17,11 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(
-    classes = {JamolingoDemoApplication.class, TestMongoConfig.class},
-    properties = {
-      "spring.data.mongodb.uri=mongodb://localhost:27018/demos",
-      "spring.liquibase.enabled=false"
-    })
+    classes = {JamolingoDemoApplication.class},
+    properties = {"spring.data.mongodb.uri=mongodb://localhost:27017/demos"})
 @AutoConfigureMockMvc
 @ExtendWith(SpringMongoDataLoaderExtension.class)
 @MongoSetup(
