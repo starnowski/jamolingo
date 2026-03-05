@@ -31,6 +31,11 @@
             <artifactId>core</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.starnowski.jamolingo</groupId>
+            <artifactId>perf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.olingo</groupId>
             <artifactId>odata-server-api</artifactId>
         </dependency>

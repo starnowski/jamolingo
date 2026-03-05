@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest(
@@ -34,6 +35,8 @@ import org.springframework.test.web.servlet.MockMvc;
 public class DemoControllerIntegrationTest {
 
   @Autowired private MockMvc mockMvc;
+
+  @Autowired private MongoTemplate mongoTemplate;
 
   @Test
   public void shouldFilterByPlainString() throws Exception {
@@ -82,5 +85,30 @@ public class DemoControllerIntegrationTest {
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.value", hasSize(6)))
         .andExpect(jsonPath("$['@odata.count']", is(6)));
+  }
+
+  @Test
+  public void shouldReturn400WhenNoIndexUsed() throws Exception {
+    mockMvc
+        .perform(get("/query-index-check").param("filter", "plainString eq 'Poem'"))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.message", is("No index used")));
+  }
+
+  @Test
+  public void shouldReturnOkWhenIndexUsed() throws Exception {
+    // GIVEN
+    mongoTemplate.getCollection("items").createIndex(new org.bson.Document("plainString", 1));
+
+    // WHEN & THEN
+    try {
+      mockMvc
+          .perform(get("/query-index-check").param("filter", "plainString eq 'Poem'"))
+          .andExpect(status().isOk())
+          .andExpect(jsonPath("$.value", hasSize(1)))
+          .andExpect(jsonPath("$.value[0].plainString", is("Poem")));
+    } finally {
+      mongoTemplate.getCollection("items").dropIndex(new org.bson.Document("plainString", 1));
+    }
   }
 }
