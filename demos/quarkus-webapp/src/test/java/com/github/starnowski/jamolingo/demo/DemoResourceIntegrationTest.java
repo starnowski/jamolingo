@@ -7,7 +7,9 @@ import static org.hamcrest.Matchers.is;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
+import com.mongodb.client.MongoClient;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -24,6 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
       @MongoDocument(database = "demos", collection = "items", bsonFilePath = "bson/doc7.json")
     })
 public class DemoResourceIntegrationTest {
+
+  @Inject MongoClient mongoClient;
 
   @Test
   public void shouldFilterByPlainString() {
@@ -89,5 +93,42 @@ public class DemoResourceIntegrationTest {
         .statusCode(200)
         .body("value", hasSize(6))
         .body("'@odata.count'", is(6));
+  }
+
+  @Test
+  public void shouldReturn400WhenNoIndexUsed() {
+    given()
+        .queryParam("filter", "plainString eq 'Poem'")
+        .when()
+        .get("/query-index-check")
+        .then()
+        .statusCode(400)
+        .body("message", is("No index used"));
+  }
+
+  @Test
+  public void shouldReturnOkWhenIndexUsed() {
+    // GIVEN
+    mongoClient
+        .getDatabase("demos")
+        .getCollection("items")
+        .createIndex(new org.bson.Document("plainString", 1));
+
+    // WHEN & THEN
+    try {
+      given()
+          .queryParam("filter", "plainString eq 'Poem'")
+          .when()
+          .get("/query-index-check")
+          .then()
+          .statusCode(200)
+          .body("value", hasSize(1))
+          .body("value[0].plainString", is("Poem"));
+    } finally {
+      mongoClient
+          .getDatabase("demos")
+          .getCollection("items")
+          .dropIndex(new org.bson.Document("plainString", 1));
+    }
   }
 }
