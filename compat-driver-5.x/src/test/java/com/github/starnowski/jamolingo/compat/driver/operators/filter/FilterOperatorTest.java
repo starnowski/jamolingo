@@ -247,4 +247,57 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             Set.of("Mario", "Oleksa"),
             "COLLSCAN"));
   }
+
+  /**
+   * String comparison is case-sensitive, case-insensitive comparison can be achieved in combination with tolower or toupper.
+   * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_contains
+   * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_endswith
+   * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_startswith
+   *
+   * @param filter
+   * @param expectedPlainStrings
+   * @throws UriValidationException
+   * @throws UriParserException
+   * @throws XMLStreamException
+   * @throws ExpressionVisitException
+   * @throws ODataApplicationException
+   */
+  @ParameterizedTest
+  @MethodSource("provideCaseSensitivityTests")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/case_sensitivity/case_sensitivity_1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/case_sensitivity/case_sensitivity_2.json")
+      })
+  public void shouldCorrectCheckCaseSensitivityForStringFunctions(
+      String filter, Set<String> expectedPlainStrings)
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    shouldReturnExpectedDocumentsBasedOnFilterOperator(filter, expectedPlainStrings);
+  }
+
+  private static Stream<Arguments> provideCaseSensitivityTests() {
+    return Stream.of(
+        // contains
+
+        Arguments.of("contains(password, 'Secret')", Set.of("doc1")),
+        Arguments.of("contains(password, 'secret')", Set.of("doc2")),
+        Arguments.of("contains(password, 'WORD')", Set.of()),
+        // startswith
+        Arguments.of("startswith(password, 'My')", Set.of("doc1")),
+        Arguments.of("startswith(password, 'my')", Set.of("doc2")),
+        // endswith
+        Arguments.of("endswith(password, '123')", Set.of("doc1", "doc2")),
+        Arguments.of("endswith(password, 'Secret123')", Set.of("doc1")),
+        Arguments.of("endswith(password, 'secret123')", Set.of("doc2")));
+  }
 }

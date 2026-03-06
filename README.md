@@ -3,7 +3,74 @@
 
 # jamolingo
 
-Implementation of OData specification for Mongo with usage of Olingo integration in JAVA.
+A Java library for translating OData queries and concepts into MongoDB aggregation pipelines, leveraging Apache Olingo. It is primarily an OData query translator and not a full OData server implementation, but it can be used as a building block to implement one.
+
+## Table of Contents
+*   **[Getting Started](#getting-started)**
+    *   [Prerequisites](#prerequisites)
+    *   [Installation (Maven)](#installation-maven)
+    *   [Basic Integration Example](#basic-integration-example)
+*   **[Modules](#modules)**
+    *   [Core](#core)
+    *   [Common JSON](#common-json)
+    *   [JUnit 5 Mongo Extension](#junit-5-mongo-extension)
+    *   [Compatibility Driver 5.x](#compatibility-driver-5x)
+    *   [Performance](#performance)
+*   **[Demos](#demos)**
+    *   [Spring Boot Webapp](#spring-boot-webapp)
+    *   [Quarkus Webapp](#quarkus-webapp)
+
+## Getting Started
+
+### Prerequisites
+*   **Java 8** or higher.
+*   **MongoDB 4.4** or higher (supporting aggregation pipelines and explain).
+
+### Installation (Maven)
+Add the following dependencies to your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>com.github.starnowski.jamolingo</groupId>
+    <artifactId>core</artifactId>
+    <version>0.7.0</version>
+</dependency>
+<!-- Optional: for performance analysis -->
+<dependency>
+    <groupId>com.github.starnowski.jamolingo</groupId>
+    <artifactId>perf</artifactId>
+    <version>0.7.0</version>
+</dependency>
+```
+
+### Basic Integration Example
+
+This example shows how to translate an OData filter into a MongoDB `$match` stage and verify its performance using the `perf` module.
+
+```java
+import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
+import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
+import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult;
+import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+// 1. Parse OData filter to MongoDB match stage (Core)
+ODataFilterToMongoMatchParser filterParser = new ODataFilterToMongoMatchParser();
+FilterOperatorResult filterResult = filterParser.parse(filterOption);
+List<Bson> pipeline = filterResult.getStageObjects();
+
+// 2. Execute and Explain (MongoDB Driver)
+Document explainDoc = collection.aggregate(pipeline).explain();
+
+// 3. Analyze performance (Perf)
+ExplainAnalyzeResultFactory perfFactory = new ExplainAnalyzeResultFactory();
+ExplainAnalyzeResult perfResult = perfFactory.build(explainDoc);
+
+if (perfResult.getIndexValue() == ExplainAnalyzeResult.IndexValueRepresentation.IXSCAN || perfResult.getIndexValue() == ExplainAnalyzeResult.IndexValueRepresentation.FETCH_IXSCAN) {
+    // Success: The translated OData query is using an index!
+}
+```
 
 ## Modules
 
@@ -26,6 +93,7 @@ The `jamolingo-json` module provides utility classes for applying JSON-based mod
 
 **Key Features:**
 *   JSON Merge Patch (RFC 7396) support.
+*   JSON Patch (RFC 6902) support.
 *   Type-safe application of changes to Java classes.
 *   Used for configuration overrides and test data setup.
 
@@ -55,3 +123,4 @@ The `demos` module contains example applications that demonstrate how to use `ja
 
 **Available Demos:**
 *   **[Spring Boot Webapp](demos/spring-boot-webapp/README.md)**: A complete Spring Boot application with a `/query` endpoint supporting OData filtering, selection, ordering, and paging.
+*   **[Quarkus Webapp](demos/quarkus-webapp/README.md)**: A complete Quarkus application with a `/query` endpoint and a specialized `/query-index-check` endpoint that validates index usage in OData queries.

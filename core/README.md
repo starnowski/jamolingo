@@ -1,6 +1,6 @@
 # Jamolingo - Core Module
 
-The `core` module contains the primary logic for translating OData concepts and queries into MongoDB-compatible formats. It provides the essential building blocks for mapping OData Entity Data Models (EDM) to MongoDB document structures and parsing OData system query options.
+The `core` module is primarily an OData query translator and not a full OData server implementation, but it can be used as a building block to implement one. It contains the logic for translating OData system query options and concepts into MongoDB-compatible formats. It provides the essential building blocks for mapping OData Entity Data Models (EDM) to MongoDB document structures.
 
 ## Features
 
@@ -286,3 +286,9 @@ You can use a helper (like `JSONOverrideHelper` in the [`json`](../common/json) 
 // Then rebuild the context with the modified mapping
 EntityPropertiesMongoPathContext context = contextBuilder.build(entityMapping);
 ```
+
+
+
+### Links
+
+[OData 4.0.1 specification](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html)
