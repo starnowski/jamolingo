@@ -93,6 +93,7 @@ The `jamolingo-json` module provides utility classes for applying JSON-based mod
 
 **Key Features:**
 *   JSON Merge Patch (RFC 7396) support.
+*   JSON Patch (RFC 6902) support.
 *   Type-safe application of changes to Java classes.
 *   Used for configuration overrides and test data setup.
 
