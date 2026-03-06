@@ -286,3 +286,9 @@ You can use a helper (like `JSONOverrideHelper` in the [`json`](../common/json) 
 // Then rebuild the context with the modified mapping
 EntityPropertiesMongoPathContext context = contextBuilder.build(entityMapping);
 ```
+
+
+
+### Links
+
+[OData 4.0.1 specification](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html)
