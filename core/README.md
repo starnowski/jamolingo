@@ -1,6 +1,6 @@
 # Jamolingo - Core Module
 
-The `core` module contains the primary logic for translating OData concepts and queries into MongoDB-compatible formats. It provides the essential building blocks for mapping OData Entity Data Models (EDM) to MongoDB document structures and parsing OData system query options.
+The `core` module is primarily an OData query translator and not a full OData server implementation, but it can be used as a building block to implement one. It contains the logic for translating OData system query options and concepts into MongoDB-compatible formats. It provides the essential building blocks for mapping OData Entity Data Models (EDM) to MongoDB document structures.
 
 ## Features
 

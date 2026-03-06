@@ -3,7 +3,7 @@
 
 # jamolingo
 
-Implementation of OData specification for Mongo with usage of Olingo integration in JAVA.
+A Java library for translating OData queries and concepts into MongoDB aggregation pipelines, leveraging Apache Olingo. It is primarily an OData query translator and not a full OData server implementation, but it can be used as a building block to implement one.
 
 ## Modules
 
