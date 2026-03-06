@@ -5,6 +5,58 @@
 
 A Java library for translating OData queries and concepts into MongoDB aggregation pipelines, leveraging Apache Olingo. It is primarily an OData query translator and not a full OData server implementation, but it can be used as a building block to implement one.
 
+## Getting Started
+
+### Prerequisites
+*   **Java 8** or higher.
+*   **MongoDB 4.4** or higher (supporting aggregation pipelines and explain).
+
+### Installation (Maven)
+Add the following dependencies to your `pom.xml`:
+
+```xml
+<dependency>
+    <groupId>com.github.starnowski.jamolingo</groupId>
+    <artifactId>core</artifactId>
+    <version>0.7.0</version>
+</dependency>
+<!-- Optional: for performance analysis -->
+<dependency>
+    <groupId>com.github.starnowski.jamolingo</groupId>
+    <artifactId>perf</artifactId>
+    <version>0.7.0</version>
+</dependency>
+```
+
+### Basic Integration Example
+
+This example shows how to translate an OData filter into a MongoDB `$match` stage and verify its performance using the `perf` module.
+
+```java
+import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
+import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
+import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult;
+import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+// 1. Parse OData filter to MongoDB match stage (Core)
+ODataFilterToMongoMatchParser filterParser = new ODataFilterToMongoMatchParser();
+FilterOperatorResult filterResult = filterParser.parse(filterOption);
+List<Bson> pipeline = filterResult.getStageObjects();
+
+// 2. Execute and Explain (MongoDB Driver)
+Document explainDoc = collection.aggregate(pipeline).explain();
+
+// 3. Analyze performance (Perf)
+ExplainAnalyzeResultFactory perfFactory = new ExplainAnalyzeResultFactory();
+ExplainAnalyzeResult perfResult = perfFactory.build(explainDoc);
+
+if (perfResult.getIndexValue() == ExplainAnalyzeResult.IndexValueRepresentation.IXSCAN || perfResult.getIndexValue() == ExplainAnalyzeResult.IndexValueRepresentation.FETCH_IXSCAN) {
+    // Success: The translated OData query is using an index!
+}
+```
+
 ## Modules
 
 The project is organized into several modules, each serving a specific purpose:
