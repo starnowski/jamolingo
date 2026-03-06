@@ -247,4 +247,42 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             Set.of("Mario", "Oleksa"),
             "COLLSCAN"));
   }
+
+  @ParameterizedTest
+  @MethodSource("provideCaseSensitivityTests")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/case_sensitivity/case_sensitivity_1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/case_sensitivity/case_sensitivity_2.json")
+      })
+  public void shouldCorrectCheckCaseSensitivityForStringFunctions(
+      String filter, Set<String> expectedPlainStrings)
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    shouldReturnExpectedDocumentsBasedOnFilterOperator(filter, expectedPlainStrings);
+  }
+
+  private static Stream<Arguments> provideCaseSensitivityTests() {
+    return Stream.of(
+        // contains
+        Arguments.of("contains(password, 'Secret')", Set.of("doc1")),
+        Arguments.of("contains(password, 'secret')", Set.of("doc2")),
+        Arguments.of("contains(password, 'WORD')", Set.of()),
+        // startswith
+        Arguments.of("startswith(password, 'My')", Set.of("doc1")),
+        Arguments.of("startswith(password, 'my')", Set.of("doc2")),
+        // endswith
+        Arguments.of("endswith(password, '123')", Set.of("doc1", "doc2")),
+        Arguments.of("endswith(password, 'Secret123')", Set.of("doc1")),
+        Arguments.of("endswith(password, 'secret123')", Set.of("doc2")));
+  }
 }
