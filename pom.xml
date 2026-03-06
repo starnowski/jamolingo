@@ -6,15 +6,16 @@
 
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>parent</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <modules>
         <module>core</module>
         <module>common</module>
-        <module>junit5-mongo-extension</module>
         <module>compat-driver-5.x</module>
         <module>perf</module>
+        <module>demos</module>
+        <module>junit5-mongo-extension-parent</module>
     </modules>
 
 
@@ -109,6 +110,36 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>5.10.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>5.10.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>5.10.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-commons</artifactId>
+                <version>1.10.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-launcher</artifactId>
+                <version>1.10.2</version>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.platform</groupId>
+                <artifactId>junit-platform-engine</artifactId>
+                <version>1.10.2</version>
+            </dependency>
+            <dependency>
                 <groupId>com.github.starnowski.jamolingo</groupId>
                 <artifactId>core</artifactId>
                 <version>${project.version}</version>
@@ -120,7 +151,12 @@
             </dependency>
             <dependency>
                 <groupId>com.github.starnowski.jamolingo</groupId>
-                <artifactId>junit5-mongo-extension</artifactId>
+                <artifactId>junit5-mongo-extension-quarkus</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.starnowski.jamolingo</groupId>
+                <artifactId>junit5-mongo-extension-spring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

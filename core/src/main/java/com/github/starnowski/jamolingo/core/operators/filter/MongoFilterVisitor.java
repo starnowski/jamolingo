@@ -1436,8 +1436,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private Bson prepareRegexMatchExpr(Object input, String regex) {
-    return new Document(
-        "$regexMatch", new Document("input", input).append("regex", regex).append("options", "i"));
+    return new Document("$regexMatch", new Document("input", input).append("regex", regex));
   }
 
   private Bson visitMethodWithOneParameter(MethodKind methodCall, List<Bson> parameters) {

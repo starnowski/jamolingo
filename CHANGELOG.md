@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 * [Unreleased](#unreleased)
+* [0.7.0](#070---2026-03-06)
 * [0.6.0](#060---2026-03-04)
 * [0.5.1](#051---2026-03-03)
 * [0.5.0](#050---2026-03-01)
@@ -16,6 +17,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [0.1.0](#010---2026-01-18)
 
 ## [Unreleased]
+
+## [0.7.0] - 2026-03-06
+
+### Added
+
+#### Core Module
+*   `/query-index-check` endpoint in demo applications (`spring-boot-webapp` and `quarkus-webapp`) for validating index usage in OData queries. ([#31](https://github.com/starnowski/jamolingo/issues/31))
+
+#### JUnit 5 Mongo Extension Module
+*   `junit5-mongo-extension-parent` module to manage specialized JUnit 5 extensions. ([#31](https://github.com/starnowski/jamolingo/issues/31))
+*   `com.github.starnowski.jamolingo.junit5.AbstractMongoDataLoaderExtension` base class for JUnit 5 data loader extensions. ([#31](https://github.com/starnowski/jamolingo/issues/31))
+*   `junit5-mongo-extension-spring` module providing `com.github.starnowski.jamolingo.junit5.SpringMongoDataLoaderExtension` for Spring and Spring Boot applications. ([#31](https://github.com/starnowski/jamolingo/issues/31))
+
+#### Demos Module
+*   `demos` module containing `spring-boot-webapp` and `quarkus-webapp` demonstration applications. ([#31](https://github.com/starnowski/jamolingo/issues/31))
+
+#### Administrative
+*   Changed project license from CC0 1.0 Universal to Apache License 2.0. ([#31](https://github.com/starnowski/jamolingo/issues/31))
+
+### Changed
+
+#### Core Module
+*   Refactored `com.github.starnowski.jamolingo.core.operators.filter.MongoFilterVisitor` to make regex matching for `contains`, `startswith`, and `endswith` functions case-sensitive by default, aligning with the OData specification. ([#31](https://github.com/starnowski/jamolingo/issues/31))
+
+#### JUnit 5 Mongo Extension Module
+*   Renamed `junit5-mongo-extension` module to `junit5-mongo-extension-quarkus` and moved it under the `junit5-mongo-extension-parent` multi-module structure. ([#31](https://github.com/starnowski/jamolingo/issues/31))
+*   Refactored `com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension` to extend the new `AbstractMongoDataLoaderExtension` base class. ([#31](https://github.com/starnowski/jamolingo/issues/31))
 
 ## [0.6.0] - 2026-03-04
 

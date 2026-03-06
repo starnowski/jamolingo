@@ -18,7 +18,7 @@ The `core` module contains the primary logic for translating OData concepts and 
     *   String, Math, and Date/Time functions.
     *   Collection operators (`any`, `all`) and `/$count`.
 *   Translates `$select` to MongoDB `$project` stages.
-*   Translates `$orderby`, `$top`, and `$skip` to corresponding MongoDB stages (`$sort`, `$limit`, `$skip`).
+*   Translates `$orderby`, `$top`, `$skip`, and `$count` to corresponding MongoDB stages (`$sort`, `$limit`, `$skip`, `$count`).
 *   Handles OData-to-MongoDB mapping configuration and supports customizing mappings via overrides.
 
 ### [Common JSON](common/json/README.md)
@@ -29,13 +29,15 @@ The `jamolingo-json` module provides utility classes for applying JSON-based mod
 *   Type-safe application of changes to Java classes.
 *   Used for configuration overrides and test data setup.
 
-### [JUnit 5 Mongo Extension](junit5-mongo-extension/README.md)
-This module provides a JUnit 5 extension designed to simplify the process of setting up MongoDB data for tests in a **Quarkus** application.
+### [JUnit 5 Mongo Extension](junit5-mongo-extension-parent/README.md)
+This module provides a suite of JUnit 5 extensions designed to simplify setting up MongoDB data for tests. It includes a generic, environment-agnostic core and a pre-configured extension for Quarkus.
 
 **Key Features:**
 *   Declarative data setup using `@MongoSetup` and `@MongoDocument` annotations.
 *   Automatic cleanup of collections before tests.
-*   Seamless integration with Quarkus `Arc` container to retrieve the `MongoClient`.
+*   **Generic Core**: Can be used in any Java environment (Spring, Micronaut, etc.) by implementing a simple `MongoClient` resolver.
+*   **Quarkus Support**: A specialized extension that integrates with the Quarkus `Arc` container.
+*   **Spring Support**: A specialized extension that integrates with the Spring `ApplicationContext`.
 
 ### [Compatibility Driver 5.x](compat-driver-5.x/README.md)
 The `compat-driver-5.x` module serves as an integration testing suite to ensure the compatibility of the [`core`](core/README.md) module with the **MongoDB Java Driver version 5.x**. It verifies that OData-to-MongoDB translation remains functional with the newer driver versions.
@@ -47,3 +49,9 @@ The `perf` module provides tools and utilities for analyzing and verifying the p
 *   Parses MongoDB explain results into a simplified `ExplainAnalyzeResult`.
 *   Identifies index usage types (IXSCAN, COLLSCAN, etc.).
 *   Experimental support for resolving index match stages.
+
+### [Demos](demos/README.md)
+The `demos` module contains example applications that demonstrate how to use `jamolingo` in real-world scenarios.
+
+**Available Demos:**
+*   **[Spring Boot Webapp](demos/spring-boot-webapp/README.md)**: A complete Spring Boot application with a `/query` endpoint supporting OData filtering, selection, ordering, and paging.

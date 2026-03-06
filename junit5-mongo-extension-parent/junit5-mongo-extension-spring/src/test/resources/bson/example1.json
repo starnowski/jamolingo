@@ -1,0 +1,9 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "zhJHGT+jS4uJzYurBrA+3A==",
+      "subType": "04"
+    }
+  },
+  "stringKey": "example1"
+}
