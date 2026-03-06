@@ -55,3 +55,4 @@ The `demos` module contains example applications that demonstrate how to use `ja
 
 **Available Demos:**
 *   **[Spring Boot Webapp](demos/spring-boot-webapp/README.md)**: A complete Spring Boot application with a `/query` endpoint supporting OData filtering, selection, ordering, and paging.
+*   **[Quarkus Webapp](demos/quarkus-webapp/README.md)**: A complete Quarkus application with a `/query` endpoint and a specialized `/query-index-check` endpoint that validates index usage in OData queries.

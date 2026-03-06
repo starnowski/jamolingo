@@ -12,3 +12,12 @@ A Spring Boot 3 application that provides a `/query` endpoint for executing ODat
 *   Demonstrates integration with Spring Data MongoDB.
 *   Uses Liquibase for initial data loading.
 *   Includes integration tests with embedded MongoDB.
+
+### [Quarkus Webapp](quarkus-webapp/README.md)
+A Quarkus application that uses the `core` module to translate OData queries and provides index usage validation.
+
+**Key Features:**
+*   Standard `/query` endpoint for OData queries.
+*   Specialized `/query-index-check` endpoint that returns an error if a query results in a collection scan (no index used).
+*   Demonstrates integration with Quarkus MongoDB Client.
+*   Includes integration tests using Quarkus Dev Services for MongoDB.
