@@ -248,6 +248,20 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
             "COLLSCAN"));
   }
 
+  /**
+   * String comparison is case-sensitive, case-insensitive comparison can be achieved in combination with tolower or toupper.
+   * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_contains
+   * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_endswith
+   * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_startswith
+   *
+   * @param filter
+   * @param expectedPlainStrings
+   * @throws UriValidationException
+   * @throws UriParserException
+   * @throws XMLStreamException
+   * @throws ExpressionVisitException
+   * @throws ODataApplicationException
+   */
   @ParameterizedTest
   @MethodSource("provideCaseSensitivityTests")
   @MongoSetup(
@@ -274,6 +288,7 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
   private static Stream<Arguments> provideCaseSensitivityTests() {
     return Stream.of(
         // contains
+
         Arguments.of("contains(password, 'Secret')", Set.of("doc1")),
         Arguments.of("contains(password, 'secret')", Set.of("doc2")),
         Arguments.of("contains(password, 'WORD')", Set.of()),
