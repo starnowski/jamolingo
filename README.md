@@ -5,6 +5,21 @@
 
 A Java library for translating OData queries and concepts into MongoDB aggregation pipelines, leveraging Apache Olingo. It is primarily an OData query translator and not a full OData server implementation, but it can be used as a building block to implement one.
 
+## Table of Contents
+*   **[Getting Started](#getting-started)**
+    *   [Prerequisites](#prerequisites)
+    *   [Installation (Maven)](#installation-maven)
+    *   [Basic Integration Example](#basic-integration-example)
+*   **[Modules](#modules)**
+    *   [Core](#core)
+    *   [Common JSON](#common-json)
+    *   [JUnit 5 Mongo Extension](#junit-5-mongo-extension)
+    *   [Compatibility Driver 5.x](#compatibility-driver-5x)
+    *   [Performance](#performance)
+*   **[Demos](#demos)**
+    *   [Spring Boot Webapp](#spring-boot-webapp)
+    *   [Quarkus Webapp](#quarkus-webapp)
+
 ## Getting Started
 
 ### Prerequisites
