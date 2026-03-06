@@ -267,7 +267,7 @@
                         <configuration>
                             <deploymentName>jamolingo</deploymentName>
                             <ignorePublishedComponents>true</ignorePublishedComponents>
-                            <excludeArtifacts>compat-driver-5.x</excludeArtifacts>
+                            <excludeArtifacts>compat-driver-5.x,demos,spring-boot-webapp,quarkus-webapp</excludeArtifacts>
                             <publishingServerId>maven-central-starnowski-jamolingo</publishingServerId>
                         </configuration>
                     </plugin>
