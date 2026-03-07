@@ -4,10 +4,12 @@ import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult;
 import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory;
 import com.mongodb.client.MongoClient;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.ArrayList;
@@ -23,6 +25,14 @@ public class DemoResource {
   @Inject ODataQueryService oDataQueryService;
 
   @Inject MongoClient mongoClient;
+
+  @GET
+  @Path("/query-with-dollar-parameters")
+  public Map<String, Object> queryWithDollarParameterOperators(@Context HttpServletRequest request)
+      throws Exception {
+    ODataQueryService.QueryPlan plan = oDataQueryService.buildQueryPlan(request.getQueryString());
+    return executeQueryPlan(plan);
+  }
 
   @GET
   @Path("/query")

@@ -41,6 +41,10 @@
             <artifactId>quarkus-mongodb-client</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-undertow</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>
             <artifactId>core</artifactId>
         </dependency>
