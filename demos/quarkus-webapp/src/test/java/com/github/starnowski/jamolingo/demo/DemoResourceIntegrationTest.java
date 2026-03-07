@@ -96,6 +96,72 @@ public class DemoResourceIntegrationTest {
   }
 
   @Test
+  public void shouldFilterByPlainStringWithDollarParameters() {
+    given()
+        .queryParam("$filter", "plainString eq 'Poem'")
+        .when()
+        .get("/query-with-dollar-parameters")
+        .then()
+        .statusCode(200)
+        .body("value", hasSize(1))
+        .body("value[0].plainString", is("Poem"));
+  }
+
+  @Test
+  public void shouldOrderAndLimitWithDollarParameters() {
+    given()
+        .queryParam("$orderby", "plainString desc")
+        .queryParam("$top", "2")
+        .when()
+        .get("/query-with-dollar-parameters")
+        .then()
+        .statusCode(200)
+        .body("value", hasSize(2))
+        .body("value[0].plainString", is("example2"))
+        .body("value[1].plainString", is("example1"));
+  }
+
+  @Test
+  public void shouldSkipAndLimitWithDollarParameters() {
+    given()
+        .queryParam("$orderby", "plainString desc")
+        .queryParam("$skip", "3")
+        .queryParam("$top", "1")
+        .when()
+        .get("/query-with-dollar-parameters")
+        .then()
+        .statusCode(200)
+        .body("value", hasSize(1))
+        .body("value[0].plainString", is("Some text"));
+  }
+
+  @Test
+  public void shouldSelectFieldsWithDollarParameters() {
+    given()
+        .queryParam("$filter", "plainString eq 'Poem'")
+        .queryParam("$select", "plainString")
+        .when()
+        .get("/query-with-dollar-parameters")
+        .then()
+        .statusCode(200)
+        .body("value[0].plainString", is("Poem"))
+        .body("value[0].tags", is((Object) null));
+  }
+
+  @Test
+  public void shouldReturnCountWithDollarParameters() {
+    given()
+        .queryParam("$filter", "contains(plainString, 'e')")
+        .queryParam("$count", "true")
+        .when()
+        .get("/query-with-dollar-parameters")
+        .then()
+        .statusCode(200)
+        .body("value", hasSize(6))
+        .body("'@odata.count'", is(6));
+  }
+
+  @Test
   public void shouldReturn400WhenNoIndexUsed() {
     given()
         .queryParam("filter", "plainString eq 'Poem'")

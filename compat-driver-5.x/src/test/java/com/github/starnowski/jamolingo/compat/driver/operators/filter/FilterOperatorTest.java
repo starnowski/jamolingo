@@ -249,7 +249,8 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
   }
 
   /**
-   * String comparison is case-sensitive, case-insensitive comparison can be achieved in combination with tolower or toupper.
+   * String comparison is case-sensitive, case-insensitive comparison can be achieved in combination
+   * with tolower or toupper.
    * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_contains
    * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_endswith
    * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_startswith
