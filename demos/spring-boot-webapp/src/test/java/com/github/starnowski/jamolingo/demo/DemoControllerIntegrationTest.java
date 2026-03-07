@@ -88,6 +88,55 @@ public class DemoControllerIntegrationTest {
   }
 
   @Test
+  public void shouldFilterByPlainStringWithDollarParameters() throws Exception {
+    mockMvc
+            .perform(get("/query-with-dollar-parameters").queryParam("$filter", "plainString eq 'Poem'"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.value", hasSize(1)))
+            .andExpect(jsonPath("$.value[0].plainString", is("Poem")));
+  }
+
+  @Test
+  public void shouldOrderAndLimitWithDollarParameters() throws Exception {
+    mockMvc
+            .perform(get("/query-with-dollar-parameters").queryParam("$orderby", "plainString desc").queryParam("$top", "2"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.value", hasSize(2)))
+            .andExpect(jsonPath("$.value[0].plainString", is("example2")))
+            .andExpect(jsonPath("$.value[1].plainString", is("example1")));
+  }
+
+  @Test
+  public void shouldSkipAndLimitWithDollarParameters() throws Exception {
+    // sorted desc: example2, example1, eOMtThyhVNLWUZNRcBaQKxI, Some text, Poem, Oleksa, Mario
+    mockMvc
+            .perform(
+                    get("/query-with-dollar-parameters").queryParam("$orderby", "plainString desc").queryParam("$skip", "3").queryParam("$top", "1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.value", hasSize(1)))
+            .andExpect(jsonPath("$.value[0].plainString", is("Some text")));
+  }
+
+  @Test
+  public void shouldSelectFieldsWithDollarParameters() throws Exception {
+    mockMvc
+            .perform(
+                    get("/query-with-dollar-parameters").queryParam("$filter", "plainString eq 'Poem'").queryParam("$select", "plainString"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.value[0].plainString", is("Poem")))
+            .andExpect(jsonPath("$.value[0].tags").doesNotExist());
+  }
+
+  @Test
+  public void shouldReturnCountWithDollarParameters() throws Exception {
+    mockMvc
+            .perform(get("/query-with-dollar-parameters").queryParam("$filter", "contains(plainString, 'e')").queryParam("$count", "true"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.value", hasSize(6)))
+            .andExpect(jsonPath("$['@odata.count']", is(6)));
+  }
+
+  @Test
   public void shouldReturn400WhenNoIndexUsed() throws Exception {
     mockMvc
         .perform(get("/query-index-check").param("filter", "plainString eq 'Poem'"))
