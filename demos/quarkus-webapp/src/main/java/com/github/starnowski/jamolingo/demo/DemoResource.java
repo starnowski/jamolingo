@@ -4,7 +4,6 @@ import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult;
 import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory;
 import com.mongodb.client.MongoClient;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -12,6 +11,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.UriInfo;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -28,9 +28,10 @@ public class DemoResource {
 
   @GET
   @Path("/query-with-dollar-parameters")
-  public Map<String, Object> queryWithDollarParameterOperators(@Context HttpServletRequest request)
+  public Map<String, Object> queryWithDollarParameterOperators(@Context UriInfo uriInfo)
       throws Exception {
-    ODataQueryService.QueryPlan plan = oDataQueryService.buildQueryPlan(request.getQueryString());
+    ODataQueryService.QueryPlan plan =
+        oDataQueryService.buildQueryPlan(uriInfo.getRequestUri().getQuery());
     return executeQueryPlan(plan);
   }
 
