@@ -2,12 +2,11 @@ package com.github.starnowski.jamolingo.demo;
 
 import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult;
 import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import jakarta.servlet.http.HttpServletRequest;
 import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -24,9 +23,8 @@ public class DemoController {
   @Autowired private MongoTemplate mongoTemplate;
 
   @GetMapping("/query-with-dollar-parameters")
-  public Map<String, Object> queryWithDollarParameterOperators(
-          HttpServletRequest request)
-          throws Exception {
+  public Map<String, Object> queryWithDollarParameterOperators(HttpServletRequest request)
+      throws Exception {
     ODataQueryService.QueryPlan plan = oDataQueryService.buildQueryPlan(request.getQueryString());
     return executeQueryPlan(plan);
   }
