@@ -16,7 +16,8 @@ public abstract class SearchDocumentForQueryStringFactory implements SearchDocum
 
   private QueryStringParsingResult pares(SearchExpression searchExpression) {
     try {
-      return new QueryStringParsingResult(parseSearchExpressionToString(searchExpression), true, null);
+      return new QueryStringParsingResult(
+          parseSearchExpressionToString(searchExpression), true, null);
     } catch (Exception ex) {
       return new QueryStringParsingResult(null, false, ex);
     }
@@ -59,7 +60,7 @@ public abstract class SearchDocumentForQueryStringFactory implements SearchDocum
 
   private String formatTerm(String term) {
     if (term.contains(" ") || term.equals("AND") || term.equals("OR") || term.equals("NOT")) {
-      return "\"" + term.replace("\\", "\\\\").replace("\"", "\\\\\"") + "\"";
+      return "\"" + term.replace("\\", "\\\\").replace("\"", "\\\"") + "\"";
     }
     return term;
   }
