@@ -63,6 +63,9 @@ class ODataSearchToMongoSearchParserTest extends AbstractSpecification {
             """database OR search"""        || """{ "\$search": { "index": "default", "queryString": { "query": "database OR search", "path": ["name","description"] }}}"""
             """database NOT legacy"""       || """{ "\$search": { "index": "default", "queryString": { "query": "database NOT legacy", "path": ["name","description"] }}}"""
             """\"AND\""""                   || """{ "\$search": { "index": "default", "queryString": { "query": "\\"AND\\"", "path": ["name","description"] }}}"""
+            """\"OR\""""                    || """{ "\$search": { "index": "default", "queryString": { "query": "\\"OR\\"", "path": ["name","description"] }}}"""
+            """\"NOT\""""                   || """{ "\$search": { "index": "default", "queryString": { "query": "\\"NOT\\"", "path": ["name","description"] }}}"""
+            """\"AND operator\""""          || """{ "\$search": { "index": "default", "queryString": { "query": "\\"AND operator\\"", "path": ["name","description"] }}}"""
     }
 
 
