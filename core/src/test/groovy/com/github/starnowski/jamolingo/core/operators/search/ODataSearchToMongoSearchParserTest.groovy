@@ -77,6 +77,7 @@ class ODataSearchToMongoSearchParserTest extends AbstractSpecification {
             """database AND ("OR" OR "NOT")"""                      || """{ "\$search": { "index": "default", "queryString": { "query": "database AND (\\"OR\\" OR \\"NOT\\")", "path": ["name","description"] }}}"""
             """\"logical AND operator\""""                          || """{ "\$search": { "index": "default", "queryString": { "query": "\\"logical AND operator\\"", "path": ["name","description"] }}}"""
             """("database search" OR "full text") AND engine"""     || """{ "\$search": { "index": "default", "queryString": { "query": "(\\"database search\\" OR \\"full text\\") AND engine", "path": ["name","description"] }}}"""
+            """\"\\"AND\\" keyword\""""                             || """{ "\$search": { "index": "default", "queryString": { "query": "\\"\\\\\\"AND\\\\\\" keyword\\"", "path": ["name","description"] }}}"""
     }
 
 
