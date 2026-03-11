@@ -60,6 +60,8 @@ class ODataSearchToMongoSearchParserTest extends AbstractSpecification {
         where:
             searchValue ||  expectedBsonJson
             """database AND search"""      || """{ "\$search": { "index": "default", "queryString": { "query": "database AND search", "path": ["name","description"] }}}"""
+            """database OR search"""      || """{ "\$search": { "index": "default", "queryString": { "query": "database OR search", "path": ["name","description"] }}}"""
+            """database NOT legacy"""      || """{ "\$search": { "index": "default", "queryString": { "query": "database NOT legacy", "path": ["name","description"] }}}"""
     }
 
 
