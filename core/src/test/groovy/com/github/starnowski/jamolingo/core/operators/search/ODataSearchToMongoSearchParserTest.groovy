@@ -48,9 +48,9 @@ class ODataSearchToMongoSearchParserTest extends AbstractSpecification {
             Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult) {
                 return new Document().append("index", "default")
                         .append("queryString", new Document()
-                                .append("path", Arrays.asList("name","description"))
                                 .append("query", queryStringParsingResult.getQuery())
-                        )
+                                .append("path", Arrays.asList("name","description"))
+                                )
             }
         })
 
