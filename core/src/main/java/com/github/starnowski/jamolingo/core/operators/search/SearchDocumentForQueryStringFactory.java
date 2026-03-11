@@ -17,6 +17,11 @@ public abstract class SearchDocumentForQueryStringFactory implements SearchDocum
     }
   }
 
+  protected String parseSearchExpressionToString(SearchExpression searchExpression) {
+    // TODO
+    return "";
+  }
+
   public abstract Bson build(
       SearchExpression searchExpression, QueryStringParsingResult queryStringParsingResult);
 
