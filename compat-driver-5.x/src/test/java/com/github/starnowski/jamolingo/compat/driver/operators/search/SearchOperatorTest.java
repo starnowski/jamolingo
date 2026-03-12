@@ -68,23 +68,23 @@ public class SearchOperatorTest extends AbstractItTest {
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance()).parseUri("examples2", "$search=" + search, null, null);
-    ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser(new SearchDocumentForQueryStringFactory() {
-      @Override
-      public Bson build(
-              SearchExpression searchExpression,
-              QueryStringParsingResult queryStringParsingResult) {
-        return new Document("index", "atlas_search_index")
-                .append(
+    ODataSearchToMongoAtlasSearchParser tested =
+        new ODataSearchToMongoAtlasSearchParser(
+            new SearchDocumentForQueryStringFactory() {
+              @Override
+              public Bson build(
+                  SearchExpression searchExpression,
+                  QueryStringParsingResult queryStringParsingResult) {
+                return new Document("index", "atlas_search_index")
+                    .append(
                         "queryString",
                         new Document("query", queryStringParsingResult.getQuery())
-                                .append("defaultPath", "plainString"));
-      }
-    });
+                            .append("defaultPath", "plainString"));
+              }
+            });
 
     // WHEN
-    SearchOperatorResult result =
-        tested.parse(
-            uriInfo.getSearchOption());
+    SearchOperatorResult result = tested.parse(uriInfo.getSearchOption());
     List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
     System.out.println(new Document("pipeline", pipeline).toJson());
 

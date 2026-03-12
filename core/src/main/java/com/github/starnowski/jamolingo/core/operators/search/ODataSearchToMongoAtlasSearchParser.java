@@ -5,13 +5,14 @@ import org.apache.olingo.server.api.uri.queryoption.SearchOption;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-public class ODataSearchToMongoAtlasSearchParser implements ODataSearchToMongoTextSearchParser<ODataSearchToMongoAtlasSearchOptions>{
+public class ODataSearchToMongoAtlasSearchParser
+    implements ODataSearchToMongoTextSearchParser<ODataSearchToMongoAtlasSearchOptions> {
 
   private final SearchDocumentFactory searchDocumentFactory;
 
-    public ODataSearchToMongoAtlasSearchParser(SearchDocumentFactory searchDocumentFactory) {
-        this.searchDocumentFactory = searchDocumentFactory;
-    }
+  public ODataSearchToMongoAtlasSearchParser(SearchDocumentFactory searchDocumentFactory) {
+    this.searchDocumentFactory = searchDocumentFactory;
+  }
 
   @Override
   public SearchOperatorResult parse(SearchOption searchOption) {
@@ -19,9 +20,10 @@ public class ODataSearchToMongoAtlasSearchParser implements ODataSearchToMongoTe
   }
 
   @Override
-  public SearchOperatorResult parse(SearchOption searchOption, ODataSearchToMongoAtlasSearchOptions options) {
+  public SearchOperatorResult parse(
+      SearchOption searchOption, ODataSearchToMongoAtlasSearchOptions options) {
     return new DefaultSearchOperatorResult(
-            new Document("$search", searchDocumentFactory.build(searchOption.getSearchExpression())));
+        new Document("$search", searchDocumentFactory.build(searchOption.getSearchExpression())));
   }
 
   private static class DefaultSearchOperatorResult implements SearchOperatorResult {
