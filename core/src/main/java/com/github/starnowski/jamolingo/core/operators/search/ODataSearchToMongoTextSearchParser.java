@@ -2,9 +2,10 @@ package com.github.starnowski.jamolingo.core.operators.search;
 
 import org.apache.olingo.server.api.uri.queryoption.SearchOption;
 
-public interface ODataSearchToMongoTextSearchParser<T extends ODataSearchToMongoTextSearchOptions> {
+public interface ODataSearchToMongoTextSearchParser<
+    T extends ODataSearchToMongoTextSearchOptions, R extends SearchOperatorResult> {
 
-  SearchOperatorResult parse(SearchOption searchOption);
+  R parse(SearchOption searchOption);
 
-  SearchOperatorResult parse(SearchOption searchOption, T options);
+  R parse(SearchOption searchOption, T options);
 }

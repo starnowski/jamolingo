@@ -6,7 +6,8 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 public class ODataSearchToMongoAtlasSearchParser
-    implements ODataSearchToMongoTextSearchParser<ODataSearchToMongoAtlasSearchOptions> {
+    implements ODataSearchToMongoTextSearchParser<
+        ODataSearchToMongoAtlasSearchOptions, SearchOperatorResultForAtlasSearch> {
 
   private final SearchDocumentFactory searchDocumentFactory;
 
@@ -15,18 +16,18 @@ public class ODataSearchToMongoAtlasSearchParser
   }
 
   @Override
-  public SearchOperatorResult parse(SearchOption searchOption) {
+  public SearchOperatorResultForAtlasSearch parse(SearchOption searchOption) {
     return parse(searchOption, null);
   }
 
   @Override
-  public SearchOperatorResult parse(
+  public SearchOperatorResultForAtlasSearch parse(
       SearchOption searchOption, ODataSearchToMongoAtlasSearchOptions options) {
     return new DefaultSearchOperatorResult(
         new Document("$search", searchDocumentFactory.build(searchOption.getSearchExpression())));
   }
 
-  private static class DefaultSearchOperatorResult implements SearchOperatorResult {
+  private static class DefaultSearchOperatorResult implements SearchOperatorResultForAtlasSearch {
 
     private final List<Bson> stageObjects;
 
