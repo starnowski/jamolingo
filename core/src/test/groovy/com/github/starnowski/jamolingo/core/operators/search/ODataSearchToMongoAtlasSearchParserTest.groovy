@@ -17,7 +17,7 @@ import org.bson.conversions.Bson
 import org.bson.json.JsonWriterSettings
 import spock.lang.Unroll
 
-class ODataSearchToMongoSearchParserTest extends AbstractSpecification {
+class ODataSearchToMongoAtlasSearchParserTest extends AbstractSpecification {
 
 
     /**
@@ -40,7 +40,7 @@ class ODataSearchToMongoSearchParserTest extends AbstractSpecification {
                 .parseUri("examples2",
                         "\$search=" +searchValue
                         , null, null)
-        ODataSearchToMongoSearchParser tested = new ODataSearchToMongoSearchParser()
+        ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser()
 
         when:
         def result = tested.parse(uriInfo.getSearchOption(), new SearchDocumentForQueryStringFactory() {

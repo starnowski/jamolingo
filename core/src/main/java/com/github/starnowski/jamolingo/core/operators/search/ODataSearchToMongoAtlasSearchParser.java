@@ -5,7 +5,7 @@ import org.apache.olingo.server.api.uri.queryoption.SearchOption;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-public class ODataSearchToMongoSearchParser {
+public class ODataSearchToMongoAtlasSearchParser {
 
   public SearchOperatorResult parse(
       SearchOption searchOption, SearchDocumentFactory searchDocumentFactory) {
