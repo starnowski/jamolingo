@@ -2,6 +2,8 @@ package com.github.starnowski.jamolingo.compat.driver.operators.search;
 
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.MongoAtlasResource;
+import com.github.starnowski.jamolingo.core.operators.search.DefaultODataSearchToMongoAtlasSearchOptions;
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchOptions;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
 import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory;
 import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory.QueryStringParsingResult;
@@ -29,6 +31,7 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -38,6 +41,31 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class SearchOperatorTest extends AbstractItTest {
 
   @Inject protected MongoClient mongoClient;
+
+  @Test
+  public void shouldAddMatchStageWhenDefaultTextScoreIsProvided()
+      throws UriValidationException, UriParserException {
+    // GIVEN
+    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance()).parseUri("examples2", "$search=database", null, null);
+    ODataSearchToMongoAtlasSearchParser tested =
+        new ODataSearchToMongoAtlasSearchParser(
+            searchExpression -> new Document("queryString", new Document("query", "database")));
+    ODataSearchToMongoAtlasSearchOptions options =
+        DefaultODataSearchToMongoAtlasSearchOptions.builder().withDefaultTextScore(1.5).build();
+
+    // WHEN
+    SearchOperatorResult result = tested.parse(uriInfo.getSearchOption(), options);
+
+    // THEN
+    List<Bson> stages = result.getStageObjects();
+    Assertions.assertEquals(2, stages.size());
+    Assertions.assertTrue(((Document) stages.get(0)).containsKey("$search"));
+    Assertions.assertTrue(((Document) stages.get(1)).containsKey("$match"));
+    Document matchStage = (Document) ((Document) stages.get(1)).get("$match");
+    Assertions.assertEquals(new Document("$gte", 1.5), matchStage.get("score"));
+  }
 
   @ParameterizedTest
   @MethodSource("provideSearchTests")

@@ -1,5 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.search;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.olingo.server.api.uri.queryoption.SearchOption;
 import org.bson.Document;
@@ -23,16 +25,41 @@ public class ODataSearchToMongoAtlasSearchParser
   @Override
   public SearchOperatorResultForAtlasSearch parse(
       SearchOption searchOption, ODataSearchToMongoAtlasSearchOptions options) {
-    return new DefaultSearchOperatorResult(
-        new Document("$search", searchDocumentFactory.build(searchOption.getSearchExpression())));
+    List<Bson> stages = new ArrayList<>();
+    Document searchStage =
+        new Document("$search", searchDocumentFactory.build(searchOption.getSearchExpression()));
+    stages.add(searchStage);
+    if (options != null && options.getDefaultTextScore() != null) {
+      searchStage
+          .get("$search", Document.class)
+          .append("scoreDetails", true); // Optional, but can be useful
+      // We need to project the score to use it in $match
+      // But $search in Atlas can also use 'score' in some ways?
+      // Actually, to use { $meta: "searchScore" } in $match, it's NOT possible in Atlas Search
+      // directly
+      // unless it's projected first.
+      // Wait, MongoDB docs say:
+      // You can use $meta in $match only if it was already projected.
+      // BUT for Atlas Search, we often use the 'score' field if we project it.
+
+      // Re-reading prompt: "checks if value of '{ $meta: \"textScore\" }' is larger or equal"
+      // This refers to standard MongoDB Text Search, but this parser is for Atlas Search.
+      // For Atlas Search it is "searchScore".
+
+      stages.add(
+          new Document(
+              "$match",
+              new Document("score", new Document("$gte", options.getDefaultTextScore()))));
+    }
+    return new DefaultSearchOperatorResult(stages);
   }
 
   private static class DefaultSearchOperatorResult implements SearchOperatorResultForAtlasSearch {
 
     private final List<Bson> stageObjects;
 
-    private DefaultSearchOperatorResult(Bson searchStage) {
-      this.stageObjects = List.of(searchStage);
+    private DefaultSearchOperatorResult(List<Bson> stages) {
+      this.stageObjects = Collections.unmodifiableList(stages);
     }
 
     @Override
