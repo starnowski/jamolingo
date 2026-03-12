@@ -40,19 +40,19 @@ class ODataSearchToMongoAtlasSearchParserTest extends AbstractSpecification {
                 .parseUri("examples2",
                         "\$search=" +searchValue
                         , null, null)
-        ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser()
-
-        when:
-        def result = tested.parse(uriInfo.getSearchOption(), new SearchDocumentForQueryStringFactory() {
+        ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser(new SearchDocumentForQueryStringFactory() {
             @Override
             Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult) {
                 return new Document().append("index", "default")
                         .append("queryString", new Document()
                                 .append("query", queryStringParsingResult.getQuery())
                                 .append("path", Arrays.asList("name","description"))
-                                )
+                        )
             }
         })
+
+        when:
+        def result = tested.parse(uriInfo.getSearchOption())
 
         then:
         [((Document)result.getStageObjects().get(0)).toJson(settings, codec)] == [expectedBson.toJson(settings, codec)]
