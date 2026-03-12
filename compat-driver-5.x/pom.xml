@@ -34,6 +34,7 @@
         <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>
             <artifactId>core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.github.starnowski.jamolingo</groupId>

@@ -19,7 +19,7 @@ public class MongoAtlasResource implements QuarkusTestResourceLifecycleManager {
     mongoAtlasContainer.start();
 
     return Collections.singletonMap(
-        "quarkus.mongodb.connection-string", "mongodb://localhost:27019");
+        "quarkus.mongodb.connection-string", "mongodb://localhost:27019/?directConnection=true");
   }
 
   @Override
