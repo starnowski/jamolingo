@@ -1,7 +1,7 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.search;
 
+import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.MongoAtlasResource;
-import com.github.starnowski.jamolingo.compat.driver.operators.filter.AbstractBaseFilterOperatorTest;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
 import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory;
 import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory.QueryStringParsingResult;
@@ -13,6 +13,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.xml.stream.XMLStreamException;
@@ -34,7 +35,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
 @QuarkusTestResource(MongoAtlasResource.class)
-public class SearchOperatorTest extends AbstractBaseFilterOperatorTest {
+public class SearchOperatorTest extends AbstractItTest {
+
+  @Inject protected MongoClient mongoClient;
 
   @ParameterizedTest
   @MethodSource("provideSearchTests")
@@ -80,7 +83,7 @@ public class SearchOperatorTest extends AbstractBaseFilterOperatorTest {
                     .append(
                         "queryString",
                         new Document("query", queryStringParsingResult.getQuery())
-                            .append("path", "plainString"));
+                            .append("defaultPath", "plainString"));
               }
             });
     List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
