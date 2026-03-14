@@ -44,7 +44,7 @@ public class SearchOperatorTest extends AbstractItTest {
 
   @Test
   public void shouldAddMatchStageWhenDefaultTextScoreIsProvided()
-      throws UriValidationException, UriParserException {
+      throws UriValidationException, UriParserException, XMLStreamException {
     // GIVEN
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
     UriInfo uriInfo =
