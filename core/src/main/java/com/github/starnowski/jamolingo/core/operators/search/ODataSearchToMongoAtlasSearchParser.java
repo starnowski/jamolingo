@@ -25,10 +25,12 @@ public class ODataSearchToMongoAtlasSearchParser
   @Override
   public SearchOperatorResultForAtlasSearch parse(
       SearchOption searchOption, ODataSearchToMongoAtlasSearchOptions options) {
-    List<Bson> stages = new ArrayList<>();
+    List<Bson> searchStages = new ArrayList<>();
+    List<Bson> scoreFilterStages = new ArrayList<>();
     Document searchStage =
-        new Document("$search", searchDocumentFactory.build(searchOption.getSearchExpression()));
-    stages.add(searchStage);
+        new Document(
+            "$search", searchDocumentFactory.build(searchOption.getSearchExpression(), options));
+    searchStages.add(searchStage);
     if (options != null && options.getDefaultTextScore() != null) {
       searchStage
           .get("$search", Document.class)
@@ -46,25 +48,42 @@ public class ODataSearchToMongoAtlasSearchParser
       // This refers to standard MongoDB Text Search, but this parser is for Atlas Search.
       // For Atlas Search it is "searchScore".
 
-      stages.add(
+      scoreFilterStages.add(
           new Document(
               "$match",
               new Document("score", new Document("$gte", options.getDefaultTextScore()))));
     }
-    return new DefaultSearchOperatorResult(stages);
+    List<Bson> allStages = new ArrayList<>(searchStages);
+    allStages.addAll(scoreFilterStages);
+    return new DefaultSearchOperatorResult(allStages, searchStages, scoreFilterStages);
   }
 
   private static class DefaultSearchOperatorResult implements SearchOperatorResultForAtlasSearch {
 
     private final List<Bson> stageObjects;
+    private final List<Bson> searchStages;
+    private final List<Bson> scoreFilterStages;
 
-    private DefaultSearchOperatorResult(List<Bson> stages) {
+    private DefaultSearchOperatorResult(
+        List<Bson> stages, List<Bson> searchStages, List<Bson> scoreFilterStages) {
       this.stageObjects = Collections.unmodifiableList(stages);
+      this.searchStages = Collections.unmodifiableList(searchStages);
+      this.scoreFilterStages = Collections.unmodifiableList(scoreFilterStages);
     }
 
     @Override
     public List<Bson> getStageObjects() {
       return stageObjects;
+    }
+
+    @Override
+    public List<Bson> getSearchStages() {
+      return searchStages;
+    }
+
+    @Override
+    public List<Bson> getScoreFilterStages() {
+      return scoreFilterStages;
     }
 
     @Override

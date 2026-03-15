@@ -5,5 +5,5 @@ import org.bson.conversions.Bson;
 
 public interface SearchDocumentFactory {
 
-  Bson build(SearchExpression searchExpression);
+  Bson build(SearchExpression searchExpression, ODataSearchToMongoAtlasSearchOptions options);
 }

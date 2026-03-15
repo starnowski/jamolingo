@@ -20,6 +20,47 @@ import spock.lang.Unroll
 class ODataSearchToMongoAtlasSearchParserTest extends AbstractSpecification {
 
 
+    def "should return separate search and score filter stages"(){
+        given:
+        Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+        JsonWriterSettings settings = JsonWriterSettings.builder().build()
+        CodecRegistry registry = CodecRegistries.fromRegistries(
+                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                MongoClientSettings.getDefaultCodecRegistry()
+        )
+        DocumentCodec codec = new DocumentCodec(registry)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2",
+                        "\$search=database"
+                        , null, null)
+        ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser(new SearchDocumentForQueryStringFactory() {
+            @Override
+            Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult, ODataSearchToMongoAtlasSearchOptions options) {
+                return new Document().append("index", "default")
+                        .append("queryString", new Document()
+                                .append("query", queryStringParsingResult.getQuery())
+                                .append("path", Arrays.asList("name","description"))
+                        )
+            }
+        })
+        ODataSearchToMongoAtlasSearchOptions options = DefaultODataSearchToMongoAtlasSearchOptions.builder().withDefaultTextScore(0.5d).build()
+
+        when:
+        def result = tested.parse(uriInfo.getSearchOption(), options)
+
+        then:
+        result.getSearchStages().size() == 1
+        ((Document)result.getSearchStages().get(0)).get("\$search") != null
+        ((Document)result.getSearchStages().get(0)).get("\$search", Document.class).get("scoreDetails") == true
+        result.getScoreFilterStages().size() == 1
+        ((Document)result.getScoreFilterStages().get(0)).get("\$match") != null
+        ((Document)result.getScoreFilterStages().get(0)).get("\$match", Document.class).get("score", Document.class).get("\$gte") == 0.5d
+        result.getStageObjects().size() == 2
+        result.getStageObjects().get(0) == result.getSearchStages().get(0)
+        result.getStageObjects().get(1) == result.getScoreFilterStages().get(0)
+    }
+
     /**
      * Verifies that the generated MongoDB $match stage matches the expected BSON document.
      */
@@ -42,7 +83,7 @@ class ODataSearchToMongoAtlasSearchParserTest extends AbstractSpecification {
                         , null, null)
         ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser(new SearchDocumentForQueryStringFactory() {
             @Override
-            Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult) {
+            Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult, ODataSearchToMongoAtlasSearchOptions options) {
                 return new Document().append("index", "default")
                         .append("queryString", new Document()
                                 .append("query", queryStringParsingResult.getQuery())

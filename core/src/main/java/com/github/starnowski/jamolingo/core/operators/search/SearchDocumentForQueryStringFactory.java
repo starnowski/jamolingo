@@ -10,8 +10,9 @@ import org.bson.conversions.Bson;
 
 public abstract class SearchDocumentForQueryStringFactory implements SearchDocumentFactory {
   @Override
-  public Bson build(SearchExpression searchExpression) {
-    return build(searchExpression, pares(searchExpression));
+  public Bson build(
+      SearchExpression searchExpression, ODataSearchToMongoAtlasSearchOptions options) {
+    return build(searchExpression, pares(searchExpression), options);
   }
 
   private QueryStringParsingResult pares(SearchExpression searchExpression) {
@@ -66,7 +67,9 @@ public abstract class SearchDocumentForQueryStringFactory implements SearchDocum
   }
 
   public abstract Bson build(
-      SearchExpression searchExpression, QueryStringParsingResult queryStringParsingResult);
+      SearchExpression searchExpression,
+      QueryStringParsingResult queryStringParsingResult,
+      ODataSearchToMongoAtlasSearchOptions options);
 
   public static class QueryStringParsingResult {
 
