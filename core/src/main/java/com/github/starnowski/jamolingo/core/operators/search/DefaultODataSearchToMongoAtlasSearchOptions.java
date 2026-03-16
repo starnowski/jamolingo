@@ -71,11 +71,23 @@ public class DefaultODataSearchToMongoAtlasSearchOptions
     private String scoreFieldName =
         ODataSearchToMongoAtlasSearchParser.SEARCH_SCORE_DEFAULT_VARIABLE;
 
+    /**
+     * Sets the minimum text score.
+     *
+     * @param defaultTextScore the default text score
+     * @return the builder instance
+     */
     public Builder withDefaultTextScore(Double defaultTextScore) {
       this.defaultTextScore = defaultTextScore;
       return this;
     }
 
+    /**
+     * Sets the score field name.
+     *
+     * @param scoreFieldName the name of the field to store the score
+     * @return the builder instance
+     */
     public Builder withScoreFieldName(String scoreFieldName) {
       this.scoreFieldName = scoreFieldName;
       return this;

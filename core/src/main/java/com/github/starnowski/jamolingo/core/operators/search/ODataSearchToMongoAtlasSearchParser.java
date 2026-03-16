@@ -7,13 +7,24 @@ import org.apache.olingo.server.api.uri.queryoption.SearchOption;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+/**
+ * Parser responsible for converting OData search options into MongoDB Atlas Search aggregation
+ * pipeline stages.
+ */
 public class ODataSearchToMongoAtlasSearchParser
     implements ODataSearchToMongoTextSearchParser<
         ODataSearchToMongoAtlasSearchOptions, SearchOperatorResultForAtlasSearch> {
 
+  /** Default variable name used to store the search score in the pipeline. */
   public static final String SEARCH_SCORE_DEFAULT_VARIABLE = "jamolingo_search_score";
+
   private final SearchDocumentFactory searchDocumentFactory;
 
+  /**
+   * Constructs a new ODataSearchToMongoAtlasSearchParser.
+   *
+   * @param searchDocumentFactory the factory to build search documents
+   */
   public ODataSearchToMongoAtlasSearchParser(SearchDocumentFactory searchDocumentFactory) {
     this.searchDocumentFactory = searchDocumentFactory;
   }
