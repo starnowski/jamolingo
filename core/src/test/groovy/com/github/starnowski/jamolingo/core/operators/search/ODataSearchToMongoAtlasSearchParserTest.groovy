@@ -53,12 +53,15 @@ class ODataSearchToMongoAtlasSearchParserTest extends AbstractSpecification {
         result.getSearchStages().size() == 1
         ((Document)result.getSearchStages().get(0)).get("\$search") != null
         ((Document)result.getSearchStages().get(0)).get("\$search", Document.class).get("scoreDetails") == true
-        result.getScoreFilterStages().size() == 1
-        ((Document)result.getScoreFilterStages().get(0)).get("\$match") != null
-        ((Document)result.getScoreFilterStages().get(0)).get("\$match", Document.class).get("score", Document.class).get("\$gte") == 0.5d
-        result.getStageObjects().size() == 2
+        result.getScoreFilterStages().size() == 2
+        ((Document)result.getScoreFilterStages().get(0)).get("\$set") != null
+        ((Document)result.getScoreFilterStages().get(0)).get("\$set", Document.class).get("jamolingo_search_score", Document.class).get("\$meta") == "searchScore"
+        ((Document)result.getScoreFilterStages().get(1)).get("\$match") != null
+        ((Document)result.getScoreFilterStages().get(1)).get("\$match", Document.class).get("jamolingo_search_score", Document.class).get("\$gte") == 0.5d
+        result.getStageObjects().size() == 3
         result.getStageObjects().get(0) == result.getSearchStages().get(0)
         result.getStageObjects().get(1) == result.getScoreFilterStages().get(0)
+        result.getStageObjects().get(2) == result.getScoreFilterStages().get(1)
     }
 
     /**

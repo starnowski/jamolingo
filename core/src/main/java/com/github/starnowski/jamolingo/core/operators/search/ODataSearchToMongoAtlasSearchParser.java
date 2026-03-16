@@ -11,6 +11,7 @@ public class ODataSearchToMongoAtlasSearchParser
     implements ODataSearchToMongoTextSearchParser<
         ODataSearchToMongoAtlasSearchOptions, SearchOperatorResultForAtlasSearch> {
 
+  public static final String SEARCH_SCORE_DEFAULT_VARIABLE = "jamolingo_search_score";
   private final SearchDocumentFactory searchDocumentFactory;
 
   public ODataSearchToMongoAtlasSearchParser(SearchDocumentFactory searchDocumentFactory) {
@@ -38,11 +39,11 @@ public class ODataSearchToMongoAtlasSearchParser
 
       // TODO specify the score variable
       scoreFilterStages.add(
-          new Document("$set", new Document("score", new Document("$meta", "searchScore"))));
+          new Document("$set", new Document(SEARCH_SCORE_DEFAULT_VARIABLE, new Document("$meta", "searchScore"))));
       scoreFilterStages.add(
           new Document(
               "$match",
-              new Document("score", new Document("$gte", options.getDefaultTextScore()))));
+              new Document(SEARCH_SCORE_DEFAULT_VARIABLE, new Document("$gte", options.getDefaultTextScore()))));
     }
     List<Bson> allStages = new ArrayList<>(searchStages);
     allStages.addAll(scoreFilterStages);
