@@ -1,0 +1,165 @@
+package com.github.starnowski.jamolingo.core.operators.search
+
+import com.github.starnowski.jamolingo.core.AbstractSpecification
+import com.mongodb.MongoClientSettings
+import org.apache.olingo.commons.api.edm.Edm
+import org.apache.olingo.server.api.OData
+import org.apache.olingo.server.api.uri.UriInfo
+import org.apache.olingo.server.api.uri.queryoption.search.SearchExpression
+import org.apache.olingo.server.core.uri.parser.Parser
+import org.bson.Document
+import org.bson.UuidRepresentation
+import org.bson.codecs.DocumentCodec
+import org.bson.codecs.UuidCodecProvider
+import org.bson.codecs.configuration.CodecRegistries
+import org.bson.codecs.configuration.CodecRegistry
+import org.bson.conversions.Bson
+import org.bson.json.JsonWriterSettings
+import spock.lang.Unroll
+
+class ODataSearchToMongoAtlasSearchParserTest extends AbstractSpecification {
+
+
+    def "should return separate search and score filter stages"(){
+        given:
+        Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+        JsonWriterSettings settings = JsonWriterSettings.builder().build()
+        CodecRegistry registry = CodecRegistries.fromRegistries(
+                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                MongoClientSettings.getDefaultCodecRegistry()
+        )
+        DocumentCodec codec = new DocumentCodec(registry)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2",
+                        "\$search=database"
+                        , null, null)
+        ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser(new SearchDocumentForQueryStringFactory() {
+            @Override
+            Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult, ODataSearchToMongoAtlasSearchOptions options) {
+                return new Document().append("index", "default")
+                        .append("queryString", new Document()
+                                .append("query", queryStringParsingResult.getQuery())
+                                .append("path", Arrays.asList("name","description"))
+                        )
+            }
+        })
+        ODataSearchToMongoAtlasSearchOptions options = DefaultODataSearchToMongoAtlasSearchOptions.builder().withDefaultTextScore(0.5d).build()
+
+        when:
+        def result = tested.parse(uriInfo.getSearchOption(), options)
+
+        then:
+        result.getSearchStages().size() == 1
+        ((Document)result.getSearchStages().get(0)).get("\$search") != null
+        ((Document)result.getSearchStages().get(0)).get("\$search", Document.class).get("scoreDetails") == true
+        result.getScoreFilterStages().size() == 2
+        ((Document)result.getScoreFilterStages().get(0)).get("\$set") != null
+        ((Document)result.getScoreFilterStages().get(0)).get("\$set", Document.class).get("jamolingo_search_score", Document.class).get("\$meta") == "searchScore"
+        ((Document)result.getScoreFilterStages().get(1)).get("\$match") != null
+        ((Document)result.getScoreFilterStages().get(1)).get("\$match", Document.class).get("jamolingo_search_score", Document.class).get("\$gte") == 0.5d
+        result.getStageObjects().size() == 3
+        result.getStageObjects().get(0) == result.getSearchStages().get(0)
+        result.getStageObjects().get(1) == result.getScoreFilterStages().get(0)
+        result.getStageObjects().get(2) == result.getScoreFilterStages().get(1)
+        result.getAddedMongoDocumentProperties() == ["jamolingo_search_score"]
+    }
+
+    def "should return separate search and score filter stages with custom score field name"(){
+        given:
+        Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+        String customScoreField = "my_custom_score"
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2",
+                        "\$search=database"
+                        , null, null)
+        ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser(new SearchDocumentForQueryStringFactory() {
+            @Override
+            Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult, ODataSearchToMongoAtlasSearchOptions options) {
+                return new Document().append("index", "default")
+                        .append("queryString", new Document()
+                                .append("query", queryStringParsingResult.getQuery())
+                                .append("path", Arrays.asList("name","description"))
+                        )
+            }
+        })
+        ODataSearchToMongoAtlasSearchOptions options = DefaultODataSearchToMongoAtlasSearchOptions.builder()
+                .withDefaultTextScore(0.5d)
+                .withScoreFieldName(customScoreField)
+                .build()
+
+        when:
+        def result = tested.parse(uriInfo.getSearchOption(), options)
+
+        then:
+        result.getSearchStages().size() == 1
+        result.getScoreFilterStages().size() == 2
+        ((Document)result.getScoreFilterStages().get(0)).get("\$set", Document.class).get(customScoreField) != null
+        ((Document)result.getScoreFilterStages().get(1)).get("\$match", Document.class).get(customScoreField) != null
+        result.getAddedMongoDocumentProperties() == [customScoreField]
+    }
+
+    /**
+     * Verifies that the generated MongoDB $match stage matches the expected BSON document.
+     */
+    @Unroll
+    def "should return expected stage bson objects"(){
+        given:
+        System.out.println("Testing search: " + searchValue)
+        Bson expectedBson = Document.parse(expectedBsonJson)
+        Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+        JsonWriterSettings settings = JsonWriterSettings.builder().build()
+        CodecRegistry registry = CodecRegistries.fromRegistries(
+                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                MongoClientSettings.getDefaultCodecRegistry()
+        )
+        DocumentCodec codec = new DocumentCodec(registry)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2",
+                        "\$search=" +searchValue
+                        , null, null)
+        ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser(new SearchDocumentForQueryStringFactory() {
+            @Override
+            Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult, ODataSearchToMongoAtlasSearchOptions options) {
+                return new Document().append("index", "default")
+                        .append("queryString", new Document()
+                                .append("query", queryStringParsingResult.getQuery())
+                                .append("path", Arrays.asList("name","description"))
+                        )
+            }
+        })
+
+        when:
+        def result = tested.parse(uriInfo.getSearchOption())
+
+        then:
+        [((Document)result.getStageObjects().get(0)).toJson(settings, codec)] == [expectedBson.toJson(settings, codec)]
+
+        where:
+            searchValue                                                 ||  expectedBsonJson
+            """database AND search"""                                   || """{ "\$search": { "index": "default", "queryString": { "query": "database AND search", "path": ["name","description"] }}}"""
+            """database OR search"""                                    || """{ "\$search": { "index": "default", "queryString": { "query": "database OR search", "path": ["name","description"] }}}"""
+            """database NOT legacy"""                                   || """{ "\$search": { "index": "default", "queryString": { "query": "database NOT legacy", "path": ["name","description"] }}}"""
+            """\"AND\""""                                               || """{ "\$search": { "index": "default", "queryString": { "query": "\\"AND\\"", "path": ["name","description"] }}}"""
+            """\"OR\""""                                                || """{ "\$search": { "index": "default", "queryString": { "query": "\\"OR\\"", "path": ["name","description"] }}}"""
+            """\"NOT\""""                                               || """{ "\$search": { "index": "default", "queryString": { "query": "\\"NOT\\"", "path": ["name","description"] }}}"""
+            """\"AND operator\""""                                      || """{ "\$search": { "index": "default", "queryString": { "query": "\\"AND operator\\"", "path": ["name","description"] }}}"""
+            """\"rock AND roll\""""                                     || """{ "\$search": { "index": "default", "queryString": { "query": "\\"rock AND roll\\"", "path": ["name","description"] }}}"""
+            """"OR condition" AND database"""                           || """{ "\$search": { "index": "default", "queryString": { "query": "\\"OR condition\\" AND database", "path": ["name","description"] }}}"""
+            """"NOT operator" OR logic"""                               || """{ "\$search": { "index": "default", "queryString": { "query": "\\"NOT operator\\" OR logic", "path": ["name","description"] }}}"""
+            """(database OR search) AND index"""                        || """{ "\$search": { "index": "default", "queryString": { "query": "(database OR search) AND index", "path": ["name","description"] }}}"""
+            """("AND" OR "OR") AND logic"""                             || """{ "\$search": { "index": "default", "queryString": { "query": "(\\"AND\\" OR \\"OR\\") AND logic", "path": ["name","description"] }}}"""
+            """(database OR "AND") AND system"""                        || """{ "\$search": { "index": "default", "queryString": { "query": "(database OR \\"AND\\") AND system", "path": ["name","description"] }}}"""
+            """\"database OR search\""""                                || """{ "\$search": { "index": "default", "queryString": { "query": "\\"database OR search\\"", "path": ["name","description"] }}}"""
+            """\"AND OR NOT\""""                                        || """{ "\$search": { "index": "default", "queryString": { "query": "\\"AND OR NOT\\"", "path": ["name","description"] }}}"""
+            """database AND ("OR" OR "NOT")"""                          || """{ "\$search": { "index": "default", "queryString": { "query": "database AND (\\"OR\\" OR \\"NOT\\")", "path": ["name","description"] }}}"""
+            """\"logical AND operator\""""                              || """{ "\$search": { "index": "default", "queryString": { "query": "\\"logical AND operator\\"", "path": ["name","description"] }}}"""
+            """("database search" OR "full text") AND engine"""         || """{ "\$search": { "index": "default", "queryString": { "query": "(\\"database search\\" OR \\"full text\\") AND engine", "path": ["name","description"] }}}"""
+            """\"\\"AND\\" keyword\""""                                 || """{ "\$search": { "index": "default", "queryString": { "query": "\\"\\\\\\"AND\\\\\\" keyword\\"", "path": ["name","description"] }}}"""
+            """(database AND search) OR ("AND operator" AND logic)"""   || """{ "\$search": { "index": "default", "queryString": { "query": "(database AND search) OR (\\"AND operator\\" AND logic)", "path": ["name","description"] }}}"""
+    }
+
+
+}

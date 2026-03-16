@@ -25,6 +25,7 @@ A Java library for translating OData queries and concepts into MongoDB aggregati
 ### Prerequisites
 *   **Java 8** or higher.
 *   **MongoDB 4.4** or higher (supporting aggregation pipelines and explain).
+*   **MongoDB Atlas** or **MongoDB Atlas Local** (required for `$search` operator support).
 
 ### Installation (Maven)
 Add the following dependencies to your `pom.xml`:
@@ -33,13 +34,13 @@ Add the following dependencies to your `pom.xml`:
 <dependency>
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>core</artifactId>
-    <version>0.7.0</version>
+    <version>0.8.0-SNAPSHOT</version>
 </dependency>
 <!-- Optional: for performance analysis -->
 <dependency>
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>perf</artifactId>
-    <version>0.7.0</version>
+    <version>0.8.0-SNAPSHOT</version>
 </dependency>
 ```
 
@@ -84,6 +85,9 @@ The `core` module contains the primary logic for translating OData concepts and 
     *   Comparison (`eq`, `ne`, `in`, etc.) and Logical (`and`, `or`, `not`) operators.
     *   String, Math, and Date/Time functions.
     *   Collection operators (`any`, `all`) and `/$count`.
+*   Translates `$search` to MongoDB Atlas Search stages (`$search`, `$set`, `$match`) with support for:
+    *   Full-text search with logical operators (`AND`, `OR`, `NOT`).
+    *   Search score filtering and custom score field names.
 *   Translates `$select` to MongoDB `$project` stages.
 *   Translates `$orderby`, `$top`, `$skip`, and `$count` to corresponding MongoDB stages (`$sort`, `$limit`, `$skip`, `$count`).
 *   Handles OData-to-MongoDB mapping configuration and supports customizing mappings via overrides.

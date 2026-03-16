@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.starnowski.jamolingo</groupId>
         <artifactId>parent</artifactId>
-        <version>0.7.0</version>
+        <version>0.8.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>compat-driver-5.x</artifactId>
@@ -70,6 +70,11 @@
             <groupId>org.skyscreamer</groupId>
             <artifactId>jsonassert</artifactId>
             <version>1.5.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
