@@ -62,7 +62,7 @@ class ODataSearchToMongoAtlasSearchParserTest extends AbstractSpecification {
         result.getStageObjects().get(0) == result.getSearchStages().get(0)
         result.getStageObjects().get(1) == result.getScoreFilterStages().get(0)
         result.getStageObjects().get(2) == result.getScoreFilterStages().get(1)
-        result.getAddedMongoDocumentProperties() == [ODataSearchToMongoAtlasSearchParser.SEARCH_SCORE_DEFAULT_VARIABLE]
+        result.getAddedMongoDocumentProperties() == ["jamolingo_search_score"]
     }
 
     def "should return separate search and score filter stages with custom score field name"(){
