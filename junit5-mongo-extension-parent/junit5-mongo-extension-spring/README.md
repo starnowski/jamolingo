@@ -16,7 +16,7 @@ Add the following dependency to your `pom.xml`:
 <dependency>
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>junit5-mongo-extension-spring</artifactId>
-    <version>0.7.0</version>
+    <version>0.8.0</version>
     <scope>test</scope>
 </dependency>
 ```
