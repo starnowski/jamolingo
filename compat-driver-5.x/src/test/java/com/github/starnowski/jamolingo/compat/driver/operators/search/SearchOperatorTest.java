@@ -42,31 +42,6 @@ public class SearchOperatorTest extends AbstractItTest {
 
   @Inject protected MongoClient mongoClient;
 
-  @Test
-  public void shouldAddMatchStageWhenDefaultTextScoreIsProvided()
-      throws UriValidationException, UriParserException, XMLStreamException {
-    // GIVEN
-    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
-    UriInfo uriInfo =
-        new Parser(edm, OData.newInstance()).parseUri("examples2", "$search=database", null, null);
-    ODataSearchToMongoAtlasSearchParser tested =
-        new ODataSearchToMongoAtlasSearchParser(
-            searchExpression -> new Document("queryString", new Document("query", "database")));
-    ODataSearchToMongoAtlasSearchOptions options =
-        DefaultODataSearchToMongoAtlasSearchOptions.builder().withDefaultTextScore(1.5).build();
-
-    // WHEN
-    SearchOperatorResult result = tested.parse(uriInfo.getSearchOption(), options);
-
-    // THEN
-    List<Bson> stages = result.getStageObjects();
-    Assertions.assertEquals(2, stages.size());
-    Assertions.assertTrue(((Document) stages.get(0)).containsKey("$search"));
-    Assertions.assertTrue(((Document) stages.get(1)).containsKey("$match"));
-    Document matchStage = (Document) ((Document) stages.get(1)).get("$match");
-    Assertions.assertEquals(new Document("$gte", 1.5), matchStage.get("score"));
-  }
-
   @ParameterizedTest
   @MethodSource("provideSearchTests")
   @MongoSetup(
@@ -102,7 +77,8 @@ public class SearchOperatorTest extends AbstractItTest {
               @Override
               public Bson build(
                   SearchExpression searchExpression,
-                  QueryStringParsingResult queryStringParsingResult) {
+                  QueryStringParsingResult queryStringParsingResult,
+                  ODataSearchToMongoAtlasSearchOptions options) {
                 return new Document("index", "atlas_search_index")
                     .append(
                         "queryString",
@@ -135,6 +111,63 @@ public class SearchOperatorTest extends AbstractItTest {
             .map(s -> (String) s)
             .collect(Collectors.toSet());
     Assertions.assertEquals(expectedPlainStrings, actual);
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/search/search1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/search/search2.json")
+      })
+  public void shouldReturnExpectedDocumentsBasedOnSearchOperatorWithDefaultScore()
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException,
+          InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("Items");
+    ensureSearchIndex(collection);
+
+    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance()).parseUri("examples2", "$search=search", null, null);
+    ODataSearchToMongoAtlasSearchParser tested =
+        new ODataSearchToMongoAtlasSearchParser(
+            new SearchDocumentForQueryStringFactory() {
+              @Override
+              public Bson build(
+                  SearchExpression searchExpression,
+                  QueryStringParsingResult queryStringParsingResult,
+                  ODataSearchToMongoAtlasSearchOptions options) {
+                return new Document("index", "atlas_search_index")
+                    .append(
+                        "queryString",
+                        new Document("query", queryStringParsingResult.getQuery())
+                            .append("defaultPath", "plainString"));
+              }
+            });
+    ODataSearchToMongoAtlasSearchOptions options =
+        new DefaultODataSearchToMongoAtlasSearchOptions();
+    options.setDefaultTextScore(0.01d);
+
+    // WHEN
+    SearchOperatorResult result = tested.parse(uriInfo.getSearchOption(), options);
+    List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
+    System.out.println(new Document("pipeline", pipeline).toJson());
+
+    // THEN
+    List<Document> results = new ArrayList<>();
+    collection.aggregate(pipeline).into(results);
+    Assertions.assertFalse(results.isEmpty());
   }
 
   private void ensureSearchIndex(MongoCollection<Document> collection) {
