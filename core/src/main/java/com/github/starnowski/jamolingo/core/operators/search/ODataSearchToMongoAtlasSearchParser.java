@@ -37,17 +37,17 @@ public class ODataSearchToMongoAtlasSearchParser
           .get("$search", Document.class)
           .append("scoreDetails", true); // Optional, but can be useful
 
-      // TODO specify the score variable
+      String scoreFieldName = options.getScoreFieldName();
       scoreFilterStages.add(
-          new Document("$set", new Document(SEARCH_SCORE_DEFAULT_VARIABLE, new Document("$meta", "searchScore"))));
+          new Document("$set", new Document(scoreFieldName, new Document("$meta", "searchScore"))));
       scoreFilterStages.add(
           new Document(
               "$match",
-              new Document(SEARCH_SCORE_DEFAULT_VARIABLE, new Document("$gte", options.getDefaultTextScore()))));
+              new Document(scoreFieldName, new Document("$gte", options.getDefaultTextScore()))));
     }
     List<Bson> allStages = new ArrayList<>(searchStages);
     allStages.addAll(scoreFilterStages);
-    return new DefaultSearchOperatorResult(allStages, searchStages, scoreFilterStages);
+    return new DefaultSearchOperatorResult(allStages, searchStages, scoreFilterStages, options);
   }
 
   private static class DefaultSearchOperatorResult implements SearchOperatorResultForAtlasSearch {
@@ -55,12 +55,17 @@ public class ODataSearchToMongoAtlasSearchParser
     private final List<Bson> stageObjects;
     private final List<Bson> searchStages;
     private final List<Bson> scoreFilterStages;
+    private final ODataSearchToMongoAtlasSearchOptions options;
 
     private DefaultSearchOperatorResult(
-        List<Bson> stages, List<Bson> searchStages, List<Bson> scoreFilterStages) {
+        List<Bson> stages,
+        List<Bson> searchStages,
+        List<Bson> scoreFilterStages,
+        ODataSearchToMongoAtlasSearchOptions options) {
       this.stageObjects = Collections.unmodifiableList(stages);
       this.searchStages = Collections.unmodifiableList(searchStages);
       this.scoreFilterStages = Collections.unmodifiableList(scoreFilterStages);
+      this.options = options;
     }
 
     @Override
@@ -90,7 +95,9 @@ public class ODataSearchToMongoAtlasSearchParser
 
     @Override
     public List<String> getAddedMongoDocumentProperties() {
-      // TODO $meta field is going to be added
+      if (options != null && options.getDefaultTextScore() != null) {
+        return List.of(options.getScoreFieldName());
+      }
       return List.of();
     }
 

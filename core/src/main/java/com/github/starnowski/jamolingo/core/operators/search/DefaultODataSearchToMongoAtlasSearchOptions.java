@@ -7,15 +7,22 @@ public class DefaultODataSearchToMongoAtlasSearchOptions
     implements ODataSearchToMongoAtlasSearchOptions {
 
   private Double defaultTextScore;
+  private String scoreFieldName;
 
   @Override
-  public void setDefaultTextScore(Double defaultTextScore) {
+  public void setDefaultTextScore(Double defaultTextScore, String scoreFieldName) {
     this.defaultTextScore = defaultTextScore;
+    this.scoreFieldName = scoreFieldName;
   }
 
   @Override
   public Double getDefaultTextScore() {
     return defaultTextScore;
+  }
+
+  @Override
+  public String getScoreFieldName() {
+    return scoreFieldName;
   }
 
   @Override
@@ -28,12 +35,13 @@ public class DefaultODataSearchToMongoAtlasSearchOptions
     }
     DefaultODataSearchToMongoAtlasSearchOptions that =
         (DefaultODataSearchToMongoAtlasSearchOptions) o;
-    return Objects.equals(defaultTextScore, that.defaultTextScore);
+    return Objects.equals(defaultTextScore, that.defaultTextScore)
+        && Objects.equals(scoreFieldName, that.scoreFieldName);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(defaultTextScore);
+    return Objects.hash(defaultTextScore, scoreFieldName);
   }
 
   @Override
@@ -41,6 +49,9 @@ public class DefaultODataSearchToMongoAtlasSearchOptions
     return "DefaultODataSearchToMongoAtlasSearchOptions{"
         + "defaultTextScore="
         + defaultTextScore
+        + ", scoreFieldName='"
+        + scoreFieldName
+        + '\''
         + '}';
   }
 
@@ -57,9 +68,16 @@ public class DefaultODataSearchToMongoAtlasSearchOptions
   public static class Builder {
 
     private Double defaultTextScore;
+    private String scoreFieldName =
+        ODataSearchToMongoAtlasSearchParser.SEARCH_SCORE_DEFAULT_VARIABLE;
 
     public Builder withDefaultTextScore(Double defaultTextScore) {
       this.defaultTextScore = defaultTextScore;
+      return this;
+    }
+
+    public Builder withScoreFieldName(String scoreFieldName) {
+      this.scoreFieldName = scoreFieldName;
       return this;
     }
 
@@ -71,7 +89,7 @@ public class DefaultODataSearchToMongoAtlasSearchOptions
     public DefaultODataSearchToMongoAtlasSearchOptions build() {
       DefaultODataSearchToMongoAtlasSearchOptions options =
           new DefaultODataSearchToMongoAtlasSearchOptions();
-      options.setDefaultTextScore(defaultTextScore);
+      options.setDefaultTextScore(defaultTextScore, scoreFieldName);
       return options;
     }
   }

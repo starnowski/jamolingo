@@ -62,6 +62,42 @@ class ODataSearchToMongoAtlasSearchParserTest extends AbstractSpecification {
         result.getStageObjects().get(0) == result.getSearchStages().get(0)
         result.getStageObjects().get(1) == result.getScoreFilterStages().get(0)
         result.getStageObjects().get(2) == result.getScoreFilterStages().get(1)
+        result.getAddedMongoDocumentProperties() == [ODataSearchToMongoAtlasSearchParser.SEARCH_SCORE_DEFAULT_VARIABLE]
+    }
+
+    def "should return separate search and score filter stages with custom score field name"(){
+        given:
+        Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+        String customScoreField = "my_custom_score"
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2",
+                        "\$search=database"
+                        , null, null)
+        ODataSearchToMongoAtlasSearchParser tested = new ODataSearchToMongoAtlasSearchParser(new SearchDocumentForQueryStringFactory() {
+            @Override
+            Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult, ODataSearchToMongoAtlasSearchOptions options) {
+                return new Document().append("index", "default")
+                        .append("queryString", new Document()
+                                .append("query", queryStringParsingResult.getQuery())
+                                .append("path", Arrays.asList("name","description"))
+                        )
+            }
+        })
+        ODataSearchToMongoAtlasSearchOptions options = DefaultODataSearchToMongoAtlasSearchOptions.builder()
+                .withDefaultTextScore(0.5d)
+                .withScoreFieldName(customScoreField)
+                .build()
+
+        when:
+        def result = tested.parse(uriInfo.getSearchOption(), options)
+
+        then:
+        result.getSearchStages().size() == 1
+        result.getScoreFilterStages().size() == 2
+        ((Document)result.getScoreFilterStages().get(0)).get("\$set", Document.class).get(customScoreField) != null
+        ((Document)result.getScoreFilterStages().get(1)).get("\$match", Document.class).get(customScoreField) != null
+        result.getAddedMongoDocumentProperties() == [customScoreField]
     }
 
     /**
