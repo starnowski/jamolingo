@@ -90,6 +90,52 @@ List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
 ```
 
+#### $search
+
+The `$search` operator allows clients to perform full-text search. The `core` module translates this into MongoDB Atlas Search aggregation stages.
+
+**Translation Details:**
+- Translates to a `$search` aggregation stage.
+- Optionally adds `$set` and `$match` stages to filter by search score.
+- Supports logical operators (`AND`, `OR`, `NOT`) within the search expression.
+- Allows specifying a minimum score and a custom field name for the score value.
+
+**Usage:**
+
+The `ODataSearchToMongoAtlasSearchParser` class is responsible for this translation.
+
+```java
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchOptions;
+import com.github.starnowski.jamolingo.core.operators.search.DefaultODataSearchToMongoAtlasSearchOptions;
+import com.github.starnowski.jamolingo.core.operators.search.SearchOperatorResult;
+import org.apache.olingo.server.api.uri.queryoption.SearchOption;
+// ... other imports
+
+// 1. Initialize the parser with a SearchDocumentFactory
+// SearchDocumentFactory factory = ...;
+ODataSearchToMongoAtlasSearchParser parser = new ODataSearchToMongoAtlasSearchParser(factory);
+
+// 2. Obtain the SearchOption from the Olingo UriInfo
+SearchOption searchOption = uriInfo.getSearchOption();
+
+// 3. (Optional) Provide search options (e.g., minimum score)
+ODataSearchToMongoAtlasSearchOptions options = DefaultODataSearchToMongoAtlasSearchOptions.builder()
+    .withDefaultTextScore(0.05)
+    .withScoreFieldName("search_score")
+    .build();
+
+// 4. Parse the option
+SearchOperatorResult result = parser.parse(searchOption, options);
+
+// 5. Use the result in your MongoDB aggregation pipeline
+List<Bson> stages = result.getStageObjects();
+// Or get specific stages
+List<Bson> searchStages = result.getSearchStages();
+List<Bson> scoreFilterStages = result.getScoreFilterStages();
+// e.g. collection.aggregate(stages);
+```
+
 #### $orderby
 
 The `$orderby` operator specifies the sort order of the returned items. The `core` module translates this into a MongoDB aggregation stage.
