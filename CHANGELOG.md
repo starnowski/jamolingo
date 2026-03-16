@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 * [Unreleased](#unreleased)
+* [0.8.0](#080---2026-03-16)
 * [0.7.0](#070---2026-03-06)
 * [0.6.0](#060---2026-03-04)
 * [0.5.1](#051---2026-03-03)
@@ -17,6 +18,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * [0.1.0](#010---2026-01-18)
 
 ## [Unreleased]
+
+## [0.8.0] - 2026-03-16
+
+### Added
+
+#### Core Module
+*   Added support for `$search` operator translation to MongoDB Atlas Search aggregation stages. ([#37](https://github.com/starnowski/jamolingo/issues/37))
+*   `com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser` class for parsing OData search options. ([#37](https://github.com/starnowski/jamolingo/issues/37))
+*   `com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchOptions` and `DefaultODataSearchToMongoAtlasSearchOptions` for search configuration. ([#37](https://github.com/starnowski/jamolingo/issues/37))
+*   Support for search score filtering using `$set` and `$match` stages with configurable field names. ([#37](https://github.com/starnowski/jamolingo/issues/37))
+*   `com.github.starnowski.jamolingo.core.operators.search.SearchOperatorResult` and `SearchOperatorResultForAtlasSearch` interfaces. ([#37](https://github.com/starnowski/jamolingo/issues/37))
+
+### Changed
+
+#### Administrative
+*   Updated project version to `0.8.0-SNAPSHOT`.
 
 ## [0.7.0] - 2026-03-06
 
