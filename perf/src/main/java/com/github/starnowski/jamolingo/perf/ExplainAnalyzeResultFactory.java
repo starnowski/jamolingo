@@ -38,7 +38,7 @@ public class ExplainAnalyzeResultFactory {
                   .filter(i -> ((Document) i).containsKey("$cursor"))
                   .findFirst()
                   .map(c -> ((Document) c).get("$cursor"))
-                  .or(() -> new Document())
+                  .or(Document::new)
                   .map(c -> ((Document) c).get("queryPlanner"))
                   .orElse(null);
     }
