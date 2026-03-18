@@ -119,8 +119,8 @@ The `perf` module provides tools and utilities for analyzing and verifying the p
 
 **Key Features:**
 *   Parses MongoDB explain results into a simplified `ExplainAnalyzeResult`.
-*   Identifies index usage types (IXSCAN, COLLSCAN, etc.).
-*   Experimental support for resolving index match stages.
+*   Identifies index usage types (`IXSCAN`, `COLLSCAN`, etc.) and supports **MongoDB Atlas Search** (`SEARCH`).
+*   **Experimental** support for resolving index match stages (`getIndexMatchStages()`) and tracking resolution exceptions (`getResolutionIndexMatchStagesException()`).
 
 ### [Demos](demos/README.md)
 The `demos` module contains example applications that demonstrate how to use `jamolingo` in real-world scenarios.
