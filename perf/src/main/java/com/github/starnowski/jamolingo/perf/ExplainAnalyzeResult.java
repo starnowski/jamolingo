@@ -45,6 +45,7 @@ public interface ExplainAnalyzeResult {
     FETCH_IXSCAN("FETCH + IXSCAN"),
     COLLSCAN,
     FETCH,
+    /** Representation of Atlas Search index usage ($search stage). */
     SEARCH;
 
     private final String value;

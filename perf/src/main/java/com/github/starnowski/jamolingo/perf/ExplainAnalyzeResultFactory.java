@@ -18,6 +18,8 @@ public class ExplainAnalyzeResultFactory {
   /**
    * Builds an {@link ExplainAnalyzeResult} from the provided MongoDB explain document.
    *
+   * <p>Supports standard query plans and Atlas Search ($search stage).
+   *
    * @param explain the MongoDB explain document
    * @return the explain analyze result, or null if the query planner info is missing
    */
