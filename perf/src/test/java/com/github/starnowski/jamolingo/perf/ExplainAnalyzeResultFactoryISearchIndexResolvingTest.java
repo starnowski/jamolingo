@@ -1,5 +1,7 @@
 package com.github.starnowski.jamolingo.perf;
 
+import com.github.starnowski.jamolingo.junit5.MongoDocument;
+import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -21,9 +23,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import static com.github.starnowski.jamolingo.perf.EmbeddedMongoResource.TEST_DATABASE;
+
 @QuarkusTest
 @QuarkusTestResource(MongoAtlasResource.class)
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
+@MongoSetup(
+        mongoDocuments = {
+                @MongoDocument(database = TEST_DATABASE, collection = "docs")
+        })
 class ExplainAnalyzeResultFactoryISearchIndexResolvingTest {
 
   private static final String TEST_DATABASE = "test_db";
