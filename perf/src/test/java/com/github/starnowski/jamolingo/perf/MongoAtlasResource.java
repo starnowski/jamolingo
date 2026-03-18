@@ -1,12 +1,11 @@
 package com.github.starnowski.jamolingo.perf;
 
 import io.quarkus.test.common.QuarkusTestResourceLifecycleManager;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
-
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 
 public class MongoAtlasResource implements QuarkusTestResourceLifecycleManager {
 

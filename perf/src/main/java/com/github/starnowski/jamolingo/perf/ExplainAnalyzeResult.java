@@ -44,7 +44,8 @@ public interface ExplainAnalyzeResult {
     IXSCAN,
     FETCH_IXSCAN("FETCH + IXSCAN"),
     COLLSCAN,
-    FETCH;
+    FETCH,
+    SEARCH;
 
     private final String value;
 

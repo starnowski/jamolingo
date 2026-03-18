@@ -44,6 +44,25 @@ public class ExplainAnalyzeResultFactory {
     }
 
     if (queryPlanner == null) {
+      // Extracting query plan for $search
+      Document searchStage =
+          (Document)
+              Optional.ofNullable(explain.get("stages"))
+                  .filter(stages -> stages instanceof List)
+                  .map(stages -> (List) stages)
+                  .orElse(List.of())
+                  .stream()
+                  .filter(i -> i instanceof Document)
+                  .filter(i -> ((Document) i).containsKey("$search"))
+                  .findFirst()
+                  .orElse(null);
+      if (searchStage != null) {
+        logger.debug("Atlas Search index used ($search stage).");
+        return new DefaultExplainAnalyzeResult(SEARCH);
+      }
+    }
+
+    if (queryPlanner == null) {
       logger.debug("No query planner info found in explain output.");
       return null;
     }
