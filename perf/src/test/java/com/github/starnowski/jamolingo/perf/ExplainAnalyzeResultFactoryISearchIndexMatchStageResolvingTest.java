@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.perf;
 
+import static com.github.starnowski.jamolingo.perf.EmbeddedMongoResource.TEST_DATABASE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
@@ -27,8 +28,15 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
-@QuarkusTestResource(MongoAtlasResource.class)
+@QuarkusTestResource(value = MongoAtlasResource.class, restrictToAnnotatedClass = true)
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
+@MongoSetup(
+    mongoDocuments = {
+      @MongoDocument(
+          database = TEST_DATABASE,
+          collection = "docs",
+          bsonFilePath = "data/search_doc1.json")
+    })
 class ExplainAnalyzeResultFactoryISearchIndexMatchStageResolvingTest {
 
   private static final String TEST_DATABASE = "test_db";
@@ -42,13 +50,6 @@ class ExplainAnalyzeResultFactoryISearchIndexMatchStageResolvingTest {
 
   @ParameterizedTest
   @MethodSource("provideShouldResolveCorrectIndexValueAndReturnCorrectData")
-  @MongoSetup(
-      mongoDocuments = {
-        @MongoDocument(
-            database = TEST_DATABASE,
-            collection = "docs",
-            bsonFilePath = "data/search_doc1.json")
-      })
   public void shouldResolveCorrectIndexValueAndReturnCorrectData(
       String pipelineFilePath, String expectedIndexValue, String expectedResultsFilePath)
       throws IOException, InterruptedException {

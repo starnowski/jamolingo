@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 @QuarkusTest
-@QuarkusTestResource(EmbeddedMongoResource.class)
+@QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
 class ExplainAnalyzeResultFactoryIndexSortStageResolvingTest {
 
