@@ -26,39 +26,44 @@ public class ExplainAnalyzeResultFactory {
     Document queryPlanner = (Document) explain.get("queryPlanner");
 
     if (queryPlanner == null) {
-      // Extracting query plan for $cursor
-      queryPlanner =
-          (Document)
-              Optional.ofNullable(explain.get("stages"))
-                  .filter(stages -> stages instanceof List)
-                  .map(stages -> (List) stages)
-                  .orElse(List.of())
-                  .stream()
-                  .filter(i -> i instanceof Document)
-                  .filter(i -> ((Document) i).containsKey("$cursor"))
-                  .findFirst()
-                  .map(c -> ((Document) c).get("$cursor"))
-                  .or(Document::new)
-                  .map(c -> ((Document) c).get("queryPlanner"))
-                  .orElse(null);
+      try {
+        // Extracting query plan for $cursor
+        queryPlanner =
+                (Document)
+                        Optional.ofNullable(explain.get("stages"))
+                                .filter(stages -> stages instanceof List)
+                                .map(stages -> (List) stages)
+                                .orElse(List.of())
+                                .stream()
+                                .filter(i -> i instanceof Document)
+                                .filter(i -> ((Document) i).containsKey("$cursor"))
+                                .findFirst()
+                                .map(c -> ((Document) c).get("$cursor"))
+                                .or(Document::new)
+                                .map(c -> ((Document) c).get("queryPlanner"))
+                                .orElse(null);
+      } catch (Exception ex) {
+        logger.debug("Resolving query plan", ex);
+      }
     }
 
     if (queryPlanner == null) {
-      // Extracting query plan for $search
-      Document searchStage =
-          (Document)
-              Optional.ofNullable(explain.get("stages"))
-                  .filter(stages -> stages instanceof List)
-                  .map(stages -> (List) stages)
-                  .orElse(List.of())
-                  .stream()
-                  .filter(i -> i instanceof Document)
-                  .filter(i -> ((Document) i).containsKey("$search"))
-                  .findFirst()
-                  .orElse(null);
-      if (searchStage != null) {
-        logger.debug("Atlas Search index used ($search stage).");
-        return new DefaultExplainAnalyzeResult(SEARCH);
+      try {
+        // Extracting query plan for $search
+        Document searchStage =
+                Optional.ofNullable((Document) explain.get("command"))
+                        .stream().map(c -> c.get("pipeline"))
+                        .filter(p -> p instanceof List<?>)
+                        .findFirst().filter(o -> o instanceof Document)
+                        .map(o -> (Document) o)
+                        .filter(i -> i.containsKey("$search"))
+                        .orElse(null);
+        if (searchStage != null) {
+          logger.debug("Atlas Search index used ($search stage).");
+          return new DefaultExplainAnalyzeResult(SEARCH);
+        }
+      } catch (Exception ex) {
+        logger.debug("Resolving search query plan", ex);
       }
     }
 
