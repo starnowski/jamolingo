@@ -1,5 +1,7 @@
 package com.github.starnowski.jamolingo.perf;
 
+import static com.github.starnowski.jamolingo.perf.EmbeddedMongoResource.TEST_DATABASE;
+
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
@@ -23,26 +25,21 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import static com.github.starnowski.jamolingo.perf.EmbeddedMongoResource.TEST_DATABASE;
-
 @QuarkusTest
 @QuarkusTestResource(value = MongoAtlasResource.class, restrictToAnnotatedClass = true)
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
 @MongoSetup(
-        mongoDocuments = {
-                @MongoDocument(
-                        database = TEST_DATABASE,
-                        collection = "docs",
-                        bsonFilePath = "data/doc1.json"),
-                @MongoDocument(
-                        database = TEST_DATABASE,
-                        collection = "docs",
-                        bsonFilePath = "data/doc2.json"),
-                @MongoDocument(
-                        database = TEST_DATABASE,
-                        collection = "docs",
-                        bsonFilePath = "data/doc3.json")
-        })
+    mongoDocuments = {
+      @MongoDocument(
+          database = TEST_DATABASE,
+          collection = "docs",
+          bsonFilePath = "data/doc1.json"),
+      @MongoDocument(
+          database = TEST_DATABASE,
+          collection = "docs",
+          bsonFilePath = "data/doc2.json"),
+      @MongoDocument(database = TEST_DATABASE, collection = "docs", bsonFilePath = "data/doc3.json")
+    })
 class ExplainAnalyzeResultFactoryISearchIndexResolvingTest {
 
   private static final String TEST_DATABASE = "test_db";
