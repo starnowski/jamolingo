@@ -1,7 +1,9 @@
 package com.github.starnowski.jamolingo.perf;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.github.starnowski.jamolingo.perf.EmbeddedMongoResource.TEST_DATABASE;
 
+import com.github.starnowski.jamolingo.junit5.MongoDocument;
+import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -24,9 +26,21 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
-@QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
+@QuarkusTestResource(value = MongoAtlasResource.class, restrictToAnnotatedClass = true)
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
-class ExplainAnalyzeResultFactoryIndexResolvingTest {
+@MongoSetup(
+    mongoDocuments = {
+      @MongoDocument(
+          database = TEST_DATABASE,
+          collection = "docs",
+          bsonFilePath = "data/doc1.json"),
+      @MongoDocument(
+          database = TEST_DATABASE,
+          collection = "docs",
+          bsonFilePath = "data/doc2.json"),
+      @MongoDocument(database = TEST_DATABASE, collection = "docs", bsonFilePath = "data/doc3.json")
+    })
+class ExplainAnalyzeResultFactoryISearchIndexResolvingTest {
 
   private static final String TEST_DATABASE = "test_db";
   @Inject MongoClient mongoClient;
@@ -40,38 +54,54 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
 
   public static Stream<Arguments> provideShouldResolveCorrectIndexValue() {
     return Stream.of(
-        Arguments.of(DEFAULT_INDEXES, "pipelines/example1.json", "FETCH + IXSCAN"),
-        Arguments.of(DEFAULT_INDEXES, "pipelines/example2.json", "IXSCAN"),
-        Arguments.of(DEFAULT_INDEXES, "pipelines/example3.json", "COLLSCAN"),
-        Arguments.of(List.of(), "pipelines/example1.json", "COLLSCAN"),
-        Arguments.of(List.of(), "pipelines/example2.json", "COLLSCAN"),
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example1.json", "FETCH + IXSCAN", false),
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example2.json", "IXSCAN", false),
+        Arguments.of(DEFAULT_INDEXES, "pipelines/example3.json", "COLLSCAN", false),
+        Arguments.of(List.of(), "pipelines/example1.json", "COLLSCAN", false),
+        Arguments.of(List.of(), "pipelines/example2.json", "COLLSCAN", false),
         Arguments.of(
-            List.of(new Document("plainString", 1)), "pipelines/example1.json", "COLLSCAN"),
-        Arguments.of(List.of(new Document("password", 1)), "pipelines/example2.json", "COLLSCAN"),
+            List.of(new Document("plainString", 1)), "pipelines/example1.json", "COLLSCAN", false),
         Arguments.of(
-            List.of(new Document("nestedObject.tokens", 1)), "pipelines/example2.json", "IXSCAN"),
+            List.of(new Document("password", 1)), "pipelines/example2.json", "COLLSCAN", false),
+        Arguments.of(
+            List.of(new Document("nestedObject.tokens", 1)),
+            "pipelines/example2.json",
+            "IXSCAN",
+            false),
         Arguments.of(
             List.of(new Document("password", 1)),
             "pipelines/example_covered_password.json",
-            "IXSCAN"),
+            "IXSCAN",
+            false),
         Arguments.of(
             List.of(new Document("plainString", 1)),
             "pipelines/example_covered_plainString.json",
-            "IXSCAN"),
+            "IXSCAN",
+            false),
         Arguments.of(
             List.of(new Document("plainString", 1), new Document("password", 1)),
             "pipelines/example_covered_plainString.json",
-            "IXSCAN"),
-        Arguments.of(DEFAULT_INDEXES, "pipelines/example_merge_indexes.json", "FETCH + IXSCAN"));
+            "IXSCAN",
+            false),
+        Arguments.of(
+            DEFAULT_INDEXES, "pipelines/example_merge_indexes.json", "FETCH + IXSCAN", false),
+        Arguments.of(List.of(), "pipelines/search_example.json", "SEARCH", true));
   }
 
   @ParameterizedTest
   @MethodSource("provideShouldResolveCorrectIndexValue")
   public void shouldResolveCorrectIndexValue(
-      List<Document> indexes, String pipelineFilePath, String expectedIndexValue)
-      throws IOException {
+      List<Document> indexes,
+      String pipelineFilePath,
+      String expectedIndexValue,
+      boolean searchIndex)
+      throws IOException, InterruptedException {
     // GIVEN
-    createIndexes(indexes);
+    if (searchIndex) {
+      ensureSearchIndex(getCollection());
+    } else {
+      createIndexes(indexes);
+    }
     List<Document> pipeline = preparePipeline(pipelineFilePath);
     // Run explain on the aggregation
     Document explain = getCollection().aggregate(pipeline).explain();
@@ -81,6 +111,7 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
     ExplainAnalyzeResult result = tested.build(explain);
 
     // THEN
+    Assertions.assertNotNull(result);
     Assertions.assertEquals(expectedIndexValue, result.getIndexValue().getValue());
   }
 
@@ -105,8 +136,35 @@ class ExplainAnalyzeResultFactoryIndexResolvingTest {
     indexes.forEach(col::createIndex);
   }
 
+  private void ensureSearchIndex(MongoCollection<Document> collection) throws InterruptedException {
+    try {
+      collection.createSearchIndex(
+          "atlas_search_index", new Document("mappings", new Document("dynamic", true)));
+      // Wait for index to be ready
+      while (true) {
+        boolean ready = false;
+        for (Document index : collection.listSearchIndexes()) {
+          if ("atlas_search_index".equals(index.getString("name"))
+              && "READY".equals(index.getString("status"))) {
+            ready = true;
+            break;
+          }
+        }
+        if (ready) break;
+        Thread.sleep(500);
+      }
+    } catch (Exception e) {
+      // Index might already exist
+    }
+  }
+
   @AfterEach
   public void dropIndexes() {
     getCollection().dropIndexes();
+    try {
+      getCollection().dropSearchIndex("atlas_search_index");
+    } catch (Exception e) {
+      // Ignore
+    }
   }
 }

@@ -40,7 +40,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
-@QuarkusTestResource(EmbeddedMongoResource.class)
+@QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
 class SelectOperatorWithOverrideConfigTest extends AbstractItTest {
 
   static final String EDM_1_MERGE_OVERRIDE_MONGO_NAME =

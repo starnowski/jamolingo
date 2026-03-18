@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Performance Module
+*   Added `SEARCH` representation to `com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult.IndexValueRepresentation` to identify MongoDB Atlas Search index usage. ([#25](https://github.com/starnowski/jamolingo/issues/25))
+*   Added experimental support for extracting the `$search` stage from MongoDB explain outputs in `com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory`. ([#25](https://github.com/starnowski/jamolingo/issues/25))
+
 ## [0.8.0] - 2026-03-16
 
 ### Added

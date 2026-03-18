@@ -1,0 +1,13 @@
+{
+  "pipeline": [
+    {
+      "$search": {
+        "index": "atlas_search_index",
+        "text": {
+          "query": "search",
+          "path": "plainString"
+        }
+      }
+    }
+  ]
+}

@@ -38,7 +38,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 
 @QuarkusTest
-@QuarkusTestResource(EmbeddedMongoResource.class)
+@QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
 class SelectOperatorTest extends AbstractItTest {
 
   @Inject MongoClient mongoClient;
