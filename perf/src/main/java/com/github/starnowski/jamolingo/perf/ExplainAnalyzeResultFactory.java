@@ -62,7 +62,7 @@ public class ExplainAnalyzeResultFactory {
                 .orElse(null);
         if (searchStage != null) {
           logger.debug("Atlas Search index used ($search stage).");
-          return new DefaultExplainAnalyzeResult(SEARCH);
+          return new DefaultExplainAnalyzeResult(SEARCH, List.of(searchStage));
         }
       } catch (Exception ex) {
         logger.debug("Resolving search query plan", ex);
