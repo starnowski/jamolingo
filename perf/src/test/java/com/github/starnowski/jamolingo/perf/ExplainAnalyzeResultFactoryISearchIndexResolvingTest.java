@@ -26,11 +26,22 @@ import org.junit.jupiter.params.provider.MethodSource;
 import static com.github.starnowski.jamolingo.perf.EmbeddedMongoResource.TEST_DATABASE;
 
 @QuarkusTest
-@QuarkusTestResource(MongoAtlasResource.class)
+@QuarkusTestResource(value = MongoAtlasResource.class, restrictToAnnotatedClass = true)
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
 @MongoSetup(
         mongoDocuments = {
-                @MongoDocument(database = TEST_DATABASE, collection = "docs")
+                @MongoDocument(
+                        database = TEST_DATABASE,
+                        collection = "docs",
+                        bsonFilePath = "data/doc1.json"),
+                @MongoDocument(
+                        database = TEST_DATABASE,
+                        collection = "docs",
+                        bsonFilePath = "data/doc2.json"),
+                @MongoDocument(
+                        database = TEST_DATABASE,
+                        collection = "docs",
+                        bsonFilePath = "data/doc3.json")
         })
 class ExplainAnalyzeResultFactoryISearchIndexResolvingTest {
 
