@@ -27,7 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
-@QuarkusTestResource(EmbeddedMongoResource.class)
+@QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
 public class TopOperatorTest extends AbstractItTest {
 
   @Inject MongoClient mongoClient;

@@ -37,7 +37,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
-@QuarkusTestResource(MongoAtlasResource.class)
+@QuarkusTestResource(value = MongoAtlasResource.class, restrictToAnnotatedClass = true)
 public class SearchOperatorTest extends AbstractItTest {
 
   @Inject protected MongoClient mongoClient;

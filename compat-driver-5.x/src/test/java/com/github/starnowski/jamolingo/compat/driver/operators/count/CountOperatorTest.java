@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 @QuarkusTest
-@QuarkusTestResource(EmbeddedMongoResource.class)
+@QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
 public class CountOperatorTest extends AbstractItTest {
 
   @Inject MongoClient mongoClient;

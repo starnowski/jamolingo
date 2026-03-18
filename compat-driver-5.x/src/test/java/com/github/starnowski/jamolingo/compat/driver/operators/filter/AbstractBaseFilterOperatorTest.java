@@ -17,7 +17,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 @QuarkusTest
-@QuarkusTestResource(EmbeddedMongoResource.class)
+@QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
 public abstract class AbstractBaseFilterOperatorTest extends AbstractItTest {
 
   @Inject protected MongoClient mongoClient;
