@@ -105,6 +105,56 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
             collection = "Items",
             bsonFilePath = "bson/filter/example2_only_id.json")
       })
+  public void shouldReturnExpectedDocumentsForQueryObject(
+      Object filter, Set<String> expectedPlainStrings, String expectedIndex)
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    String filterString =
+        filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
+    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
+        filterString, expectedPlainStrings);
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideShouldReturnExpectedProjectedDocument")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_2.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_3.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_4.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_6.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_7.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_only_id.json")
+      })
   public void shouldUsedExpectedIndexesBasedOnFilterOperator(
       Object filter, Set<String> expectedPlainStrings, String expectedIndex)
       throws UriValidationException,
@@ -205,6 +255,52 @@ public class FilterOperatorAnyLambdaTest extends AbstractFilterOperatorTest {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
     shouldUsedExpectedIndexesBasedOnFilterOperator(filterString, expectedIndex);
+  }
+
+  @ParameterizedTest
+  @MethodSource("provideShouldReturnExpectedProjectedDocumentForComplexList")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_complex_1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_complex_2.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_complex_3.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_complex_4.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_complex_5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_complex_6.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/filter/example2_only_id.json")
+      })
+  public void shouldReturnExpectedDocumentsForComplexListForQueryObject(
+      Object filter, Set<String> expectedPlainStrings, String expectedIndex)
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    String filterString =
+        filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
+    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
+        filterString, expectedPlainStrings);
   }
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {
