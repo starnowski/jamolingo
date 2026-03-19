@@ -34,13 +34,13 @@ Add the following dependencies to your `pom.xml`:
 <dependency>
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>core</artifactId>
-    <version>0.8.0</version>
+    <version>0.8.1</version>
 </dependency>
 <!-- Optional: for performance analysis -->
 <dependency>
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>perf</artifactId>
-    <version>0.8.0</version>
+    <version>0.8.1</version>
 </dependency>
 ```
 

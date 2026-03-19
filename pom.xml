@@ -6,7 +6,7 @@
 
     <groupId>com.github.starnowski.jamolingo</groupId>
     <artifactId>parent</artifactId>
-    <version>0.8.1-SNAPSHOT</version>
+    <version>0.8.1</version>
     <packaging>pom</packaging>
     <name>${project.groupId}:${project.artifactId}</name>
     <modules>
@@ -262,7 +262,7 @@
                     <plugin>
                         <groupId>org.sonatype.central</groupId>
                         <artifactId>central-publishing-maven-plugin</artifactId>
-                        <version>0.8.1-SNAPSHOT</version>
+                        <version>0.8.1</version>
                         <extensions>true</extensions>
                         <configuration>
                             <deploymentName>jamolingo</deploymentName>
