@@ -31,6 +31,9 @@ public class PropertyMapping {
   @JsonProperty("circularReferenceMapping")
   private CircularReferenceMapping circularReferenceMapping;
 
+  @JsonProperty("navigation")
+  private NavigationMapping navigation;
+
   @JsonProperty("maxCircularLimitPerEdmPath")
   private Integer maxCircularLimitPerEdmPath;
 
@@ -65,6 +68,19 @@ public class PropertyMapping {
     return this;
   }
 
+  public NavigationMapping getNavigation() {
+    return navigation;
+  }
+
+  public void setNavigation(NavigationMapping navigation) {
+    this.navigation = navigation;
+  }
+
+  public PropertyMapping withNavigation(NavigationMapping navigation) {
+    this.navigation = navigation;
+    return this;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
@@ -75,6 +91,7 @@ public class PropertyMapping {
         && Objects.equals(relativeTo, that.relativeTo)
         && Objects.equals(type, that.type)
         && Objects.equals(circularReferenceMapping, that.circularReferenceMapping)
+        && Objects.equals(navigation, that.navigation)
         && Objects.equals(maxCircularLimitPerEdmPath, that.maxCircularLimitPerEdmPath)
         && Objects.equals(flattenedLevelUp, that.flattenedLevelUp)
         && Objects.equals(ignore, that.ignore)
@@ -101,6 +118,8 @@ public class PropertyMapping {
         + '\''
         + ", circularReferenceMapping="
         + circularReferenceMapping
+        + ", navigation="
+        + navigation
         + ", maxCircularLimitPerEdmPath="
         + maxCircularLimitPerEdmPath
         + ", flattenedLevelUp="
@@ -123,6 +142,7 @@ public class PropertyMapping {
         relativeTo,
         type,
         circularReferenceMapping,
+        navigation,
         maxCircularLimitPerEdmPath,
         flattenedLevelUp,
         ignore,

@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.core.context;
 
 import com.github.starnowski.jamolingo.core.mapping.CircularReferenceMappingRecord;
+import com.github.starnowski.jamolingo.core.mapping.NavigationMapping;
 import java.util.Objects;
 
 public final class MongoPathEntry {
@@ -10,10 +11,15 @@ public final class MongoPathEntry {
   private final boolean key;
   private final String type;
   private final CircularReferenceMappingRecord circularReferenceMapping;
+  private final NavigationMapping navigation;
   private final Integer maxCircularLimitPerEdmPath;
 
   public CircularReferenceMappingRecord getCircularReferenceMapping() {
     return circularReferenceMapping;
+  }
+
+  public NavigationMapping getNavigation() {
+    return navigation;
   }
 
   public Integer getMaxCircularLimitPerEdmPath() {
@@ -26,6 +32,7 @@ public final class MongoPathEntry {
     private boolean key;
     private String type;
     private CircularReferenceMappingRecord circularReferenceMapping;
+    private NavigationMapping navigation;
     private Integer maxCircularLimitPerEdmPath;
 
     public MongoPathEntryBuilder withEdmPath(String edmPath) {
@@ -54,6 +61,11 @@ public final class MongoPathEntry {
       return this;
     }
 
+    public MongoPathEntryBuilder withNavigation(NavigationMapping navigation) {
+      this.navigation = navigation;
+      return this;
+    }
+
     public MongoPathEntryBuilder withMaxCircularLimitPerEdmPath(
         Integer maxCircularLimitPerEdmPath) {
       this.maxCircularLimitPerEdmPath = maxCircularLimitPerEdmPath;
@@ -62,7 +74,13 @@ public final class MongoPathEntry {
 
     public MongoPathEntry build() {
       return new MongoPathEntry(
-          edmPath, mongoPath, key, type, circularReferenceMapping, maxCircularLimitPerEdmPath);
+          edmPath,
+          mongoPath,
+          key,
+          type,
+          circularReferenceMapping,
+          maxCircularLimitPerEdmPath,
+          navigation);
     }
   }
 
@@ -82,6 +100,8 @@ public final class MongoPathEntry {
         + '\''
         + ", circularReferenceMapping="
         + circularReferenceMapping
+        + ", navigation="
+        + navigation
         + ", maxCircularLimitPerEdmPath="
         + maxCircularLimitPerEdmPath
         + '}';
@@ -89,6 +109,7 @@ public final class MongoPathEntry {
 
   @Override
   public boolean equals(Object o) {
+    if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     MongoPathEntry that = (MongoPathEntry) o;
     return key == that.key
@@ -96,13 +117,20 @@ public final class MongoPathEntry {
         && Objects.equals(mongoPath, that.mongoPath)
         && Objects.equals(type, that.type)
         && Objects.equals(circularReferenceMapping, that.circularReferenceMapping)
+        && Objects.equals(navigation, that.navigation)
         && Objects.equals(maxCircularLimitPerEdmPath, that.maxCircularLimitPerEdmPath);
   }
 
   @Override
   public int hashCode() {
     return Objects.hash(
-        edmPath, mongoPath, key, type, circularReferenceMapping, maxCircularLimitPerEdmPath);
+        edmPath,
+        mongoPath,
+        key,
+        type,
+        circularReferenceMapping,
+        navigation,
+        maxCircularLimitPerEdmPath);
   }
 
   public MongoPathEntry(
@@ -111,7 +139,8 @@ public final class MongoPathEntry {
       boolean key,
       String type,
       CircularReferenceMappingRecord circularReferenceMapping,
-      Integer maxCircularLimitPerEdmPath) {
+      Integer maxCircularLimitPerEdmPath,
+      NavigationMapping navigation) {
 
     this.edmPath = edmPath;
     this.mongoPath = mongoPath;
@@ -119,6 +148,7 @@ public final class MongoPathEntry {
     this.type = type;
     this.circularReferenceMapping = circularReferenceMapping;
     this.maxCircularLimitPerEdmPath = maxCircularLimitPerEdmPath;
+    this.navigation = navigation;
   }
 
   public String getEdmPath() {

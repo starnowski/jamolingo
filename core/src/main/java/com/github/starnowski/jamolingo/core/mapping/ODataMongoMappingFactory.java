@@ -78,7 +78,26 @@ public class ODataMongoMappingFactory {
               new EntityPropertyMappingContext(prop.getName(), edmTypeAndEdmPath)));
     }
 
+    // Navigation properties
+    for (String navPropName : entityType.getNavigationPropertyNames()) {
+      EdmNavigationProperty navProp = entityType.getNavigationProperty(navPropName);
+      props.put(navProp.getName(), mapNavigationProperty(navProp));
+    }
+
     return props;
+  }
+
+  private PropertyMapping mapNavigationProperty(EdmNavigationProperty navProp) {
+    PropertyMapping pm = new PropertyMapping();
+    pm.setType(navProp.getType().getNamespace() + "." + navProp.getType().getName());
+
+    NavigationMapping nm = new NavigationMapping();
+    nm.setCollection(navProp.getType().getName()); // Default to EntityType name
+    // nm.setLocalField(...); // Can be inferred or left for manual override
+    // nm.setForeignField("_id"); // Default convention
+    pm.setNavigation(nm);
+
+    return pm;
   }
 
   private Map<String, String> enrichedCircularReferenceMapBasedOnPropertiesForEdmStructuredType(
