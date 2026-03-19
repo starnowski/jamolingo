@@ -91,6 +91,11 @@ public class ODataFilterToMongoMatchParser {
         rootMongoFilterVisitor.getUsedMongoDBProperties());
   }
 
+  public FilterOperatorQueryObjectResult parseQueryObject(FilterOption filter)
+      throws ODataApplicationException, ExpressionVisitException {
+    return parseQueryObject(filter, DefaultEdmMongoContextFacade.builder().build());
+  }
+
   public FilterOperatorQueryObjectResult parseQueryObject(
       FilterOption filter, MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
       throws ODataApplicationException, ExpressionVisitException {
@@ -118,7 +123,8 @@ public class ODataFilterToMongoMatchParser {
     MongoFilterVisitor rootMongoFilterVisitor =
         new MongoFilterVisitor(edmMongoContextFacade, mongoFilterVisitorCommonContext);
     Bson result = MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(rootMongoFilterVisitor));
-    return new DefaultFilterOperatorQueryObjectResult(result, false, null);
+    return new DefaultFilterOperatorQueryObjectResult(
+        new Document("$and", List.of(result)), false, null);
   }
 
   /** Default implementation of the FilterOperatorResult. */
