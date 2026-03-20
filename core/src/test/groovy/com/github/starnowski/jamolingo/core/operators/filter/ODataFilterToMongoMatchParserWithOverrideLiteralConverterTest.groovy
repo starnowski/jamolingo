@@ -38,19 +38,6 @@ class ODataFilterToMongoMatchParserWithOverrideLiteralConverterTest extends Abst
                             "\$filter=" +filter
                             , null, null)
             ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
-//            ODataToBsonConverter oDataToBsonConverter = new DefaultODataToBsonConverter() {
-//                @Override
-//                Object toBsonValue(Object value, String type) {
-//                    def valToUnwrap = value
-//                    if (value instanceof org.bson.BsonString) {
-//                        valToUnwrap = value.asString().getValue()
-//                    }
-//                    if (valToUnwrap instanceof String && valToUnwrap.startsWith("custom_string(") && valToUnwrap.endsWith(")")) {
-//                        valToUnwrap = valToUnwrap.substring("custom_string(".length(), valToUnwrap.length() - 1)
-//                    }
-//                    return super.toBsonValue(valToUnwrap, type)
-//                }
-//            }
             LiteralToBsonConverter literalToBsonConverter = new DefaultLiteralToBsonConverter() {
                 @Override
                 Bson convert(Literal literal) {
@@ -66,7 +53,6 @@ class ODataFilterToMongoMatchParserWithOverrideLiteralConverterTest extends Abst
                 }
             }
             MongoFilterVisitorCommonContext context = DefaultMongoFilterVisitorCommonContext.builder()
-//                    .withODataToBsonConverter(oDataToBsonConverter)
                     .withLiteralToBsonConverter(literalToBsonConverter)
                     .build()
 
@@ -75,6 +61,52 @@ class ODataFilterToMongoMatchParserWithOverrideLiteralConverterTest extends Abst
 
         then:
             [((Document)result.getStageObjects().get(0)).toJson(settings, codec)] == [((Document)expectedBson).toJson(settings, codec)]
+
+        where:
+            [filter, bson] << oneToOneEdmPathsMappings()
+    }
+
+    @Unroll
+    def "should return expected query object"(){
+        given:
+            System.out.println("Testing filter: " + filter)
+            Bson expectedBson = Document.parse(bson)
+            Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+            JsonWriterSettings settings = JsonWriterSettings.builder().build()
+            CodecRegistry registry = CodecRegistries.fromRegistries(
+                    CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                    MongoClientSettings.getDefaultCodecRegistry()
+            )
+            DocumentCodec codec = new DocumentCodec(registry)
+
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri("examples2",
+                            "\$filter=" +filter
+                            , null, null)
+            ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
+            LiteralToBsonConverter literalToBsonConverter = new DefaultLiteralToBsonConverter() {
+                @Override
+                Bson convert(Literal literal) {
+                    Bson result = super.convert(literal)
+                    if (result instanceof Document && result.containsKey('$odata.literal')) {
+                        def value = result.get('$odata.literal')
+                        if (value instanceof String && value.startsWith("custom_string(") && value.endsWith(")")) {
+                            value = value.substring("custom_string(".length(), value.length() - 1)
+                            return new Document('$odata.literal', value)
+                        }
+                    }
+                    return result
+                }
+            }
+            MongoFilterVisitorCommonContext context = DefaultMongoFilterVisitorCommonContext.builder()
+                    .withLiteralToBsonConverter(literalToBsonConverter)
+                    .build()
+
+        when:
+            def result = tested.parseQueryObject(uriInfo.getFilterOption(), context)
+
+        then:
+            ((Document)result.getQueryObject()).toJson(settings, codec) == ((Document)expectedBson).get("\$match", Document.class).toJson(settings, codec)
 
         where:
             [filter, bson] << oneToOneEdmPathsMappings()
