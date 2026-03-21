@@ -1,5 +1,6 @@
 {
   "_id": 1,
+  "categoryId": 1,
   "plainString": "eOMtThyhVNLWUZNRcBaQKxI",
   "base64Data": {
     "$binary": {

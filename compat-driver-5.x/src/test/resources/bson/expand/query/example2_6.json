@@ -1,5 +1,6 @@
 {
   "_id": 6,
+  "categoryId": 1,
   "plainString": "example1",
   "password": "bbb",
   "nestedObject": {

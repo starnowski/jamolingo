@@ -1,5 +1,6 @@
 {
   "_id": 5,
+  "categoryId": 1,
   "plainString": "Oleksa",
   "password": "aaa",
   "tags": [

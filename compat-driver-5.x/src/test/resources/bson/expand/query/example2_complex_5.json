@@ -1,5 +1,6 @@
 {
   "_id": 15,
+  "categoryId": 1,
   "plainString": "Doc5",
   "complexList": [
     {
