@@ -1,3 +1,9 @@
 package com.github.starnowski.jamolingo.core.operators.expand;
 
-public interface ExpandParserContext {}
+import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import java.util.Map;
+
+public interface ExpandParserContext {
+
+  Map<String, EdmPropertyMongoPathResolver> getEDMTypeMapping();
+}
