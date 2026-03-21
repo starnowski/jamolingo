@@ -1,0 +1,7 @@
+{
+  "id": 2,
+  "plainString": "Example 2",
+  "parentId": 3,
+  "categoryId": 1,
+  "isActive": true
+}
