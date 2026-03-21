@@ -1,10 +1,5 @@
 {
-  "_id": {
-    "$binary": {
-      "base64": "zhJHGT+jS4uJzYurBrA+5A==",
-      "subType": "04"
-    }
-  },
+  "_id": 13,
   "plainString": "Doc3",
   "complexList": [
     {

@@ -1,9 +1,4 @@
 {
-  "_id": {
-    "$binary": {
-      "base64": "vV2Z3X7QYEq6B+GfPj8W2A==",
-      "subType": "04"
-    }
-  },
+  "_id": 99,
   "plainString": "only_id_and_plainString"
 }
