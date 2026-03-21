@@ -8,7 +8,7 @@
                 <NavigationProperty Name="examples" Type="Collection(MyService.Example2)" />
             </EntityType>
             <EntityType Name="Example2">
-                <Property Name="_id" Type="Edm.Guid" Nullable="false" />
+                <Property Name="_id" Type="Edm.Int32" Nullable="false" />
                 <Property Name="plainString" Type="Edm.String"></Property>
                 <Property Name="numericArray" Type="Collection(Edm.Decimal)"></Property>
                 <Property Name="genericInteger" Type="Edm.Int64"></Property>
