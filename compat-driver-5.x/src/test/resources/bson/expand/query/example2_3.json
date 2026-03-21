@@ -1,10 +1,5 @@
 {
-  "_id": {
-    "$binary": {
-      "base64": "FiNvoWtQTbS00EnGI7PbuQ==",
-      "subType": "04"
-    }
-  },
+  "_id": 3,
   "plainString": "Poem",
   "base64Data": {
     "$binary": {

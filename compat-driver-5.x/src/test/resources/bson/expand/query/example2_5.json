@@ -1,10 +1,5 @@
 {
-  "_id": {
-    "$binary": {
-      "base64": "FivsoWtQTbS00EnGI7PbuQ==",
-      "subType": "04"
-    }
-  },
+  "_id": 5,
   "plainString": "Oleksa",
   "password": "aaa",
   "tags": [

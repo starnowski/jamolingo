@@ -1,10 +1,5 @@
 {
-  "_id": {
-    "$binary": {
-      "base64": "fivsoWtQTbS00EnGI7PbuQ==",
-      "subType": "04"
-    }
-  },
+  "_id": 6,
   "plainString": "example1",
   "password": "bbb",
   "nestedObject": {
