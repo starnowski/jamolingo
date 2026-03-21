@@ -20,40 +20,88 @@ public class NavigationMapping {
   @JsonProperty("foreignField")
   private String foreignField;
 
+  /**
+   * Returns target MongoDB collection name.
+   *
+   * @return collection name
+   */
   public String getCollection() {
     return collection;
   }
 
+  /**
+   * Sets target MongoDB collection name.
+   *
+   * @param collection collection name
+   */
   public void setCollection(String collection) {
     this.collection = collection;
   }
 
+  /**
+   * Sets target MongoDB collection name.
+   *
+   * @param collection collection name
+   * @return current instance
+   */
   public NavigationMapping withCollection(String collection) {
     this.collection = collection;
     return this;
   }
 
+  /**
+   * Returns field in the current collection used for join.
+   *
+   * @return local field
+   */
   public String getLocalField() {
     return localField;
   }
 
+  /**
+   * Sets field in the current collection used for join.
+   *
+   * @param localField local field
+   */
   public void setLocalField(String localField) {
     this.localField = localField;
   }
 
+  /**
+   * Sets field in the current collection used for join.
+   *
+   * @param localField local field
+   * @return current instance
+   */
   public NavigationMapping withLocalField(String localField) {
     this.localField = localField;
     return this;
   }
 
+  /**
+   * Returns field in the target collection used for join.
+   *
+   * @return foreign field
+   */
   public String getForeignField() {
     return foreignField;
   }
 
+  /**
+   * Sets field in the target collection used for join.
+   *
+   * @param foreignField foreign field
+   */
   public void setForeignField(String foreignField) {
     this.foreignField = foreignField;
   }
 
+  /**
+   * Sets field in the target collection used for join.
+   *
+   * @param foreignField foreign field
+   * @return current instance
+   */
   public NavigationMapping withForeignField(String foreignField) {
     this.foreignField = foreignField;
     return this;
@@ -89,30 +137,59 @@ public class NavigationMapping {
         + '}';
   }
 
+  /**
+   * Returns new builder instance.
+   *
+   * @return builder
+   */
   public static Builder builder() {
     return new Builder();
   }
 
+  /** Builder for NavigationMapping. */
   public static class Builder {
     private String collection;
     private String localField;
     private String foreignField;
 
+    /**
+     * Sets target MongoDB collection name.
+     *
+     * @param collection collection name
+     * @return builder
+     */
     public Builder withCollection(String collection) {
       this.collection = collection;
       return this;
     }
 
+    /**
+     * Sets field in the current collection used for join.
+     *
+     * @param localField local field
+     * @return builder
+     */
     public Builder withLocalField(String localField) {
       this.localField = localField;
       return this;
     }
 
+    /**
+     * Sets field in the target collection used for join.
+     *
+     * @param foreignField foreign field
+     * @return builder
+     */
     public Builder withForeignField(String foreignField) {
       this.foreignField = foreignField;
       return this;
     }
 
+    /**
+     * Builds NavigationMapping instance.
+     *
+     * @return navigation mapping
+     */
     public NavigationMapping build() {
       NavigationMapping navigationMapping = new NavigationMapping();
       navigationMapping.setCollection(collection);

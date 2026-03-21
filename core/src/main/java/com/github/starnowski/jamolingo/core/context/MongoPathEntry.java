@@ -18,6 +18,11 @@ public final class MongoPathEntry {
     return circularReferenceMapping;
   }
 
+  /**
+   * Returns navigation mapping for navigation property.
+   *
+   * @return navigation mapping
+   */
   public NavigationMapping getNavigation() {
     return navigation;
   }
@@ -61,6 +66,12 @@ public final class MongoPathEntry {
       return this;
     }
 
+    /**
+     * Sets navigation mapping for navigation property.
+     *
+     * @param navigation navigation mapping
+     * @return builder
+     */
     public MongoPathEntryBuilder withNavigation(NavigationMapping navigation) {
       this.navigation = navigation;
       return this;

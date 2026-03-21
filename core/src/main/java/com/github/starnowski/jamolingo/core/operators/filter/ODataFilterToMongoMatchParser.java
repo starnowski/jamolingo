@@ -91,11 +91,29 @@ public class ODataFilterToMongoMatchParser {
         rootMongoFilterVisitor.getUsedMongoDBProperties());
   }
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorQueryObjectResult.
+   *
+   * @param filter the OData filter option
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
   public FilterOperatorQueryObjectResult parseQueryObject(FilterOption filter)
       throws ODataApplicationException, ExpressionVisitException {
     return parseQueryObject(filter, DefaultEdmMongoContextFacade.builder().build());
   }
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorQueryObjectResult using the specified
+   * common context.
+   *
+   * @param filter the OData filter option
+   * @param mongoFilterVisitorCommonContext the common context for the filter visitor
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
   public FilterOperatorQueryObjectResult parseQueryObject(
       FilterOption filter, MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
       throws ODataApplicationException, ExpressionVisitException {
@@ -103,6 +121,16 @@ public class ODataFilterToMongoMatchParser {
         filter, DefaultEdmMongoContextFacade.builder().build(), mongoFilterVisitorCommonContext);
   }
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorQueryObjectResult using the specified
+   * path resolver.
+   *
+   * @param filter the OData filter option
+   * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
   public FilterOperatorQueryObjectResult parseQueryObject(
       FilterOption filter, EdmPropertyMongoPathResolver edmMongoContextFacade)
       throws ODataApplicationException, ExpressionVisitException {
@@ -110,6 +138,17 @@ public class ODataFilterToMongoMatchParser {
         filter, edmMongoContextFacade, DefaultMongoFilterVisitorCommonContext.builder().build());
   }
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorQueryObjectResult using the specified
+   * path resolver and common context.
+   *
+   * @param filter the OData filter option
+   * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
+   * @param mongoFilterVisitorCommonContext the common context for the filter visitor
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
   public FilterOperatorQueryObjectResult parseQueryObject(
       FilterOption filter,
       EdmPropertyMongoPathResolver edmMongoContextFacade,

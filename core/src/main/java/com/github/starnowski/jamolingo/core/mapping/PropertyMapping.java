@@ -68,14 +68,30 @@ public class PropertyMapping {
     return this;
   }
 
+  /**
+   * Returns navigation mapping for navigation property.
+   *
+   * @return navigation mapping
+   */
   public NavigationMapping getNavigation() {
     return navigation;
   }
 
+  /**
+   * Sets navigation mapping for navigation property.
+   *
+   * @param navigation navigation mapping
+   */
   public void setNavigation(NavigationMapping navigation) {
     this.navigation = navigation;
   }
 
+  /**
+   * Sets navigation mapping for navigation property.
+   *
+   * @param navigation navigation mapping
+   * @return current instance
+   */
   public PropertyMapping withNavigation(NavigationMapping navigation) {
     this.navigation = navigation;
     return this;
