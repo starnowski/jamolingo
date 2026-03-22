@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.core.operators.expand;
 
+import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,9 +22,14 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
   public static class DefaultExpandParserContext implements ExpandParserContext {
     private final Map<String, EdmPropertyMongoPathResolver> edmTypeMapping;
+    private final Map<KeyValue<String, String>, KeyValue<String, String>>
+        edmTablesToMongoDBCollections;
 
-    public DefaultExpandParserContext(Map<String, EdmPropertyMongoPathResolver> edmTypeMapping) {
+    public DefaultExpandParserContext(
+        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections) {
       this.edmTypeMapping = edmTypeMapping;
+      this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
     }
 
     @Override
@@ -32,21 +38,33 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
+    public Map<KeyValue<String, String>, KeyValue<String, String>>
+        getEDMTablesToMongoDBCollections() {
+      return edmTablesToMongoDBCollections;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       DefaultExpandParserContext that = (DefaultExpandParserContext) o;
-      return Objects.equals(edmTypeMapping, that.edmTypeMapping);
+      return Objects.equals(edmTypeMapping, that.edmTypeMapping)
+          && Objects.equals(edmTablesToMongoDBCollections, that.edmTablesToMongoDBCollections);
     }
 
     @Override
     public int hashCode() {
-      return Objects.hash(edmTypeMapping);
+      return Objects.hash(edmTypeMapping, edmTablesToMongoDBCollections);
     }
 
     @Override
     public String toString() {
-      return "DefaultExpandParserContext{" + "edmTypeMapping=" + edmTypeMapping + '}';
+      return "DefaultExpandParserContext{"
+          + "edmTypeMapping="
+          + edmTypeMapping
+          + ", edmTablesToMongoDBCollections="
+          + edmTablesToMongoDBCollections
+          + '}';
     }
 
     public static Builder builder() {
@@ -55,9 +73,17 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
     public static class Builder {
       private Map<String, EdmPropertyMongoPathResolver> edmTypeMapping = new HashMap<>();
+      private Map<KeyValue<String, String>, KeyValue<String, String>>
+          edmTablesToMongoDBCollections = new HashMap<>();
 
       public Builder withEdmTypeMapping(Map<String, EdmPropertyMongoPathResolver> edmTypeMapping) {
         this.edmTypeMapping = edmTypeMapping;
+        return this;
+      }
+
+      public Builder withEdmTablesToMongoDBCollections(
+          Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections) {
+        this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
         return this;
       }
 
@@ -67,6 +93,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
             defaultExpandParserContext.edmTypeMapping != null
                 ? new HashMap<>(defaultExpandParserContext.edmTypeMapping)
                 : null;
+        this.edmTablesToMongoDBCollections =
+            defaultExpandParserContext.edmTablesToMongoDBCollections != null
+                ? new HashMap<>(defaultExpandParserContext.edmTablesToMongoDBCollections)
+                : null;
         return this;
       }
 
@@ -74,6 +104,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
         return new DefaultExpandParserContext(
             edmTypeMapping != null
                 ? Collections.unmodifiableMap(new HashMap<>(edmTypeMapping))
+                : null,
+            edmTablesToMongoDBCollections != null
+                ? Collections.unmodifiableMap(new HashMap<>(edmTablesToMongoDBCollections))
                 : null);
       }
     }
