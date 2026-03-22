@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>json</module>
+        <module>beans</module>
     </modules>
     <artifactId>common</artifactId>
     <name>${project.groupId}:${project.artifactId}</name>
