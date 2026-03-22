@@ -1,8 +1,10 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.expand.query;
 
+import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import io.quarkus.test.junit.QuarkusTest;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
@@ -206,6 +208,13 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
           XMLStreamException,
           ExpressionVisitException,
           ODataApplicationException {
-    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(filter, expectedPlainStrings);
+    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
+        filter,
+        expectedPlainStrings,
+        Map.of(
+            new KeyValue<>("MyService", "Category"),
+            new KeyValue<>("testdb", "categories"),
+            new KeyValue<>("MyService", "Example2"),
+            new KeyValue<>("testdb", "examples")));
   }
 }

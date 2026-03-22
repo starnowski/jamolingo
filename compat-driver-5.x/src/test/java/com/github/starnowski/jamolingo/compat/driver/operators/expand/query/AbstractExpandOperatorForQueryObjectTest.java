@@ -2,6 +2,7 @@ package com.github.starnowski.jamolingo.compat.driver.operators.expand.query;
 
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
+import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import com.mongodb.client.MongoClient;
@@ -31,7 +32,9 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
   @Inject protected MongoClient mongoClient;
 
   protected void shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
-      String filter, Set<String> expectedPlainStrings)
+      String filter,
+      Set<String> expectedPlainStrings,
+      Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
@@ -51,7 +54,12 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
         new ODataExpandToMongoAggregationPipelineParser();
 
     // WHEN
-    ExpandOperatorResult result = tested.parse(uriInfo.getExpandOption());
+    ExpandOperatorResult result =
+        tested.parse(
+            uriInfo.getExpandOption(),
+            ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+                .withEdmTablesToMongoDBCollections(edmTablesToMongoDBCollections)
+                .build());
     List<Document> results = collection.aggregate(result.getStageObjects()).into(new ArrayList<>());
 
     // THEN
