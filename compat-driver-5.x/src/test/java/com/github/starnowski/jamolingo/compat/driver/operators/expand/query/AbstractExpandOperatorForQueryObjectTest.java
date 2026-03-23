@@ -48,7 +48,7 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
             .parseUri(
-                "categories", "$expand=examples($filter=" + filter + ";$levels=2)", null, null);
+                "examples2", "$filter=_id eq 100&$expand=children($filter=" + filter + ";$levels=2)", null, null);
     ODataExpandToMongoAggregationPipelineParser tested =
         new ODataExpandToMongoAggregationPipelineParser();
 
