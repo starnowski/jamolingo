@@ -11,7 +11,10 @@ public class EntityMapping {
   @Override
   public String toString() {
     return "EntityMapping{"
-        + "collection='"
+        + "database='"
+        + database
+        + '\''
+        + ", collection='"
         + collection
         + '\''
         + ", rootPath='"
@@ -21,6 +24,10 @@ public class EntityMapping {
         + properties
         + '}';
   }
+
+  /** MongoDB database name */
+  @JsonProperty("database")
+  private String database;
 
   /** MongoDB collection name */
   @JsonProperty("collection")
@@ -33,6 +40,35 @@ public class EntityMapping {
   /** Scalar & complex properties */
   @JsonProperty("properties")
   private Map<String, PropertyMapping> properties;
+
+  /**
+   * Returns the MongoDB database name.
+   *
+   * @return the database name
+   */
+  public String getDatabase() {
+    return database;
+  }
+
+  /**
+   * Sets the MongoDB database name.
+   *
+   * @param database the database name
+   */
+  public void setDatabase(String database) {
+    this.database = database;
+  }
+
+  /**
+   * Sets the MongoDB database name.
+   *
+   * @param database the database name
+   * @return this entity mapping
+   */
+  public EntityMapping withDatabase(String database) {
+    this.database = database;
+    return this;
+  }
 
   /**
    * Returns the MongoDB collection name.
@@ -69,14 +105,15 @@ public class EntityMapping {
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
     EntityMapping that = (EntityMapping) o;
-    return Objects.equals(collection, that.collection)
+    return Objects.equals(database, that.database)
+        && Objects.equals(collection, that.collection)
         && Objects.equals(rootPath, that.rootPath)
         && Objects.equals(properties, that.properties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(collection, rootPath, properties);
+    return Objects.hash(database, collection, rootPath, properties);
   }
 
   /**

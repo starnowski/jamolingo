@@ -20,6 +20,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Core Module
+*   Added `database` property to `com.github.starnowski.jamolingo.core.mapping.EntityMapping` to support specifying the MongoDB database name. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `database` property to `com.github.starnowski.jamolingo.core.mapping.NavigationMapping` to support cross-database joins in OData navigation properties. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+
+### Changed
+
+#### Core Module
+*   Updated `com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory` to automatically map OData Schema namespaces to MongoDB database names. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+
 ## [0.8.1] - 2026-03-19
 
 ### Added
