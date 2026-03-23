@@ -34,19 +34,17 @@
                 <Property Name="timestamp" Type="Edm.DateTimeOffset"></Property>
                 <Property Name="parentId" Type="Edm.Int32" />
                 <Property Name="categoryId" Type="Edm.Int32" />
-<!--                <NavigationProperty Name="parent" Type="MyService.Example2">-->
-<!--                    <ReferentialConstraint Property="parentId" ReferencedProperty="_id" />-->
-<!--                </NavigationProperty>-->
                 <NavigationProperty Name="category" Type="MyService.Category">
                     <ReferentialConstraint Property="categoryId" ReferencedProperty="_id" />
                 </NavigationProperty>
-<!--                <NavigationProperty Name="children" Type="Collection(MyService.Example2)" />-->
 
                 <NavigationProperty
                         Name="parent"
                         Type="MyService.Example2"
                         Nullable="true"
-                        Partner="children"/>
+                        Partner="children">
+                    <ReferentialConstraint Property="parentId" ReferencedProperty="_id" />
+                </NavigationProperty>
 
                 <!-- Children collection -->
                 <NavigationProperty
