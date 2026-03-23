@@ -2,11 +2,15 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+
+import java.util.*;
+
+import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+
+import javax.print.Doc;
 
 public class ODataExpandToMongoAggregationPipelineParser {
 
@@ -16,8 +20,68 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
   public ExpandOperatorResult parse(
       ExpandOption expandOption, ExpandParserContext expandParserContext) {
+    List<Bson> stageObjects = new ArrayList<>();
+    for (ExpandItem eOption : expandOption.getExpandItems()){
+      stageObjects.addAll(prepareStageObjectsForExpandItem(eOption, expandParserContext));
+    }
     // TODO
-    return null;
+    return new DefaultExpandOperatorResult(List.of());
+  }
+
+  private Collection<? extends Bson> prepareStageObjectsForExpandItem(ExpandItem eOption, ExpandParserContext expandParserContext) {
+    if (eOption.getLevelsOption() != null && eOption.getLevelsOption().getValue() > 1) {
+      List<Bson> pipeline = new ArrayList<>();
+      // Adding $graphLookup
+      Document graphLookup = new Document();
+      graphLookup.append("$graphLookup", new Document()
+              .append("startWith","$_id") //TODO resolve correct id field
+              .append("connectFromField","_id") //TODO resolve correct id field
+              .append("connectToField", "parentId")
+      );//TODO
+      pipeline.add(graphLookup);
+      return pipeline;
+    }
+    return List.of();
+  }
+
+  private static class DefaultExpandOperatorResult implements ExpandOperatorResult{
+
+    private final List<Bson> stageObjects;
+
+      private DefaultExpandOperatorResult(List<Bson> stageObjects) {
+          this.stageObjects = stageObjects;
+      }
+
+      @Override
+    public List<Bson> getStageObjects() {
+      return stageObjects;
+    }
+
+    @Override
+    public List<String> getUsedMongoDocumentProperties() {
+      return List.of();
+    }
+
+    @Override
+    public List<String> getWrittenMongoDocumentProperties() {
+      return List.of();
+    }
+
+    @Override
+    public List<String> getAddedMongoDocumentProperties() {
+      //TODO top elements for $expand
+      return List.of();
+    }
+
+    @Override
+    public List<String> getRemovedMongoDocumentProperties() {
+      return List.of();
+    }
+
+    @Override
+    public boolean isDocumentShapeRedefined() {
+      return false;
+    }
   }
 
   public static class DefaultExpandParserContext implements ExpandParserContext {

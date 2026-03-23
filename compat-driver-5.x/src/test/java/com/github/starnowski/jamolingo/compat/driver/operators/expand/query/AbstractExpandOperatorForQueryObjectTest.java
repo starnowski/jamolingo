@@ -47,7 +47,6 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
     Edm edm = loadEmdProvider("edm/edm7_graph_lookup.xml");
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
-            // TODO Add $level=2
             .parseUri(
                 "categories", "$expand=examples($filter=" + filter + ";$levels=2)", null, null);
     ODataExpandToMongoAggregationPipelineParser tested =
