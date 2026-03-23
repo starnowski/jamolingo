@@ -3,6 +3,11 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
 import java.util.*;
+import org.apache.olingo.commons.api.edm.EdmEntityType;
+import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
+import org.apache.olingo.commons.api.edm.EdmReferentialConstraint;
+import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
 import org.bson.Document;
@@ -20,24 +25,78 @@ public class ODataExpandToMongoAggregationPipelineParser {
     for (ExpandItem eOption : expandOption.getExpandItems()) {
       stageObjects.addAll(prepareStageObjectsForExpandItem(eOption, expandParserContext));
     }
-    // TODO
-    return new DefaultExpandOperatorResult(List.of());
+    return new DefaultExpandOperatorResult(stageObjects);
   }
 
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
       ExpandItem eOption, ExpandParserContext expandParserContext) {
-    if (eOption.getLevelsOption() != null && eOption.getLevelsOption().getValue() > 1) {
-      List<Bson> pipeline = new ArrayList<>();
-      // Adding $graphLookup
-      Document graphLookup = new Document();
-      graphLookup.append(
-          "$graphLookup",
-          new Document()
-              .append("startWith", "$_id") // TODO resolve correct id field
-              .append("connectFromField", "_id") // TODO resolve correct id field
-              .append("connectToField", "parentId")); // TODO
-      pipeline.add(graphLookup);
-      return pipeline;
+    UriResource lastResource =
+        eOption
+            .getResourcePath()
+            .getUriResourceParts()
+            .get(eOption.getResourcePath().getUriResourceParts().size() - 1);
+    if (!(lastResource instanceof UriResourceNavigation)) {
+      return List.of();
+    }
+    EdmNavigationProperty navProp = ((UriResourceNavigation) lastResource).getProperty();
+    EdmEntityType targetEntityType = (EdmEntityType) navProp.getType();
+    String targetFullTypeName = targetEntityType.getNamespace() + "." + targetEntityType.getName();
+
+    EdmPropertyMongoPathResolver targetResolver =
+        expandParserContext.getEDMTypeMapping() != null
+            ? expandParserContext.getEDMTypeMapping().get(targetFullTypeName)
+            : null;
+
+    String edmStartWith = null;
+    String edmConnectFrom = null;
+    String edmConnectTo = null;
+
+    List<EdmReferentialConstraint> referentialConstraints = navProp.getReferentialConstraints();
+    if (referentialConstraints.isEmpty() && navProp.getPartner() != null) {
+      referentialConstraints = navProp.getPartner().getReferentialConstraints();
+      if (!referentialConstraints.isEmpty()) {
+        EdmReferentialConstraint constraint = referentialConstraints.get(0);
+        edmStartWith = constraint.getReferencedPropertyName();
+        edmConnectFrom = constraint.getReferencedPropertyName();
+        edmConnectTo = constraint.getPropertyName();
+      }
+    } else if (!referentialConstraints.isEmpty()) {
+      EdmReferentialConstraint constraint = referentialConstraints.get(0);
+      edmStartWith = constraint.getPropertyName();
+      edmConnectFrom = constraint.getPropertyName();
+      edmConnectTo = constraint.getReferencedPropertyName();
+    }
+
+    if (edmConnectFrom != null && edmConnectTo != null) {
+      String mongoStartWith = edmStartWith;
+      String mongoConnectFrom = edmConnectFrom;
+      String mongoConnectTo = edmConnectTo;
+
+      if (targetResolver != null) {
+        mongoConnectTo = targetResolver.resolveMongoPathForEDMPath(edmConnectTo).getMongoPath();
+      }
+
+      String targetCollection =
+          expandParserContext
+              .getEDMTablesToMongoDBCollections()
+              .get(new KeyValue(targetEntityType.getNamespace(), targetEntityType.getName()))
+              .getValue();
+
+      if (eOption.getLevelsOption() != null && eOption.getLevelsOption().getValue() > 1) {
+        List<Bson> pipeline = new ArrayList<>();
+        // Adding $graphLookup
+        Document graphLookup = new Document();
+        graphLookup.append(
+            "$graphLookup",
+            new Document()
+                .append("from", targetCollection)
+                .append("startWith", "$" + mongoStartWith)
+                .append("connectFromField", mongoConnectFrom)
+                .append("connectToField", mongoConnectTo)
+                .append("as", navProp.getName()));
+        pipeline.add(graphLookup);
+        return pipeline;
+      }
     }
     return List.of();
   }

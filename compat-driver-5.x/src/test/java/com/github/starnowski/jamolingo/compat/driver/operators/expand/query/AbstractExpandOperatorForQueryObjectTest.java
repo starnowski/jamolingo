@@ -48,7 +48,10 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
             .parseUri(
-                "examples2", "$filter=_id eq 100&$expand=children($filter=" + filter + ";$levels=2)", null, null);
+                "examples2",
+                "$filter=_id eq 100&$expand=children($filter=" + filter + ";$levels=2)",
+                null,
+                null);
     ODataExpandToMongoAggregationPipelineParser tested =
         new ODataExpandToMongoAggregationPipelineParser();
 
@@ -63,7 +66,7 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
 
     // THEN
     Set<String> actual =
-        results.get(0).getList("examples", Document.class, List.of()).stream()
+        results.get(0).getList("children", Document.class, List.of()).stream()
             .map(d -> d.get("plainString"))
             .filter(Objects::nonNull)
             .map(s -> (String) s)
