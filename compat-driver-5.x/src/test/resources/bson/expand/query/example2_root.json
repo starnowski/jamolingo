@@ -1,11 +1,3 @@
 {
-  "_id": 100,
-  "categoryId": 1,
-  "plainString": "example2",
-  "password": "aaa",
-  "nestedObject": {
-    "tokens": ["007", "7", "Bond", "James"],
-    "numbers": [107, 113],
-    "index": "a"
-  }
+  "_id": 100
 }

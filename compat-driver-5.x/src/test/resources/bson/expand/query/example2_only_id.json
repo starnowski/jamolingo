@@ -1,5 +1,6 @@
 {
   "_id": 99,
+  "parentId": 100,
   "categoryId": 1,
   "plainString": "only_id_and_plainString"
 }

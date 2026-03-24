@@ -1,6 +1,7 @@
 {
   "_id": 3,
   "categoryId": 1,
+  "parentId": 100,
   "plainString": "Poem",
   "base64Data": {
     "$binary": {

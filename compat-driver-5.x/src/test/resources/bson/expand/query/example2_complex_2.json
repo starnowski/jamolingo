@@ -1,6 +1,7 @@
 {
   "_id": 12,
   "categoryId": 1,
+  "parentId": 100,
   "plainString": "Doc2",
   "complexList": [
     {

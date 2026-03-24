@@ -1,6 +1,7 @@
 {
   "_id": 4,
   "categoryId": 1,
+  "parentId": 100,
   "plainString": "Mario",
   "tags": [
     "star trek",
