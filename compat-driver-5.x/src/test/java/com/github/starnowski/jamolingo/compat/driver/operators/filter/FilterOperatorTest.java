@@ -17,7 +17,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 @QuarkusTest
 public class FilterOperatorTest extends AbstractFilterOperatorTest {
 
-
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
@@ -148,7 +147,8 @@ public class FilterOperatorTest extends AbstractFilterOperatorTest {
   }
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {
-    return FilterTestsCasesAggregator.provideShouldReturnExpectedProjectedDocumentForBasicFiltering();
+    return FilterTestsCasesAggregator
+        .provideShouldReturnExpectedProjectedDocumentForBasicFiltering();
   }
 
   /**
