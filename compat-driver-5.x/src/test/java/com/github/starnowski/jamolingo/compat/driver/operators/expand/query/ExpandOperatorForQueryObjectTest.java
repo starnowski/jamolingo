@@ -200,10 +200,10 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
             database = "testdb",
             collection = "examples",
             bsonFilePath = "bson/expand/query/example2_7.json"),
-              @MongoDocument(
-                      database = "testdb",
-                      collection = "examples",
-                      bsonFilePath = "bson/expand/query/example2_root.json")
+        @MongoDocument(
+            database = "testdb",
+            collection = "examples",
+            bsonFilePath = "bson/expand/query/example2_root.json")
       })
   public void shouldReturnExpectedDocumentsForQueryObject(
       String filter, Set<String> expectedPlainStrings, String expectedIndex)
@@ -220,7 +220,6 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
             new KeyValue<>("testdb", "categories"),
             new KeyValue<>("MyService", "Example2"),
             new KeyValue<>("testdb", "examples")),
-            100
-            );
+        100);
   }
 }

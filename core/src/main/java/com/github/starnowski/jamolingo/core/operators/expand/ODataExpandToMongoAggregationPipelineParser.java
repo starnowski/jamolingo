@@ -2,25 +2,31 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorQueryObjectResult;
+import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import java.util.*;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
 import org.apache.olingo.commons.api.edm.EdmReferentialConstraint;
+import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.queryoption.ExpandItem;
 import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
 public class ODataExpandToMongoAggregationPipelineParser {
 
-  public ExpandOperatorResult parse(ExpandOption expandOption) {
+  public ExpandOperatorResult parse(ExpandOption expandOption)
+      throws ExpressionVisitException, ODataApplicationException {
     return parse(expandOption, DefaultExpandParserContext.builder().build());
   }
 
   public ExpandOperatorResult parse(
-      ExpandOption expandOption, ExpandParserContext expandParserContext) {
+      ExpandOption expandOption, ExpandParserContext expandParserContext)
+      throws ExpressionVisitException, ODataApplicationException {
     List<Bson> stageObjects = new ArrayList<>();
     for (ExpandItem eOption : expandOption.getExpandItems()) {
       stageObjects.addAll(prepareStageObjectsForExpandItem(eOption, expandParserContext));
@@ -29,7 +35,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
   }
 
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
-      ExpandItem eOption, ExpandParserContext expandParserContext) {
+      ExpandItem eOption, ExpandParserContext expandParserContext)
+      throws ExpressionVisitException, ODataApplicationException {
     UriResource lastResource =
         eOption
             .getResourcePath()
@@ -81,19 +88,31 @@ public class ODataExpandToMongoAggregationPipelineParser {
               .getEDMTablesToMongoDBCollections()
               .get(new KeyValue(targetEntityType.getNamespace(), targetEntityType.getName()))
               .getValue();
+      List<Bson> pipeline = new ArrayList<>();
+      Bson queryObject = null;
+      if (eOption.getFilterOption() != null) {
+        ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
+            new ODataFilterToMongoMatchParser();
+        // TODO Resolving correct filter parameters
+        FilterOperatorQueryObjectResult result =
+            oDataFilterToMongoMatchParser.parseQueryObject(eOption.getFilterOption());
+        queryObject = result.getQueryObject();
+      }
 
       if (eOption.getLevelsOption() != null && eOption.getLevelsOption().getValue() > 1) {
-        List<Bson> pipeline = new ArrayList<>();
         // Adding $graphLookup
         Document graphLookup = new Document();
-        graphLookup.append(
-            "$graphLookup",
+        Document graphLookupInnerObject =
             new Document()
                 .append("from", targetCollection)
                 .append("startWith", "$" + mongoStartWith)
                 .append("connectFromField", mongoConnectFrom)
                 .append("connectToField", mongoConnectTo)
-                .append("as", navProp.getName()));
+                .append("as", navProp.getName());
+        if (queryObject != null) {
+          graphLookupInnerObject.append("restrictSearchWithMatch", queryObject);
+        }
+        graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
         return pipeline;
       }
