@@ -43,7 +43,7 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
     // plainString
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
-    MongoCollection<Document> collection = database.getCollection("Items");
+    MongoCollection<Document> collection = database.getCollection("examples");
     Edm edm = loadEmdProvider("edm/edm7_graph_lookup.xml");
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
