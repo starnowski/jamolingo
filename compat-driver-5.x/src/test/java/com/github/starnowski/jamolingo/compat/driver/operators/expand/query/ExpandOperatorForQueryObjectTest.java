@@ -51,8 +51,8 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
     return FilterTestsCasesAggregator.provideShouldReturnExpectedProjectedDocumentForAllLambda();
   }
 
-  private static Stream<Arguments> provideShouldReturnExpectedProjectedDocumentForComplexList() {
-    return provideShouldReturnExpectedProjectedDocumentForComplexListForAllLambda();
+  private static Stream<Arguments> provideShouldReturnExpectedProjectedDocumentForComplexListForAllLambda() {
+    return FilterTestsCasesAggregator.provideShouldReturnExpectedProjectedDocumentForComplexListForAllLambda();
   }
 
   @ParameterizedTest
@@ -162,7 +162,7 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
   }
 
   @ParameterizedTest
-  @MethodSource("provideShouldReturnExpectedProjectedDocumentForComplexList")
+  @MethodSource("provideShouldReturnExpectedProjectedDocumentForComplexListForAllLambda")
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(
