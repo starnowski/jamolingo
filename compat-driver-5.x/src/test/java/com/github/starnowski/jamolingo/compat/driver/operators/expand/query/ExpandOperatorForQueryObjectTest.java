@@ -155,7 +155,7 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
             bsonFilePath = "bson/expand/query/example2_root.json")
       })
   public void shouldReturnExpectedDocumentsForQueryObject(
-      String filter, Set<String> expectedPlainStrings, String expectedIndex)
+      String filter, Set<String> expectedPlainStrings)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
