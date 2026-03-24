@@ -23,6 +23,7 @@ import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
 
 @QuarkusTest
@@ -34,7 +35,8 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
   protected void shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
       String filter,
       Set<String> expectedPlainStrings,
-      Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections)
+      Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections,
+      int rootDocumentId)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
@@ -62,7 +64,10 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
             ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
                 .withEdmTablesToMongoDBCollections(edmTablesToMongoDBCollections)
                 .build());
-    List<Document> results = collection.aggregate(result.getStageObjects()).into(new ArrayList<>());
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(new Document("$match", new Document("_id", rootDocumentId)));
+    pipeline.addAll(result.getStageObjects());
+    List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
 
     // THEN
     Set<String> actual =

@@ -219,6 +219,8 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
             new KeyValue<>("MyService", "Category"),
             new KeyValue<>("testdb", "categories"),
             new KeyValue<>("MyService", "Example2"),
-            new KeyValue<>("testdb", "examples")));
+            new KeyValue<>("testdb", "examples")),
+            100
+            );
   }
 }
