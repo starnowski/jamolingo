@@ -20,7 +20,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 @QuarkusTest
-public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQueryObjectTest {
+public class ExpandOperatorForLookupWithPipelineTest
+    extends AbstractExpandOperatorForQueryObjectTest {
 
   public static final Map<@NotNull KeyValue<String, String>, @NotNull KeyValue<String, String>>
       EDM_TABLES_TO_MONGO_DB_COLLECTIONS =
@@ -103,8 +104,8 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
           XMLStreamException,
           ExpressionVisitException,
           ODataApplicationException {
-    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
-        filter, expectedPlainStrings, EDM_TABLES_TO_MONGO_DB_COLLECTIONS, ROOT_DOCUMENT_ID);
+    shouldReturnExpectedDocumentsBasedOnLookupWithPipelineForFilterOperator(
+        filter, expectedPlainStrings, EDM_TABLES_TO_MONGO_DB_COLLECTIONS, ROOT_DOCUMENT_ID, true);
   }
 
   @ParameterizedTest
@@ -157,11 +158,12 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
           ODataApplicationException {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
-    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
+    shouldReturnExpectedDocumentsBasedOnLookupWithPipelineForFilterOperator(
         filterString,
         expectedPlainStrings,
         EDM_TABLES_TO_MONGO_DB_COLLECTIONS_WITH_NULL_DATABASE,
-        ROOT_DOCUMENT_ID);
+        ROOT_DOCUMENT_ID,
+        false);
   }
 
   @ParameterizedTest
@@ -210,8 +212,12 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
           ODataApplicationException {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
-    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
-        filterString, expectedPlainStrings, EDM_TABLES_TO_MONGO_DB_COLLECTIONS, ROOT_DOCUMENT_ID);
+    shouldReturnExpectedDocumentsBasedOnLookupWithPipelineForFilterOperator(
+        filterString,
+        expectedPlainStrings,
+        EDM_TABLES_TO_MONGO_DB_COLLECTIONS,
+        ROOT_DOCUMENT_ID,
+        true);
   }
 
   @ParameterizedTest
@@ -264,11 +270,12 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
           ODataApplicationException {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
-    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
+    shouldReturnExpectedDocumentsBasedOnLookupWithPipelineForFilterOperator(
         filterString,
         expectedPlainStrings,
         EDM_TABLES_TO_MONGO_DB_COLLECTIONS_WITH_NULL_DATABASE,
-        ROOT_DOCUMENT_ID);
+        ROOT_DOCUMENT_ID,
+        false);
   }
 
   @ParameterizedTest
@@ -317,7 +324,11 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
           ODataApplicationException {
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
-    shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
-        filterString, expectedPlainStrings, EDM_TABLES_TO_MONGO_DB_COLLECTIONS, ROOT_DOCUMENT_ID);
+    shouldReturnExpectedDocumentsBasedOnLookupWithPipelineForFilterOperator(
+        filterString,
+        expectedPlainStrings,
+        EDM_TABLES_TO_MONGO_DB_COLLECTIONS,
+        ROOT_DOCUMENT_ID,
+        true);
   }
 }

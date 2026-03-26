@@ -78,5 +78,55 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
             .collect(Collectors.toSet());
     Assertions.assertEquals(expectedPlainStrings, actual);
   }
-  // TODO Add same tests but without $level
+
+  protected void shouldReturnExpectedDocumentsBasedOnLookupWithPipelineForFilterOperator(
+      String filter,
+      Set<String> expectedPlainStrings,
+      Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections,
+      int rootDocumentId,
+      boolean addLevel)
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException {
+    // plainString
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("examples");
+    Edm edm = loadEmdProvider("edm/edm7_graph_lookup.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance())
+            .parseUri(
+                "examples2",
+                "$filter=_id eq 100&$expand=children($filter="
+                    + filter
+                    + (addLevel ? ";$levels=1" : "")
+                    + ")",
+                null,
+                null);
+    ODataExpandToMongoAggregationPipelineParser tested =
+        new ODataExpandToMongoAggregationPipelineParser();
+
+    // WHEN
+    ExpandOperatorResult result =
+        tested.parse(
+            uriInfo.getExpandOption(),
+            ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+                .withEdmTablesToMongoDBCollections(edmTablesToMongoDBCollections)
+                .build());
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(new Document("$match", new Document("_id", rootDocumentId)));
+    pipeline.addAll(result.getStageObjects());
+    List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+
+    // THEN
+    Set<String> actual =
+        results.get(0).getList("children", Document.class, List.of()).stream()
+            .map(d -> d.get("plainString"))
+            .filter(Objects::nonNull)
+            .map(s -> (String) s)
+            .collect(Collectors.toSet());
+    Assertions.assertEquals(expectedPlainStrings, actual);
+  }
 }
