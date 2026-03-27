@@ -115,6 +115,25 @@ public class ODataExpandToMongoAggregationPipelineParser {
         graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
         return pipeline;
+      } else {
+        // Adding $lookup
+        Document lookup = new Document();
+        Document lookupInnerObject =
+            new Document()
+                .append("from", targetCollection)
+                .append("localField", mongoStartWith)
+                .append("foreignField", mongoConnectTo);
+
+        if (queryObject != null) {
+          // $lookup with pipeline
+          List<Document> lookupPipeline = new ArrayList<>();
+          lookupPipeline.add(new Document("$match", queryObject));
+          lookupInnerObject.append("pipeline", lookupPipeline);
+        }
+        lookupInnerObject.append("as", navProp.getName());
+        lookup.append("$lookup", lookupInnerObject);
+        pipeline.add(lookup);
+        return pipeline;
       }
     }
     return List.of();
