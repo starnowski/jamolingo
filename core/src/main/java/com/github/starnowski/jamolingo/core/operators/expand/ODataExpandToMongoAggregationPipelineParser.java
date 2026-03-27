@@ -2,7 +2,6 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
-import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorQueryObjectResult;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import java.util.*;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
@@ -89,15 +88,6 @@ public class ODataExpandToMongoAggregationPipelineParser {
               .get(new KeyValue(targetEntityType.getNamespace(), targetEntityType.getName()))
               .getValue();
       List<Bson> pipeline = new ArrayList<>();
-      Bson queryObject = null;
-      if (eOption.getFilterOption() != null) {
-        ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
-            new ODataFilterToMongoMatchParser();
-        // TODO Resolving correct filter parameters
-        FilterOperatorQueryObjectResult result =
-            oDataFilterToMongoMatchParser.parseQueryObject(eOption.getFilterOption());
-        queryObject = result.getQueryObject();
-      }
 
       if (eOption.getLevelsOption() != null && eOption.getLevelsOption().getValue() > 1) {
         // Adding $graphLookup
@@ -109,8 +99,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .append("connectFromField", mongoConnectFrom)
                 .append("connectToField", mongoConnectTo)
                 .append("as", navProp.getName());
-        if (queryObject != null) {
-          graphLookupInnerObject.append("restrictSearchWithMatch", queryObject);
+        if (eOption.getFilterOption() != null) {
+          ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
+              new ODataFilterToMongoMatchParser();
+          // TODO Resolving correct filter parameters
+          graphLookupInnerObject.append(
+              "restrictSearchWithMatch",
+              oDataFilterToMongoMatchParser
+                  .parseQueryObject(eOption.getFilterOption())
+                  .getQueryObject());
         }
         graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
@@ -124,10 +121,14 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .append("localField", mongoStartWith)
                 .append("foreignField", mongoConnectTo);
 
-        if (queryObject != null) {
+        if (eOption.getFilterOption() != null) {
+          ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
+              new ODataFilterToMongoMatchParser();
+          // TODO Resolving correct filter parameters
           // $lookup with pipeline
-          List<Document> lookupPipeline = new ArrayList<>();
-          lookupPipeline.add(new Document("$match", queryObject));
+          List<Bson> lookupPipeline =
+              new ArrayList<>(
+                  oDataFilterToMongoMatchParser.parse(eOption.getFilterOption()).getStageObjects());
           lookupInnerObject.append("pipeline", lookupPipeline);
         }
         lookupInnerObject.append("as", navProp.getName());
