@@ -44,39 +44,83 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         @MongoDocument(
             database = "testdb",
             collection = "categories",
-            bsonFilePath = "bson/expand/query/category_1.json"),
+            bsonFilePath = "bson/expand/tree/category1.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "examples",
-            bsonFilePath = "bson/expand/query/example2_1.json"),
+            collection = "categories",
+            bsonFilePath = "bson/expand/tree/category2.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "examples",
-            bsonFilePath = "bson/expand/query/example2_2.json"),
+            collection = "TreeType1",
+            bsonFilePath = "bson/expand/tree/t1_1.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "examples",
-            bsonFilePath = "bson/expand/query/example2_3.json"),
+            collection = "TreeType1",
+            bsonFilePath = "bson/expand/tree/t1_2.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "examples",
-            bsonFilePath = "bson/expand/query/example2_4.json"),
+            collection = "TreeType1",
+            bsonFilePath = "bson/expand/tree/t1_3.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "examples",
-            bsonFilePath = "bson/expand/query/example2_5.json"),
+            collection = "TreeType2",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_1.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "examples",
-            bsonFilePath = "bson/expand/query/example2_6.json"),
+            collection = "TreeType2",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_2.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "examples",
-            bsonFilePath = "bson/expand/query/example2_7.json"),
+            collection = "TreeType2",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_3.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "examples",
-            bsonFilePath = "bson/expand/query/example2_root.json")
+            collection = "TreeType2",
+            bsonFilePath = "bson/expand/tree/t1_2_t2_4.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType2",
+            bsonFilePath = "bson/expand/tree/t1_2_t2_5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType2",
+            bsonFilePath = "bson/expand/tree/t1_2_t2_6.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType3",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType3",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_2.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType3",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_3.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType3",
+            bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_4.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType3",
+            bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType3",
+            bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_6.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType4",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType4",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_2.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "TreeType4",
+            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_3.json")
       })
   public void shouldReturnExpectedDocumentsForQueryObject(
       String filter, Set<String> expectedPlainStrings)
