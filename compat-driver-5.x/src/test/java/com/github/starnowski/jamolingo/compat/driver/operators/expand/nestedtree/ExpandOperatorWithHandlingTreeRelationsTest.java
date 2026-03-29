@@ -85,6 +85,19 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                              ]
                                             }]
                                             """,
+                    JSONCompareMode.LENIENT),
+            // Level with filters
+            // Filter with condition that TreeType2 grandfather and parent only pass, the child not
+            Arguments.of(
+                    Set.of(1),
+                    "$expand=treeType2s($levels=10;$filter=index lt 3)",
+                    """
+                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                     "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 }
+                                                     ]
+                                                    }]
+                                                    """,
                     JSONCompareMode.LENIENT)
             );
   }
