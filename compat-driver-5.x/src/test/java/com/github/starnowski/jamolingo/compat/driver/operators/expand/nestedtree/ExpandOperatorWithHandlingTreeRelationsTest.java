@@ -90,11 +90,24 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             // Filter with condition that TreeType2 grandfather and parent only pass, the child not
             Arguments.of(
                     Set.of(1),
-                    "$expand=treeType2s($levels=10;$filter=index lt 3)",
+                    "$expand=treeType2s($levels=10;$filter=index in (1, 2))",
                     """
                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
                                                      { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 }
+                                                     ]
+                                                    }]
+                                                    """,
+                    JSONCompareMode.LENIENT),
+            // Level with filters
+            // Filter with condition that TreeType2 grandfather and the child not, parent does not pass condition.
+            // Important! Because OData filters on the level context then because parent does not pass condition then children should not be returned
+            Arguments.of(
+                    Set.of(1),
+                    "$expand=treeType2s($levels=10;$filter=index in (1, 3))",
+                    """
+                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                     "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
