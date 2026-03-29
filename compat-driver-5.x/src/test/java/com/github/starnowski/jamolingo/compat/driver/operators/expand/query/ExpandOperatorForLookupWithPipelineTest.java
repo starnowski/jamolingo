@@ -23,12 +23,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 public class ExpandOperatorForLookupWithPipelineTest
     extends AbstractExpandOperatorForQueryObjectTest {
 
-  public static final Map<@NotNull KeyValue<String, String>, @NotNull KeyValue<String, String>>
+  public static final Map<@NotNull KeyValue<String, String>, @NotNull String>
       EDM_TABLES_TO_MONGO_DB_COLLECTIONS =
-          Map.of(new KeyValue<>("MyService", "Example2"), new KeyValue<>("testdb", "examples"));
-  public static final Map<@NotNull KeyValue<String, String>, @NotNull KeyValue<String, String>>
+          Map.of(new KeyValue<>("MyService", "Example2"), "examples");
+  public static final Map<@NotNull KeyValue<String, String>, @NotNull String>
       EDM_TABLES_TO_MONGO_DB_COLLECTIONS_WITH_NULL_DATABASE =
-          Map.of(new KeyValue<>("MyService", "Example2"), new KeyValue<>(null, "examples"));
+          Map.of(new KeyValue<>("MyService", "Example2"), "examples");
   public static final int ROOT_DOCUMENT_ID = 100;
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {

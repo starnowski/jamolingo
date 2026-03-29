@@ -49,6 +49,16 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                              "category": { "_id": 1, "name": "Category 1" }
                             }]
                             """,
+            JSONCompareMode.LENIENT),
+        Arguments.of(
+            Set.of(1),
+            "$expand=category,children",
+            """
+                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                     "category": { "_id": 1, "name": "Category 1" },
+                                     "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 }]
+                                    }]
+                                    """,
             JSONCompareMode.LENIENT));
   }
 
