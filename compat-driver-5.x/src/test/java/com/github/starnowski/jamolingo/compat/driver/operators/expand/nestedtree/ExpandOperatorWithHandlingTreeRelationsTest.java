@@ -2,39 +2,36 @@ package com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtre
 
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
-import com.github.starnowski.jamolingo.common.beans.KeyValue;
-import com.github.starnowski.jamolingo.compat.driver.operators.filter.FilterTestsCasesAggregator;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
+import java.util.Set;
+import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
 
 @QuarkusTest
 @QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
 public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest {
 
-
-  private static Stream<Arguments>
-  provideData() {
-    //TODO
+  private static Stream<Arguments> provideData() {
+    // TODO
     return Stream.of(
-            Arguments.of(
-                    "complexList/any(c:c/someString eq 'Apple')", Set.of("Doc1", "Doc4"), "FETCH + IXSCAN"));
+        Arguments.of(
+            1,
+            "$expand=category",
+            """
+                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                             "category": { "_id": 1, "name": "Category 1" }
+                            }]
+                            """));
   }
 
   @ParameterizedTest
@@ -43,11 +40,11 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
-            collection = "categories",
+            collection = "Category",
             bsonFilePath = "bson/expand/tree/category1.json"),
         @MongoDocument(
             database = "testdb",
-            collection = "categories",
+            collection = "Category",
             bsonFilePath = "bson/expand/tree/category2.json"),
         @MongoDocument(
             database = "testdb",
@@ -129,7 +126,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
           XMLStreamException,
           ExpressionVisitException,
           ODataApplicationException {
-    //todo
+    // todo
   }
-
 }
