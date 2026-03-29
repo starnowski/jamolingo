@@ -105,6 +105,11 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // condition.
         // Important! Because OData filters on the level context then because parent does not pass
         // condition then children should not be returned
+        // TODO Wrong tests case, it should be added to TreeType1 -> grandpa, father, child,
+        // grandchild
+        // TODO father does not match condition so array is empty
+        // TODO child does not match condition then array contains only father
+        // TODO add first tests chase with filter that all documents pass
         Arguments.of(
             Set.of(1),
             "$expand=treeType2s($levels=10;$filter=index in (1, 3))",

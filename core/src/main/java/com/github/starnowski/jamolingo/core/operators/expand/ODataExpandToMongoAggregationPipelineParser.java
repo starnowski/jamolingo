@@ -125,37 +125,41 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   "$set",
                   new Document(
                       navProp.getName(),
-                      new Document("$reduce", new Document("input", "$" + navProp.getName()))
-                          .append("initialValue", List.of())
-                          .append(
-                              "in",
-                              new Document(
-                                  "$let",
+                      new Document(
+                          "$reduce",
+                          new Document("input", "$" + navProp.getName())
+                              .append("initialValue", List.of())
+                              .append(
+                                  "in",
                                   new Document(
-                                          "vars",
-                                          new Document("current", "$$this")
-                                              .append("acc", "$$value"))
-                                      .append(
-                                          "in",
-                                          new Document(
-                                              "$cond",
-                                              List.of(
-                                                  new Document(
-                                                      "$or",
-                                                      List.of(
-                                                          new Document(
-                                                              "$eq",
-                                                              List.of(
-                                                                  "$$current." + depthVariable, 0)),
-                                                          new Document(
-                                                              "$in",
-                                                              List.of(
-                                                                  "$$current." + mongoConnectTo,
-                                                                  "$$acc." + mongoConnectFrom)))),
-                                                  new Document(
-                                                      "$concatArrays",
-                                                      List.of("$$acc", List.of("$$current"))),
-                                                  "$$acc"))))))));
+                                      "$let",
+                                      new Document(
+                                              "vars",
+                                              new Document("current", "$$this")
+                                                  .append("acc", "$$value"))
+                                          .append(
+                                              "in",
+                                              new Document(
+                                                  "$cond",
+                                                  List.of(
+                                                      new Document(
+                                                          "$or",
+                                                          List.of(
+                                                              new Document(
+                                                                  "$eq",
+                                                                  List.of(
+                                                                      "$$current." + depthVariable,
+                                                                      0)),
+                                                              new Document(
+                                                                  "$in",
+                                                                  List.of(
+                                                                      "$$current." + mongoConnectTo,
+                                                                      "$$acc."
+                                                                          + mongoConnectFrom)))),
+                                                      new Document(
+                                                          "$concatArrays",
+                                                          List.of("$$acc", List.of("$$current"))),
+                                                      "$$acc")))))))));
         }
         return pipeline;
       } else {
