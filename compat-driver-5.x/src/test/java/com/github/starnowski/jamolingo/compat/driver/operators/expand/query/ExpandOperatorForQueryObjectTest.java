@@ -22,12 +22,9 @@ import org.junit.jupiter.params.provider.MethodSource;
 @QuarkusTest
 public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQueryObjectTest {
 
-  public static final Map<@NotNull KeyValue<String, String>, @NotNull KeyValue<String, String>>
+  public static final Map<@NotNull KeyValue<String, String>, @NotNull String>
       EDM_TABLES_TO_MONGO_DB_COLLECTIONS =
-          Map.of(new KeyValue<>("MyService", "Example2"), new KeyValue<>("testdb", "examples"));
-  public static final Map<@NotNull KeyValue<String, String>, @NotNull KeyValue<String, String>>
-      EDM_TABLES_TO_MONGO_DB_COLLECTIONS_WITH_NULL_DATABASE =
-          Map.of(new KeyValue<>("MyService", "Example2"), new KeyValue<>(null, "examples"));
+          Map.of(new KeyValue<>("MyService", "Example2"), "examples");
   public static final int ROOT_DOCUMENT_ID = 100;
 
   private static Stream<Arguments> provideShouldReturnExpectedProjectedDocument() {
@@ -158,10 +155,7 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
     shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
-        filterString,
-        expectedPlainStrings,
-        EDM_TABLES_TO_MONGO_DB_COLLECTIONS_WITH_NULL_DATABASE,
-        ROOT_DOCUMENT_ID);
+        filterString, expectedPlainStrings, EDM_TABLES_TO_MONGO_DB_COLLECTIONS, ROOT_DOCUMENT_ID);
   }
 
   @ParameterizedTest
@@ -265,10 +259,7 @@ public class ExpandOperatorForQueryObjectTest extends AbstractExpandOperatorForQ
     String filterString =
         filter instanceof String ? (String) filter : String.join(" and ", (List<String>) filter);
     shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
-        filterString,
-        expectedPlainStrings,
-        EDM_TABLES_TO_MONGO_DB_COLLECTIONS_WITH_NULL_DATABASE,
-        ROOT_DOCUMENT_ID);
+        filterString, expectedPlainStrings, EDM_TABLES_TO_MONGO_DB_COLLECTIONS, ROOT_DOCUMENT_ID);
   }
 
   @ParameterizedTest

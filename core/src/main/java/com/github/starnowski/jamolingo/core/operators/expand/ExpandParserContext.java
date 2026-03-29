@@ -8,5 +8,5 @@ public interface ExpandParserContext {
 
   Map<String, EdmPropertyMongoPathResolver> getEDMTypeMapping();
 
-  Map<KeyValue<String, String>, KeyValue<String, String>> getEDMTablesToMongoDBCollections();
+  Map<KeyValue<String, String>, String> getEDMTablesToMongoDBCollections();
 }

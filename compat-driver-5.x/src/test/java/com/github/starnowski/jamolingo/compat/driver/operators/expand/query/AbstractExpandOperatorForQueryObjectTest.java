@@ -35,7 +35,7 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
   protected void shouldReturnExpectedDocumentsBasedOnQueryObjectForFilterOperator(
       String filter,
       Set<String> expectedPlainStrings,
-      Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections,
+      Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
       int rootDocumentId)
       throws UriValidationException,
           UriParserException,
@@ -82,7 +82,7 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
   protected void shouldReturnExpectedDocumentsBasedOnLookupWithPipelineForFilterOperator(
       String filter,
       Set<String> expectedPlainStrings,
-      Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections,
+      Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
       int rootDocumentId,
       boolean addLevel)
       throws UriValidationException,

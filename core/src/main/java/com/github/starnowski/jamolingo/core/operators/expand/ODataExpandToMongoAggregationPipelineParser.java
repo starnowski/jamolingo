@@ -82,15 +82,13 @@ public class ODataExpandToMongoAggregationPipelineParser {
         mongoConnectTo = targetResolver.resolveMongoPathForEDMPath(edmConnectTo).getMongoPath();
       }
 
-      KeyValue<String, String> mongoCollectionName =
+      String mongoCollectionName =
           expandParserContext
               .getEDMTablesToMongoDBCollections()
               .get(new KeyValue<>(targetEntityType.getNamespace(), targetEntityType.getName()));
 
       String targetCollection =
-          mongoCollectionName == null
-              ? targetEntityType.getName()
-              : getFullMongoDBCollectionReference(mongoCollectionName);
+          mongoCollectionName == null ? targetEntityType.getName() : mongoCollectionName;
       List<Bson> pipeline = new ArrayList<>();
 
       if (eOption.getLevelsOption() != null && eOption.getLevelsOption().getValue() > 1) {
@@ -140,16 +138,16 @@ public class ODataExpandToMongoAggregationPipelineParser {
         pipeline.add(lookup);
         if (!navProp.isCollection()) {
           // TODO Comment why preserveNullAndEmptyArrays is needed and check if OData
-          pipeline.add(new Document("$unwind", new Document("path", "$" + navProp.getName()).append("preserveNullAndEmptyArrays", true)));
+          pipeline.add(
+              new Document(
+                  "$unwind",
+                  new Document("path", "$" + navProp.getName())
+                      .append("preserveNullAndEmptyArrays", true)));
         }
         return pipeline;
       }
     }
     return List.of();
-  }
-
-  protected String getFullMongoDBCollectionReference(KeyValue<String, String> keyValue) {
-    return (keyValue.getKey() == null ? "" : keyValue.getKey() + ".") + keyValue.getValue();
   }
 
   private static class DefaultExpandOperatorResult implements ExpandOperatorResult {
@@ -194,12 +192,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
   public static class DefaultExpandParserContext implements ExpandParserContext {
     private final Map<String, EdmPropertyMongoPathResolver> edmTypeMapping;
-    private final Map<KeyValue<String, String>, KeyValue<String, String>>
-        edmTablesToMongoDBCollections;
+    private final Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections;
 
     public DefaultExpandParserContext(
         Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
-        Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections) {
+        Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections) {
       this.edmTypeMapping = edmTypeMapping;
       this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
     }
@@ -210,8 +207,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
-    public Map<KeyValue<String, String>, KeyValue<String, String>>
-        getEDMTablesToMongoDBCollections() {
+    public Map<KeyValue<String, String>, String> getEDMTablesToMongoDBCollections() {
       return edmTablesToMongoDBCollections;
     }
 
@@ -245,8 +241,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
     public static class Builder {
       private Map<String, EdmPropertyMongoPathResolver> edmTypeMapping = new HashMap<>();
-      private Map<KeyValue<String, String>, KeyValue<String, String>>
-          edmTablesToMongoDBCollections = new HashMap<>();
+      private Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections = new HashMap<>();
 
       public Builder withEdmTypeMapping(Map<String, EdmPropertyMongoPathResolver> edmTypeMapping) {
         this.edmTypeMapping = edmTypeMapping;
@@ -254,7 +249,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       public Builder withEdmTablesToMongoDBCollections(
-          Map<KeyValue<String, String>, KeyValue<String, String>> edmTablesToMongoDBCollections) {
+          Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections) {
         this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
         return this;
       }
