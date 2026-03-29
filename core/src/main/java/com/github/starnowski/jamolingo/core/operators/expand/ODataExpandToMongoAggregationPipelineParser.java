@@ -138,6 +138,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
         lookupInnerObject.append("as", navProp.getName());
         lookup.append("$lookup", lookupInnerObject);
         pipeline.add(lookup);
+        if (!navProp.isCollection()) {
+          pipeline.add(new Document("$unwind", "$" + navProp.getName()));
+        }
         return pipeline;
       }
     }
