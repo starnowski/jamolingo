@@ -18,6 +18,9 @@ import org.bson.conversions.Bson;
 
 public class ODataExpandToMongoAggregationPipelineParser {
 
+  public static final String ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX =
+      "_odata_graphlookup_depth_variable";
+
   public ExpandOperatorResult parse(ExpandOption expandOption)
       throws ExpressionVisitException, ODataApplicationException {
     return parse(expandOption, DefaultExpandParserContext.builder().build());
@@ -110,9 +113,29 @@ public class ODataExpandToMongoAggregationPipelineParser {
               oDataFilterToMongoMatchParser
                   .parseQueryObject(eOption.getFilterOption())
                   .getQueryObject());
+          graphLookupInnerObject.append(
+              "depthField", navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX);
         }
         graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
+        if (eOption.getFilterOption() != null) {
+          // TODO Filter children which parent didn't pass conditions set by the $filter operator
+          pipeline.add(
+              new Document(
+                  "$set",
+                  new Document(
+                      navProp.getName(),
+                      new Document("$reduce", new Document("input", "$" + navProp.getName()))
+                          .append("initialValue", List.of())
+                          .append(
+                              "in",
+                              new Document(
+                                  "$let",
+                                  new Document(
+                                      "vars",
+                                      new Document("current", "$$this")
+                                          .append("acc", "$$value")))))));
+        }
         return pipeline;
       } else {
         // Adding $lookup

@@ -39,7 +39,8 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest {
 
   private static Stream<Arguments> provideData() {
-    // TODO
+    // TODO Check in for category (that is single property and not collection) we can specify the
+    // $levels > 1
     return Stream.of(
         Arguments.of(
             Set.of(1),
@@ -74,49 +75,53 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                             }]
                                             """,
             JSONCompareMode.LENIENT),
-            // Level without filters
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=children($levels=10)",
-                    """
+        // Level without filters
+        Arguments.of(
+            Set.of(1),
+            "$expand=children($levels=10)",
+            """
                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                              "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
                                              { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 }
                                              ]
                                             }]
                                             """,
-                    JSONCompareMode.LENIENT),
-            // Level with filters
-            // Filter with condition that TreeType2 grandfather and parent only pass, the child not
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=treeType2s($levels=10;$filter=index in (1, 2))",
-                    """
+            JSONCompareMode.LENIENT),
+        // Level with filters
+        // Filter with condition that TreeType2 grandfather and parent only pass, the child not
+        Arguments.of(
+            Set.of(1),
+            "$expand=treeType2s($levels=10;$filter=index in (1, 2))",
+            """
                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
                                                      { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
-                    JSONCompareMode.LENIENT),
-            // Level with filters
-            // Filter with condition that TreeType2 grandfather and the child not, parent does not pass condition.
-            // Important! Because OData filters on the level context then because parent does not pass condition then children should not be returned
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=treeType2s($levels=10;$filter=index in (1, 3))",
-                    """
+            JSONCompareMode.LENIENT),
+        // Level with filters
+        // Filter with condition that TreeType2 grandfather and the child not, parent does not pass
+        // condition.
+        // Important! Because OData filters on the level context then because parent does not pass
+        // condition then children should not be returned
+        Arguments.of(
+            Set.of(1),
+            "$expand=treeType2s($levels=10;$filter=index in (1, 3))",
+            """
                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
-                    JSONCompareMode.LENIENT)
-            );
+            JSONCompareMode.LENIENT));
   }
 
   @Inject protected MongoClient mongoClient;
 
+  // TODO Change approach, by default the default component is going to write to the collection with
+  // name MyService.Category.
+  // TODO The "MyService" prefix is not a name of database, it just prefix for the collection name
   @ParameterizedTest
   @MethodSource("provideData")
   @MongoSetup(
