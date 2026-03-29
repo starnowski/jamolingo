@@ -82,11 +82,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
         mongoConnectTo = targetResolver.resolveMongoPathForEDMPath(edmConnectTo).getMongoPath();
       }
 
-      String targetCollection =
+      KeyValue<String, String> mongoCollectionName =
           expandParserContext
               .getEDMTablesToMongoDBCollections()
-              .get(new KeyValue(targetEntityType.getNamespace(), targetEntityType.getName()))
-              .getValue();
+              .get(new KeyValue<>(targetEntityType.getNamespace(), targetEntityType.getName()));
+
+      String targetCollection =
+          mongoCollectionName == null
+              ? targetFullTypeName
+              : getFullMongoDBCollectionReference(mongoCollectionName);
       List<Bson> pipeline = new ArrayList<>();
 
       if (eOption.getLevelsOption() != null && eOption.getLevelsOption().getValue() > 1) {
@@ -138,6 +142,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
     }
     return List.of();
+  }
+
+  protected String getFullMongoDBCollectionReference(KeyValue<String, String> keyValue) {
+    return (keyValue.getKey() == null ? "" : keyValue.getKey() + ".") + keyValue.getValue();
   }
 
   private static class DefaultExpandOperatorResult implements ExpandOperatorResult {
