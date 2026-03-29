@@ -89,7 +89,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
       String targetCollection =
           mongoCollectionName == null
-              ? targetFullTypeName
+              ? targetEntityType.getName()
               : getFullMongoDBCollectionReference(mongoCollectionName);
       List<Bson> pipeline = new ArrayList<>();
 
@@ -139,7 +139,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
         lookup.append("$lookup", lookupInnerObject);
         pipeline.add(lookup);
         if (!navProp.isCollection()) {
-          pipeline.add(new Document("$unwind", "$" + navProp.getName()));
+          // TODO Comment why preserveNullAndEmptyArrays is needed and check if OData
+          pipeline.add(new Document("$unwind", new Document("path", "$" + navProp.getName()).append("preserveNullAndEmptyArrays", true)));
         }
         return pipeline;
       }
