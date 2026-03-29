@@ -104,6 +104,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .append("connectFromField", mongoConnectFrom)
                 .append("connectToField", mongoConnectTo)
                 .append("as", navProp.getName());
+        String depthVariable = navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX;
         if (eOption.getFilterOption() != null) {
           ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
               new ODataFilterToMongoMatchParser();
@@ -113,8 +114,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
               oDataFilterToMongoMatchParser
                   .parseQueryObject(eOption.getFilterOption())
                   .getQueryObject());
-          graphLookupInnerObject.append(
-              "depthField", navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX);
+          graphLookupInnerObject.append("depthField", depthVariable);
         }
         graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
@@ -132,9 +132,30 @@ public class ODataExpandToMongoAggregationPipelineParser {
                               new Document(
                                   "$let",
                                   new Document(
-                                      "vars",
-                                      new Document("current", "$$this")
-                                          .append("acc", "$$value")))))));
+                                          "vars",
+                                          new Document("current", "$$this")
+                                              .append("acc", "$$value"))
+                                      .append(
+                                          "in",
+                                          new Document(
+                                              "$cond",
+                                              List.of(
+                                                  new Document(
+                                                      "$or",
+                                                      List.of(
+                                                          new Document(
+                                                              "$eq",
+                                                              List.of(
+                                                                  "$$current." + depthVariable, 0)),
+                                                          new Document(
+                                                              "$in",
+                                                              List.of(
+                                                                  "$$current." + mongoConnectTo,
+                                                                  "$$acc." + mongoConnectFrom)))),
+                                                  new Document(
+                                                      "$concatArrays",
+                                                      List.of("$$acc", List.of("$$current"))),
+                                                  "$$acc"))))))));
         }
         return pipeline;
       } else {
