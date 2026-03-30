@@ -78,7 +78,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // Level without filters
         Arguments.of(
             Set.of(1),
-            "$expand=children($levels=10)",
+            "$expand=children($levels=5)",
             """
                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                              "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
@@ -92,7 +92,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // Filter with condition that TreeType2 grandfather and parent only pass, the child not
         Arguments.of(
             Set.of(1),
-            "$expand=treeType2s($levels=10;$filter=index in (1, 2))",
+            "$expand=treeType2s($levels=5;$filter=index in (1, 2))",
             """
                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
@@ -111,17 +111,19 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // TODO father does not match condition so array is empty
         // TODO child does not match condition then array contains only father
         // TODO add first tests chase with filter that all documents pass
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=children($levels=10;$filter=index in (2, 3, 4))",
-                    """
+        Arguments.of(
+            Set.of(1),
+            "$expand=children($levels=5;$filter=index in (2, 3, 4))",
+            """
                                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                                             "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 }
+                                                             "children": [
+                                                             { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
+                                                             { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
+                                                             { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 }
                                                              ]
                                                             }]
                                                             """,
-                    JSONCompareMode.LENIENT)
-            );
+            JSONCompareMode.LENIENT));
   }
 
   @Inject protected MongoClient mongoClient;
@@ -153,10 +155,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             database = "MyService",
             collection = "TreeType1",
             bsonFilePath = "bson/expand/tree/t1_3.json"),
-              @MongoDocument(
-                      database = "MyService",
-                      collection = "TreeType1",
-                      bsonFilePath = "bson/expand/tree/t1_4.json"),
+        @MongoDocument(
+            database = "MyService",
+            collection = "TreeType1",
+            bsonFilePath = "bson/expand/tree/t1_4.json"),
         @MongoDocument(
             database = "MyService",
             collection = "TreeType2",
