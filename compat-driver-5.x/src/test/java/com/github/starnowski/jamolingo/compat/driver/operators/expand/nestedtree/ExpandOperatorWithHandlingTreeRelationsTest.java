@@ -123,8 +123,25 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                              ]
                                                             }]
                                                             """,
-            JSONCompareMode.NON_EXTENSIBLE));
+            JSONCompareMode.NON_EXTENSIBLE),
+            // Level with filters that condition pass for document with id 2 and 4, which means that 4 is not going be
+            // returned in array because it parent document with id 3 does not pass condition.
+            // Parent document with id 3 is not going to be returned in the list
+            Arguments.of(
+                    Set.of(1),
+                    "$expand=children($levels=3;$filter=index in (2, 4))",
+                    """
+                                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                                     "children": [
+                                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 }
+                                                                     ]
+                                                                    }]
+                                                                    """,
+                    JSONCompareMode.NON_EXTENSIBLE)
+    );
   }
+
+  // TODO Add tests that contains the depth level property
 
   @Inject protected MongoClient mongoClient;
 
