@@ -109,7 +109,6 @@ public class ODataExpandToMongoAggregationPipelineParser {
         if (eOption.getFilterOption() != null) {
           ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
               new ODataFilterToMongoMatchParser();
-          // TODO Resolving correct filter parameters
           graphLookupInnerObject.append(
               "restrictSearchWithMatch",
               oDataFilterToMongoMatchParser
@@ -139,7 +138,6 @@ public class ODataExpandToMongoAggregationPipelineParser {
         if (eOption.getFilterOption() != null) {
           ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
               new ODataFilterToMongoMatchParser();
-          // TODO Resolving correct filter parameters
           // $lookup with pipeline
           List<Bson> lookupPipeline =
               new ArrayList<>(
