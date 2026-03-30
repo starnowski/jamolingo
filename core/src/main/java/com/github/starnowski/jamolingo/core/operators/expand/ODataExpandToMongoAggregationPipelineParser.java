@@ -120,47 +120,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
         graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
         if (eOption.getFilterOption() != null) {
-          // TODO Filter children which parent didn't pass conditions set by the $filter operator
           pipeline.add(
-              new Document(
-                  "$set",
-                  new Document(
-                      navProp.getName(),
-                      new Document(
-                          "$reduce",
-                          new Document("input", "$" + navProp.getName())
-                              .append("initialValue", List.of())
-                              .append(
-                                  "in",
-                                  new Document(
-                                      "$let",
-                                      new Document(
-                                              "vars",
-                                              new Document("current", "$$this")
-                                                  .append("acc", "$$value"))
-                                          .append(
-                                              "in",
-                                              new Document(
-                                                  "$cond",
-                                                  List.of(
-                                                      new Document(
-                                                          "$or",
-                                                          List.of(
-                                                              new Document(
-                                                                  "$eq",
-                                                                  List.of(
-                                                                      "$$current." + depthVariable,
-                                                                      0)),
-                                                              new Document(
-                                                                  "$in",
-                                                                  List.of(
-                                                                      "$$current." + mongoConnectTo,
-                                                                      "$$acc."
-                                                                          + mongoConnectFrom)))),
-                                                      new Document(
-                                                          "$concatArrays",
-                                                          List.of("$$acc", List.of("$$current"))),
-                                                      "$$acc")))))))));
+              prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
+                  navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
           // Removing the "depthVariable" property from results
           pipeline.add(new Document("$unset", navProp.getName() + "." + depthVariable));
         }
@@ -199,6 +161,69 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
     }
     return List.of();
+  }
+
+  /**
+   * Prepares a $set stage with a $reduce operator to filter out "orphan" documents from the result
+   * of a $graphLookup stage.
+   *
+   * <p>When $graphLookup is used with a $filter (via restrictSearchWithMatch), it might include
+   * documents that match the filter but are disconnected from the root because one of their
+   * ancestors was filtered out. This method generates a MongoDB aggregation stage that traverses
+   * the flat array of results and only keeps documents that have a valid path back to the root
+   * (depth 0).
+   *
+   * @param navProp the navigation property being expanded
+   * @param depthVariable the name of the field storing the recursion depth
+   * @param mongoConnectTo the field name used for the "connectToField" in $graphLookup
+   * @param mongoConnectFrom the field name used for the "connectFromField" in $graphLookup
+   * @return a BSON Document representing the $set stage
+   */
+  private static Document prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
+      EdmNavigationProperty navProp,
+      String depthVariable,
+      String mongoConnectTo,
+      String mongoConnectFrom) {
+    return new Document(
+        "$set",
+        new Document(
+            navProp.getName(),
+            new Document(
+                "$reduce",
+                new Document(
+                        "input",
+                        new Document(
+                            "$sortArray",
+                            new Document("input", "$" + navProp.getName())
+                                .append("sortBy", new Document(depthVariable, 1))))
+                    .append("initialValue", List.of())
+                    .append(
+                        "in",
+                        new Document(
+                            "$let",
+                            new Document(
+                                    "vars",
+                                    new Document("current", "$$this").append("acc", "$$value"))
+                                .append(
+                                    "in",
+                                    new Document(
+                                        "$cond",
+                                        List.of(
+                                            new Document(
+                                                "$or",
+                                                List.of(
+                                                    new Document(
+                                                        "$eq",
+                                                        List.of("$$current." + depthVariable, 0)),
+                                                    new Document(
+                                                        "$in",
+                                                        List.of(
+                                                            "$$current." + mongoConnectTo,
+                                                            "$$acc." + mongoConnectFrom)))),
+                                            new Document(
+                                                "$concatArrays",
+                                                List.of("$$acc", List.of("$$current"))),
+                                            "$$acc"))))))));
   }
 
   /**
