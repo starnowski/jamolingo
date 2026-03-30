@@ -101,8 +101,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                     }]
                                                     """,
             JSONCompareMode.LENIENT),
-        // Level with filters
-        // Filter with condition that TreeType2 grandfather and the child not, parent does not pass
+        // Filter with condition that TreeType1 grandfather and the child not, parent does not pass
         // condition.
         // Important! Because OData filters on the level context then because parent does not pass
         // condition then children should not be returned
@@ -110,7 +109,8 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // grandchild
         // TODO father does not match condition so array is empty
         // TODO child does not match condition then array contains only father
-        // TODO add first tests chase with filter that all documents pass
+
+        // Level with filters that condition pass for all children in the specified depth
         Arguments.of(
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (2, 3, 4))",
@@ -123,7 +123,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                              ]
                                                             }]
                                                             """,
-            JSONCompareMode.LENIENT));
+            JSONCompareMode.NON_EXTENSIBLE));
   }
 
   @Inject protected MongoClient mongoClient;
