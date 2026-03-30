@@ -103,6 +103,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .append("startWith", "$" + mongoStartWith)
                 .append("connectFromField", mongoConnectFrom)
                 .append("connectToField", mongoConnectTo)
+                .append("maxDepth", eOption.getLevelsOption().getValue())
                 .append("as", navProp.getName());
         String depthVariable = navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX;
         if (eOption.getFilterOption() != null) {
