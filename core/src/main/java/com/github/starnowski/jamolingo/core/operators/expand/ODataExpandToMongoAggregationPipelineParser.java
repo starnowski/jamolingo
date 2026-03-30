@@ -103,7 +103,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .append("startWith", "$" + mongoStartWith)
                 .append("connectFromField", mongoConnectFrom)
                 .append("connectToField", mongoConnectTo)
-                .append("maxDepth", eOption.getLevelsOption().getValue() - 1)
+                .append("maxDepth", translateODataExpandLevelsToGraphLookupMaxDepth(eOption))
                 .append("as", navProp.getName());
         String depthVariable = navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX;
         if (eOption.getFilterOption() != null) {
@@ -199,6 +199,19 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
     }
     return List.of();
+  }
+
+  /**
+   * Translates the OData $levels option value to the MongoDB $graphLookup maxDepth value.
+   *
+   * <p>OData $levels=1 corresponds to a maxDepth of 0 in MongoDB, as maxDepth 0 includes only the
+   * immediate related documents (one level of recursion).
+   *
+   * @param eOption the expand item containing the levels option
+   * @return the calculated maxDepth for $graphLookup
+   */
+  private int translateODataExpandLevelsToGraphLookupMaxDepth(ExpandItem eOption) {
+    return eOption.getLevelsOption().getValue() - 1;
   }
 
   private static class DefaultExpandOperatorResult implements ExpandOperatorResult {
