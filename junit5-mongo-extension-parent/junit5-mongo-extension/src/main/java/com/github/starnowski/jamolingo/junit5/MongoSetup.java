@@ -21,4 +21,11 @@ public @interface MongoSetup {
    * @return an array of {@link MongoDocument}
    */
   MongoDocument[] mongoDocuments();
+
+  /**
+   * Flag to indicate if documents should be inserted in batch mode.
+   *
+   * @return true if batch insertion is enabled, false otherwise
+   */
+  boolean batchInsertToCollection() default false;
 }

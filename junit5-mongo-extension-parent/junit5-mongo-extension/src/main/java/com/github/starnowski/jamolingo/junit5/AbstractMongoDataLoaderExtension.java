@@ -96,27 +96,62 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
                         });
               });
 
-      Arrays.stream(annotation.mongoDocuments())
-          .filter(an -> !an.bsonFilePath().trim().isEmpty())
-          .forEach(
-              an -> {
-                MongoCollection<Document> collection =
-                    mongoCollectionMap.get(new MongoCollectionKey(an.database(), an.collection()));
-                try {
-                  String bson =
-                      Files.readString(
-                          Paths.get(
-                              new File(
-                                      getClass()
-                                          .getClassLoader()
-                                          .getResource(an.bsonFilePath())
-                                          .getFile())
-                                  .getPath()));
-                  collection.insertOne(Document.parse(bson));
-                } catch (IOException e) {
-                  throw new RuntimeException(e);
-                }
-              });
+      Map<MongoCollectionKey, List<MongoDocument>> groupedDocuments =
+          Arrays.stream(annotation.mongoDocuments())
+              .filter(an -> !an.bsonFilePath().trim().isEmpty())
+              .collect(
+                  Collectors.groupingBy(
+                      an -> new MongoCollectionKey(an.database(), an.collection())));
+
+      if (annotation.batchInsertToCollection()) {
+        groupedDocuments.forEach(
+            (key, docs) -> {
+              MongoCollection<Document> collection = mongoCollectionMap.get(key);
+              List<Document> documentsToInsert =
+                  docs.stream()
+                      .map(
+                          an -> {
+                            try {
+                              String bson =
+                                  Files.readString(
+                                      Paths.get(
+                                          new File(
+                                                  getClass()
+                                                      .getClassLoader()
+                                                      .getResource(an.bsonFilePath())
+                                                      .getFile())
+                                              .getPath()));
+                              return Document.parse(bson);
+                            } catch (IOException e) {
+                              throw new RuntimeException(e);
+                            }
+                          })
+                      .collect(Collectors.toList());
+              collection.insertMany(documentsToInsert);
+            });
+      } else {
+        groupedDocuments.forEach(
+            (key, docs) -> {
+              MongoCollection<Document> collection = mongoCollectionMap.get(key);
+              docs.forEach(
+                  an -> {
+                    try {
+                      String bson =
+                          Files.readString(
+                              Paths.get(
+                                  new File(
+                                          getClass()
+                                              .getClassLoader()
+                                              .getResource(an.bsonFilePath())
+                                              .getFile())
+                                      .getPath()));
+                      collection.insertOne(Document.parse(bson));
+                    } catch (IOException e) {
+                      throw new RuntimeException(e);
+                    }
+                  });
+            });
+      }
     }
   }
 }
