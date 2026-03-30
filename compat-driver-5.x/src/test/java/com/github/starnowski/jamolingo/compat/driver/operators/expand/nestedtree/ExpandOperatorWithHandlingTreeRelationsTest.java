@@ -105,10 +105,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // condition.
         // Important! Because OData filters on the level context then because parent does not pass
         // condition then children should not be returned
-        // TODO Wrong tests case, it should be added to TreeType1 -> grandpa, father, child,
-        // grandchild
-        // TODO father does not match condition so array is empty
-        // TODO child does not match condition then array contains only father
 
         // Level with filters that condition pass for all children in the specified depth
         Arguments.of(
@@ -134,6 +130,19 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                                      "children": [
                                                                      { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 }
+                                                                     ]
+                                                                    }]
+                                                                    """,
+                    JSONCompareMode.NON_EXTENSIBLE),
+            // Level with filters that condition pass for document with id 3 and 4.
+            // Parent document with id 2 is not going to be returned in the list, that means that documents with ids
+            // 3 and 4 are not going to be returned. The children array should be empty
+            Arguments.of(
+                    Set.of(1),
+                    "$expand=children($levels=3;$filter=index in (3, 4))",
+                    """
+                                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                                     "children": [
                                                                      ]
                                                                     }]
                                                                     """,
