@@ -134,7 +134,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
   @ParameterizedTest
   @MethodSource("provideData")
   @MongoSetup(
-          batchInsertToCollection = true,
+      batchInsertToCollection = true,
       mongoDocuments = {
         @MongoDocument(
             database = "MyService",
