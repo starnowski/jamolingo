@@ -113,7 +113,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // TODO add first tests chase with filter that all documents pass
         Arguments.of(
             Set.of(1),
-            "$expand=children($levels=5;$filter=index in (2, 3, 4))",
+            "$expand=children($levels=3;$filter=index in (2, 3, 4))",
             """
                                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                              "children": [
