@@ -161,7 +161,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                                           "$concatArrays",
                                                           List.of("$$acc", List.of("$$current"))),
                                                       "$$acc")))))))));
-          // TODO remove the "depthVariable" property from results
+          // Removing the "depthVariable" property from results
+          pipeline.add(new Document("$unset", navProp.getName() + "." + depthVariable));
         }
         return pipeline;
       } else {
