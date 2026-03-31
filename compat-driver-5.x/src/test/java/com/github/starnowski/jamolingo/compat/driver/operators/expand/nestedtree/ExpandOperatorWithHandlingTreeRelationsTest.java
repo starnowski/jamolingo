@@ -57,7 +57,9 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             """
                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                      "category": { "_id": 1, "name": "Category 1" },
-                                     "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 }]
+                                     "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
+                                      { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 }
+                                     ]
                                     }]
                                     """,
             JSONCompareMode.LENIENT),
@@ -67,7 +69,8 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             """
                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                              "category": { "_id": 1, "name": "Category 1" },
-                                             "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 }],
+                                             "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
+                                              { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 }],
                                              "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
                                              { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
                                              { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
@@ -82,6 +85,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             """
                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                              "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
+                                             { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
                                              { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
                                              { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 }
                                              ]
@@ -190,6 +194,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             database = "MyService",
             collection = "TreeType1",
             bsonFilePath = "bson/expand/tree/t1_4.json"),
+        @MongoDocument(
+            database = "MyService",
+            collection = "TreeType1",
+            bsonFilePath = "bson/expand/tree/t1_5.json"),
         @MongoDocument(
             database = "MyService",
             collection = "TreeType2",
