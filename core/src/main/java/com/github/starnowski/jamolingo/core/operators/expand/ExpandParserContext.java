@@ -6,7 +6,11 @@ import java.util.Map;
 
 public interface ExpandParserContext {
 
+  Integer DEFAULT_MAX_LEVEL = 5;
+
   Map<String, EdmPropertyMongoPathResolver> getEDMTypeMapping();
 
   Map<KeyValue<String, String>, String> getEDMTablesToMongoDBCollections();
+
+  Integer getMaxLevel();
 }

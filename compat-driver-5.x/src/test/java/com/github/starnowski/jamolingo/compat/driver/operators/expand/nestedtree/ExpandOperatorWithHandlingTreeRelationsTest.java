@@ -94,11 +94,11 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                             }]
                                             """,
             JSONCompareMode.LENIENT),
-            // Level with max=5
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=children($levels=max)",
-                    """
+        // Level with max=5
+        Arguments.of(
+            Set.of(1),
+            "$expand=children($levels=max)",
+            """
                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                      "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
                                                      { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
@@ -109,8 +109,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                      ]
                                                     }]
                                                     """,
-                    JSONCompareMode.LENIENT)
-            ,
+            JSONCompareMode.LENIENT),
         // Level with filters
         // Filter with condition that TreeType2 grandfather and parent only pass, the child not
         Arguments.of(
