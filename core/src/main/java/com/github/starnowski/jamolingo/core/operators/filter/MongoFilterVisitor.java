@@ -878,7 +878,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 /*
                  * The all operator applies a Boolean expression to each member of a collection and returns true if the expression is true for all members of the collection, otherwise it returns false.
                  * This implies that the all operator always returns true for an empty collection.
-                 * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html?utm_source=chatgpt.com#sec_all
+                 * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html
                  */
                 new Document(
                     "$size", new Document("$ifNull", Arrays.asList(fieldReference, List.of())))
