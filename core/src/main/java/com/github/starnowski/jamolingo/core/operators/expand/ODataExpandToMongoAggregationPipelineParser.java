@@ -1,8 +1,12 @@
 package com.github.starnowski.jamolingo.core.operators.expand;
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
+import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
+import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
+import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
 import java.util.*;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
@@ -132,6 +136,30 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // Removing the "depthVariable" property from results
           pipeline.add(new Document("$unset", navProp.getName() + "." + depthVariable));
         }
+
+        if (eOption.getOrderByOption() != null) {
+          OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
+              new OdataOrderByToMongoSortParser();
+          EdmMongoContextFacade facade =
+              DefaultEdmMongoContextFacade.builder()
+                  .withEntityPropertiesMongoPathContext(null)
+                  .build();
+
+          OrderByOperatorResult orderByResult =
+              odataOrderByToMongoSortParser.parse(eOption.getOrderByOption(), facade);
+          Document sortDocument =
+              (Document) ((Document) orderByResult.getStageObjects().get(0)).get("$sort");
+
+          pipeline.add(
+              new Document(
+                  "$set",
+                  new Document(
+                      navProp.getName(),
+                      new Document(
+                          "$sortArray",
+                          new Document("input", "$" + navProp.getName())
+                              .append("sortBy", sortDocument)))));
+        }
         return pipeline;
       } else {
         // Adding $lookup
@@ -142,13 +170,28 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .append("localField", mongoStartWith)
                 .append("foreignField", mongoConnectTo);
 
-        if (eOption.getFilterOption() != null) {
+        if (eOption.getFilterOption() != null || eOption.getOrderByOption() != null) {
           ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
               new ODataFilterToMongoMatchParser();
+          OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
+              new OdataOrderByToMongoSortParser();
+          EdmMongoContextFacade facade =
+              DefaultEdmMongoContextFacade.builder()
+                  .withEntityPropertiesMongoPathContext(null)
+                  .build();
+
           // $lookup with pipeline
-          List<Bson> lookupPipeline =
-              new ArrayList<>(
-                  oDataFilterToMongoMatchParser.parse(eOption.getFilterOption()).getStageObjects());
+          List<Bson> lookupPipeline = new ArrayList<>();
+          if (eOption.getFilterOption() != null) {
+            lookupPipeline.addAll(
+                oDataFilterToMongoMatchParser.parse(eOption.getFilterOption()).getStageObjects());
+          }
+          if (eOption.getOrderByOption() != null) {
+            lookupPipeline.addAll(
+                odataOrderByToMongoSortParser
+                    .parse(eOption.getOrderByOption(), facade)
+                    .getStageObjects());
+          }
           lookupInnerObject.append("pipeline", lookupPipeline);
         }
         lookupInnerObject.append("as", navProp.getName());
