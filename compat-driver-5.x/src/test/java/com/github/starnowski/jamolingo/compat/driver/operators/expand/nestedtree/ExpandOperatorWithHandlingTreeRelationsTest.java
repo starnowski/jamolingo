@@ -150,7 +150,8 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
     );
   }
 
-  // TODO Add tests that contains the depth level property
+  // TODO Add tests that contains the depth level property, that property is rendred with document and can be used to
+  // create response that compatible with OData specification which is tree structure and not the flat array.
 
   @Inject protected MongoClient mongoClient;
 
