@@ -120,38 +120,41 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                             }]
                                                             """,
             JSONCompareMode.NON_EXTENSIBLE),
-            // Level with filters that condition pass for document with id 2 and 4, which means that 4 is not going be
-            // returned in array because it parent document with id 3 does not pass condition.
-            // Parent document with id 3 is not going to be returned in the list
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=children($levels=3;$filter=index in (2, 4))",
-                    """
+        // Level with filters that condition pass for document with id 2 and 4, which means that 4
+        // is not going be
+        // returned in array because it parent document with id 3 does not pass condition.
+        // Parent document with id 3 is not going to be returned in the list
+        Arguments.of(
+            Set.of(1),
+            "$expand=children($levels=3;$filter=index in (2, 4))",
+            """
                                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                                      "children": [
                                                                      { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 }
                                                                      ]
                                                                     }]
                                                                     """,
-                    JSONCompareMode.NON_EXTENSIBLE),
-            // Level with filters that condition pass for document with id 3 and 4.
-            // Parent document with id 2 is not going to be returned in the list, that means that documents with ids
-            // 3 and 4 are not going to be returned. The children array should be empty
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=children($levels=3;$filter=index in (3, 4))",
-                    """
+            JSONCompareMode.NON_EXTENSIBLE),
+        // Level with filters that condition pass for document with id 3 and 4.
+        // Parent document with id 2 is not going to be returned in the list, that means that
+        // documents with ids
+        // 3 and 4 are not going to be returned. The children array should be empty
+        Arguments.of(
+            Set.of(1),
+            "$expand=children($levels=3;$filter=index in (3, 4))",
+            """
                                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                                      "children": [
                                                                      ]
                                                                     }]
                                                                     """,
-                    JSONCompareMode.NON_EXTENSIBLE)
-    );
+            JSONCompareMode.NON_EXTENSIBLE));
   }
 
-  // TODO Add tests that contains the depth level property, that property is rendred with document and can be used to
-  // create response that compatible with OData specification which is tree structure and not the flat array.
+  // TODO Add tests that contains the depth level property, that property is rendred with document
+  // and can be used to
+  // create response that compatible with OData specification which is tree structure and not the
+  // flat array.
 
   @Inject protected MongoClient mongoClient;
 

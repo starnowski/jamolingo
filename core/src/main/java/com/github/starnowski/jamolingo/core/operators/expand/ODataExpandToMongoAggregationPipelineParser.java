@@ -95,6 +95,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       List<Bson> pipeline = new ArrayList<>();
 
       if (eOption.getLevelsOption() != null && eOption.getLevelsOption().getValue() > 1) {
+        // TODO Check approach with executing the nested $lookup stages (based on the levels value)
         // Adding $graphLookup
         Document graphLookup = new Document();
         Document graphLookupInnerObject =
