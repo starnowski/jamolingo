@@ -87,7 +87,9 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                              "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
                                              { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
                                              { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                             { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 }
+                                             { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
+                                             { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
+                                             { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 }
                                              ]
                                             }]
                                             """,
@@ -198,6 +200,18 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             database = "MyService",
             collection = "TreeType1",
             bsonFilePath = "bson/expand/tree/t1_5.json"),
+        @MongoDocument(
+            database = "MyService",
+            collection = "TreeType1",
+            bsonFilePath = "bson/expand/tree/t1_6.json"),
+        @MongoDocument(
+            database = "MyService",
+            collection = "TreeType1",
+            bsonFilePath = "bson/expand/tree/t1_7.json"),
+        @MongoDocument(
+            database = "MyService",
+            collection = "TreeType1",
+            bsonFilePath = "bson/expand/tree/t1_8.json"),
         @MongoDocument(
             database = "MyService",
             collection = "TreeType2",
