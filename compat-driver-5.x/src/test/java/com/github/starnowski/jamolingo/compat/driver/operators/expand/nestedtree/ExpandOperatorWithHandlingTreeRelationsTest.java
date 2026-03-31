@@ -204,11 +204,11 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                     }]
                                                                     """,
             JSONCompareMode.NON_EXTENSIBLE),
-            // Level with max=5 with asc ordering by index
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=children($levels=max;$orderby=index asc)",
-                    """
+        // Level with max=5 with asc ordering by index
+        Arguments.of(
+            Set.of(1),
+            "$expand=children($levels=max;$orderby=index asc)",
+            """
                                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                              "children": [
                                                              { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
@@ -220,12 +220,12 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                              ]
                                                             }]
                                                             """,
-                    JSONCompareMode.STRICT_ORDER),
-            // Level with max=5 with asc ordering by index
-            Arguments.of(
-                    Set.of(1),
-                    "$expand=children($levels=max;$orderby=index desc)",
-                    """
+            JSONCompareMode.STRICT_ORDER),
+        // Level with max=5 with asc ordering by index
+        Arguments.of(
+            Set.of(1),
+            "$expand=children($levels=max;$orderby=index desc)",
+            """
                                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                              "children": [
                                                              { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 },
@@ -237,8 +237,35 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                              ]
                                                             }]
                                                             """,
-                    JSONCompareMode.STRICT_ORDER)
-    );
+            JSONCompareMode.STRICT_ORDER),
+        // Expand level handle by $lookup stage and order by index with asc order
+        Arguments.of(
+            Set.of(1),
+            "$expand=treeType2s($orderby=index asc)",
+            """
+                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                     "treeType2s": [
+                                                     { "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
+                                                     ]
+                                                    }]
+                                                    """,
+            JSONCompareMode.STRICT_ORDER),
+        // Expand level handle by $lookup stage and order by index with desc order
+        Arguments.of(
+            Set.of(1),
+            "$expand=treeType2s($orderby=index desc)",
+            """
+                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                     "treeType2s": [
+                                                     { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 },
+                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 }
+                                                     ]
+                                                    }]
+                                                    """,
+            JSONCompareMode.STRICT_ORDER));
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document
