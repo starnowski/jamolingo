@@ -306,7 +306,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                             {
                               $concatArrays: [
                               "$$value",
-                                  [{ %4$s: "$$this.%4$s", %3$s: "$$this.%3$s", $%2$s: ["$$this"] }]
+                                  [{ %4$s: "$$this.%4$s", %3$s: "$$this.%3$s", %2$s: ["$$this"] }]
                                 ]
                             },
                             {
@@ -318,7 +318,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                   { $eq: ["$$bucket.%4$s", "$$this.%4$s"] },
                                   {
                                     %4$s: "$$bucket.%4$s",
-                                            $%2$s: { $concatArrays: ["$$bucket.%2$s", ["$$this"]] }
+                                            %2$s: { $concatArrays: ["$$bucket.%2$s", ["$$this"]] }
                                   },
                                   "$$bucket"
                                     ]
