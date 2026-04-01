@@ -6,7 +6,7 @@ Based on your analyzis add markdown file that is going in the same directory as
 the com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTest java tests type.
 The file should have name documents-relations.md.
 <rules>
-- File should contains current date of moficiation/createion with format YYYY-MM-DD:HH:MM:SS
+- File should contains current date of moficiation/creation with format YYYY-MM-DD:HH:MM:SS
 - File should contains a tree representation for the entity sets like TreeType1, TreeType2, TreeType2, TreeType3
 - A rendered tree representation should always start from the root document
 - File should contains a relation between different enitty types
@@ -14,7 +14,7 @@ The file should have name documents-relations.md.
 
 <example>
 ## Date
-Date: 2026-04-01:21:12:03
+Date: {{Date in format YYYY-MM-DD:HH:MM:SS}}
 
 ## TreeType1 tree:
     TreeType1(_id=1)
