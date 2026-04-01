@@ -315,10 +315,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                         as: "bucket",
                                         in: {
                                   $cond: [
-                                  { $eq: ["$$bucket.$$this.%4$s", "$$this.$$this.%4$s"] },
+                                  { $eq: ["$$bucket.%4$s", "$$this.%4$s"] },
                                   {
                                     %4$s: "$$bucket.%4$s",
-                                            $%2$s: { $concatArrays: ["$$bucket.$%2$s", ["$$this"]] }
+                                            $%2$s: { $concatArrays: ["$$bucket.%2$s", ["$$this"]] }
                                   },
                                   "$$bucket"
                                     ]
