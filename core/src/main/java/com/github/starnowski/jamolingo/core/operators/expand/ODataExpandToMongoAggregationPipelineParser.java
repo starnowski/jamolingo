@@ -25,7 +25,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
   public static final String ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX =
       "_odata_graphlookup_depth_variable";
   public static final String ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX =
-          "_odata_graphlookup_tmp_array";
+      "_odata_graphlookup_tmp_array";
 
   public ExpandOperatorResult parse(ExpandOption expandOption)
       throws ExpressionVisitException, ODataApplicationException {
@@ -138,6 +138,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
         }
 
+        Document sortDocument = null;
         if (eOption.getOrderByOption() != null) {
           OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
               new OdataOrderByToMongoSortParser();
@@ -148,7 +149,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
           OrderByOperatorResult orderByResult =
               odataOrderByToMongoSortParser.parse(eOption.getOrderByOption(), facade);
-          Document sortDocument =
+          sortDocument =
               (Document) ((Document) orderByResult.getStageObjects().get(0)).get("$sort");
 
           pipeline.add(
@@ -162,7 +163,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
                               .append("sortBy", sortDocument)))));
         }
         if (eOption.getTopOption() != null) {
-          pipeline.add(prepareArrayWithChildrenArrayGroupByParentAndLevel(navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
+          pipeline.add(
+              prepareArrayWithChildrenArrayGroupByParentAndLevel(
+                  navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
+          if (eOption.getOrderByOption() != null) {
+            pipeline.add(prepareArrayWithSortedChildrenArray(navProp, sortDocument));
+          }
         }
         if (removeDepthProperty) {
           // Removing the "depthVariable" property from results
@@ -282,12 +288,14 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                             "$$acc"))))))));
   }
 
-  private static Document prepareArrayWithChildrenArrayGroupByParentAndLevel(EdmNavigationProperty navProp,
-                                                                             String depthVariable,
-                                                                             String mongoConnectTo,
-                                                                             String mongoConnectFrom) {
+  private static Document prepareArrayWithChildrenArrayGroupByParentAndLevel(
+      EdmNavigationProperty navProp,
+      String depthVariable,
+      String mongoConnectTo,
+      String mongoConnectFrom) {
 
-    return Document.parse("""
+    return Document.parse(
+        """
             {
               $set: {
                   %1$s: {
@@ -332,7 +340,47 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   }
                 }
               }
-            """.formatted(navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX, navProp.getName(), depthVariable, mongoConnectTo));
+            """
+            .formatted(
+                navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
+                navProp.getName(),
+                depthVariable,
+                mongoConnectTo));
+  }
+
+  private static Document prepareArrayWithSortedChildrenArray(
+      EdmNavigationProperty navProp, Document sortObject) {
+
+    return Document.parse(
+        """
+            {
+                $set: {
+                  %1$s: {
+                    $map: {
+                      input: "$%1$s",
+                      as: "item",
+                      in: {
+                        $mergeObjects: [
+                                  "$$item",
+                                  {
+                                    %2$s: {
+                                      $sortArray: {
+                                        input: "$$item.%2$s",
+                                        sortBy: %3$s
+                                      }
+                                    }
+                                  }
+                                ]
+                      }
+                    }
+                  }
+                }
+              }
+            """
+            .formatted(
+                navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
+                navProp.getName(),
+                sortObject.toJson()));
   }
 
   /**

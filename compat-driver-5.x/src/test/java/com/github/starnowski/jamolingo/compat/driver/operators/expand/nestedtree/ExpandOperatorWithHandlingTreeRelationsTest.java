@@ -433,10 +433,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                     }]
                                                     """,
             JSONCompareMode.STRICT_ORDER),
-            Arguments.of(
-                    Set.of(10),
-                    "$expand=children($levels=max)",
-                    """
+        Arguments.of(
+            Set.of(10),
+            "$expand=children($levels=max)",
+            """
                             [
                             		{
                             			"_id": 10,
@@ -532,11 +532,11 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             		}
                             	]
                             """,
-                    JSONCompareMode.NON_EXTENSIBLE),
-            Arguments.of(
-                    Set.of(10),
-                    "$expand=children($levels=max;$top=2;$orderby=index asc)",
-                    """
+            JSONCompareMode.NON_EXTENSIBLE),
+        Arguments.of(
+            Set.of(10),
+            "$expand=children($levels=max;$top=2;$orderby=index asc)",
+            """
                             [
                             		{
                             			"_id": 10,
@@ -596,9 +596,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             		}
                             	]
                             """,
-                    JSONCompareMode.STRICT_ORDER)
-
-    );
+            JSONCompareMode.STRICT_ORDER));
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document
@@ -644,13 +642,13 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         """
             {"value": %s }
             """.formatted(expectedJson),
-            currentResult,
+        currentResult,
         jsonCompareMode);
   }
 
-    private Document wrapBsonList(List<Bson> docs) {
-        return new Document("value", docs);
-    }
+  private Document wrapBsonList(List<Bson> docs) {
+    return new Document("value", docs);
+  }
 
   private Document wrapDocumentsList(List<Document> docs) {
     return new Document("value", docs);
