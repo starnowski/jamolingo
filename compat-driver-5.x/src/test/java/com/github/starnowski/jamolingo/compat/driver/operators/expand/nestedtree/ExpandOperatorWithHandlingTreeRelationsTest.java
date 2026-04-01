@@ -34,6 +34,113 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+// TODO Change approach, by default the default component is going to write to the collection with
+// name MyService.Category.
+// TODO The "MyService" prefix is not a name of database, it just prefix for the collection name
+@MongoSetup(
+    batchInsertToCollection = true,
+    mongoDocuments = {
+      @MongoDocument(
+          database = "MyService",
+          collection = "Category",
+          bsonFilePath = "bson/expand/tree/category1.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "Category",
+          bsonFilePath = "bson/expand/tree/category2.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_1.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_2.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_3.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_4.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_5.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_6.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_7.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_8.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType2",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_1.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType2",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_2.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType2",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_3.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType2",
+          bsonFilePath = "bson/expand/tree/t1_2_t2_4.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType2",
+          bsonFilePath = "bson/expand/tree/t1_2_t2_5.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType2",
+          bsonFilePath = "bson/expand/tree/t1_2_t2_6.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType3",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType3",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_2.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType3",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_3.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType3",
+          bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_4.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType3",
+          bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_5.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType3",
+          bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_6.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType4",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_1.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType4",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_2.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType4",
+          bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_3.json")
+    })
 @QuarkusTest
 @QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
 public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest {
@@ -275,115 +382,8 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
 
   @Inject protected MongoClient mongoClient;
 
-  // TODO Change approach, by default the default component is going to write to the collection with
-  // name MyService.Category.
-  // TODO The "MyService" prefix is not a name of database, it just prefix for the collection name
   @ParameterizedTest
   @MethodSource("provideData")
-  @MongoSetup(
-      batchInsertToCollection = true,
-      mongoDocuments = {
-        @MongoDocument(
-            database = "MyService",
-            collection = "Category",
-            bsonFilePath = "bson/expand/tree/category1.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "Category",
-            bsonFilePath = "bson/expand/tree/category2.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType1",
-            bsonFilePath = "bson/expand/tree/t1_1.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType1",
-            bsonFilePath = "bson/expand/tree/t1_2.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType1",
-            bsonFilePath = "bson/expand/tree/t1_3.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType1",
-            bsonFilePath = "bson/expand/tree/t1_4.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType1",
-            bsonFilePath = "bson/expand/tree/t1_5.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType1",
-            bsonFilePath = "bson/expand/tree/t1_6.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType1",
-            bsonFilePath = "bson/expand/tree/t1_7.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType1",
-            bsonFilePath = "bson/expand/tree/t1_8.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType2",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_1.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType2",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_2.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType2",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_3.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType2",
-            bsonFilePath = "bson/expand/tree/t1_2_t2_4.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType2",
-            bsonFilePath = "bson/expand/tree/t1_2_t2_5.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType2",
-            bsonFilePath = "bson/expand/tree/t1_2_t2_6.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType3",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType3",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_2.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType3",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_3.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType3",
-            bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_4.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType3",
-            bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_5.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType3",
-            bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_6.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType4",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_1.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType4",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_2.json"),
-        @MongoDocument(
-            database = "MyService",
-            collection = "TreeType4",
-            bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_3.json")
-      })
   public void shouldReturnExpectedDocumentsForExpandOperator(
       Set<Integer> ids, String expandPart, String expectedJson, JSONCompareMode jsonCompareMode)
       throws UriValidationException,
