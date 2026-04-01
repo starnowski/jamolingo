@@ -636,6 +636,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
     pipeline.addAll(result.getStageObjects());
+    System.out.println(wrapBsonList(pipeline).toJson());
     List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
     String currentResult = wrapDocumentsList(results).toJson();
     System.out.println(currentResult);
@@ -646,6 +647,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             currentResult,
         jsonCompareMode);
   }
+
+    private Document wrapBsonList(List<Bson> docs) {
+        return new Document("value", docs);
+    }
 
   private Document wrapDocumentsList(List<Document> docs) {
     return new Document("value", docs);

@@ -24,6 +24,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
   public static final String ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX =
       "_odata_graphlookup_depth_variable";
+  public static final String ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX =
+          "_odata_graphlookup_tmp_array";
 
   public ExpandOperatorResult parse(ExpandOption expandOption)
       throws ExpressionVisitException, ODataApplicationException {
@@ -129,12 +131,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
         }
         graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
+        boolean removeDepthProperty = false;
         if (eOption.getFilterOption() != null) {
           pipeline.add(
               prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
                   navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
-          // Removing the "depthVariable" property from results
-          pipeline.add(new Document("$unset", navProp.getName() + "." + depthVariable));
+          removeDepthProperty = true;
         }
 
         if (eOption.getOrderByOption() != null) {
@@ -159,6 +161,13 @@ public class ODataExpandToMongoAggregationPipelineParser {
                           "$sortArray",
                           new Document("input", "$" + navProp.getName())
                               .append("sortBy", sortDocument)))));
+        }
+        if (eOption.getTopOption() != null) {
+          pipeline.add(prepareArrayWithChildrenArrayGroupByParentAndLevel(navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
+        }
+        if (removeDepthProperty) {
+          // Removing the "depthVariable" property from results
+          pipeline.add(new Document("$unset", navProp.getName() + "." + depthVariable));
         }
         return pipeline;
       } else {
@@ -272,6 +281,59 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                                 "$concatArrays",
                                                 List.of("$$acc", List.of("$$current"))),
                                             "$$acc"))))))));
+  }
+
+  private static Document prepareArrayWithChildrenArrayGroupByParentAndLevel(EdmNavigationProperty navProp,
+                                                                             String depthVariable,
+                                                                             String mongoConnectTo,
+                                                                             String mongoConnectFrom) {
+
+    return Document.parse("""
+            {
+              $set: {
+                  %1$s: {
+                    $reduce: {
+                      input: "$%2$s",
+                              initialValue: [],
+                      in: {
+                        $let: {
+                          vars: {
+                            index: { $indexOfArray: ["$$value.%4$s", "$$this.%4$s"] }
+                          },
+                          in: {
+                            $cond: [
+                            { $eq: ["$$index", -1] },
+                            {
+                              $concatArrays: [
+                              "$$value",
+                                  [{ %4$s: "$$this.%4$s", %3$s: "$$this.%3$s", $%2$s: ["$$this"] }]
+                                ]
+                            },
+                            {
+                              $map: {
+                                input: "$$value",
+                                        as: "bucket",
+                                        in: {
+                                  $cond: [
+                                  { $eq: ["$$bucket.$$this.%4$s", "$$this.$$this.%4$s"] },
+                                  {
+                                    %4$s: "$$bucket.%4$s",
+                                            $%2$s: { $concatArrays: ["$$bucket.$%2$s", ["$$this"]] }
+                                  },
+                                  "$$bucket"
+                                    ]
+                                }
+                              }
+                            }
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            """.formatted(navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX, navProp.getName(), depthVariable, mongoConnectTo));
   }
 
   /**
