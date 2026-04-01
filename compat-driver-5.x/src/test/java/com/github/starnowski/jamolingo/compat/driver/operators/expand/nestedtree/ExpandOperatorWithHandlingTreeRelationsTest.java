@@ -82,6 +82,66 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
           bsonFilePath = "bson/expand/tree/t1_8.json"),
       @MongoDocument(
           database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_10.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_11_p_t1_10.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_12_p_t1_10.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_13_p_t1_10.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_14_p_t1_11.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_15_p_t1_11.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_16_p_t1_11.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_17_p_t1_12.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_18_p_t1_12.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_19_p_t1_12.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_20_p_t1_13.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_21_p_t1_14.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_22_p_t1_14.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_23_p_t1_14.json"),
+      @MongoDocument(
+          database = "MyService",
+          collection = "TreeType1",
+          bsonFilePath = "bson/expand/tree/t1_24_p_t1_14.json"),
+      @MongoDocument(
+          database = "MyService",
           collection = "TreeType2",
           bsonFilePath = "bson/expand/tree/t1_1_t2_1.json"),
       @MongoDocument(
@@ -377,17 +437,101 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     Set.of(10),
                     "$expand=children($levels=max;$orderby=index desc)",
                     """
-                                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                                                     "children": [
-                                                                     { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 },
-                                                                     { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-                                                                     { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
-                                                                     { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-                                                                     { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 }
-                                                                     ]
-                                                                    }]
-                                                                    """,
+                            [
+                            		{
+                            			"_id": 10,
+                            			"index": 10,
+                            			"parentId": null,
+                            			"categoryId": 1,
+                            			"children": [
+                            				{
+                            					"_id": 24,
+                            					"index": 24,
+                            					"parentId": 14,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 23,
+                            					"index": 23,
+                            					"parentId": 14,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 22,
+                            					"index": 22,
+                            					"parentId": 14,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 21,
+                            					"index": 21,
+                            					"parentId": 14,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 20,
+                            					"index": 20,
+                            					"parentId": 13,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 19,
+                            					"index": 19,
+                            					"parentId": 12,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 18,
+                            					"index": 18,
+                            					"parentId": 12,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 17,
+                            					"index": 17,
+                            					"parentId": 12,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 16,
+                            					"index": 16,
+                            					"parentId": 11,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 15,
+                            					"index": 15,
+                            					"parentId": 11,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 14,
+                            					"index": 14,
+                            					"parentId": 11,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 13,
+                            					"index": 13,
+                            					"parentId": 10,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 12,
+                            					"index": 12,
+                            					"parentId": 10,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 11,
+                            					"index": 11,
+                            					"parentId": 10,
+                            					"categoryId": 1
+                            				}
+                            			]
+                            		}
+                            	]
+                            """,
                     JSONCompareMode.STRICT_ORDER));
   }
 
