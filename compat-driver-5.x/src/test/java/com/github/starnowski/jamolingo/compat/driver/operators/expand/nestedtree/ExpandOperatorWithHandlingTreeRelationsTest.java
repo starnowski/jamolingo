@@ -535,7 +535,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     JSONCompareMode.NON_EXTENSIBLE),
             Arguments.of(
                     Set.of(10),
-                    "$expand=children($levels=max;$top=2)",
+                    "$expand=children($levels=max;$top=2;$orderby=index asc)",
                     """
                             [
                             		{
@@ -545,74 +545,8 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             			"categoryId": 1,
                             			"children": [
                             				{
-                            					"_id": 24,
-                            					"index": 24,
-                            					"parentId": 14,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 23,
-                            					"index": 23,
-                            					"parentId": 14,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 22,
-                            					"index": 22,
-                            					"parentId": 14,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 21,
-                            					"index": 21,
-                            					"parentId": 14,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 20,
-                            					"index": 20,
-                            					"parentId": 13,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 19,
-                            					"index": 19,
-                            					"parentId": 12,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 18,
-                            					"index": 18,
-                            					"parentId": 12,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 17,
-                            					"index": 17,
-                            					"parentId": 12,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 16,
-                            					"index": 16,
-                            					"parentId": 11,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 15,
-                            					"index": 15,
-                            					"parentId": 11,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 14,
-                            					"index": 14,
-                            					"parentId": 11,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 13,
-                            					"index": 13,
+                            					"_id": 11,
+                            					"index": 11,
                             					"parentId": 10,
                             					"categoryId": 1
                             				},
@@ -623,9 +557,75 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             					"categoryId": 1
                             				},
                             				{
-                            					"_id": 11,
-                            					"index": 11,
+                            					"_id": 13,
+                            					"index": 13,
                             					"parentId": 10,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 14,
+                            					"index": 14,
+                            					"parentId": 11,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 15,
+                            					"index": 15,
+                            					"parentId": 11,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 16,
+                            					"index": 16,
+                            					"parentId": 11,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 17,
+                            					"index": 17,
+                            					"parentId": 12,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 18,
+                            					"index": 18,
+                            					"parentId": 12,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 19,
+                            					"index": 19,
+                            					"parentId": 12,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 20,
+                            					"index": 20,
+                            					"parentId": 13,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 21,
+                            					"index": 21,
+                            					"parentId": 14,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 22,
+                            					"index": 22,
+                            					"parentId": 14,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 23,
+                            					"index": 23,
+                            					"parentId": 14,
+                            					"categoryId": 1
+                            				},
+                            				{
+                            					"_id": 24,
+                            					"index": 24,
+                            					"parentId": 14,
                             					"categoryId": 1
                             				}
                             			]
