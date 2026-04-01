@@ -127,16 +127,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
               oDataFilterToMongoMatchParser
                   .parseQueryObject(eOption.getFilterOption())
                   .getQueryObject());
-          graphLookupInnerObject.append("depthField", depthVariable);
         }
+        graphLookupInnerObject.append("depthField", depthVariable);
         graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
-        boolean removeDepthProperty = false;
+        boolean removeDepthProperty = true;
         if (eOption.getFilterOption() != null) {
           pipeline.add(
               prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
                   navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
-          removeDepthProperty = true;
         }
 
         if (eOption.getOrderByOption() != null) {
