@@ -557,12 +557,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             					"categoryId": 1
                             				},
                             				{
-                            					"_id": 13,
-                            					"index": 13,
-                            					"parentId": 10,
-                            					"categoryId": 1
-                            				},
-                            				{
                             					"_id": 14,
                             					"index": 14,
                             					"parentId": 11,
@@ -571,12 +565,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             				{
                             					"_id": 15,
                             					"index": 15,
-                            					"parentId": 11,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 16,
-                            					"index": 16,
                             					"parentId": 11,
                             					"categoryId": 1
                             				},
@@ -593,18 +581,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             					"categoryId": 1
                             				},
                             				{
-                            					"_id": 19,
-                            					"index": 19,
-                            					"parentId": 12,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 20,
-                            					"index": 20,
-                            					"parentId": 13,
-                            					"categoryId": 1
-                            				},
-                            				{
                             					"_id": 21,
                             					"index": 21,
                             					"parentId": 14,
@@ -613,18 +589,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             				{
                             					"_id": 22,
                             					"index": 22,
-                            					"parentId": 14,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 23,
-                            					"index": 23,
-                            					"parentId": 14,
-                            					"categoryId": 1
-                            				},
-                            				{
-                            					"_id": 24,
-                            					"index": 24,
                             					"parentId": 14,
                             					"categoryId": 1
                             				}
