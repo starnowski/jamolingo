@@ -162,13 +162,18 @@ public class ODataExpandToMongoAggregationPipelineParser {
                           new Document("input", "$" + navProp.getName())
                               .append("sortBy", sortDocument)))));
         }
-        if (eOption.getTopOption() != null) {
+        if (eOption.getTopOption() != null || eOption.getSkipOption() != null) {
           pipeline.add(
               prepareArrayWithChildrenArrayGroupByParentAndLevel(
                   navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
           if (eOption.getOrderByOption() != null) {
             pipeline.add(prepareArrayWithSortedChildrenArray(navProp, sortDocument));
           }
+          pipeline.add(
+              prepareArrayWithSkippedAndLimitedChildrenArray(
+                  navProp,
+                  eOption.getSkipOption() == null ? null : eOption.getSkipOption().getValue(),
+                  eOption.getTopOption() == null ? null : eOption.getTopOption().getValue()));
         }
         if (removeDepthProperty) {
           // Removing the "depthVariable" property from results
@@ -381,6 +386,47 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
                 navProp.getName(),
                 sortObject.toJson()));
+  }
+
+  private static Document prepareArrayWithSkippedAndLimitedChildrenArray(
+      EdmNavigationProperty navProp, Integer skip, Integer top) {
+
+    return Document.parse(
+        """
+                {
+                    $set: {
+                      %1$s: {
+                        $map: {
+                          input: "$%1$s",
+                          as: "item",
+                          in: {
+                            $mergeObjects: [
+                                      "$$item",
+                                      {
+                                        %2$s: {
+                                          $slice: [
+                                            "$$item.%2$s",
+                                            %3$s,
+                                            %4$s
+                                          ]
+                                        }
+                                      }
+                                    ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                """
+            .formatted(
+                navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
+                navProp.getName(),
+                skip == null ? 0 : skip,
+                top == null
+                    ? """
+                                    { $size: "$$item.%2$s" }
+                                    """
+                    : top));
   }
 
   /**
