@@ -175,6 +175,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   eOption.getSkipOption() == null ? null : eOption.getSkipOption().getValue(),
                   eOption.getTopOption() == null ? null : eOption.getTopOption().getValue()));
           pipeline.add(prepareFlatterArrayBasedOnChildrenArray(navProp));
+          pipeline.add(
+              new Document(
+                  "$set",
+                  new Document(
+                      navProp.getName(),
+                      "$" + navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX)));
+          pipeline.add(
+              prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
+                  navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
         }
         if (removeDepthProperty) {
           // Removing the "depthVariable" property from results
@@ -430,11 +439,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     : top));
   }
 
-  private static Document prepareFlatterArrayBasedOnChildrenArray(
-          EdmNavigationProperty navProp) {
+  private static Document prepareFlatterArrayBasedOnChildrenArray(EdmNavigationProperty navProp) {
 
     return Document.parse(
-            """
+        """
                     {
                         $set: {
                           %1$s: {
@@ -449,8 +457,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                         }
                      }
                     """
-                    .formatted(navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
-                            navProp.getName()));
+            .formatted(
+                navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX, navProp.getName()));
   }
 
   /**
