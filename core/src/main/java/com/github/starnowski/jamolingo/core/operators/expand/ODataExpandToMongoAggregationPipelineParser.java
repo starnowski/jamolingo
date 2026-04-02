@@ -174,6 +174,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   navProp,
                   eOption.getSkipOption() == null ? null : eOption.getSkipOption().getValue(),
                   eOption.getTopOption() == null ? null : eOption.getTopOption().getValue()));
+          pipeline.add(prepareFlatterArrayBasedOnChildrenArray(navProp));
         }
         if (removeDepthProperty) {
           // Removing the "depthVariable" property from results
@@ -427,6 +428,29 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                     { $size: "$$item.%2$s" }
                                     """
                     : top));
+  }
+
+  private static Document prepareFlatterArrayBasedOnChildrenArray(
+          EdmNavigationProperty navProp) {
+
+    return Document.parse(
+            """
+                    {
+                        $set: {
+                          %1$s: {
+                            $reduce: {
+                                    input: "$%1$s",
+                                    initialValue: [],
+                                    in: {
+                                      $concatArrays: ["$$value", "$$this.%2$s"]
+                                    }
+                            }
+                          }
+                        }
+                     }
+                    """
+                    .formatted(navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
+                            navProp.getName()));
   }
 
   /**
