@@ -24,6 +24,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
   public static final String ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX =
       "_odata_graphlookup_depth_variable";
+  // TODO try to remove temporary array
   public static final String ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX =
       "_odata_graphlookup_tmp_array";
 
@@ -184,6 +185,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           pipeline.add(
               prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
                   navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
+          pipeline.add(
+              new Document("$unset", navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX));
         }
         if (removeDepthProperty) {
           // Removing the "depthVariable" property from results
