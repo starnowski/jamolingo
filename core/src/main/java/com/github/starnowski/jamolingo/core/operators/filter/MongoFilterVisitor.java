@@ -974,33 +974,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return List.of(prepareElementMatchDocumentForAllLambda(innerPart, field, true));
   }
 
-  private String resolveMongoPathForMember(Member member) {
-    if (edmPropertyMongoPathResolver != null) {
-      MongoPathResolution result =
-          edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
-              context.resolveFullEdmPathForMember(member));
-      String full = result.getMongoPath();
-      if (member.getResourcePath().getUriResourceParts().get(0)
-          instanceof UriResourceLambdaVariable) {
-        UriResourceLambdaVariable variable =
-            (UriResourceLambdaVariable) member.getResourcePath().getUriResourceParts().get(0);
-        String lambdaPath =
-            this.context
-                .resolveFullPathForLambdaVariable(variable.getVariableName())
-                .replace(".", "/");
-        MongoPathResolution lambdaMongoPath =
-            edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
-        return full.substring(lambdaMongoPath.getMongoPath().length() + 1);
-      }
-      return full;
-      // TODO
-      // if no lambda variable then take the whole path
-      // if any lambda variable then (memberFullPath - lambdaPath) set as finalPath
-    }
-    // TODO resolve Member
-    return null;
-  }
-
   private String resolvePropertyTypeBasedOnMember(Member member) {
     return member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceProperty
         ? ((UriResourceProperty) member.getResourcePath().getUriResourceParts().get(0))
