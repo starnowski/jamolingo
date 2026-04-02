@@ -305,7 +305,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
               $set: {
                   %1$s: {
                     $reduce: {
-                      input: "$%2$s",
+                      input: { $ifNull: ["$%2$s", []] },
                               initialValue: [],
                       in: {
                         $let: {
@@ -362,7 +362,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 $set: {
                   %1$s: {
                     $map: {
-                      input: "$%1$s",
+                      input: { $ifNull: ["$%1$s", []] },
                       as: "item",
                       in: {
                         $mergeObjects: [
@@ -397,7 +397,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     $set: {
                       %1$s: {
                         $map: {
-                          input: "$%1$s",
+                          input: { $ifNull: ["$%1$s", []] },
                           as: "item",
                           in: {
                             $mergeObjects: [
