@@ -57,6 +57,11 @@ public class DefaultEdmMongoContextFacade
     return wrapWithRootMongoPathIfNotNull(mongoPathResolution);
   }
 
+  @Override
+  public String getRootMongoPath() {
+    return rootMongoPath;
+  }
+
   private MongoPathResolution wrapWithRootMongoPathIfNotNull(
       MongoPathResolution mongoPathResolution) {
     if (rootMongoPath != null && mongoPathResolution != null) {

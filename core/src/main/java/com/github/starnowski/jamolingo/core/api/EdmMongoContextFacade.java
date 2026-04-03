@@ -13,4 +13,11 @@ public interface EdmMongoContextFacade {
    * @return the resolved Mongo path resolution
    */
   MongoPathResolution resolveMongoPathForEDMPath(UriInfoResource uriInfoResource);
+
+  /**
+   * Returns the root Mongo path to prefix to all resolved paths.
+   *
+   * @return the root Mongo path
+   */
+  String getRootMongoPath();
 }
