@@ -682,10 +682,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                         ]
                                     """,
             JSONCompareMode.STRICT),
-            Arguments.of(
-                    Set.of(10),
-                    "$expand=children($levels=max;$skip=1;$top=2;$orderby=index asc;$select=index)",
-                    """
+        Arguments.of(
+            Set.of(10),
+            "$expand=children($levels=max;$skip=1;$top=2;$orderby=index asc;$select=index)",
+            """
                                             [
                                                     {
                                                         "_id": 10,
@@ -694,25 +694,21 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                         "categoryId": 1,
                                                         "children": [
                                                             {
-                                                                "_id": 12,
                                                                 "index": 12
                                                             },
                                                             {
-                                                                "_id": 13,
                                                                 "index": 13
                                                             },{
-                                                                "_id": 18,
                                                                 "index": 18
                                                             },
                                                             {
-                                                                "_id": 19,
                                                                 "index": 19
                                                             }
                                                         ]
                                                     }
                                                 ]
                                             """,
-                    JSONCompareMode.STRICT));
+            JSONCompareMode.STRICT));
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document

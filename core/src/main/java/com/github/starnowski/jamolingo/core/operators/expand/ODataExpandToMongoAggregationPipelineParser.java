@@ -7,6 +7,8 @@ import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
+import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult;
 import java.util.*;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
@@ -187,6 +189,22 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
           pipeline.add(
               new Document("$unset", navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX));
+        }
+        if (eOption.getSelectOption() != null) {
+          OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
+              new OdataSelectToMongoProjectParser();
+          SelectOperatorResult selectResult =
+              odataSelectToMongoProjectParser.parse(
+                  eOption.getSelectOption(),
+                  DefaultEdmMongoContextFacade.builder()
+                      .withRootMongoPath(navProp.getName())
+                      .build());
+          // TODO create object that returns select properties for graphLookup
+          // TODO It should return the SelectOperatorResult operator that should be applied instead
+          // of just the fields names
+          // TODO Create helper component that combine selected fields from the SelectOperatorResult
+          // collection
+          pipeline.add(selectResult.getStageObject());
         }
         if (removeDepthProperty) {
           // Removing the "depthVariable" property from results
