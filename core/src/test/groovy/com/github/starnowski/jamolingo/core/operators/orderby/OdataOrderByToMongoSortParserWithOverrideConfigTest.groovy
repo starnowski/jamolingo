@@ -33,7 +33,7 @@ class OdataOrderByToMongoSortParserWithOverrideConfigTest extends AbstractSpecif
         OdataOrderByToMongoSortParser tested = new OdataOrderByToMongoSortParser()
 
         when:
-            def result = tested.parse(uriInfo.getOrderByOption(), new DefaultEdmMongoContextFacade(context, null))
+            def result = tested.parse(uriInfo.getOrderByOption(), DefaultEdmMongoContextFacade.builder().withEntityPropertiesMongoPathContext(context).build())
 
         then:
             result.getStageObjects().get(0) == expectedBson
