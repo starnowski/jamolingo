@@ -187,4 +187,31 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
                 ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses"], ["plainString", "Name", "Addresses"]]
         ]
     }
+
+    @Unroll
+    def "should return expected rootMongoPath"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm1.xml")
+        ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+        def odataMapping = factory.build(edm.getSchema("Demo"))
+        def entityMapping = odataMapping.getEntities().get("Item")
+        EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+        def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("Items", "\$select=plainString", null, null)
+        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+
+        when:
+        def result = tested.parse(uriInfo.getSelectOption(), DefaultEdmMongoContextFacade.builder()
+                .withEntityPropertiesMongoPathContext(context)
+                .withRootMongoPath(rootMongoPath)
+                .build())
+
+        then:
+        result.getRootMongoPath() == rootMongoPath
+
+        where:
+        rootMongoPath << ["root", "nested.root", null]
+    }
 }

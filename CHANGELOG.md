@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Module
+*   Added `rootMongoPath` property to `com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade` to provide access to the root MongoDB path. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `rootMongoPath` property to `com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult` to retrieve the root path applied to the selection. ([#35](https://github.com/starnowski/jamolingo/issues/35))
 *   Added `database` property to `com.github.starnowski.jamolingo.core.mapping.EntityMapping` to support specifying the MongoDB database name. ([#35](https://github.com/starnowski/jamolingo/issues/35))
 *   Added `database` property to `com.github.starnowski.jamolingo.core.mapping.NavigationMapping` to support cross-database joins in OData navigation properties. ([#35](https://github.com/starnowski/jamolingo/issues/35))
 

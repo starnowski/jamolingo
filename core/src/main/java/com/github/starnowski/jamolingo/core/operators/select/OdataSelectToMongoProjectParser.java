@@ -36,14 +36,16 @@ public class OdataSelectToMongoProjectParser {
       SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
     if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
       // TODO check if _id is part of available register property
-      return new DefaultSelectOperatorResult(new HashSet<>(), true, true);
+      return new DefaultSelectOperatorResult(
+          new HashSet<>(), true, true, edmMongoContextFacade.getRootMongoPath());
     }
 
     List<String> fields = new ArrayList<>();
     for (SelectItem item : selectOption.getSelectItems()) {
       if (item.isStar()) {
         // TODO check if _id is part of available register property
-        return new DefaultSelectOperatorResult(new HashSet<>(), true, true);
+        return new DefaultSelectOperatorResult(
+            new HashSet<>(), true, true, edmMongoContextFacade.getRootMongoPath());
       }
       if (!item.getResourcePath().getUriResourceParts().stream()
           .allMatch(p -> p instanceof UriResourceProperty)) {
@@ -54,7 +56,8 @@ public class OdataSelectToMongoProjectParser {
       fields.add(propertyName);
     }
     // TODO check if _id is part of available register property
-    return new DefaultSelectOperatorResult(new HashSet<>(fields), true, false);
+    return new DefaultSelectOperatorResult(
+        new HashSet<>(fields), true, false, edmMongoContextFacade.getRootMongoPath());
   }
 
   private static class DefaultSelectOperatorResult implements SelectOperatorResult {
@@ -62,12 +65,17 @@ public class OdataSelectToMongoProjectParser {
     private final Set<String> selectedFields;
     private final boolean removeIdPropertyIfNotSpecified;
     private final boolean wildCard;
+    private final String rootMongoPath;
 
     private DefaultSelectOperatorResult(
-        Set<String> selectedFields, boolean removeIdPropertyIfNotSpecified, boolean wildCard) {
+        Set<String> selectedFields,
+        boolean removeIdPropertyIfNotSpecified,
+        boolean wildCard,
+        String rootMongoPath) {
       this.selectedFields = selectedFields;
       this.removeIdPropertyIfNotSpecified = removeIdPropertyIfNotSpecified;
       this.wildCard = wildCard;
+      this.rootMongoPath = rootMongoPath;
     }
 
     @Override
@@ -78,6 +86,11 @@ public class OdataSelectToMongoProjectParser {
     @Override
     public boolean isWildCard() {
       return wildCard;
+    }
+
+    @Override
+    public String getRootMongoPath() {
+      return rootMongoPath;
     }
 
     @Override
