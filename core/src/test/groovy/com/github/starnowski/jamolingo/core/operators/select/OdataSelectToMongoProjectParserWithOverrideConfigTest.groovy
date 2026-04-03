@@ -41,13 +41,50 @@ class OdataSelectToMongoProjectParserWithOverrideConfigTest extends AbstractSpec
         OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
 
         when:
-            def result = tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null))
+            def result = tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null, null))
 
         then:
             result.getStageObject() == expectedBson
 
         where:
             [bsonFile, edmConfigFile, mergePayload, selectFields] << oneToOneEdmPathsMappings()
+    }
+
+    @Unroll
+    def "should return expected stage bson object with DefaultEdmMongoContextFacade where rootMongoPath is set and override config"() {
+        given:
+        Bson expectedBson = loadBsonFromFile(bsonFile)
+        Edm edm = loadEmdProvider(edmConfigFile)
+        ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+        def odataMapping = factory.build(edm.getSchema("Demo"))
+        def entityMapping = odataMapping.getEntities().get("Item")
+        EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+        def helper = new JSONOverrideHelper()
+        entityMapping = helper.applyChangesToJson(entityMapping, mergePayload as String, EntityMapping.class, JSONOverrideHelper.PatchType.MERGE)
+        def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
+
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("Items",
+                        "\$select=" +
+                                selectFields.stream().filter(Objects::nonNull)
+                                        .filter(s -> !s.trim().isEmpty())
+                                        .collect(Collectors.joining(","))
+                        , null, null)
+        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+
+        when:
+        def result = tested.parse(uriInfo.getSelectOption(), DefaultEdmMongoContextFacade.builder()
+                .withEntityPropertiesMongoPathContext(context)
+                .withRootMongoPath(rootMongoPath)
+                .build())
+
+        then:
+        result.getStageObject() == expectedBson
+
+        where:
+        bsonFile | edmConfigFile | mergePayload | selectFields | rootMongoPath
+        "select/stages/case1_edm1_config_override_with_root_path.json" | "edm/edm1.xml" | EDM_1_MERGE_OVERRIDE_MONGO_NAME | ["plainString"] | "root"
     }
 
     static final String EDM_1_MERGE_OVERRIDE_MONGO_NAME = """

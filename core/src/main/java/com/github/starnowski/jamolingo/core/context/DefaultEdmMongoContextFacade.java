@@ -12,6 +12,7 @@ public class DefaultEdmMongoContextFacade
 
   private final EntityPropertiesMongoPathContext entityPropertiesMongoPathContext;
   private final EdmPathContextSearch edmPathContextSearch;
+  private final String rootMongoPath;
 
   /**
    * Constructs a new DefaultEdmMongoContextFacade.
@@ -19,12 +20,15 @@ public class DefaultEdmMongoContextFacade
    * @param entityPropertiesMongoPathContext the context for resolving entity properties to Mongo
    *     paths
    * @param edmPathContextSearch configuration for searching EDM paths
+   * @param rootMongoPath the root Mongo path to prefix to all resolved paths
    */
   public DefaultEdmMongoContextFacade(
       EntityPropertiesMongoPathContext entityPropertiesMongoPathContext,
-      EdmPathContextSearch edmPathContextSearch) {
+      EdmPathContextSearch edmPathContextSearch,
+      String rootMongoPath) {
     this.entityPropertiesMongoPathContext = entityPropertiesMongoPathContext;
     this.edmPathContextSearch = edmPathContextSearch;
+    this.rootMongoPath = rootMongoPath;
   }
 
   /**
@@ -38,16 +42,27 @@ public class DefaultEdmMongoContextFacade
 
   @Override
   public MongoPathResolution resolveMongoPathForEDMPath(UriInfoResource uriInfoResource) {
+    MongoPathResolution mongoPathResolution;
     if (entityPropertiesMongoPathContext == null) {
       String result = preparePath(uriInfoResource, ".");
-      return new InnerMongoPathResolution(result);
+      mongoPathResolution = new InnerMongoPathResolution(result);
     } else {
       String edmPath = preparePath(uriInfoResource, "/");
-      return edmPathContextSearch == null
-          ? entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(edmPath)
-          : entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(
-              edmPath, edmPathContextSearch);
+      mongoPathResolution =
+          edmPathContextSearch == null
+              ? entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(edmPath)
+              : entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(
+                  edmPath, edmPathContextSearch);
     }
+    return wrapWithRootMongoPathIfNotNull(mongoPathResolution);
+  }
+
+  private MongoPathResolution wrapWithRootMongoPathIfNotNull(
+      MongoPathResolution mongoPathResolution) {
+    if (rootMongoPath != null && mongoPathResolution != null) {
+      return new RootMongoPathDecorator(rootMongoPath, mongoPathResolution);
+    }
+    return mongoPathResolution;
   }
 
   private static String preparePath(UriInfoResource uriInfoResource, String delimiter) {
@@ -58,14 +73,17 @@ public class DefaultEdmMongoContextFacade
 
   @Override
   public MongoPathResolution resolveMongoPathForEDMPath(String edmPath) {
-    // TODO
+    MongoPathResolution mongoPathResolution;
     if (entityPropertiesMongoPathContext == null) {
-      return new InnerMongoPathResolution(edmPath.replace("/", "."));
+      mongoPathResolution = new InnerMongoPathResolution(edmPath.replace("/", "."));
+    } else {
+      mongoPathResolution =
+          edmPathContextSearch == null
+              ? entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(edmPath)
+              : entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(
+                  edmPath, edmPathContextSearch);
     }
-    return edmPathContextSearch == null
-        ? entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(edmPath)
-        : entityPropertiesMongoPathContext.resolveMongoPathForEDMPath(
-            edmPath, edmPathContextSearch);
+    return wrapWithRootMongoPathIfNotNull(mongoPathResolution);
   }
 
   private static final class InnerMongoPathResolution implements MongoPathResolution {
@@ -79,6 +97,22 @@ public class DefaultEdmMongoContextFacade
     @Override
     public String getMongoPath() {
       return mongoPath;
+    }
+  }
+
+  private static final class RootMongoPathDecorator implements MongoPathResolution {
+    private final String rootMongoPath;
+    private final MongoPathResolution originalMongoPathResolution;
+
+    public RootMongoPathDecorator(
+        String rootMongoPath, MongoPathResolution originalMongoPathResolution) {
+      this.rootMongoPath = rootMongoPath;
+      this.originalMongoPathResolution = originalMongoPathResolution;
+    }
+
+    @Override
+    public String getMongoPath() {
+      return rootMongoPath + "." + originalMongoPathResolution.getMongoPath();
     }
   }
 
@@ -113,6 +147,19 @@ public class DefaultEdmMongoContextFacade
     private EdmPathContextSearch edmPathContextSearch;
 
     /**
+     * Sets the root Mongo path to prefix to all resolved paths.
+     *
+     * @param rootMongoPath the root Mongo path
+     * @return the builder instance
+     */
+    public DefaultEdmMongoContextFacadeBuilder withRootMongoPath(String rootMongoPath) {
+      this.rootMongoPath = rootMongoPath;
+      return this;
+    }
+
+    private String rootMongoPath;
+
+    /**
      * Initializes the builder with values from an existing DefaultEdmMongoContextFacade.
      *
      * @param defaultEdmMongoContextFacade the existing instance
@@ -123,6 +170,7 @@ public class DefaultEdmMongoContextFacade
       this.entityPropertiesMongoPathContext =
           defaultEdmMongoContextFacade.entityPropertiesMongoPathContext;
       this.edmPathContextSearch = defaultEdmMongoContextFacade.edmPathContextSearch;
+      this.rootMongoPath = defaultEdmMongoContextFacade.rootMongoPath;
       return this;
     }
 
@@ -133,7 +181,7 @@ public class DefaultEdmMongoContextFacade
      */
     public DefaultEdmMongoContextFacade build() {
       return new DefaultEdmMongoContextFacade(
-          entityPropertiesMongoPathContext, edmPathContextSearch);
+          entityPropertiesMongoPathContext, edmPathContextSearch, rootMongoPath);
     }
   }
 }
