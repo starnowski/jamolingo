@@ -83,7 +83,11 @@ class SelectOperatorTest extends AbstractItTest {
 
     // WHEN
     SelectOperatorResult result =
-        tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null));
+        tested.parse(
+            uriInfo.getSelectOption(),
+            DefaultEdmMongoContextFacade.builder()
+                .withEntityPropertiesMongoPathContext(context)
+                .build());
     Bson projectStage = result.getStageObject();
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", UUID.fromString(expectedId))));
