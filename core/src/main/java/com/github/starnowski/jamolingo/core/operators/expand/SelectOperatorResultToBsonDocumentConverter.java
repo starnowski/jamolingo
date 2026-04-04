@@ -39,7 +39,7 @@ public class SelectOperatorResultToBsonDocumentConverter {
       }
 
       String lastPart = parts[parts.length - 1];
-      current.put(lastPart, "$$" + itemName + "." + lastPart);
+      current.put(lastPart, "$$" + itemName + "." + fieldPath);
     }
 
     return root;
