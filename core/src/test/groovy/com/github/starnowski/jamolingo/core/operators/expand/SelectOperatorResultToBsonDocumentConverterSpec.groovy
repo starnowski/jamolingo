@@ -1,6 +1,5 @@
 package com.github.starnowski.jamolingo.core.operators.expand
 
-import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult
 import org.bson.Document
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -11,14 +10,12 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
     def "should convert SelectOperatorResult to BSON Document for \$map stage (#itemName, #selectedFields)"() {
         given:
         def converter = new SelectOperatorResultToBsonDocumentConverter()
-        def selectOperatorResult = Mock(SelectOperatorResult)
         def expectedBson = Document.parse(bsonJson)
 
         when:
-        def result = converter.convert(selectOperatorResult, itemName)
+        def result = converter.convert(selectedFields, itemName)
 
         then:
-        1 * selectOperatorResult.getSelectedFields() >> (selectedFields as Set)
         result == expectedBson
 
         where:
@@ -28,19 +25,17 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
     def "should handle empty selected fields"() {
         given:
         def converter = new SelectOperatorResultToBsonDocumentConverter()
-        def selectOperatorResult = Mock(SelectOperatorResult)
         def itemName = "item"
 
         when:
-        def result = converter.convert(selectOperatorResult, itemName)
+        def result = converter.convert([], itemName)
 
         then:
-        1 * selectOperatorResult.getSelectedFields() >> ([] as Set)
         result != null
         result.isEmpty()
     }
 
-    def "should handle null SelectOperatorResult"() {
+    def "should handle null selected fields"() {
         given:
         def converter = new SelectOperatorResultToBsonDocumentConverter()
 
