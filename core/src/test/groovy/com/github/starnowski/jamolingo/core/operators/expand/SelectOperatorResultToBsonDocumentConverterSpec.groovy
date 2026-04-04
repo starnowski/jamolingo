@@ -3,43 +3,26 @@ package com.github.starnowski.jamolingo.core.operators.expand
 import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult
 import org.bson.Document
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
 
-    def "should convert SelectOperatorResult to BSON Document for \$map stage"() {
+    @Unroll
+    def "should convert SelectOperatorResult to BSON Document for \$map stage (#itemName, #selectedFields)"() {
         given:
         def converter = new SelectOperatorResultToBsonDocumentConverter()
         def selectOperatorResult = Mock(SelectOperatorResult)
-        def itemName = "currentItem"
-        def selectedFields = [
-                "propertyAZB",
-                "propertyB",
-                "propertyC.name",
-                "propertyC.nestedObject",
-                "propertyC.nestedObject2._id",
-                "propertyC.nestedObject2.index",
-                "propertyC.nestedObject2.a"
-        ] as Set
+        def expectedBson = Document.parse(bsonJson)
 
         when:
         def result = converter.convert(selectOperatorResult, itemName)
 
         then:
-        1 * selectOperatorResult.getSelectedFields() >> selectedFields
-        result != null
-        result.get("propertyAZB") == '$$currentItem.propertyAZB'
-        result.get("propertyB") == '$$currentItem.propertyB'
-        
-        def propertyC = result.get("propertyC") as Document
-        propertyC != null
-        propertyC.get("name") == '$$currentItem.name'
-        propertyC.get("nestedObject") == '$$currentItem.nestedObject'
-        
-        def nestedObject2 = propertyC.get("nestedObject2") as Document
-        nestedObject2 != null
-        nestedObject2.get("_id") == '$$currentItem._id'
-        nestedObject2.get("index") == '$$currentItem.index'
-        nestedObject2.get("a") == '$$currentItem.a'
+        1 * selectOperatorResult.getSelectedFields() >> (selectedFields as Set)
+        result == expectedBson
+
+        where:
+        [itemName, selectedFields, bsonJson] << selectOperatorResultToBsonDocumentMappings()
     }
 
     def "should handle empty selected fields"() {
@@ -67,5 +50,28 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
         then:
         result != null
         result.isEmpty()
+    }
+
+    static selectOperatorResultToBsonDocumentMappings() {
+        [
+                [
+                        "currentItem",
+                        [
+                                "propertyAZB",
+                                "propertyB",
+                                "propertyC.name",
+                                "propertyC.nestedObject",
+                                "propertyC.nestedObject2._id",
+                                "propertyC.nestedObject2.index",
+                                "propertyC.nestedObject2.a"
+                        ],
+                        '{"propertyAZB": "$$currentItem.propertyAZB", "propertyB": "$$currentItem.propertyB", "propertyC": {"name": "$$currentItem.name", "nestedObject": "$$currentItem.nestedObject", "nestedObject2": {"_id": "$$currentItem._id", "index": "$$currentItem.index", "a": "$$currentItem.a"}}}'
+                ],
+                [
+                        "item",
+                        ["simpleProp"],
+                        '{"simpleProp": "$$item.simpleProp"}'
+                ]
+        ]
     }
 }
