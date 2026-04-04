@@ -65,7 +65,7 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
                                 "propertyC.nestedObject2.index",
                                 "propertyC.nestedObject2.a"
                         ],
-                        '{"propertyAZB": "$$currentItem.propertyAZB", "propertyB": "$$currentItem.propertyB", "propertyC": {"name": "$$currentItem.name", "nestedObject": "$$currentItem.nestedObject", "nestedObject2": {"_id": "$$currentItem._id", "index": "$$currentItem.index", "a": "$$currentItem.a"}}}'
+                        '{"propertyAZB": "$$currentItem.propertyAZB", "propertyB": "$$currentItem.propertyB", "propertyC": {"name": "$$currentItem.name", "nestedObject": "$$currentItem.nestedObject", "nestedObject2": {"_id": "$$currentItem.nestedObject2._id", "index": "$$currentItem.nestedObject2.index", "a": "$$currentItem.nestedObject2.a"}}}'
                 ],
                 [
                         "item",
