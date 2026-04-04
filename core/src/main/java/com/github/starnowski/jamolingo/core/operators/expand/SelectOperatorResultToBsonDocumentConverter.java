@@ -17,6 +17,7 @@ public class SelectOperatorResultToBsonDocumentConverter {
    * @return a BSON Document representing the projection for the $map stage
    */
   public Document convert(SelectOperatorResult selectOperatorResult, String itemName) {
+    // TODO Pass object with selected fields, item name, and fields that represent the collection
     Document root = new Document();
     if (selectOperatorResult == null) {
       return root;

@@ -191,6 +191,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
               new Document("$unset", navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX));
         }
         if (eOption.getSelectOption() != null) {
+          // TODO check if element does not have nested $expand, if yes then check if potential
+          // excluded property would not be
+          // TODO a foreign key for external collection
+          // TODO In such case we would have to add the foreign property to include and after
+          // processing the nested $expand
+          // TODO remove it
           OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
               new OdataSelectToMongoProjectParser();
           SelectOperatorResult selectResult =
