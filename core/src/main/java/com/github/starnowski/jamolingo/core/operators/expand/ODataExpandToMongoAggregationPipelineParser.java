@@ -125,6 +125,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
               .getEDMTablesToMongoDBCollections()
               .get(new KeyValue<>(targetEntityType.getNamespace(), targetEntityType.getName()));
 
+      // TODO Add property in configuration that allow to specify the collection name
       String targetCollection =
           mongoCollectionName == null
               ? targetEntityType.getFullQualifiedName().getFullQualifiedNameAsString()

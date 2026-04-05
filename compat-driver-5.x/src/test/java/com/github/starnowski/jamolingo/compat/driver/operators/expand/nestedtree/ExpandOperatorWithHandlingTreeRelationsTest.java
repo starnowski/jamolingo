@@ -36,9 +36,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-// TODO Change approach, by default the default component is going to write to the collection with
-// name MyService.Category.
-// TODO The "MyService" prefix is not a name of database, it just prefix for the collection name
 @MongoSetup(
     batchInsertToCollection = true,
     mongoDocuments = {
