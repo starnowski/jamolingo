@@ -62,6 +62,12 @@ public class OdataSelectToMongoProjectParser {
         new HashSet<>(fields), true, false, edmMongoContextFacade.getRootMongoPath());
   }
 
+  /**
+   * Computes select operator options for a $map operator using default context.
+   *
+   * @param selectOption the select option
+   * @return the select operator options for $map operator
+   */
   public SelectOperatorOptionsForMapOperator computeValueForMapOperator(SelectOption selectOption) {
     return computeValueForMapOperator(selectOption, DefaultEdmMongoContextFacade.builder().build());
   }
@@ -72,6 +78,13 @@ public class OdataSelectToMongoProjectParser {
         .collect(Collectors.joining("/"));
   }
 
+  /**
+   * Computes select operator options for a $map operator using provided context.
+   *
+   * @param selectOption the select option
+   * @param edmMongoContextFacade the context facade
+   * @return the select operator options for $map operator
+   */
   public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
       SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
     SelectOperatorResult selectResult = parse(selectOption, edmMongoContextFacade);

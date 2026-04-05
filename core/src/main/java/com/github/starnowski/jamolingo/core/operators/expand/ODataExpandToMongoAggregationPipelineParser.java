@@ -22,19 +22,44 @@ import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitEx
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+/**
+ * Parser for OData $expand system query option to MongoDB aggregation pipeline stages.
+ *
+ * <p>This parser translates expansion requests into $lookup or $graphLookup stages depending on the
+ * levels option.
+ */
 public class ODataExpandToMongoAggregationPipelineParser {
 
+  /** Suffix for $graphLookup depth variable. */
   public static final String ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX =
       "_odata_graphlookup_depth_variable";
-  // TODO try to remove temporary array
+
+  /** Suffix for temporary array used in $graphLookup processing. */
   public static final String ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX =
       "_odata_graphlookup_tmp_array";
 
+  /**
+   * Parses the given OData expand option into expansion operator result using default context.
+   *
+   * @param expandOption the expand option to parse
+   * @return the expansion operator result
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   * @throws ODataApplicationException if an error occurs during parsing
+   */
   public ExpandOperatorResult parse(ExpandOption expandOption)
       throws ExpressionVisitException, ODataApplicationException {
     return parse(expandOption, DefaultExpandParserContext.builder().build());
   }
 
+  /**
+   * Parses the given OData expand option into expansion operator result using provided context.
+   *
+   * @param expandOption the expand option to parse
+   * @param expandParserContext the expand parser context
+   * @return the expansion operator result
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   * @throws ODataApplicationException if an error occurs during parsing
+   */
   public ExpandOperatorResult parse(
       ExpandOption expandOption, ExpandParserContext expandParserContext)
       throws ExpressionVisitException, ODataApplicationException {
@@ -572,11 +597,20 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
   }
 
+  /** Default implementation of {@link ExpandParserContext}. */
   public static class DefaultExpandParserContext implements ExpandParserContext {
     private final Map<String, EdmPropertyMongoPathResolver> edmTypeMapping;
     private final Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections;
     private final Integer maxLevel;
 
+    /**
+     * Constructs a new DefaultExpandParserContext.
+     *
+     * @param edmTypeMapping mapping between EDM type names and their Mongo path resolvers
+     * @param edmTablesToMongoDBCollections mapping between EDM entity sets and their MongoDB
+     *     collection names
+     * @param maxLevel maximum level of recursion for $expand
+     */
     public DefaultExpandParserContext(
         Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
@@ -628,31 +662,61 @@ public class ODataExpandToMongoAggregationPipelineParser {
           + '}';
     }
 
+    /**
+     * Returns a new builder for DefaultExpandParserContext.
+     *
+     * @return the builder instance
+     */
     public static Builder builder() {
       return new Builder();
     }
 
+    /** Builder for {@link DefaultExpandParserContext}. */
     public static class Builder {
       private Map<String, EdmPropertyMongoPathResolver> edmTypeMapping = new HashMap<>();
       private Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections = new HashMap<>();
       private Integer maxLevel = DEFAULT_MAX_LEVEL;
 
+      /**
+       * Sets the mapping between EDM type names and their Mongo path resolvers.
+       *
+       * @param edmTypeMapping the type mapping
+       * @return the builder instance
+       */
       public Builder withEdmTypeMapping(Map<String, EdmPropertyMongoPathResolver> edmTypeMapping) {
         this.edmTypeMapping = edmTypeMapping;
         return this;
       }
 
+      /**
+       * Sets the mapping between EDM entity sets and their MongoDB collection names.
+       *
+       * @param edmTablesToMongoDBCollections the collection mapping
+       * @return the builder instance
+       */
       public Builder withEdmTablesToMongoDBCollections(
           Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections) {
         this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
         return this;
       }
 
+      /**
+       * Sets the maximum level of recursion for $expand.
+       *
+       * @param maxLevel the maximum level
+       * @return the builder instance
+       */
       public Builder withMaxLevel(Integer maxLevel) {
         this.maxLevel = maxLevel;
         return this;
       }
 
+      /**
+       * Initializes the builder with values from an existing context.
+       *
+       * @param defaultExpandParserContext the context to copy values from
+       * @return the builder instance
+       */
       public Builder withDefaultExpandParserContext(
           DefaultExpandParserContext defaultExpandParserContext) {
         this.edmTypeMapping =
@@ -667,6 +731,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
         return this;
       }
 
+      /**
+       * Builds the DefaultExpandParserContext instance.
+       *
+       * @return the constructed context
+       */
       public DefaultExpandParserContext build() {
         return new DefaultExpandParserContext(
             edmTypeMapping != null
