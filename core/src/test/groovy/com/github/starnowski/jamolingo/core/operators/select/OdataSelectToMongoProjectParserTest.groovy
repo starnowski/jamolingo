@@ -125,9 +125,9 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
         [
                 ["edm/edm1.xml"  , ["plainString"], ["plainString"], []],
                 ["edm/edm1.xml"  , ["*"], [], []],// ExpandAsterisk = false
-                ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode"], []], // ExpandAsterisk = false
-                ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses"], ["plainString", "Name", "Addresses"], []], // ExpandAsterisk = false
-                ["edm/edm2_complextype_with_circular_reference.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode", "Addresses.BackUpAddresses.ZipCode"], []], // ExpandAsterisk = false
+                ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode"], ["Addresses"]], // ExpandAsterisk = false
+                ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses"], ["plainString", "Name", "Addresses"], ["Addresses"]], // ExpandAsterisk = false
+                ["edm/edm2_complextype_with_circular_reference.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode", "Addresses.BackUpAddresses.ZipCode"], ["Addresses"]], // ExpandAsterisk = false
                 ["edm/edm3_complextype_with_circular_reference_collection.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode", "Addresses.BackUpAddresses.ZipCode"], ["Addresses", "Addresses.BackUpAddresses"]] // ExpandAsterisk = false
         ]
     }
