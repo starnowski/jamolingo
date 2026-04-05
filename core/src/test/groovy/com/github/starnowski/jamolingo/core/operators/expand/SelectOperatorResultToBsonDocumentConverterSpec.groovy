@@ -102,7 +102,7 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
         [
                 [
                         "currentItem",
-                        ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"],
+                        ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode", "Addresses.BackUpAddresses.ZipCode"],
                         ["Addresses", "Addresses.BackUpAddresses"],
                         """
                             {
