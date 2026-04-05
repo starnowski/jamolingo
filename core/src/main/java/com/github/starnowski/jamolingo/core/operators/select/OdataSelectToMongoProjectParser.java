@@ -60,6 +60,17 @@ public class OdataSelectToMongoProjectParser {
         new HashSet<>(fields), true, false, edmMongoContextFacade.getRootMongoPath());
   }
 
+  public SelectOperatorOptionsForMapOperator computeValueForMapOperator(SelectOption selectOption) {
+    return computeValueForMapOperator(selectOption, DefaultEdmMongoContextFacade.builder().build());
+  }
+
+  public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
+          SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
+
+    // TODO check if _id is part of available register property
+    return null;
+  }
+
   private static class DefaultSelectOperatorResult implements SelectOperatorResult {
 
     private final Set<String> selectedFields;
