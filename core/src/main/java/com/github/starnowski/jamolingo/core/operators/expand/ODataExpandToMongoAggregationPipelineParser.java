@@ -34,6 +34,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
   public static final String ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX =
       "_odata_graphlookup_depth_variable";
 
+  //TODO Try to remove a need of this temporary array
   /** Suffix for temporary array used in $graphLookup processing. */
   public static final String ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX =
       "_odata_graphlookup_tmp_array";
