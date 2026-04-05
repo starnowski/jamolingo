@@ -279,7 +279,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
         lookup.append("$lookup", lookupInnerObject);
         pipeline.add(lookup);
         if (!navProp.isCollection()) {
-          // TODO Comment why preserveNullAndEmptyArrays is needed and check if OData
+          // For single-valued navigation properties (one-to-one or many-to-one),
+          // unwind the lookup result array to render a single object.
+          // preserveNullAndEmptyArrays is set to true to ensure the parent document
+          // is not dropped if the related resource is missing (OData $expand behavior).
           pipeline.add(
               new Document(
                   "$unwind",
