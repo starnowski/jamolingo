@@ -87,6 +87,10 @@ public class SelectOperatorResultToBsonDocumentConverter {
                 + itemName
                 + (valuePathString.startsWith(".") ? valuePathString : "." + valuePathString));
       } else {
+        if (isArrayAndOtherThereAreOtherSelectedFieldsInsideThisArray(
+            fieldPath, arraysFields, selectedFields)) {
+          continue;
+        }
         String[] parts = fieldPath.split("\\.");
         Document current = root;
         for (int i = 0; i < parts.length - 1; i++) {
@@ -103,6 +107,21 @@ public class SelectOperatorResultToBsonDocumentConverter {
     }
 
     return root;
+  }
+
+  private boolean isArrayAndOtherThereAreOtherSelectedFieldsInsideThisArray(
+      String fieldPath,
+      java.util.Collection<String> arraysFields,
+      java.util.Collection<String> selectedFields) {
+    if (!arraysFields.contains(fieldPath)) {
+      return false;
+    }
+    for (String field : selectedFields) {
+      if (!field.equals(fieldPath) && field.startsWith(fieldPath)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private boolean isInsideArrayButNotArrayItself(

@@ -174,7 +174,28 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
                                 "Addresses": "\$\$currentItem.Addresses"
                             }
                         """
-                ]
+                ],
+                [
+                        "currentItem",
+                        ["plainString", "Name", "Addresses.Street", "Addresses", "Addresses.ZipCode"],
+                        ["Addresses"],
+                        """
+                            {
+                                "plainString": "\$\$currentItem.plainString",
+                                "Name": "\$\$currentItem.Name",
+                                "Addresses": {
+                                "\$map": {
+                                "input": "\$\$currentItem.Addresses",
+                                "as": "currentItem",
+                                "in": {
+                                    "Street": "\$\$currentItem.Street",
+                                    "ZipCode": "\$\$currentItem.ZipCode"
+                                    }
+                                }
+                                }
+                            }
+                        """
+                ],
         ]
     }
 }
