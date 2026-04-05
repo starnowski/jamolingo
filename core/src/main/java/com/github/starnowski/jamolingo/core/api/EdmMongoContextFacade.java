@@ -4,7 +4,7 @@ import com.github.starnowski.jamolingo.core.context.MongoPathResolution;
 import org.apache.olingo.server.api.uri.UriInfoResource;
 
 /** Facade for resolving Mongo paths from EDM paths. */
-public interface EdmMongoContextFacade {
+public interface EdmMongoContextFacade extends EdmPropertyMongoPathResolver {
 
   /**
    * Resolves the Mongo path for the given EDM path represented by {@link UriInfoResource}.

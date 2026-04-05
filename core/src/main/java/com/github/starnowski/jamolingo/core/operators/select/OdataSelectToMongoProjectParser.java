@@ -2,9 +2,8 @@ package com.github.starnowski.jamolingo.core.operators.select;
 
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
-import java.lang.reflect.Proxy;
 import java.util.*;
-import org.apache.olingo.server.api.uri.UriInfoResource;
+import java.util.stream.Collectors;
 import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
@@ -67,6 +66,12 @@ public class OdataSelectToMongoProjectParser {
     return computeValueForMapOperator(selectOption, DefaultEdmMongoContextFacade.builder().build());
   }
 
+  private String prepareEDMPath(List<UriResource> parts) {
+    return parts.stream()
+        .map(p -> ((UriResourceProperty) p).getProperty().getName())
+        .collect(Collectors.joining("/"));
+  }
+
   public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
       SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
     SelectOperatorResult selectResult = parse(selectOption, edmMongoContextFacade);
@@ -81,19 +86,10 @@ public class OdataSelectToMongoProjectParser {
           final int index = i;
           UriResource part = parts.get(index);
           if (part instanceof UriResourceProperty && ((UriResourceProperty) part).isCollection()) {
-            UriInfoResource subResource =
-                (UriInfoResource)
-                    Proxy.newProxyInstance(
-                        UriInfoResource.class.getClassLoader(),
-                        new Class<?>[] {UriInfoResource.class},
-                        (proxy, method, args) -> {
-                          if (method.getName().equals("getUriResourceParts")) {
-                            return parts.subList(0, index + 1);
-                          }
-                          return method.invoke(item.getResourcePath(), args);
-                        });
             arrayFields.add(
-                edmMongoContextFacade.resolveMongoPathForEDMPath(subResource).getMongoPath());
+                edmMongoContextFacade
+                    .resolveMongoPathForEDMPath(prepareEDMPath(parts.subList(0, i + 1)))
+                    .getMongoPath());
           }
         }
       }
