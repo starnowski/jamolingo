@@ -150,8 +150,8 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
             def result = tested.computeValueForMapOperator(uriInfo.getSelectOption())
 
         then:
-            result.getSelectedFields() == expectedSelecteFields
-            result.getArrayFields() == expectedArrayFields
+            result.getSelectedFields() == new HashSet(expectedSelecteFields)
+            result.getArrayFields() == new HashSet(expectedArrayFields)
 
         where:
         [edmConfigFile, selectFields, expectedSelecteFields, expectedArrayFields] << oneToOneEdmPathsMappingsWithExpectedSelectedFieldsAndArrayFields()

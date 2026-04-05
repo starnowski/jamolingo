@@ -65,10 +65,40 @@ public class OdataSelectToMongoProjectParser {
   }
 
   public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
-          SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
-
+      SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
+    SelectOperatorResult selectResult = parse(selectOption, edmMongoContextFacade);
     // TODO check if _id is part of available register property
-    return null;
+    return new DefaultSelectOperatorOptionsForMapOperator(
+        selectResult.isWildCard(),
+        selectResult.isWildCard() ? Set.of() : selectResult.getSelectedFields(),
+        Set.of());
+  }
+
+  private static class DefaultSelectOperatorOptionsForMapOperator
+      implements SelectOperatorOptionsForMapOperator {
+    private final boolean wildCard;
+    private final Set<String> selectedFields;
+
+    public boolean isWildCard() {
+      return wildCard;
+    }
+
+    public Set<String> getSelectedFields() {
+      return selectedFields;
+    }
+
+    public Set<String> getArrayFields() {
+      return arrayFields;
+    }
+
+    private final Set<String> arrayFields;
+
+    private DefaultSelectOperatorOptionsForMapOperator(
+        boolean wildCard, Set<String> selectedFields, Set<String> arrayFields) {
+      this.wildCard = wildCard;
+      this.selectedFields = selectedFields;
+      this.arrayFields = arrayFields;
+    }
   }
 
   private static class DefaultSelectOperatorResult implements SelectOperatorResult {
