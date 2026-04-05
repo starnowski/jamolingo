@@ -2,7 +2,10 @@ package com.github.starnowski.jamolingo.core.operators.select;
 
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
+import java.lang.reflect.Proxy;
 import java.util.*;
+import org.apache.olingo.server.api.uri.UriInfoResource;
+import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
@@ -67,11 +70,39 @@ public class OdataSelectToMongoProjectParser {
   public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
       SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
     SelectOperatorResult selectResult = parse(selectOption, edmMongoContextFacade);
-    // TODO check if _id is part of available register property
+    Set<String> arrayFields = new HashSet<>();
+    if (selectOption != null) {
+      for (SelectItem item : selectOption.getSelectItems()) {
+        if (item.isStar()) {
+          continue;
+        }
+        List<UriResource> parts = item.getResourcePath().getUriResourceParts();
+        for (int i = 0; i < parts.size(); i++) {
+          final int index = i;
+          UriResource part = parts.get(index);
+          if (part instanceof UriResourceProperty && ((UriResourceProperty) part).isCollection()) {
+            UriInfoResource subResource =
+                (UriInfoResource)
+                    Proxy.newProxyInstance(
+                        UriInfoResource.class.getClassLoader(),
+                        new Class<?>[] {UriInfoResource.class},
+                        (proxy, method, args) -> {
+                          if (method.getName().equals("getUriResourceParts")) {
+                            return parts.subList(0, index + 1);
+                          }
+                          return method.invoke(item.getResourcePath(), args);
+                        });
+            arrayFields.add(
+                edmMongoContextFacade.resolveMongoPathForEDMPath(subResource).getMongoPath());
+          }
+        }
+      }
+    }
+
     return new DefaultSelectOperatorOptionsForMapOperator(
         selectResult.isWildCard(),
         selectResult.isWildCard() ? Set.of() : selectResult.getSelectedFields(),
-        Set.of());
+        arrayFields);
   }
 
   private static class DefaultSelectOperatorOptionsForMapOperator
