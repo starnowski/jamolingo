@@ -14,8 +14,8 @@ public class EntityMapping {
         + "database='"
         + database
         + '\''
-        + ", collection='"
-        + collection
+        + ", table='"
+        + table
         + '\''
         + ", rootPath='"
         + rootPath
@@ -29,9 +29,9 @@ public class EntityMapping {
   @JsonProperty("database")
   private String database;
 
-  /** MongoDB collection name */
-  @JsonProperty("collection")
-  private String collection;
+  /** EDM table name */
+  @JsonProperty("table")
+  private String table;
 
   /** Root path inside Mongo document (optional) Example: "orders[]" */
   @JsonProperty("rootPath")
@@ -75,18 +75,18 @@ public class EntityMapping {
    *
    * @return the collection name
    */
-  public String getCollection() {
-    return collection;
+  public String getTable() {
+    return table;
   }
 
   /**
-   * Sets the MongoDB collection name.
+   * Sets the EDM table name.
    *
-   * @param collection the collection name
+   * @param table the EDM table name
    * @return this entity mapping
    */
-  public EntityMapping withCollection(String collection) {
-    this.collection = collection;
+  public EntityMapping withTable(String table) {
+    this.table = table;
     return this;
   }
 
@@ -106,14 +106,14 @@ public class EntityMapping {
     if (o == null || getClass() != o.getClass()) return false;
     EntityMapping that = (EntityMapping) o;
     return Objects.equals(database, that.database)
-        && Objects.equals(collection, that.collection)
+        && Objects.equals(table, that.table)
         && Objects.equals(rootPath, that.rootPath)
         && Objects.equals(properties, that.properties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(database, collection, rootPath, properties);
+    return Objects.hash(database, table, rootPath, properties);
   }
 
   /**
@@ -128,12 +128,12 @@ public class EntityMapping {
   }
 
   /**
-   * Sets the MongoDB collection name.
+   * Sets the EDM table name.
    *
-   * @param collection the collection name
+   * @param table the table name
    */
-  public void setCollection(String collection) {
-    this.collection = collection;
+  public void setTable(String table) {
+    this.table = table;
   }
 
   /**

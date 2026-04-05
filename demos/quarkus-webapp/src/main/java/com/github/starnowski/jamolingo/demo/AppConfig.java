@@ -45,7 +45,7 @@ public class AppConfig {
     ODataMongoMappingFactory factory = new ODataMongoMappingFactory();
     ODataMongoMapping mapping = factory.build(edm, "MyService");
     if (mapping.getEntities().containsKey("Example2")) {
-      mapping.getEntities().get("Example2").setCollection("items");
+      mapping.getEntities().get("Example2").setTable("items");
     }
     return mapping;
   }
