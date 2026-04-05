@@ -19,7 +19,23 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
         result == expectedBson
 
         where:
-        [itemName, selectedFields, bsonJson] << selectOperatorResultToBsonDocumentMappings()
+        [itemName, selectedFields, bsonJson] << selectFieldsToBsonDocumentMappings()
+    }
+
+    @Unroll
+    def "should convert SelectOperatorResult to BSON Document for \$map stage (#itemName, #selectedFields, #arraysFields)"() {
+        given:
+        def converter = new SelectOperatorResultToBsonDocumentConverter()
+        def expectedBson = Document.parse(bsonJson)
+
+        when:
+        def result = converter.convert(selectedFields, itemName, arraysFields)
+
+        then:
+        result == expectedBson
+
+        where:
+        [itemName, selectedFields, arraysFields, bsonJson] << selectFieldsAndArraysFieldsToBsonDocumentMappings()
     }
 
     def "should handle empty selected fields"() {
@@ -47,7 +63,7 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
         result.isEmpty()
     }
 
-    static selectOperatorResultToBsonDocumentMappings() {
+    static selectFieldsToBsonDocumentMappings() {
         [
                 [
                         "currentItem",
@@ -66,6 +82,41 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
                         "item",
                         ["simpleProp"],
                         '{"simpleProp": "$$item.simpleProp"}'
+                ]
+        ]
+    }
+
+    static selectFieldsAndArraysFieldsToBsonDocumentMappings() {
+        [
+                [
+                        "currentItem",
+                        ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"],
+                        ["Addresses", "Addresses.BackUpAddresses"],
+                        """
+                            {
+                                "plainString": "\$\$currentItem.plainString",
+                                "Name": "\$\$currentItem.Name",
+                                "Addresses": {
+                                "\$map": {
+                                "input": "\$\$currentItem.Addresses",
+                                "as": "currentItem",
+                                "in": {
+                                    "Street": "\$\$currentItem.Street",
+                                    "ZipCode": "\$\$currentItem.ZipCode",
+                                    "BackUpAddresses": {
+                                        "\$map": {
+                                            "input": "\$\$currentItem.BackUpAddresses",
+                                            "as": "currentItem",
+                                            "in": {
+                                                "ZipCode": "\$\$currentItem.ZipCode"
+                                            }
+                                        }
+                                    }
+                                    }
+                                }
+                                }
+                            }
+                        """
                 ]
         ]
     }
