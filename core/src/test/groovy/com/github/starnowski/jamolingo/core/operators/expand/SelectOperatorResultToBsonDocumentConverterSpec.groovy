@@ -9,58 +9,70 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
     @Unroll
     def "should convert SelectOperatorResult to BSON Document for \$map stage (#itemName, #selectedFields)"() {
         given:
-        def converter = new SelectOperatorResultToBsonDocumentConverter()
-        def expectedBson = Document.parse(bsonJson)
+            def converter = new SelectOperatorResultToBsonDocumentConverter()
+            def expectedBson = Document.parse(bsonJson)
 
         when:
-        def result = converter.convert(selectedFields, itemName)
+            def result = converter.convert(selectedFields, itemName)
 
         then:
-        result == expectedBson
+            result == expectedBson
 
         where:
-        [itemName, selectedFields, bsonJson] << selectFieldsToBsonDocumentMappings()
+            [itemName, selectedFields, bsonJson] << selectFieldsToBsonDocumentMappings()
     }
 
     @Unroll
     def "should convert SelectOperatorResult to BSON Document for \$map stage (#itemName, #selectedFields, #arraysFields)"() {
         given:
-        def converter = new SelectOperatorResultToBsonDocumentConverter()
-        def expectedBson = Document.parse(bsonJson)
+            def converter = new SelectOperatorResultToBsonDocumentConverter()
+            def expectedBson = Document.parse(bsonJson)
 
         when:
-        def result = converter.convert(selectedFields, itemName, arraysFields)
+            def result = converter.convert(selectedFields, itemName, arraysFields)
 
         then:
-        result == expectedBson
+            result == expectedBson
 
         where:
-        [itemName, selectedFields, arraysFields, bsonJson] << selectFieldsAndArraysFieldsToBsonDocumentMappings()
+            [itemName, selectedFields, arraysFields, bsonJson] << selectFieldsAndArraysFieldsToBsonDocumentMappings()
     }
 
     def "should handle empty selected fields"() {
         given:
-        def converter = new SelectOperatorResultToBsonDocumentConverter()
-        def itemName = "item"
+            def converter = new SelectOperatorResultToBsonDocumentConverter()
+            def itemName = "item"
 
         when:
-        def result = converter.convert([], itemName)
+            def result = converter.convert([], itemName)
 
         then:
-        result != null
-        result.isEmpty()
+            result == Document.parse("""
+                {
+                    "\$mergeObjects": [
+                        "\$\$item",
+                        {}
+                    ]
+                }
+            """)
     }
 
     def "should handle null selected fields"() {
         given:
-        def converter = new SelectOperatorResultToBsonDocumentConverter()
+            def converter = new SelectOperatorResultToBsonDocumentConverter()
 
         when:
-        def result = converter.convert(null, "item")
+            def result = converter.convert(null, "item")
 
         then:
-        result != null
-        result.isEmpty()
+            result == Document.parse("""
+                {
+                    "\$mergeObjects": [
+                        "\$\$item",
+                        {}
+                    ]
+                }
+            """)
     }
 
     static selectFieldsToBsonDocumentMappings() {

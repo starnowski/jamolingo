@@ -1,8 +1,8 @@
 package com.github.starnowski.jamolingo.core.operators.expand;
 
-import org.bson.Document;
-
+import java.util.Arrays;
 import java.util.Collections;
+import org.bson.Document;
 
 /**
  * Component that converts selected fields into a BSON Document that can be used in a $map
@@ -17,7 +17,7 @@ public class SelectOperatorResultToBsonDocumentConverter {
    * @param itemName the name of the variable representing the current item in the $map stage
    * @return a BSON Document representing the projection for the $map stage
    */
-  public Document convert(java.util.Collection<String> selectedFields, String itemName){
+  public Document convert(java.util.Collection<String> selectedFields, String itemName) {
     return convert(selectedFields, itemName, Collections.emptyList());
   }
 
@@ -29,11 +29,14 @@ public class SelectOperatorResultToBsonDocumentConverter {
    * @param arraysFields the collection of fields that are arrays
    * @return a BSON Document representing the projection for the $map stage
    */
-  public Document convert(java.util.Collection<String> selectedFields, String itemName, java.util.Collection<String> arraysFields) {
-    arraysFields = arraysFields == null ? Collections.emptyList(): arraysFields;
+  public Document convert(
+      java.util.Collection<String> selectedFields,
+      String itemName,
+      java.util.Collection<String> arraysFields) {
+    arraysFields = arraysFields == null ? Collections.emptyList() : arraysFields;
     Document root = new Document();
-    if (selectedFields == null) {
-      return root;
+    if (selectedFields == null || selectedFields.isEmpty()) {
+      return new Document("$mergeObjects", Arrays.asList("$$" + itemName, new Document()));
     }
 
     for (String fieldPath : selectedFields) {
