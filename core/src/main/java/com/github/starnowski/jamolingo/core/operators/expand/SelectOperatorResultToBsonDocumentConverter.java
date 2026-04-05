@@ -40,21 +40,64 @@ public class SelectOperatorResultToBsonDocumentConverter {
     }
 
     for (String fieldPath : selectedFields) {
-      String[] parts = fieldPath.split("\\.");
-      Document current = root;
-
-      for (int i = 0; i < parts.length - 1; i++) {
-        String part = parts[i];
-        if (!current.containsKey(part)) {
-          current.put(part, new Document());
+      if (isInsideArrayButNotArrayItself(fieldPath, arraysFields)) {
+        String[] parts = fieldPath.split("\\.");
+        Document current = root;
+        StringBuilder currentPath = new StringBuilder();
+        for (int i = 0; i < parts.length - 1; i++) {
+          String part = parts[i];
+          if (i > 0) {
+            currentPath.append(".");
+          }
+          currentPath.append(part);
+          boolean isArray = arraysFields.contains(currentPath.toString());
+          if (isArray) {
+            if (!current.containsKey(part)) {
+              current.put(part, new Document("$map", new Document()
+                      .append("input", "$$" + itemName + "." + part).append("as", itemName)
+                      .append("in", new Document())));
+            }
+            current = current.get(part, Document.class).get("$map", Document.class).get("in", Document.class);
+          } else {
+            if (!current.containsKey(part)) {
+              current.put(part, new Document());
+            }
+            current = (Document) current.get(part);
+          }
         }
-        current = (Document) current.get(part);
-      }
 
-      String lastPart = parts[parts.length - 1];
-      current.put(lastPart, "$$" + itemName + "." + fieldPath);
+        String lastPart = parts[parts.length - 1];
+        // TODO fix fieldPath
+        current.put(lastPart, "$$" + itemName + "." + fieldPath);
+      } else {
+        String[] parts = fieldPath.split("\\.");
+        Document current = root;
+        for (int i = 0; i < parts.length - 1; i++) {
+          String part = parts[i];
+          if (!current.containsKey(part)) {
+            current.put(part, new Document());
+          }
+          current = (Document) current.get(part);
+        }
+
+        String lastPart = parts[parts.length - 1];
+        current.put(lastPart, "$$" + itemName + "." + fieldPath);
+      }
     }
 
     return root;
+  }
+
+  private boolean isInsideArrayButNotArrayItself(
+      String fieldPath, java.util.Collection<String> arraysFields) {
+    if (arraysFields.contains(fieldPath)) {
+      return false;
+    }
+    for (String array : arraysFields) {
+      if (fieldPath.startsWith(array)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
