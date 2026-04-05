@@ -11,8 +11,8 @@ public class EntityMapping {
   @Override
   public String toString() {
     return "EntityMapping{"
-        + "database='"
-        + database
+        + "namespace='"
+        + namespace
         + '\''
         + ", table='"
         + table
@@ -25,9 +25,9 @@ public class EntityMapping {
         + '}';
   }
 
-  /** MongoDB database name */
-  @JsonProperty("database")
-  private String database;
+  /** EDM namespace name */
+  @JsonProperty("namespace")
+  private String namespace;
 
   /** EDM table name */
   @JsonProperty("table")
@@ -42,31 +42,31 @@ public class EntityMapping {
   private Map<String, PropertyMapping> properties;
 
   /**
-   * Returns the MongoDB database name.
+   * Returns the EDM namespace name.
    *
-   * @return the database name
+   * @return the EDM namespace name
    */
-  public String getDatabase() {
-    return database;
+  public String getNamespace() {
+    return namespace;
   }
 
   /**
-   * Sets the MongoDB database name.
+   * Sets the EDM namespace name.
    *
-   * @param database the database name
+   * @param namespace the EDM namespace name
    */
-  public void setDatabase(String database) {
-    this.database = database;
+  public void setNamespace(String namespace) {
+    this.namespace = namespace;
   }
 
   /**
-   * Sets the MongoDB database name.
+   * Sets the EDM namespace name.
    *
-   * @param database the database name
+   * @param namespace EDM namespace name
    * @return this entity mapping
    */
-  public EntityMapping withDatabase(String database) {
-    this.database = database;
+  public EntityMapping withNamespace(String namespace) {
+    this.namespace = namespace;
     return this;
   }
 
@@ -105,7 +105,7 @@ public class EntityMapping {
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
     EntityMapping that = (EntityMapping) o;
-    return Objects.equals(database, that.database)
+    return Objects.equals(namespace, that.namespace)
         && Objects.equals(table, that.table)
         && Objects.equals(rootPath, that.rootPath)
         && Objects.equals(properties, that.properties);
@@ -113,7 +113,7 @@ public class EntityMapping {
 
   @Override
   public int hashCode() {
-    return Objects.hash(database, table, rootPath, properties);
+    return Objects.hash(namespace, table, rootPath, properties);
   }
 
   /**

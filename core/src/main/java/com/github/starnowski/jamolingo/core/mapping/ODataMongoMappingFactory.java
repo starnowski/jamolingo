@@ -53,7 +53,7 @@ public class ODataMongoMappingFactory {
 
     EntityMapping entity = new EntityMapping();
 
-    entity.setDatabase(entityType.getNamespace());
+    entity.setNamespace(entityType.getNamespace());
     entity.setTable(defaultCollectionName(entityType));
     entity.setProperties(mapProperties(entityType));
     return entity;
