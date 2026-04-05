@@ -708,9 +708,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                 ]
                                             """,
             JSONCompareMode.STRICT),
+            // Testing skip and orderby for 1st level only query that use under hood $lookup
             Arguments.of(
                     Set.of(1),
-                    "$expand=treeType2s($skip=1;$top=1;$orderby=index asc)",
+                    "$expand=treeType2s($skip=1;$orderby=index asc)",
                     """
                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [
@@ -719,7 +720,20 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                      ]
                                                     }]
                                                     """,
-                    JSONCompareMode.LENIENT));
+                    JSONCompareMode.LENIENT),
+            // Testing skip, index and orderby for 1st level only query that use under hood $lookup
+            Arguments.of(
+                    Set.of(1),
+                    "$expand=treeType2s($skip=1;$top=1;$orderby=index asc;$select=index)",
+                    """
+                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                     "treeType2s": [
+                                                     { "index": 2}
+                                                     ]
+                                                    }]
+                                                    """,
+                    JSONCompareMode.LENIENT)
+    );
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document
