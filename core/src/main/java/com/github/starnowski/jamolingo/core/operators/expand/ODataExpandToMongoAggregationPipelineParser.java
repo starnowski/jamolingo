@@ -253,11 +253,19 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .append("localField", mongoStartWith)
                 .append("foreignField", mongoConnectTo);
 
-        if (eOption.getFilterOption() != null || eOption.getOrderByOption() != null) {
+        if (eOption.getFilterOption() != null
+            || eOption.getOrderByOption() != null
+            || eOption.getTopOption() != null
+            || eOption.getSkipOption() != null
+            || eOption.getSelectOption() != null) {
           ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
               new ODataFilterToMongoMatchParser();
           OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
               new OdataOrderByToMongoSortParser();
+          OdataTopToMongoLimitParser odataTopToMongoLimitParser = new OdataTopToMongoLimitParser();
+          OdataSkipToMongoSkipParser odataSkipToMongoSkipParser = new OdataSkipToMongoSkipParser();
+          OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
+              new OdataSelectToMongoProjectParser();
           EdmMongoContextFacade facade =
               DefaultEdmMongoContextFacade.builder()
                   .withEntityPropertiesMongoPathContext(null)
@@ -273,6 +281,20 @@ public class ODataExpandToMongoAggregationPipelineParser {
             lookupPipeline.addAll(
                 odataOrderByToMongoSortParser
                     .parse(eOption.getOrderByOption(), facade)
+                    .getStageObjects());
+          }
+          if (eOption.getSkipOption() != null) {
+            lookupPipeline.addAll(
+                odataSkipToMongoSkipParser.parse(eOption.getSkipOption()).getStageObjects());
+          }
+          if (eOption.getTopOption() != null) {
+            lookupPipeline.addAll(
+                odataTopToMongoLimitParser.parse(eOption.getTopOption()).getStageObjects());
+          }
+          if (eOption.getSelectOption() != null) {
+            lookupPipeline.addAll(
+                odataSelectToMongoProjectParser
+                    .parse(eOption.getSelectOption(), facade)
                     .getStageObjects());
           }
           lookupInnerObject.append("pipeline", lookupPipeline);
