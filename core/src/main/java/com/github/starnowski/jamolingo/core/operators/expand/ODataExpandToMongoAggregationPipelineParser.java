@@ -125,7 +125,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
               .get(new KeyValue<>(targetEntityType.getNamespace(), targetEntityType.getName()));
 
       String targetCollection =
-          mongoCollectionName == null ? targetEntityType.getName() : mongoCollectionName;
+          mongoCollectionName == null
+              ? targetEntityType.getFullQualifiedName().getFullQualifiedNameAsString()
+              : mongoCollectionName;
       List<Bson> pipeline = new ArrayList<>();
 
       if (eOption.getLevelsOption() != null

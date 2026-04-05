@@ -1,5 +1,7 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree;
 
+import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
+
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
@@ -33,8 +35,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
 
 // TODO Change approach, by default the default component is going to write to the collection with
 // name MyService.Category.
@@ -731,7 +731,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
           ODataApplicationException,
           JSONException {
     // GIVEN
-    MongoDatabase database = mongoClient.getDatabase("testDB");
+    MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
     MongoCollection<Document> collection = database.getCollection("MyService.TreeType1");
     Edm edm = loadEmdProvider("edm/tree_types.xml");
     UriInfo uriInfo =
