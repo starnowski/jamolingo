@@ -81,7 +81,11 @@ public class SelectOperatorResultToBsonDocumentConverter {
 
         String lastPart = parts[parts.length - 1];
         String valuePathString = valuePath.isEmpty() ? lastPart : valuePath + "." + lastPart;
-        current.put(lastPart, "$$" + itemName + "." + valuePathString);
+        current.put(
+            lastPart,
+            "$$"
+                + itemName
+                + (valuePathString.startsWith(".") ? valuePathString : "." + valuePathString));
       } else {
         String[] parts = fieldPath.split("\\.");
         Document current = root;

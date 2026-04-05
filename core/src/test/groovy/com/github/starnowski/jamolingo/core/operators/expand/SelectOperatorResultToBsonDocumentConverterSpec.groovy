@@ -129,6 +129,38 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
                                 }
                             }
                         """
+                ],
+                // Array element contains complex type (Flat.number)
+                [
+                        "currentItem",
+                        ["plainString", "Name", "Addresses.Street", "Addresses.Flat.number", "Addresses.ZipCode", "Addresses.BackUpAddresses.ZipCode"],
+                        ["Addresses", "Addresses.BackUpAddresses"],
+                        """
+                            {
+                                "plainString": "\$\$currentItem.plainString",
+                                "Name": "\$\$currentItem.Name",
+                                "Addresses": {
+                                "\$map": {
+                                "input": "\$\$currentItem.Addresses",
+                                "as": "currentItem",
+                                "in": {
+                                    "Flat": { "number": "\$\$currentItem.Flat.number" },
+                                    "Street": "\$\$currentItem.Street",
+                                    "ZipCode": "\$\$currentItem.ZipCode",
+                                    "BackUpAddresses": {
+                                        "\$map": {
+                                            "input": "\$\$currentItem.BackUpAddresses",
+                                            "as": "currentItem",
+                                            "in": {
+                                                "ZipCode": "\$\$currentItem.ZipCode"
+                                            }
+                                        }
+                                    }
+                                    }
+                                }
+                                }
+                            }
+                        """
                 ]
         ]
     }
