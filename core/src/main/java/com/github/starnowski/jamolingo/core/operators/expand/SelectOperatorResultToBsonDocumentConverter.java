@@ -44,20 +44,33 @@ public class SelectOperatorResultToBsonDocumentConverter {
         String[] parts = fieldPath.split("\\.");
         Document current = root;
         StringBuilder currentPath = new StringBuilder();
+        StringBuilder valuePath = new StringBuilder();
         for (int i = 0; i < parts.length - 1; i++) {
           String part = parts[i];
           if (i > 0) {
             currentPath.append(".");
+            valuePath.append(".");
           }
           currentPath.append(part);
+          valuePath.append(part);
           boolean isArray = arraysFields.contains(currentPath.toString());
           if (isArray) {
             if (!current.containsKey(part)) {
-              current.put(part, new Document("$map", new Document()
-                      .append("input", "$$" + itemName + "." + part).append("as", itemName)
-                      .append("in", new Document())));
+              current.put(
+                  part,
+                  new Document(
+                      "$map",
+                      new Document()
+                          .append("input", "$$" + itemName + "." + part)
+                          .append("as", itemName)
+                          .append("in", new Document())));
             }
-            current = current.get(part, Document.class).get("$map", Document.class).get("in", Document.class);
+            current =
+                current
+                    .get(part, Document.class)
+                    .get("$map", Document.class)
+                    .get("in", Document.class);
+            valuePath = new StringBuilder();
           } else {
             if (!current.containsKey(part)) {
               current.put(part, new Document());
@@ -67,8 +80,8 @@ public class SelectOperatorResultToBsonDocumentConverter {
         }
 
         String lastPart = parts[parts.length - 1];
-        // TODO fix fieldPath
-        current.put(lastPart, "$$" + itemName + "." + fieldPath);
+        String valuePathString = valuePath.isEmpty() ? lastPart : valuePath + "." + lastPart;
+        current.put(lastPart, "$$" + itemName + "." + valuePathString);
       } else {
         String[] parts = fieldPath.split("\\.");
         Document current = root;
