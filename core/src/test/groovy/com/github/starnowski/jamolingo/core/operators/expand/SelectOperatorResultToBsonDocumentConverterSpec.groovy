@@ -161,6 +161,19 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
                                 }
                             }
                         """
+                ],
+                // With single array property Addresses but with all properties from array
+                [
+                        "currentItem",
+                        ["plainString", "Name", "Addresses"],
+                        ["Addresses"],
+                        """
+                            {
+                                "plainString": "\$\$currentItem.plainString",
+                                "Name": "\$\$currentItem.Name",
+                                "Addresses": "\$\$currentItem.Addresses"
+                            }
+                        """
                 ]
         ]
     }
