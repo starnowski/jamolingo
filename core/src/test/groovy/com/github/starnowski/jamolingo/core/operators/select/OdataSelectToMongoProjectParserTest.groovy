@@ -44,71 +44,71 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
     @Unroll
     def "should return expected stage bson object with default EdmMongoContextFacade with 1-to-1 edm to mongo mapping"() {
         given:
-        Bson expectedBson = loadBsonFromFile(bsonFile)
-        Edm edm = loadEmdProvider(edmConfigFile)
-        ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
-        def odataMapping = factory.build(edm.getSchema("Demo"))
-        def entityMapping = odataMapping.getEntities().get("Item")
-        EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
-        def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
+            Bson expectedBson = loadBsonFromFile(bsonFile)
+            Edm edm = loadEmdProvider(edmConfigFile)
+            ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+            def odataMapping = factory.build(edm.getSchema("Demo"))
+            def entityMapping = odataMapping.getEntities().get("Item")
+            EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+            def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
 
 
-        UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                .parseUri("Items",
-                        "\$select=" +
-                                selectFields.stream().filter(Objects::nonNull)
-                                        .filter(s -> !s.trim().isEmpty())
-                                        .collect(Collectors.joining(","))
-                        , null, null)
-        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri("Items",
+                            "\$select=" +
+                                    selectFields.stream().filter(Objects::nonNull)
+                                            .filter(s -> !s.trim().isEmpty())
+                                            .collect(Collectors.joining(","))
+                            , null, null)
+            OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
 
         when:
-        def result = tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null, null))
+            def result = tested.parse(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null, null))
 
         then:
-        result.getStageObject() == expectedBson
+            result.getStageObject() == expectedBson
 
         where:
-        [bsonFile, edmConfigFile, selectFields] << oneToOneEdmPathsMappings()
+            [bsonFile, edmConfigFile, selectFields] << oneToOneEdmPathsMappings()
         }
 
         @Unroll
         def "should return expected stage bson object with DefaultEdmMongoContextFacade where rootMongoPath is set"() {
         given:
-        Bson expectedBson = loadBsonFromFile(bsonFile)
-        Edm edm = loadEmdProvider(edmConfigFile)
-        ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
-        def odataMapping = factory.build(edm.getSchema("Demo"))
-        def entityMapping = odataMapping.getEntities().get("Item")
-        EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
-        def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
+            Bson expectedBson = loadBsonFromFile(bsonFile)
+            Edm edm = loadEmdProvider(edmConfigFile)
+            ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+            def odataMapping = factory.build(edm.getSchema("Demo"))
+            def entityMapping = odataMapping.getEntities().get("Item")
+            EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+            def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
 
 
-        UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                .parseUri("Items",
-                        "\$select=" +
-                                selectFields.stream().filter(Objects::nonNull)
-                                        .filter(s -> !s.trim().isEmpty())
-                                        .collect(Collectors.joining(","))
-                        , null, null)
-        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri("Items",
+                            "\$select=" +
+                                    selectFields.stream().filter(Objects::nonNull)
+                                            .filter(s -> !s.trim().isEmpty())
+                                            .collect(Collectors.joining(","))
+                            , null, null)
+            OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
 
         when:
-        def result = tested.parse(uriInfo.getSelectOption(), DefaultEdmMongoContextFacade.builder()
-                .withEntityPropertiesMongoPathContext(context)
-                .withRootMongoPath(rootMongoPath)
-                .build())
+            def result = tested.parse(uriInfo.getSelectOption(), DefaultEdmMongoContextFacade.builder()
+                    .withEntityPropertiesMongoPathContext(context)
+                    .withRootMongoPath(rootMongoPath)
+                    .build())
 
         then:
-        result.getStageObject() == expectedBson
+            result.getStageObject() == expectedBson
 
         where:
-        bsonFile | edmConfigFile | selectFields | rootMongoPath
-        "select/stages/case1_with_root_path.json" | "edm/edm1.xml" | ["plainString"] | "root"
-        "select/stages/case2_with_root_path.json" | "edm/edm2_with_nested_collections.xml" | ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"] | "nested.root"
+            bsonFile | edmConfigFile | selectFields | rootMongoPath
+            "select/stages/case1_with_root_path.json" | "edm/edm1.xml" | ["plainString"] | "root"
+            "select/stages/case2_with_root_path.json" | "edm/edm2_with_nested_collections.xml" | ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"] | "nested.root"
         }
 
-        static oneToOneEdmPathsMappings() {
+    static oneToOneEdmPathsMappings() {
 
         [
                 ["select/stages/case1.json"       ,  "edm/edm1.xml"  , ["plainString"]],
@@ -118,6 +118,43 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
                 ["select/stages/case3_with_nested_complexType_circular_reference.json"       ,  "edm/edm2_complextype_with_circular_reference.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"]], // ExpandAsterisk = false
                 ["select/stages/case3_with_nested_complexType_circular_reference.json"       ,  "edm/edm3_complextype_with_circular_reference_collection.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"]] // ExpandAsterisk = false
         ]
+    }
+
+    static oneToOneEdmPathsMappingsWithExpectedSelectedFieldsAndArrayFields() {
+
+        [
+                ["edm/edm1.xml"  , ["plainString"], ["plainString"], []],
+                ["edm/edm1.xml"  , ["*"], [], []],// ExpandAsterisk = false
+                ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode"], []], // ExpandAsterisk = false
+                ["edm/edm2_with_nested_collections.xml"  , ["plainString", "Name", "Addresses"], ["plainString", "Name", "Addresses"], []], // ExpandAsterisk = false
+                ["edm/edm2_complextype_with_circular_reference.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode", "Addresses.BackUpAddresses.ZipCode"], []], // ExpandAsterisk = false
+                ["edm/edm3_complextype_with_circular_reference_collection.xml"  , ["plainString", "Name", "Addresses/Street", "Addresses/ZipCode", "Addresses/BackUpAddresses/ZipCode"], ["plainString", "Name", "Addresses.Street", "Addresses.ZipCode", "Addresses.BackUpAddresses.ZipCode"], ["Addresses", "Addresses.BackUpAddresses"]] // ExpandAsterisk = false
+        ]
+    }
+
+    @Unroll
+    def "should return expected values for the map operator"(){
+        given:
+        Edm edm = loadEmdProvider(edmConfigFile)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("Items",
+                        "\$select=" +
+                                selectFields.stream().filter(Objects::nonNull)
+                                        .filter(s -> !s.trim().isEmpty())
+                                        .collect(Collectors.joining(","))
+                        , null, null)
+        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+
+        when:
+            def result = tested.computeValueForMapOperator(uriInfo.getSelectOption())
+
+        then:
+            result.getSelectedFields() == expectedSelecteFields
+            result.getArrayFields() == expectedArrayFields
+
+        where:
+        [edmConfigFile, selectFields, expectedSelecteFields, expectedArrayFields] << oneToOneEdmPathsMappingsWithExpectedSelectedFieldsAndArrayFields()
     }
 
 
