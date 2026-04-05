@@ -196,6 +196,45 @@ class SelectOperatorResultToBsonDocumentConverterSpec extends Specification {
                             }
                         """
                 ],
+                [
+                        "currentItem",
+                        ["plainString", "Name", "Addresses.Street", "Addresses.BackUpAddresses.BackUpAddresses.Street", "Addresses.ZipCode", "Addresses.BackUpAddresses.ZipCode"],
+                        ["Addresses", "Addresses.BackUpAddresses.BackUpAddresses", "Addresses.BackUpAddresses"],
+                        """
+                            {
+                                "plainString": "\$\$currentItem.plainString",
+                                "Name": "\$\$currentItem.Name",
+                                "Addresses": {
+                                "\$map": {
+                                "input": "\$\$currentItem.Addresses",
+                                "as": "currentItem",
+                                "in": {
+                                    "Street": "\$\$currentItem.Street",
+                                    "ZipCode": "\$\$currentItem.ZipCode",
+                                    "BackUpAddresses": {
+                                        "\$map": {
+                                            "input": "\$\$currentItem.BackUpAddresses",
+                                            "as": "currentItem",
+                                            "in": {
+                                                "ZipCode": "\$\$currentItem.ZipCode",
+                                                "BackUpAddresses": {
+                                                    "\$map": {
+                                                        "input": "\$\$currentItem.BackUpAddresses",
+                                                        "as": "currentItem",
+                                                        "in": {
+                                                            "Street": "\$\$currentItem.Street"
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    }
+                                }
+                                }
+                            }
+                        """
+                ]
         ]
     }
 }
