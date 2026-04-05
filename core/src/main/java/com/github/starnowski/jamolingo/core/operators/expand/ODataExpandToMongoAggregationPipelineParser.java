@@ -9,6 +9,8 @@ import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMong
 import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
 import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorOptionsForMapOperator;
+import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser;
+import com.github.starnowski.jamolingo.core.operators.top.OdataTopToMongoLimitParser;
 import java.util.*;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
