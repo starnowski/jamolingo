@@ -157,7 +157,33 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
         [edmConfigFile, selectFields, expectedSelecteFields, expectedArrayFields] << oneToOneEdmPathsMappingsWithExpectedSelectedFieldsAndArrayFields()
     }
 
+    @Unroll
+    def "should determine if wildcard is used for the map operator"(){
+        given:
+            Edm edm = loadEmdProvider(edmConfigFile)
 
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri("Items",
+                            "\$select=" +
+                                    selectFields.stream().filter(Objects::nonNull)
+                                            .filter(s -> !s.trim().isEmpty())
+                                            .collect(Collectors.joining(","))
+                            , null, null)
+            OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+
+        when:
+            def result = tested.computeValueForMapOperator(uriInfo.getSelectOption())
+
+        then:
+            result.isWildCard() == expectedWildcard
+
+        where:
+            [edmConfigFile, selectFields, expectedWildcard] <<
+                [
+                        ["edm/edm1.xml"  , ["plainString"], false],
+                        ["edm/edm1.xml"  , ["*"], true]
+                ]
+    }
 
     // TODO ExpandAsterisk = true (all fields defined in EDM)
 
