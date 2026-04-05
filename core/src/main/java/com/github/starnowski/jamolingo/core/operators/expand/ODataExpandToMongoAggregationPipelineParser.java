@@ -8,7 +8,7 @@ import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoM
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
-import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorOptionsForMapOperator;
 import java.util.*;
 import org.apache.olingo.commons.api.edm.EdmEntityType;
 import org.apache.olingo.commons.api.edm.EdmNavigationProperty;
@@ -187,6 +187,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           pipeline.add(
               prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
                   navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
+
           pipeline.add(
               new Document("$unset", navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX));
         }
@@ -199,18 +200,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // TODO remove it
           OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
               new OdataSelectToMongoProjectParser();
-          SelectOperatorResult selectResult =
-              odataSelectToMongoProjectParser.parse(
-                  eOption.getSelectOption(),
-                  DefaultEdmMongoContextFacade.builder()
-                      .withRootMongoPath(navProp.getName())
-                      .build());
+          SelectOperatorOptionsForMapOperator selectResult =
+              odataSelectToMongoProjectParser.computeValueForMapOperator(eOption.getSelectOption());
           // TODO create object that returns select properties for graphLookup
           // TODO It should return the SelectOperatorResult operator that should be applied instead
           // of just the fields names
           // TODO Create helper component that combine selected fields from the SelectOperatorResult
           // collection
-          pipeline.add(selectResult.getStageObject());
+
+          pipeline.add(prepareArrayWithSelectedProperties(navProp, selectResult));
         }
         if (removeDepthProperty) {
           // Removing the "depthVariable" property from results
@@ -265,6 +263,30 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
     }
     return List.of();
+  }
+
+  private static Bson prepareArrayWithSelectedProperties(
+      EdmNavigationProperty navProp, SelectOperatorOptionsForMapOperator selectResult) {
+    SelectOperatorResultToBsonDocumentConverter selectOptionToMapConverter =
+        new SelectOperatorResultToBsonDocumentConverter();
+    Document mapObject =
+        selectOptionToMapConverter.convert(
+            selectResult.getSelectedFields(), "item", selectResult.getArrayFields());
+    return Document.parse(
+        """
+                {
+                    $set: {
+                      %1$s: {
+                        $map: {
+                          input: { $ifNull: ["$%1$s", []] },
+                          as: "item",
+                          in: %2$s
+                        }
+                      }
+                    }
+                  }
+                """
+            .formatted(navProp.getName(), mapObject.toJson()));
   }
 
   /**
