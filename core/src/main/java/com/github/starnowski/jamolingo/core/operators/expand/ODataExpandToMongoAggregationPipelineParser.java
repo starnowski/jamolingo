@@ -73,8 +73,24 @@ public class ODataExpandToMongoAggregationPipelineParser {
     return new DefaultExpandOperatorResult(stageObjects);
   }
 
+  private ExpandOperatorResult parse(
+          ExpandOption expandOption, ExpandParserContext expandParserContext,
+          String root)
+          throws ExpressionVisitException, ODataApplicationException {
+    List<Bson> stageObjects = new ArrayList<>();
+    for (ExpandItem eOption : expandOption.getExpandItems()) {
+      stageObjects.addAll(prepareStageObjectsForExpandItem(eOption, expandParserContext, root));
+    }
+    return new DefaultExpandOperatorResult(stageObjects);
+  }
+
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
-      ExpandItem eOption, ExpandParserContext expandParserContext)
+          ExpandItem eOption, ExpandParserContext expandParserContext) throws ExpressionVisitException, ODataApplicationException {
+    return prepareStageObjectsForExpandItem(eOption, expandParserContext, null);
+  }
+
+  private Collection<? extends Bson> prepareStageObjectsForExpandItem(
+      ExpandItem eOption, ExpandParserContext expandParserContext, String root)
       throws ExpressionVisitException, ODataApplicationException {
     UriResource lastResource =
         eOption
@@ -133,6 +149,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
               ? targetEntityType.getFullQualifiedName().getFullQualifiedNameAsString()
               : mongoCollectionName;
       List<Bson> pipeline = new ArrayList<>();
+
+      String navPropertyWithRootPrefix = root == null ? navProp.getName() : root + "." + navProp.getName();
 
       if (eOption.getLevelsOption() != null
           && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)) {
@@ -249,10 +267,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
       } else {
         // Adding $lookup
         Document lookup = new Document();
+        String lookupMongoStartWith = root == null? mongoStartWith : root + "." + mongoStartWith;
         Document lookupInnerObject =
             new Document()
                 .append("from", targetCollection)
-                .append("localField", mongoStartWith)
+                .append("localField", lookupMongoStartWith)
                 .append("foreignField", mongoConnectTo);
 
         if (eOption.getFilterOption() != null
@@ -301,7 +320,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           }
           lookupInnerObject.append("pipeline", lookupPipeline);
         }
-        lookupInnerObject.append("as", navProp.getName());
+        lookupInnerObject.append("as", navPropertyWithRootPrefix);
         lookup.append("$lookup", lookupInnerObject);
         pipeline.add(lookup);
         if (!navProp.isCollection()) {
@@ -312,8 +331,20 @@ public class ODataExpandToMongoAggregationPipelineParser {
           pipeline.add(
               new Document(
                   "$unwind",
-                  new Document("path", "$" + navProp.getName())
+                  new Document("path", "$" + navPropertyWithRootPrefix)
                       .append("preserveNullAndEmptyArrays", true)));
+        }
+        if (eOption.getExpandOption() != null) {
+          if (navProp.isCollection()) {
+            new Document(
+                    "$unwind",
+                    new Document("path", "$" + navProp.getName())
+                            .append("preserveNullAndEmptyArrays", true));
+          }
+          ExpandOperatorResult nestedExpandResult = parse(eOption.getExpandOption(), expandParserContext, navPropertyWithRootPrefix);
+          pipeline.addAll(nestedExpandResult.getStageObjects());
+
+          //TODO group if nav is collection
         }
         return pipeline;
       }
