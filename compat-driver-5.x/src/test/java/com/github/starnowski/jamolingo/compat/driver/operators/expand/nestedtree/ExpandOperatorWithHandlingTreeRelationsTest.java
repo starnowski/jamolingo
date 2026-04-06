@@ -742,7 +742,9 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                              "children": [
                                                 { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
                                                     "treeType2s": [
-                                                        { "_id": 4, "index": 4, "parentId": 2, "categoryId": 1, "treeType1Id": 1 }
+                                                        {"_id":4,"index":4,"categoryId":1},
+                                                        {"_id":5,"index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
+                                                        {"_id":6,"index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
                                                     ]
                                                 },
                                                 { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1,

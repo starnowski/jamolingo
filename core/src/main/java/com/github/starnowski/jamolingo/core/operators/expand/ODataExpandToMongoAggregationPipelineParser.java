@@ -41,8 +41,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
   public static final String ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX =
       "_odata_graphlookup_tmp_array";
 
-  public static final String  ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX = "_odata_merge_tmp_array";
-  public static final String  ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX = "_odata_merge_tmp_rootdata";
+  public static final String ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX = "_odata_merge_tmp_array";
+  public static final String ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX =
+      "_odata_merge_tmp_rootdata";
 
   /**
    * Parses the given OData expand option into expansion operator result using default context.
@@ -77,9 +78,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
   }
 
   private ExpandOperatorResult parse(
-          ExpandOption expandOption, ExpandParserContext expandParserContext,
-          String root)
-          throws ExpressionVisitException, ODataApplicationException {
+      ExpandOption expandOption, ExpandParserContext expandParserContext, String root)
+      throws ExpressionVisitException, ODataApplicationException {
     List<Bson> stageObjects = new ArrayList<>();
     for (ExpandItem eOption : expandOption.getExpandItems()) {
       stageObjects.addAll(prepareStageObjectsForExpandItem(eOption, expandParserContext, root));
@@ -88,7 +88,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
   }
 
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
-          ExpandItem eOption, ExpandParserContext expandParserContext) throws ExpressionVisitException, ODataApplicationException {
+      ExpandItem eOption, ExpandParserContext expandParserContext)
+      throws ExpressionVisitException, ODataApplicationException {
     return prepareStageObjectsForExpandItem(eOption, expandParserContext, null);
   }
 
@@ -153,7 +154,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
               : mongoCollectionName;
       List<Bson> pipeline = new ArrayList<>();
 
-      String navPropertyWithRootPrefix = root == null ? navProp.getName() : root + "." + navProp.getName();
+      String navPropertyWithRootPrefix =
+          root == null ? navProp.getName() : root + "." + navProp.getName();
 
       if (eOption.getLevelsOption() != null
           && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)) {
@@ -270,7 +272,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       } else {
         // Adding $lookup
         Document lookup = new Document();
-        String lookupMongoStartWith = root == null? mongoStartWith : root + "." + mongoStartWith;
+        String lookupMongoStartWith = root == null ? mongoStartWith : root + "." + mongoStartWith;
         Document lookupInnerObject =
             new Document()
                 .append("from", targetCollection)
@@ -339,16 +341,19 @@ public class ODataExpandToMongoAggregationPipelineParser {
         }
         if (eOption.getExpandOption() != null) {
           if (navProp.isCollection()) {
-            pipeline.add(new Document(
+            pipeline.add(
+                new Document(
                     "$unwind",
                     new Document("path", "$" + navPropertyWithRootPrefix)
-                            .append("preserveNullAndEmptyArrays", true)));
+                        .append("preserveNullAndEmptyArrays", true)));
           }
-          ExpandOperatorResult nestedExpandResult = parse(eOption.getExpandOption(), expandParserContext, navPropertyWithRootPrefix);
+          ExpandOperatorResult nestedExpandResult =
+              parse(eOption.getExpandOption(), expandParserContext, navPropertyWithRootPrefix);
           pipeline.addAll(nestedExpandResult.getStageObjects());
-          pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
+          pipeline.addAll(
+              prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
 
-          //TODO group if nav is collection
+          // TODO group if nav is collection
         }
         return pipeline;
       }
@@ -356,10 +361,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
     return List.of();
   }
 
-  private Collection<? extends Bson> prepareMergingDocumentStages(String navPropertyWithRootPrefix, String lookupMongoStartWith) {
+  private Collection<? extends Bson> prepareMergingDocumentStages(
+      String navPropertyWithRootPrefix, String lookupMongoStartWith) {
     List<Bson> results = new ArrayList<>();
-    //TODO setting _id strategy
-    results.add(Document.parse(
+    // TODO setting _id strategy
+    results.add(
+        Document.parse(
             """
                     {
                              $group: {
@@ -368,9 +375,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                %4$s: { $first: "$$ROOT" }
                              }
                            }
-                 """.formatted(lookupMongoStartWith, navPropertyWithRootPrefix, navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX, navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX)
-    ));
-    results.add(Document.parse(
+                 """
+                .formatted(
+                    lookupMongoStartWith,
+                    navPropertyWithRootPrefix,
+                    navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX,
+                    navPropertyWithRootPrefix
+                        + ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX)));
+    results.add(
+        Document.parse(
             """
               {
                 $replaceRoot: {
@@ -382,8 +395,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   }
                 }
               }
-              """.formatted(navPropertyWithRootPrefix, navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX, navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX)
-    ));
+              """
+                .formatted(
+                    navPropertyWithRootPrefix,
+                    navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX,
+                    navPropertyWithRootPrefix
+                        + ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX)));
     return results;
   }
 
