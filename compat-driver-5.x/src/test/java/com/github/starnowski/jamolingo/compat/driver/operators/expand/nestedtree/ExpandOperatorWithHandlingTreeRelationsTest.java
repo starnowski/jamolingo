@@ -732,6 +732,25 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                      ]
                                                     }]
                                                     """,
+            JSONCompareMode.LENIENT),
+        // Nested level 1 with root level 1
+        Arguments.of(
+            Set.of(1),
+            "$expand=children($expand=treeType2s)",
+            """
+                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                             "children": [
+                                                { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                    "treeType2s": [
+                                                        { "_id": 4, "index": 4, "parentId": 2, "categoryId": 1, "treeType1Id": 1 }
+                                                    ]
+                                                },
+                                                { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1,
+                                                    "treeType2s": []
+                                                 }
+                                             ]
+                                            }]
+                                            """,
             JSONCompareMode.LENIENT));
   }
 
