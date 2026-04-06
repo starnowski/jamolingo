@@ -41,6 +41,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
   public static final String ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX =
       "_odata_graphlookup_tmp_array";
 
+  public static final String  ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX = "_odata_merge_tmp_array";
+  public static final String  ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX = "_odata_merge_tmp_rootdata";
+
   /**
    * Parses the given OData expand option into expansion operator result using default context.
    *
@@ -343,6 +346,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           }
           ExpandOperatorResult nestedExpandResult = parse(eOption.getExpandOption(), expandParserContext, navPropertyWithRootPrefix);
           pipeline.addAll(nestedExpandResult.getStageObjects());
+          pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
 
           //TODO group if nav is collection
         }
@@ -350,6 +354,37 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
     }
     return List.of();
+  }
+
+  private Collection<? extends Bson> prepareMergingDocumentStages(String navPropertyWithRootPrefix, String lookupMongoStartWith) {
+    List<Bson> results = new ArrayList<>();
+    //TODO setting _id strategy
+    results.add(Document.parse(
+            """
+                    {
+                             $group: {
+                               _id: "$%1$s",
+                               %3$s: { $push: "$%2$s" },
+                               %4$s: { $first: "$$ROOT" }
+                             }
+                           }
+                 """.formatted(lookupMongoStartWith, navPropertyWithRootPrefix, navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX, navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX)
+    ));
+    results.add(Document.parse(
+            """
+              {
+                $replaceRoot: {
+                  newRoot: {
+                    $mergeObjects: [
+                      "$%3$s",
+                      { %1$s: "$%2$s" }
+                    ]
+                  }
+                }
+              }
+              """.formatted(navPropertyWithRootPrefix, navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ARRAY_SUFFIX, navPropertyWithRootPrefix + ODATA_MERGING_STAGE_TMP_ROOT_DATA_PROPERTY_SUFFIX)
+    ));
+    return results;
   }
 
   private static Bson prepareArrayWithSelectedProperties(
