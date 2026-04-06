@@ -336,10 +336,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
         }
         if (eOption.getExpandOption() != null) {
           if (navProp.isCollection()) {
-            new Document(
+            pipeline.add(new Document(
                     "$unwind",
-                    new Document("path", "$" + navProp.getName())
-                            .append("preserveNullAndEmptyArrays", true));
+                    new Document("path", "$" + navPropertyWithRootPrefix)
+                            .append("preserveNullAndEmptyArrays", true)));
           }
           ExpandOperatorResult nestedExpandResult = parse(eOption.getExpandOption(), expandParserContext, navPropertyWithRootPrefix);
           pipeline.addAll(nestedExpandResult.getStageObjects());
