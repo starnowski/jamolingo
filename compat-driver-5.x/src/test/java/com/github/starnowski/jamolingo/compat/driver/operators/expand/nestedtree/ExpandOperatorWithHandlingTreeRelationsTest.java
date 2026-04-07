@@ -5,6 +5,7 @@ import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nes
 
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
+import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
@@ -209,7 +210,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
     // TODO Check in for category (that is single property and not collection) we can specify the
     // $levels > 1
     return Stream.of(
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=category",
             """
@@ -218,7 +219,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             }]
                             """,
             JSONCompareMode.LENIENT),
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=category,children",
             """
@@ -230,7 +231,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                     }]
                                     """,
             JSONCompareMode.LENIENT),
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=category,children,treeType2s",
             """
@@ -246,7 +247,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                             """,
             JSONCompareMode.LENIENT),
         // Level without filters
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=5)",
             """
@@ -262,7 +263,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                             """,
             JSONCompareMode.LENIENT),
         // Level with max=5
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=max)",
             """
@@ -284,7 +285,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // The document with id 2 is also an ancestor for document with id 8 but because level
         // recursion in this is 5
         // then the document is going to be returned by query
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1, 2),
             "$expand=children($levels=max)",
             """
@@ -312,7 +313,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             JSONCompareMode.LENIENT),
         // Level with filters
         // Filter with condition that TreeType2 grandfather and parent only pass, the child not
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=treeType2s($levels=5;$filter=index in (1, 2))",
             """
@@ -329,7 +330,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // condition then children should not be returned
 
         // Level with filters that condition pass for all children in the specified depth
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (2, 3, 4))",
             """
@@ -346,7 +347,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // is not going be
         // returned in array because it parent document with id 3 does not pass condition.
         // Parent document with id 3 is not going to be returned in the list
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (2, 4))",
             """
@@ -361,7 +362,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         // Parent document with id 2 is not going to be returned in the list, that means that
         // documents with ids
         // 3 and 4 are not going to be returned. The children array should be empty
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (3, 4))",
             """
@@ -372,7 +373,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                     """,
             JSONCompareMode.NON_EXTENSIBLE),
         // Level with max=5 with asc ordering by index
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=max;$orderby=index asc)",
             """
@@ -389,7 +390,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                             """,
             JSONCompareMode.STRICT_ORDER),
         // Level with max=5 with asc ordering by index
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=max;$orderby=index desc)",
             """
@@ -406,7 +407,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                             """,
             JSONCompareMode.STRICT_ORDER),
         // Expand level handle by $lookup stage and order by index with asc order
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=treeType2s($orderby=index asc)",
             """
@@ -420,7 +421,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                     """,
             JSONCompareMode.STRICT_ORDER),
         // Expand level handle by $lookup stage and order by index with desc order
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=treeType2s($orderby=index desc)",
             """
@@ -433,7 +434,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                     }]
                                                     """,
             JSONCompareMode.STRICT_ORDER),
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),
             "$expand=children($levels=max)",
             """
@@ -533,7 +534,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             	]
                             """,
             JSONCompareMode.NON_EXTENSIBLE),
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),
             "$expand=children($levels=max;$top=2;$orderby=index asc)",
             """
@@ -597,7 +598,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             	]
                             """,
             JSONCompareMode.STRICT),
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),
             "$expand=children($levels=max;$top=2;$orderby=index desc)",
             """
@@ -643,7 +644,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                         ]
                                     """,
             JSONCompareMode.STRICT),
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),
             "$expand=children($levels=max;$skip=1;$top=2;$orderby=index asc)",
             """
@@ -682,7 +683,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                         ]
                                     """,
             JSONCompareMode.STRICT),
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),
             "$expand=children($levels=max;$skip=1;$top=2;$orderby=index asc;$select=index)",
             """
@@ -710,7 +711,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                             """,
             JSONCompareMode.STRICT),
         // Testing skip and orderby for 1st level only query that use under hood $lookup
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=treeType2s($skip=1;$orderby=index asc)",
             """
@@ -723,7 +724,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                     """,
             JSONCompareMode.LENIENT),
         // Testing skip, index and orderby for 1st level only query that use under hood $lookup
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=treeType2s($skip=1;$top=1;$orderby=index asc;$select=index)",
             """
@@ -735,7 +736,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                     """,
             JSONCompareMode.LENIENT),
         // Nested level 1 with root level 1
-        Arguments.of(
+        Arguments.of(TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($expand=treeType2s)",
             """
@@ -767,6 +768,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
   @ParameterizedTest
   @MethodSource("provideData")
   public void shouldReturnExpectedDocumentsForExpandOperator(
+          KeyValue<String, String> rootMongoCollection,
       Set<Integer> ids, String expandPart, String expectedJson, JSONCompareMode jsonCompareMode)
       throws UriValidationException,
           UriParserException,
@@ -776,10 +778,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
           JSONException {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
-    MongoCollection<Document> collection = database.getCollection("MyService.TreeType1");
+    MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
     Edm edm = loadEmdProvider("edm/tree_types.xml");
     UriInfo uriInfo =
-        new Parser(edm, OData.newInstance()).parseUri("treeType1s", expandPart, null, null);
+        new Parser(edm, OData.newInstance()).parseUri(rootMongoCollection.getValue(), expandPart, null, null);
     ODataExpandToMongoAggregationPipelineParser tested =
         new ODataExpandToMongoAggregationPipelineParser();
 
