@@ -352,7 +352,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           pipeline.addAll(nestedExpandResult.getStageObjects());
           if (navProp.isCollection()) {
             pipeline.addAll(
-                    prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
+                prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
           }
           // TODO group if nav is collection
         }
