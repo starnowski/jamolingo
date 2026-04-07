@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree;
 
 import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
+import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTestProperties.*;
 
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
@@ -41,163 +42,163 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
     mongoDocuments = {
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.Category",
+          collection = CATEGORY_COLLECTION,
           bsonFilePath = "bson/expand/tree/category1.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.Category",
+          collection = CATEGORY_COLLECTION,
           bsonFilePath = "bson/expand/tree/category2.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_2.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_3.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_4.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_5.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_6.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_7.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_8.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_10.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_11_p_t1_10.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_12_p_t1_10.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_13_p_t1_10.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_14_p_t1_11.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_15_p_t1_11.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_16_p_t1_11.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_17_p_t1_12.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_18_p_t1_12.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_19_p_t1_12.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_20_p_t1_13.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_21_p_t1_14.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_22_p_t1_14.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_23_p_t1_14.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType1",
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_24_p_t1_14.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType2",
+          collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_1.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType2",
+          collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_2.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType2",
+          collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_3.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType2",
+          collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_2_t2_4.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType2",
+          collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_2_t2_5.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType2",
+          collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_2_t2_6.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType3",
+          collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType3",
+          collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_2.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType3",
+          collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_3.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType3",
+          collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_4.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType3",
+          collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_5.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType3",
+          collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_2_t2_4_t3_6.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType4",
+          collection = TREETYPE4_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_1.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType4",
+          collection = TREETYPE4_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_2.json"),
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = "MyService.TreeType4",
+          collection = TREETYPE4_COLLECTION,
           bsonFilePath = "bson/expand/tree/t1_1_t2_1_t3_1_t4_3.json")
     })
 @QuarkusTest
