@@ -78,11 +78,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
   }
 
   private ExpandOperatorResult parse(
-      ExpandOption expandOption, ExpandParserContext expandParserContext, String root)
+      ExpandOption expandOption, ExpandParserContext expandParserContext, ParserExpandItemContext parserExpandItemContext)
       throws ExpressionVisitException, ODataApplicationException {
     List<Bson> stageObjects = new ArrayList<>();
     for (ExpandItem eOption : expandOption.getExpandItems()) {
-      stageObjects.addAll(prepareStageObjectsForExpandItem(eOption, expandParserContext, root));
+      stageObjects.addAll(prepareStageObjectsForExpandItem(eOption, expandParserContext, parserExpandItemContext));
     }
     return new DefaultExpandOperatorResult(stageObjects);
   }
@@ -90,11 +90,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
       ExpandItem eOption, ExpandParserContext expandParserContext)
       throws ExpressionVisitException, ODataApplicationException {
-    return prepareStageObjectsForExpandItem(eOption, expandParserContext, null);
+    return prepareStageObjectsForExpandItem(eOption, expandParserContext, new ParserExpandItemContext(null, null));
   }
 
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
-      ExpandItem eOption, ExpandParserContext expandParserContext, String root)
+      ExpandItem eOption, ExpandParserContext expandParserContext, ParserExpandItemContext parserExpandItemContext)
       throws ExpressionVisitException, ODataApplicationException {
     UriResource lastResource =
         eOption
@@ -155,7 +155,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       List<Bson> pipeline = new ArrayList<>();
 
       String navPropertyWithRootPrefix =
-          root == null ? navProp.getName() : root + "." + navProp.getName();
+          parserExpandItemContext.getRoot() == null ? navProp.getName() : parserExpandItemContext.getRoot() + "." + navProp.getName();
 
       if (eOption.getLevelsOption() != null
           && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)) {
@@ -272,7 +272,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       } else {
         // Adding $lookup
         Document lookup = new Document();
-        String lookupMongoStartWith = root == null ? mongoStartWith : root + "." + mongoStartWith;
+        String lookupMongoStartWith = parserExpandItemContext.getRoot() == null ? mongoStartWith : parserExpandItemContext.getRoot() + "." + mongoStartWith;
         Document lookupInnerObject =
             new Document()
                 .append("from", targetCollection)
@@ -347,8 +347,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     new Document("path", "$" + navPropertyWithRootPrefix)
                         .append("preserveNullAndEmptyArrays", true)));
           }
+          Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
+          newIdProperties.add(parserExpandItemContext.getRoot() == null ? lookupMongoStartWith: parserExpandItemContext.getRoot() + "." + lookupMongoStartWith);
           ExpandOperatorResult nestedExpandResult =
-              parse(eOption.getExpandOption(), expandParserContext, navPropertyWithRootPrefix);
+              parse(eOption.getExpandOption(), expandParserContext, new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties));
           pipeline.addAll(nestedExpandResult.getStageObjects());
           if (navProp.isCollection()) {
             pipeline.addAll(
@@ -364,6 +366,25 @@ public class ODataExpandToMongoAggregationPipelineParser {
     return List.of();
   }
 
+  private static final class ParserExpandItemContext{
+    private final String root;
+
+    public ParserExpandItemContext(String root, Set<String> idProperties) {
+      this.root = root;
+      this.idProperties = Collections.unmodifiableSet(idProperties == null ? Collections.emptySet() : idProperties);
+    }
+
+    public String getRoot() {
+      return root;
+    }
+
+    public Set<String> getIdProperties() {
+      return idProperties;
+    }
+
+    private final Set<String> idProperties;
+  }
+
   private Collection<? extends Bson> prepareMergingDocumentStages(
       String navPropertyWithRootPrefix, String lookupMongoStartWith) {
     List<Bson> results = new ArrayList<>();
@@ -374,8 +395,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     {
                              $group: {
                                _id: "$%1$s",
-                               %3$s: { $push: "$%2$s" },
-                               %4$s: { $first: "$$ROOT" }
+                               "%3$s": { $push: "$%2$s" },
+                               "%4$s": { $first: "$$ROOT" }
                              }
                            }
                  """
@@ -393,7 +414,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   newRoot: {
                     $mergeObjects: [
                       "$%3$s",
-                      { %1$s: "$%2$s" }
+                      { "%1$s": "$%2$s" }
                     ]
                   }
                 }
