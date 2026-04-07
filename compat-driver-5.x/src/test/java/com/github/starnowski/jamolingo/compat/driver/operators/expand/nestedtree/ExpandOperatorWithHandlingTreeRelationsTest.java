@@ -781,7 +781,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         Arguments.of(
             TREETYPE2_MONGO_COLLECTION_USAGE_INFO,
             Set.of(4, 5, 6),
-            "$expand=treeType1($expand=treeType2s)",
+            "$expand=treeType1($expand=treeType2s($select=_id,index,treeType1Id);$select=_id,index)",
             """
                             [
                             		{
@@ -793,28 +793,20 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             			"treeType1": {
                             				"_id": 2,
                             				"index": 2,
-                            				"parentId": 1,
-                            				"categoryId": 1,
                             				"treeType2s": [
                             					{
                             						"_id": 4,
                             						"index": 4,
-                            						"parentId": null,
-                            						"categoryId": 1,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 5,
                             						"index": 5,
-                            						"parentId": 4,
-                            						"categoryId": 1,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 6,
                             						"index": 6,
-                            						"parentId": 5,
-                            						"categoryId": 2,
                             						"treeType1Id": 2
                             					}
                             				]
@@ -829,28 +821,20 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             			"treeType1": {
                             				"_id": 2,
                             				"index": 2,
-                            				"parentId": 1,
-                            				"categoryId": 1,
                             				"treeType2s": [
                             					{
                             						"_id": 4,
                             						"index": 4,
-                            						"parentId": null,
-                            						"categoryId": 1,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 5,
                             						"index": 5,
-                            						"parentId": 4,
-                            						"categoryId": 1,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 6,
                             						"index": 6,
-                            						"parentId": 5,
-                            						"categoryId": 2,
                             						"treeType1Id": 2
                             					}
                             				]
@@ -865,28 +849,20 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             			"treeType1": {
                             				"_id": 2,
                             				"index": 2,
-                            				"parentId": 1,
-                            				"categoryId": 1,
                             				"treeType2s": [
                             					{
                             						"_id": 4,
                             						"index": 4,
-                            						"parentId": null,
-                            						"categoryId": 1,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 5,
                             						"index": 5,
-                            						"parentId": 4,
-                            						"categoryId": 1,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 6,
                             						"index": 6,
-                            						"parentId": 5,
-                            						"categoryId": 2,
                             						"treeType1Id": 2
                             					}
                             				]
