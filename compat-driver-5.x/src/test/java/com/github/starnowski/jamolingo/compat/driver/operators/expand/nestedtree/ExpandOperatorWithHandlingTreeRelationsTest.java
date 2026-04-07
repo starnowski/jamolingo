@@ -870,7 +870,110 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             		}
                             	]
                             """,
-            JSONCompareMode.LENIENT));
+            JSONCompareMode.LENIENT),
+            // Nested level 1 with root level 1
+            Arguments.of(
+                    TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+                    Set.of(1),
+                    "$expand=children($expand=treeType2s($expand=treeType1($expand=treeType2s($select=_id,index,treeType1Id);$select=_id,index)))",
+                    """
+                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                     "children": [
+                                                        { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                            "treeType2s": [
+                                                                {
+                                                                    "_id": 4,
+                                                                    "index": 4,
+                                                                    "parentId": null,
+                                                                    "categoryId": 1,
+                                                                    "treeType1Id": 2,
+                                                                    "treeType1": {
+                                                                        "_id": 2,
+                                                                        "index": 2,
+                                                                        "treeType2s": [
+                                                                            {
+                                                                                "_id": 4,
+                                                                                "index": 4,
+                                                                                "treeType1Id": 2
+                                                                            },
+                                                                            {
+                                                                                "_id": 5,
+                                                                                "index": 5,
+                                                                                "treeType1Id": 2
+                                                                            },
+                                                                            {
+                                                                                "_id": 6,
+                                                                                "index": 6,
+                                                                                "treeType1Id": 2
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "_id": 5,
+                                                                    "index": 5,
+                                                                    "parentId": 4,
+                                                                    "categoryId": 1,
+                                                                    "treeType1Id": 2,
+                                                                    "treeType1": {
+                                                                        "_id": 2,
+                                                                        "index": 2,
+                                                                        "treeType2s": [
+                                                                            {
+                                                                                "_id": 4,
+                                                                                "index": 4,
+                                                                                "treeType1Id": 2
+                                                                            },
+                                                                            {
+                                                                                "_id": 5,
+                                                                                "index": 5,
+                                                                                "treeType1Id": 2
+                                                                            },
+                                                                            {
+                                                                                "_id": 6,
+                                                                                "index": 6,
+                                                                                "treeType1Id": 2
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                },
+                                                                {
+                                                                    "_id": 6,
+                                                                    "index": 6,
+                                                                    "parentId": 5,
+                                                                    "categoryId": 2,
+                                                                    "treeType1Id": 2,
+                                                                    "treeType1": {
+                                                                        "_id": 2,
+                                                                        "index": 2,
+                                                                        "treeType2s": [
+                                                                            {
+                                                                                "_id": 4,
+                                                                                "index": 4,
+                                                                                "treeType1Id": 2
+                                                                            },
+                                                                            {
+                                                                                "_id": 5,
+                                                                                "index": 5,
+                                                                                "treeType1Id": 2
+                                                                            },
+                                                                            {
+                                                                                "_id": 6,
+                                                                                "index": 6,
+                                                                                "treeType1Id": 2
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                }
+                                                            ]
+                                                        },
+                                                        { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1,
+                                                            "treeType2s": []
+                                                         }
+                                                     ]
+                                                    }]
+                                                    """,
+                    JSONCompareMode.LENIENT));
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document
