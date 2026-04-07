@@ -350,9 +350,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
           ExpandOperatorResult nestedExpandResult =
               parse(eOption.getExpandOption(), expandParserContext, navPropertyWithRootPrefix);
           pipeline.addAll(nestedExpandResult.getStageObjects());
-          pipeline.addAll(
-              prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
-
+          if (navProp.isCollection()) {
+            pipeline.addAll(
+                    prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
+          }
           // TODO group if nav is collection
         }
         return pipeline;
