@@ -355,6 +355,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
           }
           // TODO group if nav is collection
+
+          // TODO Remove properties that were foreign keys
         }
         return pipeline;
       }
