@@ -359,10 +359,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                         .append("preserveNullAndEmptyArrays", true)));
           }
           Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
-          newIdProperties.add(
-              parserExpandItemContext.getRoot() == null
-                  ? lookupMongoStartWith
-                  : parserExpandItemContext.getRoot() + "." + lookupMongoStartWith);
+          newIdProperties.add(lookupMongoStartWith);
           ExpandOperatorResult nestedExpandResult =
               parse(
                   eOption.getExpandOption(),
