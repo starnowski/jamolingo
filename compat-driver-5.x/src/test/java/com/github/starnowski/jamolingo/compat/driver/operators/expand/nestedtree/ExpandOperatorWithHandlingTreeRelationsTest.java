@@ -1077,19 +1077,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                 			}
                                 		},
                                 		{
-                                            "$addFields": {
-                                              "children.treeType2s": {
-                                                "$cond": {
-                                                  "if": {
-                                                    "$eq": [{ "$size": "$children.treeType2s" }, 0]
-                                                  },
-                                                  "then": "$$REMOVE",
-                                                  "else": "$children.treeType2s"
-                                                }
-                                              }
-                                            }
-                                         },
-                                		{
                                 			"$unwind": {
                                 				"path": "$children.treeType2s",
                                 				"preserveNullAndEmptyArrays": true
