@@ -1035,4 +1035,144 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
   private Document wrapDocumentsList(List<Document> docs) {
     return new Document("value", docs);
   }
+
+
+    private static Stream<Arguments> provideRawQueryData() {
+        return Stream.of(
+                // Nested level 1 with root level 1
+                Arguments.of(
+                        TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+                        """
+                                {"value": [{"$match": {"_id": {"$in": [1]}}}, {"$lookup": {"from": "MyService.TreeType1", "localField": "_id", "foreignField": "parentId", "as": "children"}}, {"$unwind": {"path": "$children", "preserveNullAndEmptyArrays": true}}, {"$lookup": {"from": "MyService.TreeType2", "localField": "children._id", "foreignField": "treeType1Id", "as": "children.treeType2s"}}, {"$unwind": {"path": "$children.treeType2s", "preserveNullAndEmptyArrays": true}}, {"$lookup": {"from": "MyService.TreeType1", "localField": "children.treeType2s.treeType1Id", "foreignField": "_id", "pipeline": [{"$project": {"index": 1, "_id": 1}}], "as": "children.treeType2s.treeType1"}}, {"$unwind": {"path": "$children.treeType2s.treeType1", "preserveNullAndEmptyArrays": true}}, {"$lookup": {"from": "MyService.TreeType2", "localField": "children.treeType2s.treeType1._id", "foreignField": "treeType1Id", "pipeline": [{"$project": {"_id": 1, "index": 1, "treeType1Id": 1}}], "as": "children.treeType2s.treeType1.treeType2s"}}, {"$group": {"_id": {"id_0": "$children._id", "id_1": "$_id"}, "tmp_array": {"$push": "$children.treeType2s"}, "tmp_root": {"$first": "$$ROOT"}}}, {"$set": {"tmp_root.children.treeType2s": "$tmp_array"}}, {"$replaceRoot": {"newRoot": "$tmp_root"}}, {"$group": {"_id": {"id_0": "$_id"}, "tmp_array": {"$push": "$children"}, "tmp_root": {"$first": "$$ROOT"}}}, {"$set": {"tmp_root.children": "$tmp_array"}}, {"$replaceRoot": {"newRoot": "$tmp_root"}}]}
+                                
+                        """,
+                        """
+                                                                [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                                 "children": [
+                                                                    { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                                        "treeType2s": [
+                                                                            {
+                                                                                "_id": 4,
+                                                                                "index": 4,
+                                                                                "parentId": null,
+                                                                                "categoryId": 1,
+                                                                                "treeType1Id": 2,
+                                                                                "treeType1": {
+                                                                                    "_id": 2,
+                                                                                    "index": 2,
+                                                                                    "treeType2s": [
+                                                                                        {
+                                                                                            "_id": 4,
+                                                                                            "index": 4,
+                                                                                            "treeType1Id": 2
+                                                                                        },
+                                                                                        {
+                                                                                            "_id": 5,
+                                                                                            "index": 5,
+                                                                                            "treeType1Id": 2
+                                                                                        },
+                                                                                        {
+                                                                                            "_id": 6,
+                                                                                            "index": 6,
+                                                                                            "treeType1Id": 2
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "_id": 5,
+                                                                                "index": 5,
+                                                                                "parentId": 4,
+                                                                                "categoryId": 1,
+                                                                                "treeType1Id": 2,
+                                                                                "treeType1": {
+                                                                                    "_id": 2,
+                                                                                    "index": 2,
+                                                                                    "treeType2s": [
+                                                                                        {
+                                                                                            "_id": 4,
+                                                                                            "index": 4,
+                                                                                            "treeType1Id": 2
+                                                                                        },
+                                                                                        {
+                                                                                            "_id": 5,
+                                                                                            "index": 5,
+                                                                                            "treeType1Id": 2
+                                                                                        },
+                                                                                        {
+                                                                                            "_id": 6,
+                                                                                            "index": 6,
+                                                                                            "treeType1Id": 2
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            },
+                                                                            {
+                                                                                "_id": 6,
+                                                                                "index": 6,
+                                                                                "parentId": 5,
+                                                                                "categoryId": 2,
+                                                                                "treeType1Id": 2,
+                                                                                "treeType1": {
+                                                                                    "_id": 2,
+                                                                                    "index": 2,
+                                                                                    "treeType2s": [
+                                                                                        {
+                                                                                            "_id": 4,
+                                                                                            "index": 4,
+                                                                                            "treeType1Id": 2
+                                                                                        },
+                                                                                        {
+                                                                                            "_id": 5,
+                                                                                            "index": 5,
+                                                                                            "treeType1Id": 2
+                                                                                        },
+                                                                                        {
+                                                                                            "_id": 6,
+                                                                                            "index": 6,
+                                                                                            "treeType1Id": 2
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            }
+                                                                        ]
+                                                                    },
+                                                                    { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1,
+                                                                        "treeType2s": []
+                                                                     }
+                                                                 ]
+                                                                }]
+                                                                """,
+                        JSONCompareMode.LENIENT));
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideRawQueryData")
+    public void shouldReturnExpectedDocumentsForRawQuery(
+            KeyValue<String, String> rootMongoCollection,
+            String queryObjectString,
+            String expectedJson,
+            JSONCompareMode jsonCompareMode)
+            throws
+            JSONException {
+        // GIVEN
+        MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
+        MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
+
+
+        // WHEN
+        List<Bson> pipeline = new ArrayList<>();
+        Document pipelineDocument = Document.parse(queryObjectString);
+        pipeline.addAll(pipelineDocument.get("value", List.class));
+        System.out.println(wrapBsonList(pipeline).toJson());
+        List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+        String currentResult = wrapDocumentsList(results).toJson();
+        System.out.println(currentResult);
+        JSONAssert.assertEquals(
+                """
+                    {"value": %s }
+                    """.formatted(expectedJson),
+                currentResult,
+                jsonCompareMode);
+    }
 }
