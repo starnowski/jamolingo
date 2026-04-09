@@ -1043,8 +1043,146 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                 Arguments.of(
                         TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
                         """
-                                {"value": [{"$match": {"_id": {"$in": [1]}}}, {"$lookup": {"from": "MyService.TreeType1", "localField": "_id", "foreignField": "parentId", "as": "children"}}, {"$unwind": {"path": "$children", "preserveNullAndEmptyArrays": true}}, {"$lookup": {"from": "MyService.TreeType2", "localField": "children._id", "foreignField": "treeType1Id", "as": "children.treeType2s"}}, {"$unwind": {"path": "$children.treeType2s", "preserveNullAndEmptyArrays": true}}, {"$lookup": {"from": "MyService.TreeType1", "localField": "children.treeType2s.treeType1Id", "foreignField": "_id", "pipeline": [{"$project": {"index": 1, "_id": 1}}], "as": "children.treeType2s.treeType1"}}, {"$unwind": {"path": "$children.treeType2s.treeType1", "preserveNullAndEmptyArrays": true}}, {"$lookup": {"from": "MyService.TreeType2", "localField": "children.treeType2s.treeType1._id", "foreignField": "treeType1Id", "pipeline": [{"$project": {"_id": 1, "index": 1, "treeType1Id": 1}}], "as": "children.treeType2s.treeType1.treeType2s"}}, {"$group": {"_id": {"id_0": "$children._id", "id_1": "$_id"}, "tmp_array": {"$push": "$children.treeType2s"}, "tmp_root": {"$first": "$$ROOT"}}}, {"$set": {"tmp_root.children.treeType2s": "$tmp_array"}}, {"$replaceRoot": {"newRoot": "$tmp_root"}}, {"$group": {"_id": {"id_0": "$_id"}, "tmp_array": {"$push": "$children"}, "tmp_root": {"$first": "$$ROOT"}}}, {"$set": {"tmp_root.children": "$tmp_array"}}, {"$replaceRoot": {"newRoot": "$tmp_root"}}]}
-                                
+                                {
+                                	"value": [
+                                		{
+                                			"$match": {
+                                				"_id": {
+                                					"$in": [
+                                						1
+                                					]
+                                				}
+                                			}
+                                		},
+                                		{
+                                			"$lookup": {
+                                				"from": "MyService.TreeType1",
+                                				"localField": "_id",
+                                				"foreignField": "parentId",
+                                				"as": "children"
+                                			}
+                                		},
+                                		{
+                                			"$unwind": {
+                                				"path": "$children",
+                                				"preserveNullAndEmptyArrays": true
+                                			}
+                                		},
+                                		{
+                                			"$lookup": {
+                                				"from": "MyService.TreeType2",
+                                				"localField": "children._id",
+                                				"foreignField": "treeType1Id",
+                                				"as": "children.treeType2s"
+                                			}
+                                		},
+                                		{
+                                			"$unwind": {
+                                				"path": "$children.treeType2s",
+                                				"preserveNullAndEmptyArrays": true
+                                			}
+                                		},
+                                		{
+                                			"$lookup": {
+                                				"from": "MyService.TreeType1",
+                                				"localField": "children.treeType2s.treeType1Id",
+                                				"foreignField": "_id",
+                                				"pipeline": [
+                                					{
+                                						"$project": {
+                                							"index": 1,
+                                							"_id": 1
+                                						}
+                                					}
+                                				],
+                                				"as": "children.treeType2s.treeType1"
+                                			}
+                                		},
+                                		{
+                                			"$unwind": {
+                                				"path": "$children.treeType2s.treeType1",
+                                				"preserveNullAndEmptyArrays": true
+                                			}
+                                		},
+                                		{
+                                			"$lookup": {
+                                				"from": "MyService.TreeType2",
+                                				"localField": "children.treeType2s.treeType1._id",
+                                				"foreignField": "treeType1Id",
+                                				"pipeline": [
+                                					{
+                                						"$project": {
+                                							"_id": 1,
+                                							"index": 1,
+                                							"treeType1Id": 1
+                                						}
+                                					}
+                                				],
+                                				"as": "children.treeType2s.treeType1.treeType2s"
+                                			}
+                                		},
+                                		{
+                                            "$addFields": {
+                                              "children.treeType2s.treeType1.treeType2s": {
+                                                "$cond": {
+                                                  "if": {
+                                                    "$eq": [{ "$size": "$children.treeType2s.treeType1.treeType2s" }, 0]
+                                                  },
+                                                  "then": "$$REMOVE",
+                                                  "else": "$children.treeType2s.treeType1.treeType2s"
+                                                }
+                                              }
+                                            }
+                                         },
+                                		{
+                                			"$group": {
+                                				"_id": {
+                                					"id_0": "$children._id",
+                                					"id_1": "$_id"
+                                				},
+                                				"tmp_array": {
+                                					"$push": "$children.treeType2s"
+                                				},
+                                				"tmp_root": {
+                                					"$first": "$$ROOT"
+                                				}
+                                			}
+                                		},
+                                		{
+                                			"$set": {
+                                				"tmp_root.children.treeType2s": "$tmp_array"
+                                			}
+                                		},
+                                		{
+                                			"$replaceRoot": {
+                                				"newRoot": "$tmp_root"
+                                			}
+                                		},
+                                		{
+                                			"$group": {
+                                				"_id": {
+                                					"id_0": "$_id"
+                                				},
+                                				"tmp_array": {
+                                					"$push": "$children"
+                                				},
+                                				"tmp_root": {
+                                					"$first": "$$ROOT"
+                                				}
+                                			}
+                                		},
+                                		{
+                                			"$set": {
+                                				"tmp_root.children": "$tmp_array"
+                                			}
+                                		},
+                                		{
+                                			"$replaceRoot": {
+                                				"newRoot": "$tmp_root"
+                                			}
+                                		}
+                                	]
+                                }
                         """,
                         """
                                                                 [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
