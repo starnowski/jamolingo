@@ -1118,22 +1118,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                 			}
                                 		},
                                 		{
-                                              $addFields: {
-                                                "children.treeType2s.treeType1": {
-                                                  $cond: {
-                                                    if: {
-                                                      $eq: [
-                                                        { $size: { $objectToArray: { $ifNull: ["$children.treeType2s.treeType1", {}] } } },
-                                                        0
-                                                      ]
-                                                    },
-                                                    then: "$$REMOVE",
-                                                    else: "$children.treeType2s.treeType1"
-                                                  }
-                                                }
-                                              }
-                                            },
-                                		{
                                 			"$lookup": {
                                 				"from": "MyService.TreeType2",
                                 				"localField": "children.treeType2s.treeType1._id",
