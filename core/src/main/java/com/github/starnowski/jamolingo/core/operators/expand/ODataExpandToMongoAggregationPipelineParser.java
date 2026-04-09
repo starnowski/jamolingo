@@ -371,7 +371,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           pipeline.addAll(nestedExpandResult.getStageObjects());
           if (navProp.isCollection()) {
             pipeline.addAll(
-                prepareMergingDocumentStages(navPropertyWithRootPrefix, lookupMongoStartWith));
+                prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
           }
           // TODO group if nav is collection
 
@@ -404,21 +404,26 @@ public class ODataExpandToMongoAggregationPipelineParser {
   }
 
   private Collection<? extends Bson> prepareMergingDocumentStages(
-      String navPropertyWithRootPrefix, String lookupMongoStartWith) {
+      String navPropertyWithRootPrefix, Set<String> idFields) {
     List<Bson> results = new ArrayList<>();
     // TODO setting _id strategy
+    Document idObject = new Document();
+    int i = 0;
+    for (String idField : idFields) {
+      idObject.append("id_" + (i++), "$" + idField);
+    }
     results.add(
         Document.parse(
             """
                     {
                              $group: {
-                               _id: "$%1$s",
+                               _id: %1$s,
                                "tmp_array": { $push: "$%2$s" },
                                "tmp_root": { $first: "$$ROOT" }
                              }
                            }
                  """
-                .formatted(lookupMongoStartWith, navPropertyWithRootPrefix)));
+                .formatted(idObject.toJson(), navPropertyWithRootPrefix)));
     results.add(
         Document.parse(
             """
