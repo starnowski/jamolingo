@@ -1036,13 +1036,12 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
     return new Document("value", docs);
   }
 
-
-    private static Stream<Arguments> provideRawQueryData() {
-        return Stream.of(
-                // Nested level 1 with root level 1
-                Arguments.of(
-                        TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-                        """
+  private static Stream<Arguments> provideRawQueryData() {
+    return Stream.of(
+        // Nested level 1 with root level 1
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            """
                                 {
                                 	"value": [
                                 		{
@@ -1216,7 +1215,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                 	]
                                 }
                         """,
-                        """
+            """
                                                                 [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                                  "children": [
                                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
@@ -1313,36 +1312,34 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                  ]
                                                                 }]
                                                                 """,
-                        JSONCompareMode.LENIENT));
-    }
+            JSONCompareMode.LENIENT));
+  }
 
-    @ParameterizedTest
-    @MethodSource("provideRawQueryData")
-    public void shouldReturnExpectedDocumentsForRawQuery(
-            KeyValue<String, String> rootMongoCollection,
-            String queryObjectString,
-            String expectedJson,
-            JSONCompareMode jsonCompareMode)
-            throws
-            JSONException {
-        // GIVEN
-        MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
-        MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
+  @ParameterizedTest
+  @MethodSource("provideRawQueryData")
+  public void shouldReturnExpectedDocumentsForRawQuery(
+      KeyValue<String, String> rootMongoCollection,
+      String queryObjectString,
+      String expectedJson,
+      JSONCompareMode jsonCompareMode)
+      throws JSONException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
+    MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
 
-
-        // WHEN
-        List<Bson> pipeline = new ArrayList<>();
-        Document pipelineDocument = Document.parse(queryObjectString);
-        pipeline.addAll(pipelineDocument.get("value", List.class));
-        System.out.println(wrapBsonList(pipeline).toJson());
-        List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
-        String currentResult = wrapDocumentsList(results).toJson();
-        System.out.println(currentResult);
-        JSONAssert.assertEquals(
-                """
+    // WHEN
+    List<Bson> pipeline = new ArrayList<>();
+    Document pipelineDocument = Document.parse(queryObjectString);
+    pipeline.addAll(pipelineDocument.get("value", List.class));
+    System.out.println(wrapBsonList(pipeline).toJson());
+    List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+    String currentResult = wrapDocumentsList(results).toJson();
+    System.out.println(currentResult);
+    JSONAssert.assertEquals(
+        """
                     {"value": %s }
                     """.formatted(expectedJson),
-                currentResult,
-                jsonCompareMode);
-    }
+        currentResult,
+        jsonCompareMode);
+  }
 }
