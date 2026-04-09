@@ -1135,33 +1135,33 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                             }
                                          },
                                          {
-                                              $addFields: {
+                                              "$addFields": {
                                                 "children.treeType2s.treeType1": {
-                                                  $cond: {
-                                                    if: {
-                                                      $eq: [
-                                                        { $size: { $objectToArray: { $ifNull: ["$children.treeType2s.treeType1", {}] } } },
+                                                  "$cond": {
+                                                    "if": {
+                                                      "$eq": [
+                                                        { "$size": { $objectToArray: { $ifNull: ["$children.treeType2s.treeType1", {}] } } },
                                                         0
                                                       ]
                                                     },
-                                                    then: "$$REMOVE",
-                                                    else: "$children.treeType2s.treeType1"
+                                                    "then": "$$REMOVE",
+                                                    "else": "$children.treeType2s.treeType1"
                                                   }
                                                 }
                                               }
                                             },
                                         {
-                                              $addFields: {
+                                              "$addFields": {
                                                 "children.treeType2s": {
-                                                  $cond: {
-                                                    if: {
-                                                      $eq: [
-                                                        { $size: { $objectToArray: { $ifNull: ["$children.treeType2s", {}] } } },
+                                                  "$cond": {
+                                                    "if": {
+                                                      "$eq": [
+                                                        { "$size": { $objectToArray: { $ifNull: ["$children.treeType2s", {}] } } },
                                                         0
                                                       ]
                                                     },
-                                                    then: "$$REMOVE",
-                                                    else: "$children.treeType2s"
+                                                    "then": "$$REMOVE",
+                                                    "else": "$children.treeType2s"
                                                   }
                                                 }
                                               }

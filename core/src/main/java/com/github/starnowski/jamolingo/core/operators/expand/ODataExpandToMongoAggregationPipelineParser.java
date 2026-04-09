@@ -94,7 +94,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       ExpandItem eOption, ExpandParserContext expandParserContext)
       throws ExpressionVisitException, ODataApplicationException {
     return prepareStageObjectsForExpandItem(
-        eOption, expandParserContext, new ParserExpandItemContext(null, null));
+        eOption, expandParserContext, new ParserExpandItemContext(null, null, false));
   }
 
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
@@ -364,7 +364,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
               parse(
                   eOption.getExpandOption(),
                   expandParserContext,
-                  new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties));
+                  new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
           pipeline.addAll(nestedExpandResult.getStageObjects());
           if (navProp.isCollection()) {
             pipeline.addAll(
@@ -374,19 +374,78 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
           // TODO Remove properties that were foreign keys
         }
+        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+          if (navProp.isCollection()) {
+            pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
+          } else {
+            pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+          }
+        }
         return pipeline;
       }
     }
     return List.of();
   }
 
+  private Bson prepareCleanUpStageForSingleObjectProperty(String navProperty) {
+    return Document.parse(
+            """
+                    {
+                                              $addFields: {
+                                                "%1$s": {
+                                                  $cond: {
+                                                    if: {
+                                                      $eq: [
+                                                        { $size: { $objectToArray: { $ifNull: ["$%1$s", {}] } } },
+                                                        0
+                                                      ]
+                                                    },
+                                                    then: "$$REMOVE",
+                                                    else: "$%1$s"
+                                                  }
+                                                }
+                                              }
+                                            }
+                    """
+                    .formatted(navProperty));
+  }
+
+  private Bson prepareCleanUpStageForArrayProperty(String navProperty) {
+    return Document.parse(
+            """
+                    {
+                                            "$addFields": {
+                                              "%1$s": {
+                                                "$cond": {
+                                                  "if": {
+                                                    "$eq": [{ "$size": "$%1$s" }, 0]
+                                                  },
+                                                  "then": "$$REMOVE",
+                                                  "else": "$%1$s"
+                                                }
+                                              }
+                                            }
+                                         }
+                    """
+                    .formatted(navProperty));
+  }
+
   private static final class ParserExpandItemContext {
     private final String root;
+    private final Set<String> idProperties;
 
-    public ParserExpandItemContext(String root, Set<String> idProperties) {
+    public boolean isAddCleanUpEmptyPropertiesStage() {
+      return addCleanUpEmptyPropertiesStage;
+    }
+
+    private final boolean addCleanUpEmptyPropertiesStage;
+
+
+    public ParserExpandItemContext(String root, Set<String> idProperties, boolean addCleanUpEmptyPropertiesStage) {
       this.root = root;
       this.idProperties =
           Collections.unmodifiableSet(idProperties == null ? Collections.emptySet() : idProperties);
+        this.addCleanUpEmptyPropertiesStage = addCleanUpEmptyPropertiesStage;
     }
 
     public String getRoot() {
@@ -396,8 +455,6 @@ public class ODataExpandToMongoAggregationPipelineParser {
     public Set<String> getIdProperties() {
       return idProperties;
     }
-
-    private final Set<String> idProperties;
   }
 
   private Collection<? extends Bson> prepareMergingDocumentStages(
