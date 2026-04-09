@@ -871,12 +871,12 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             	]
                             """,
             JSONCompareMode.LENIENT),
-            // Nested level 1 with root level 1
-            Arguments.of(
-                    TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-                    Set.of(1),
-                    "$expand=children($expand=treeType2s($expand=treeType1($expand=treeType2s($select=_id,index,treeType1Id);$select=_id,index)))",
-                    """
+        // Nested level 1 with root level 1
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($expand=treeType2s($expand=treeType1($expand=treeType2s($select=_id,index,treeType1Id);$select=_id,index)))",
+            """
                                                     [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                                      "children": [
                                                         { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
@@ -973,7 +973,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                      ]
                                                     }]
                                                     """,
-                    JSONCompareMode.LENIENT));
+            JSONCompareMode.LENIENT));
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document
