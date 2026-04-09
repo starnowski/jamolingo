@@ -1140,7 +1140,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                   "$cond": {
                                                     "if": {
                                                       "$eq": [
-                                                        { "$size": { $objectToArray: { $ifNull: ["$children.treeType2s.treeType1", {}] } } },
+                                                        { "$size": { "$objectToArray": { "$ifNull": ["$children.treeType2s.treeType1", {}] } } },
                                                         0
                                                       ]
                                                     },
@@ -1156,7 +1156,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                   "$cond": {
                                                     "if": {
                                                       "$eq": [
-                                                        { "$size": { $objectToArray: { $ifNull: ["$children.treeType2s", {}] } } },
+                                                        { "$size": { "$objectToArray": { "$ifNull": ["$children.treeType2s", {}] } } },
                                                         0
                                                       ]
                                                     },
