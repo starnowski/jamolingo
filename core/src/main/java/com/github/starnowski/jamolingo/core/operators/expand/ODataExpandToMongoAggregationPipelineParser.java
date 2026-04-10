@@ -367,20 +367,44 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
           pipeline.addAll(nestedExpandResult.getStageObjects());
           if (navProp.isCollection()) {
+            pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
             pipeline.addAll(
                 prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
+          } else {
+            if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+              pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+            }
           }
           // TODO group if nav is collection
 
           // TODO Remove properties that were foreign keys
-        }
-        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
-          if (navProp.isCollection()) {
-            pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
-          } else {
-            pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+
+          //          if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+          //            if (navProp.isCollection()) {
+          //
+          // pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
+          //            } else {
+          //
+          // pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+          //            }
+          //          }
+        } else {
+          if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+            if (navProp.isCollection()) {
+              pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
+            } else {
+              pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+            }
           }
         }
+        //        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+        //          if (navProp.isCollection()) {
+        //            pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
+        //          } else {
+        //
+        // pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+        //          }
+        //        }
         return pipeline;
       }
     }
@@ -389,7 +413,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
   private Bson prepareCleanUpStageForSingleObjectProperty(String navProperty) {
     return Document.parse(
-            """
+        """
                     {
                                               $addFields: {
                                                 "%1$s": {
@@ -407,12 +431,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                               }
                                             }
                     """
-                    .formatted(navProperty));
+            .formatted(navProperty));
   }
 
   private Bson prepareCleanUpStageForArrayProperty(String navProperty) {
     return Document.parse(
-            """
+        """
                     {
                                             "$addFields": {
                                               "%1$s": {
@@ -427,7 +451,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                             }
                                          }
                     """
-                    .formatted(navProperty));
+            .formatted(navProperty));
   }
 
   private static final class ParserExpandItemContext {
@@ -440,12 +464,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
     private final boolean addCleanUpEmptyPropertiesStage;
 
-
-    public ParserExpandItemContext(String root, Set<String> idProperties, boolean addCleanUpEmptyPropertiesStage) {
+    public ParserExpandItemContext(
+        String root, Set<String> idProperties, boolean addCleanUpEmptyPropertiesStage) {
       this.root = root;
       this.idProperties =
           Collections.unmodifiableSet(idProperties == null ? Collections.emptySet() : idProperties);
-        this.addCleanUpEmptyPropertiesStage = addCleanUpEmptyPropertiesStage;
+      this.addCleanUpEmptyPropertiesStage = addCleanUpEmptyPropertiesStage;
     }
 
     public String getRoot() {
