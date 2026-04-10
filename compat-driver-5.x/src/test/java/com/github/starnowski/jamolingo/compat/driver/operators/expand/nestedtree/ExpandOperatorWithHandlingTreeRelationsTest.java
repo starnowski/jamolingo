@@ -810,6 +810,8 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                     }]
                                                     """,
             JSONCompareMode.LENIENT),
+        // TODO $expand=children($level=max;$expand=treeType2s)
+        // TODO $expand=children($level=max;$expand=treeType2s($level=max))
         Arguments.of(
             TREETYPE2_MONGO_COLLECTION_USAGE_INFO,
             Set.of(4, 5, 6),
