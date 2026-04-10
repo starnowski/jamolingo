@@ -379,15 +379,6 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
           // TODO Remove properties that were foreign keys
 
-          //          if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
-          //            if (navProp.isCollection()) {
-          //
-          // pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
-          //            } else {
-          //
-          // pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-          //            }
-          //          }
         } else {
           if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
             if (navProp.isCollection()) {
@@ -397,14 +388,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
             }
           }
         }
-        //        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
-        //          if (navProp.isCollection()) {
-        //            pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
-        //          } else {
-        //
-        // pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-        //          }
-        //        }
+
         return pipeline;
       }
     }
