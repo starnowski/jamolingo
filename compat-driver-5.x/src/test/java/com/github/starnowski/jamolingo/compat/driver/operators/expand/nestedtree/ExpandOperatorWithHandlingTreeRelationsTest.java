@@ -811,6 +811,31 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                     """,
             JSONCompareMode.LENIENT),
         // TODO $expand=children($level=max;$expand=treeType2s)
+            //TODO Fix assertions for the treeType2s
+            Arguments.of(
+                    TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+                    Set.of(1),
+                    "$expand=children($levels=max;$expand=treeType2s)",
+                    """
+                                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                             "children": [
+                                                                { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                                    "treeType2s": [
+                                                                        {"_id":4,"index":4,"categoryId":1},
+                                                                        {"_id":5,"index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
+                                                                        {"_id":6,"index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
+                                                                    ]
+                                                                },
+                                                                    { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1
+                                                                     },
+                                                                 { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
+                                                                 { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
+                                                                 { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
+                                                                 { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 }
+                                                             ]
+                                                            }]
+                                                            """,
+                    JSONCompareMode.LENIENT),
         // TODO $expand=children($level=max;$expand=treeType2s($level=max))
         Arguments.of(
             TREETYPE2_MONGO_COLLECTION_USAGE_INFO,
@@ -1007,7 +1032,9 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                      ]
                                                     }]
                                                     """,
-            JSONCompareMode.LENIENT));
+            JSONCompareMode.LENIENT)
+            //TODO Nested level 1 with root level 1 and graph
+    );
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document
