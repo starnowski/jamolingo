@@ -1044,7 +1044,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
 
   @Inject protected MongoClient mongoClient;
 
-  @ParameterizedTest
+  @ParameterizedTest(name = "{2} - {0} - {1}")
   @MethodSource("provideData")
   public void shouldReturnExpectedDocumentsForExpandOperator(
       KeyValue<String, String> rootMongoCollection,
