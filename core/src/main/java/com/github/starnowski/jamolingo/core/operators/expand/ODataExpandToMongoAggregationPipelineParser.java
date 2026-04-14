@@ -164,7 +164,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
           parserExpandItemContext.getRoot() == null
               ? navProp.getName()
               : parserExpandItemContext.getRoot() + "." + navProp.getName();
-
+      String lookupMongoStartWith =
+          parserExpandItemContext.getRoot() == null
+              ? mongoStartWith
+              : parserExpandItemContext.getRoot() + "." + mongoStartWith;
       if (eOption.getLevelsOption() != null
           && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)) {
         // TODO Check approach with executing the nested $lookup stages (based on the levels value)
@@ -276,14 +279,40 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // Removing the "depthVariable" property from results
           pipeline.add(new Document("$unset", navProp.getName() + "." + depthVariable));
         }
+        if (eOption.getExpandOption() != null) {
+          if (navProp.isCollection()) {
+            pipeline.add(
+                new Document(
+                    "$unwind",
+                    new Document("path", "$" + navPropertyWithRootPrefix)
+                        .append("preserveNullAndEmptyArrays", true)));
+          }
+          Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
+          newIdProperties.add(lookupMongoStartWith);
+          ExpandOperatorResult nestedExpandResult =
+              parse(
+                  eOption.getExpandOption(),
+                  expandParserContext,
+                  new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
+          pipeline.addAll(nestedExpandResult.getStageObjects());
+          if (navProp.isCollection()) {
+            pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+            pipeline.addAll(
+                prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
+          } else {
+            if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+              pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+            }
+          }
+          // TODO group if nav is collection
+
+          // TODO Remove properties that were foreign keys
+
+        }
         return pipeline;
       } else {
         // Adding $lookup
         Document lookup = new Document();
-        String lookupMongoStartWith =
-            parserExpandItemContext.getRoot() == null
-                ? mongoStartWith
-                : parserExpandItemContext.getRoot() + "." + mongoStartWith;
         Document lookupInnerObject =
             new Document()
                 .append("from", targetCollection)
