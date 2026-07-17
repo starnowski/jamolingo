@@ -327,7 +327,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   navPropertyWithRootPrefix,
                   navProp,
                   1,
-                  maxDepth));
+                  maxDepth + 1));
         } else {
           pipeline.addAll(
               prepareLookUpStage(
@@ -374,7 +374,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         || eOption.getTopOption() != null
         || eOption.getSkipOption() != null
         || eOption.getSelectOption() != null
-    || currentLevel != maxLevel) {
+        || currentLevel != maxLevel) {
       ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
           new ODataFilterToMongoMatchParser();
       OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
@@ -406,7 +406,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         lookupPipeline.addAll(
             odataTopToMongoLimitParser.parse(eOption.getTopOption()).getStageObjects());
       }
-      //TODO check if _id or collection can be lost
+      // TODO check if _id or collection can be lost
       if (eOption.getSelectOption() != null) {
         lookupPipeline.addAll(
             odataSelectToMongoProjectParser
@@ -415,17 +415,17 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
       if (currentLevel != maxLevel) {
         lookupPipeline.addAll(
-                prepareLookUpStage(
-                        targetCollection,
-                        lookupMongoStartWith,
-                        mongoConnectTo,
-                        eOption,
-                        expandParserContext,
-                        parserExpandItemContext,
-                        navPropertyWithRootPrefix,
-                        navProp,
-                        currentLevel + 1,
-                        maxLevel));
+            prepareLookUpStage(
+                targetCollection,
+                lookupMongoStartWith,
+                mongoConnectTo,
+                eOption,
+                expandParserContext,
+                parserExpandItemContext,
+                navPropertyWithRootPrefix,
+                navProp,
+                currentLevel + 1,
+                maxLevel));
       }
       lookupInnerObject.append("pipeline", lookupPipeline);
     }
