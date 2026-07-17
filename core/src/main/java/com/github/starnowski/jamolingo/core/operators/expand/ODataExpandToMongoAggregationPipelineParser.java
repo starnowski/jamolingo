@@ -312,17 +312,36 @@ public class ODataExpandToMongoAggregationPipelineParser {
         }
         return pipeline;
       } else {
-
-        pipeline.addAll(
-            prepareLookUpStage(
-                targetCollection,
-                lookupMongoStartWith,
-                mongoConnectTo,
-                eOption,
-                expandParserContext,
-                parserExpandItemContext,
-                navPropertyWithRootPrefix,
-                navProp));
+        if (eOption.getLevelsOption() != null
+            && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)) {
+          int maxDepth =
+              translateODataExpandLevelsToGraphLookupMaxDepth(eOption, expandParserContext);
+          pipeline.addAll(
+              prepareLookUpStage(
+                  targetCollection,
+                  lookupMongoStartWith,
+                  mongoConnectTo,
+                  eOption,
+                  expandParserContext,
+                  parserExpandItemContext,
+                  navPropertyWithRootPrefix,
+                  navProp,
+                  1,
+                  maxDepth));
+        } else {
+          pipeline.addAll(
+              prepareLookUpStage(
+                  targetCollection,
+                  lookupMongoStartWith,
+                  mongoConnectTo,
+                  eOption,
+                  expandParserContext,
+                  parserExpandItemContext,
+                  navPropertyWithRootPrefix,
+                  navProp,
+                  1,
+                  1));
+        }
         return pipeline;
       }
     }
@@ -337,7 +356,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       ExpandParserContext expandParserContext,
       ParserExpandItemContext parserExpandItemContext,
       String navPropertyWithRootPrefix,
-      EdmNavigationProperty navProp)
+      EdmNavigationProperty navProp,
+      int currentLevel,
+      int maxLevel)
       throws ExpressionVisitException, ODataApplicationException {
     // Adding $lookup
     List<Bson> pipeline = new ArrayList<>();
@@ -442,6 +463,20 @@ public class ODataExpandToMongoAggregationPipelineParser {
           pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
         }
       }
+    }
+    if (currentLevel != maxLevel) {
+      pipeline.addAll(
+          prepareLookUpStage(
+              targetCollection,
+              lookupMongoStartWith,
+              mongoConnectTo,
+              eOption,
+              expandParserContext,
+              parserExpandItemContext,
+              navPropertyWithRootPrefix,
+              navProp,
+              currentLevel + 1,
+              maxLevel));
     }
 
     return pipeline;
