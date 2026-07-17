@@ -373,7 +373,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
         || eOption.getOrderByOption() != null
         || eOption.getTopOption() != null
         || eOption.getSkipOption() != null
-        || eOption.getSelectOption() != null) {
+        || eOption.getSelectOption() != null
+    || currentLevel != maxLevel) {
       ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
           new ODataFilterToMongoMatchParser();
       OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
@@ -405,11 +406,26 @@ public class ODataExpandToMongoAggregationPipelineParser {
         lookupPipeline.addAll(
             odataTopToMongoLimitParser.parse(eOption.getTopOption()).getStageObjects());
       }
+      //TODO check if _id or collection can be lost
       if (eOption.getSelectOption() != null) {
         lookupPipeline.addAll(
             odataSelectToMongoProjectParser
                 .parse(eOption.getSelectOption(), facade)
                 .getStageObjects());
+      }
+      if (currentLevel != maxLevel) {
+        lookupPipeline.addAll(
+                prepareLookUpStage(
+                        targetCollection,
+                        lookupMongoStartWith,
+                        mongoConnectTo,
+                        eOption,
+                        expandParserContext,
+                        parserExpandItemContext,
+                        navPropertyWithRootPrefix,
+                        navProp,
+                        currentLevel + 1,
+                        maxLevel));
       }
       lookupInnerObject.append("pipeline", lookupPipeline);
     }
@@ -463,20 +479,6 @@ public class ODataExpandToMongoAggregationPipelineParser {
           pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
         }
       }
-    }
-    if (currentLevel != maxLevel) {
-      pipeline.addAll(
-          prepareLookUpStage(
-              targetCollection,
-              lookupMongoStartWith,
-              mongoConnectTo,
-              eOption,
-              expandParserContext,
-              parserExpandItemContext,
-              navPropertyWithRootPrefix,
-              navProp,
-              currentLevel + 1,
-              maxLevel));
     }
 
     return pipeline;

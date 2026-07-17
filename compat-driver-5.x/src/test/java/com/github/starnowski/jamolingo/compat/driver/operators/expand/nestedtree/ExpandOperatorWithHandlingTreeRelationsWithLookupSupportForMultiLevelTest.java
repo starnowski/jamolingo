@@ -1,5 +1,8 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree;
 
+import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
+import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTestProperties.*;
+
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
@@ -13,6 +16,11 @@ import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -30,15 +38,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
-
-import javax.xml.stream.XMLStreamException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
-import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTestProperties.*;
 
 @MongoSetup(
     batchInsertToCollection = true,
@@ -206,7 +205,8 @@ import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nes
     })
 @QuarkusTest
 @QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
-public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLevelTest extends AbstractItTest {
+public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLevelTest
+    extends AbstractItTest {
 
   private static Stream<Arguments> provideData() {
     // TODO Check in for category (that is single property and not collection) we can specify the
@@ -1141,7 +1141,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
         tested.parse(
             uriInfo.getExpandOption(),
             ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
-                    .withUseLookupForLevelGreaterThanOne(true)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .build());
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
