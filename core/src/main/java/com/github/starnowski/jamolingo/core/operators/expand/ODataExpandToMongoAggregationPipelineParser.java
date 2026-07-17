@@ -312,117 +312,139 @@ public class ODataExpandToMongoAggregationPipelineParser {
         }
         return pipeline;
       } else {
-        // Adding $lookup
-        Document lookup = new Document();
-        Document lookupInnerObject =
-            new Document()
-                .append("from", targetCollection)
-                .append("localField", lookupMongoStartWith)
-                .append("foreignField", mongoConnectTo);
 
-        if (eOption.getFilterOption() != null
-            || eOption.getOrderByOption() != null
-            || eOption.getTopOption() != null
-            || eOption.getSkipOption() != null
-            || eOption.getSelectOption() != null) {
-          ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
-              new ODataFilterToMongoMatchParser();
-          OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
-              new OdataOrderByToMongoSortParser();
-          OdataTopToMongoLimitParser odataTopToMongoLimitParser = new OdataTopToMongoLimitParser();
-          OdataSkipToMongoSkipParser odataSkipToMongoSkipParser = new OdataSkipToMongoSkipParser();
-          OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
-              new OdataSelectToMongoProjectParser();
-          EdmMongoContextFacade facade =
-              DefaultEdmMongoContextFacade.builder()
-                  .withEntityPropertiesMongoPathContext(null)
-                  .build();
-
-          // $lookup with pipeline
-          List<Bson> lookupPipeline = new ArrayList<>();
-          if (eOption.getFilterOption() != null) {
-            lookupPipeline.addAll(
-                oDataFilterToMongoMatchParser.parse(eOption.getFilterOption()).getStageObjects());
-          }
-          if (eOption.getOrderByOption() != null) {
-            lookupPipeline.addAll(
-                odataOrderByToMongoSortParser
-                    .parse(eOption.getOrderByOption(), facade)
-                    .getStageObjects());
-          }
-          if (eOption.getSkipOption() != null) {
-            lookupPipeline.addAll(
-                odataSkipToMongoSkipParser.parse(eOption.getSkipOption()).getStageObjects());
-          }
-          if (eOption.getTopOption() != null) {
-            lookupPipeline.addAll(
-                odataTopToMongoLimitParser.parse(eOption.getTopOption()).getStageObjects());
-          }
-          if (eOption.getSelectOption() != null) {
-            lookupPipeline.addAll(
-                odataSelectToMongoProjectParser
-                    .parse(eOption.getSelectOption(), facade)
-                    .getStageObjects());
-          }
-          lookupInnerObject.append("pipeline", lookupPipeline);
-        }
-        lookupInnerObject.append("as", navPropertyWithRootPrefix);
-        lookup.append("$lookup", lookupInnerObject);
-        pipeline.add(lookup);
-        if (!navProp.isCollection()) {
-          // For single-valued navigation properties (one-to-one or many-to-one),
-          // unwind the lookup result array to render a single object.
-          // preserveNullAndEmptyArrays is set to true to ensure the parent document
-          // is not dropped if the related resource is missing (OData $expand behavior).
-          pipeline.add(
-              new Document(
-                  "$unwind",
-                  new Document("path", "$" + navPropertyWithRootPrefix)
-                      .append("preserveNullAndEmptyArrays", true)));
-        }
-        if (eOption.getExpandOption() != null) {
-          if (navProp.isCollection()) {
-            pipeline.add(
-                new Document(
-                    "$unwind",
-                    new Document("path", "$" + navPropertyWithRootPrefix)
-                        .append("preserveNullAndEmptyArrays", true)));
-          }
-          Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
-          newIdProperties.add(lookupMongoStartWith);
-          ExpandOperatorResult nestedExpandResult =
-              parse(
-                  eOption.getExpandOption(),
-                  expandParserContext,
-                  new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
-          pipeline.addAll(nestedExpandResult.getStageObjects());
-          if (navProp.isCollection()) {
-            pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-            pipeline.addAll(
-                prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
-          } else {
-            if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
-              pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-            }
-          }
-          // TODO group if nav is collection
-
-          // TODO Remove properties that were foreign keys
-
-        } else {
-          if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
-            if (navProp.isCollection()) {
-              pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
-            } else {
-              pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-            }
-          }
-        }
-
+        pipeline.addAll(
+            prepareLookUpStage(
+                targetCollection,
+                lookupMongoStartWith,
+                mongoConnectTo,
+                eOption,
+                expandParserContext,
+                parserExpandItemContext,
+                navPropertyWithRootPrefix,
+                navProp));
         return pipeline;
       }
     }
     return List.of();
+  }
+
+  private List<Bson> prepareLookUpStage(
+      String targetCollection,
+      String lookupMongoStartWith,
+      String mongoConnectTo,
+      ExpandItem eOption,
+      ExpandParserContext expandParserContext,
+      ParserExpandItemContext parserExpandItemContext,
+      String navPropertyWithRootPrefix,
+      EdmNavigationProperty navProp)
+      throws ExpressionVisitException, ODataApplicationException {
+    // Adding $lookup
+    List<Bson> pipeline = new ArrayList<>();
+    Document lookup = new Document();
+    Document lookupInnerObject =
+        new Document()
+            .append("from", targetCollection)
+            .append("localField", lookupMongoStartWith)
+            .append("foreignField", mongoConnectTo);
+
+    if (eOption.getFilterOption() != null
+        || eOption.getOrderByOption() != null
+        || eOption.getTopOption() != null
+        || eOption.getSkipOption() != null
+        || eOption.getSelectOption() != null) {
+      ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
+          new ODataFilterToMongoMatchParser();
+      OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
+          new OdataOrderByToMongoSortParser();
+      OdataTopToMongoLimitParser odataTopToMongoLimitParser = new OdataTopToMongoLimitParser();
+      OdataSkipToMongoSkipParser odataSkipToMongoSkipParser = new OdataSkipToMongoSkipParser();
+      OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
+          new OdataSelectToMongoProjectParser();
+      EdmMongoContextFacade facade =
+          DefaultEdmMongoContextFacade.builder().withEntityPropertiesMongoPathContext(null).build();
+
+      // $lookup with pipeline
+      List<Bson> lookupPipeline = new ArrayList<>();
+      if (eOption.getFilterOption() != null) {
+        lookupPipeline.addAll(
+            oDataFilterToMongoMatchParser.parse(eOption.getFilterOption()).getStageObjects());
+      }
+      if (eOption.getOrderByOption() != null) {
+        lookupPipeline.addAll(
+            odataOrderByToMongoSortParser
+                .parse(eOption.getOrderByOption(), facade)
+                .getStageObjects());
+      }
+      if (eOption.getSkipOption() != null) {
+        lookupPipeline.addAll(
+            odataSkipToMongoSkipParser.parse(eOption.getSkipOption()).getStageObjects());
+      }
+      if (eOption.getTopOption() != null) {
+        lookupPipeline.addAll(
+            odataTopToMongoLimitParser.parse(eOption.getTopOption()).getStageObjects());
+      }
+      if (eOption.getSelectOption() != null) {
+        lookupPipeline.addAll(
+            odataSelectToMongoProjectParser
+                .parse(eOption.getSelectOption(), facade)
+                .getStageObjects());
+      }
+      lookupInnerObject.append("pipeline", lookupPipeline);
+    }
+    lookupInnerObject.append("as", navPropertyWithRootPrefix);
+    lookup.append("$lookup", lookupInnerObject);
+    pipeline.add(lookup);
+    if (!navProp.isCollection()) {
+      // For single-valued navigation properties (one-to-one or many-to-one),
+      // unwind the lookup result array to render a single object.
+      // preserveNullAndEmptyArrays is set to true to ensure the parent document
+      // is not dropped if the related resource is missing (OData $expand behavior).
+      pipeline.add(
+          new Document(
+              "$unwind",
+              new Document("path", "$" + navPropertyWithRootPrefix)
+                  .append("preserveNullAndEmptyArrays", true)));
+    }
+    if (eOption.getExpandOption() != null) {
+      if (navProp.isCollection()) {
+        pipeline.add(
+            new Document(
+                "$unwind",
+                new Document("path", "$" + navPropertyWithRootPrefix)
+                    .append("preserveNullAndEmptyArrays", true)));
+      }
+      Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
+      newIdProperties.add(lookupMongoStartWith);
+      ExpandOperatorResult nestedExpandResult =
+          parse(
+              eOption.getExpandOption(),
+              expandParserContext,
+              new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
+      pipeline.addAll(nestedExpandResult.getStageObjects());
+      if (navProp.isCollection()) {
+        pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+        pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
+      } else {
+        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+          pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+        }
+      }
+      // TODO group if nav is collection
+
+      // TODO Remove properties that were foreign keys
+
+    } else {
+      if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+        if (navProp.isCollection()) {
+          pipeline.add(prepareCleanUpStageForArrayProperty(navPropertyWithRootPrefix));
+        } else {
+          pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+        }
+      }
+    }
+
+    return pipeline;
   }
 
   private Bson prepareCleanUpStageForSingleObjectProperty(String navProperty) {
