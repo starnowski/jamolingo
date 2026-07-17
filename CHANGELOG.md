@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 *   Added `rootMongoPath` property to `com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult` to retrieve the root path applied to the selection. ([#35](https://github.com/starnowski/jamolingo/issues/35))
 *   Added `database` property to `com.github.starnowski.jamolingo.core.mapping.EntityMapping` to support specifying the MongoDB database name. ([#35](https://github.com/starnowski/jamolingo/issues/35))
 *   Added `database` property to `com.github.starnowski.jamolingo.core.mapping.NavigationMapping` to support cross-database joins in OData navigation properties. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `isUseLookupForLevelGreaterThanOne()` property to `com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext` interface to configure whether `$lookup` should be used instead of `$graphLookup` for levels greater than 1. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `useLookupForLevelGreaterThanOne` support to `com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext` and its builder. ([#35](https://github.com/starnowski/jamolingo/issues/35))
 
 ### Changed
 

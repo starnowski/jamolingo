@@ -30,4 +30,14 @@ public interface ExpandParserContext {
    * @return maximum expansion level
    */
   Integer getMaxLevel();
+
+  /**
+   * Determines if the $lookup stage should be used to handle $level greater than 1. By default,
+   * returns false because by default the $graphLookup stage handles such cases.
+   *
+   * @return true if the $lookup stage should be used, false otherwise
+   */
+  default boolean isUseLookupForLevelGreaterThanOne() {
+    return false;
+  }
 }
