@@ -36,10 +36,35 @@ public class OdataSelectToMongoProjectParser {
    */
   public SelectOperatorResult parse(
       SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
+    return parse(
+        selectOption,
+        edmMongoContextFacade,
+        DefaultOdataSelectToMongoProjectParserContext.builder().build());
+  }
+
+  /**
+   * Parses the given SelectOption using the provided context facade and additional context.
+   *
+   * @param selectOption the OData select option to parse
+   * @param edmMongoContextFacade the context facade for resolving paths
+   * @param context the context containing additional project configurations
+   * @return the result of the parsing containing the MongoDB projection
+   */
+  public SelectOperatorResult parse(
+      SelectOption selectOption,
+      EdmMongoContextFacade edmMongoContextFacade,
+      OdataSelectToMongoProjectParserContext context) {
+    OdataSelectToMongoProjectParserContext nonNullContext =
+        context != null ? context : DefaultOdataSelectToMongoProjectParserContext.builder().build();
+
     if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
       // TODO check if _id is part of available register property
       return new DefaultSelectOperatorResult(
-          new HashSet<>(), true, true, edmMongoContextFacade.getRootMongoPath());
+          new HashSet<>(),
+          nonNullContext.getAdditionalFields(),
+          true,
+          true,
+          edmMongoContextFacade.getRootMongoPath());
     }
 
     List<String> fields = new ArrayList<>();
@@ -47,7 +72,11 @@ public class OdataSelectToMongoProjectParser {
       if (item.isStar()) {
         // TODO check if _id is part of available register property
         return new DefaultSelectOperatorResult(
-            new HashSet<>(), true, true, edmMongoContextFacade.getRootMongoPath());
+            new HashSet<>(),
+            nonNullContext.getAdditionalFields(),
+            true,
+            true,
+            edmMongoContextFacade.getRootMongoPath());
       }
       if (!item.getResourcePath().getUriResourceParts().stream()
           .allMatch(p -> p instanceof UriResourceProperty)) {
@@ -59,7 +88,11 @@ public class OdataSelectToMongoProjectParser {
     }
     // TODO check if _id is part of available register property
     return new DefaultSelectOperatorResult(
-        new HashSet<>(fields), true, false, edmMongoContextFacade.getRootMongoPath());
+        new HashSet<>(fields),
+        nonNullContext.getAdditionalFields(),
+        true,
+        false,
+        edmMongoContextFacade.getRootMongoPath());
   }
 
   /**
@@ -143,20 +176,43 @@ public class OdataSelectToMongoProjectParser {
 
   private static class DefaultSelectOperatorResult implements SelectOperatorResult {
 
+    private final Set<String> requestedFields;
+    private final Set<String> additionalFields;
     private final Set<String> selectedFields;
     private final boolean removeIdPropertyIfNotSpecified;
     private final boolean wildCard;
     private final String rootMongoPath;
 
     private DefaultSelectOperatorResult(
-        Set<String> selectedFields,
+        Set<String> requestedFields,
+        Set<String> additionalFields,
         boolean removeIdPropertyIfNotSpecified,
         boolean wildCard,
         String rootMongoPath) {
-      this.selectedFields = selectedFields;
+      this.requestedFields =
+          requestedFields != null
+              ? Collections.unmodifiableSet(requestedFields)
+              : Collections.emptySet();
+      this.additionalFields =
+          additionalFields != null
+              ? Collections.unmodifiableSet(additionalFields)
+              : Collections.emptySet();
+      Set<String> union = new HashSet<>(this.requestedFields);
+      union.addAll(this.additionalFields);
+      this.selectedFields = Collections.unmodifiableSet(union);
       this.removeIdPropertyIfNotSpecified = removeIdPropertyIfNotSpecified;
       this.wildCard = wildCard;
       this.rootMongoPath = rootMongoPath;
+    }
+
+    @Override
+    public Set<String> getRequestedFields() {
+      return requestedFields;
+    }
+
+    @Override
+    public Set<String> getAdditionalFields() {
+      return additionalFields;
     }
 
     @Override
