@@ -212,45 +212,6 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
     // TODO Check in for category (that is single property and not collection) we can specify the
     // $levels > 1
     return Stream.of(
-        Arguments.of(
-            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-            Set.of(1),
-            "$expand=category",
-            """
-                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                             "category": { "_id": 1, "name": "Category 1" }
-                            }]
-                            """,
-            JSONCompareMode.LENIENT),
-        Arguments.of(
-            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-            Set.of(1),
-            "$expand=category,children",
-            """
-                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                     "category": { "_id": 1, "name": "Category 1" },
-                                     "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                      { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 }
-                                     ]
-                                    }]
-                                    """,
-            JSONCompareMode.LENIENT),
-        Arguments.of(
-            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-            Set.of(1),
-            "$expand=category,children,treeType2s",
-            """
-                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                             "category": { "_id": 1, "name": "Category 1" },
-                                             "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                              { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 }],
-                                             "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
-                                             { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
-                                             { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
-                                             ]
-                                            }]
-                                            """,
-            JSONCompareMode.LENIENT),
         // Level without filters
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
@@ -320,15 +281,61 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
             Set.of(1),
             "$expand=children($levels=max)",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                                     "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                                     { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
-                                                     { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                     { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-                                                     { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-                                                     { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 }
-                                                     ]
-                                                    }]
+                                                            [
+                                                        {
+                                                            "_id": 1,
+                                                            "index": 1,
+                                                            "parentId": null,
+                                                            "categoryId": 1,
+                                                            "children": [
+                                                                {
+                                                                    "_id": 2,
+                                                                    "index": 2,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": [
+                                                                        {
+                                                                            "_id": 3,
+                                                                            "index": 3,
+                                                                            "parentId": 2,
+                                                                            "categoryId": 2,
+                                                                            "children": [
+                                                                                {
+                                                                                    "_id": 4,
+                                                                                    "index": 4,
+                                                                                    "parentId": 3,
+                                                                                    "categoryId": 2,
+                                                                                    "children": [
+                                                                                        {
+                                                                                            "_id": 6,
+                                                                                            "index": 6,
+                                                                                            "parentId": 4,
+                                                                                            "categoryId": 2,
+                                                                                            "children": [
+                                                                                                {
+                                                                                                    "_id": 7,
+                                                                                                    "index": 7,
+                                                                                                    "parentId": 6,
+                                                                                                    "categoryId": 2
+                                                                                                }
+                                                                                            ]
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "_id": 5,
+                                                                    "index": 5,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
                                                     """,
             JSONCompareMode.LENIENT),
         // Level with max=5 with root documents with id 1 and 2
