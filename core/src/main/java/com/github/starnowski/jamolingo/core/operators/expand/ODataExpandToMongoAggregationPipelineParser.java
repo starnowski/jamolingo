@@ -7,10 +7,7 @@ import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
-import com.github.starnowski.jamolingo.core.operators.select.DefaultOdataSelectToMongoProjectParserContext;
-import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
-import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParserContext;
-import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorOptionsForMapOperator;
+import com.github.starnowski.jamolingo.core.operators.select.*;
 import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser;
 import com.github.starnowski.jamolingo.core.operators.top.OdataTopToMongoLimitParser;
 import java.util.*;
@@ -409,16 +406,22 @@ public class ODataExpandToMongoAggregationPipelineParser {
             odataTopToMongoLimitParser.parse(eOption.getTopOption()).getStageObjects());
       }
       boolean isLastLevelLookUp = currentLevel != maxLevel;
+      SelectOperatorResult selectOperatorResult = null;
       // TODO check if _id or collection can be lost
       if (eOption.getSelectOption() != null) {
-        DefaultOdataSelectToMongoProjectParserContext.Builder odataSelectToMongoProjectParserContextBuilder = DefaultOdataSelectToMongoProjectParserContext.builder();
+        DefaultOdataSelectToMongoProjectParserContext.Builder
+            odataSelectToMongoProjectParserContextBuilder =
+                DefaultOdataSelectToMongoProjectParserContext.builder();
         if (isLastLevelLookUp) {
-          odataSelectToMongoProjectParserContextBuilder.withAdditionalFields(Set.of(lookupMongoStartWith));
+          odataSelectToMongoProjectParserContextBuilder.withAdditionalFields(
+              Set.of(lookupMongoStartWith));
         }
-        lookupPipeline.addAll(
-            odataSelectToMongoProjectParser
-                .parse(eOption.getSelectOption(), facade, odataSelectToMongoProjectParserContextBuilder.build())
-                .getStageObjects());
+        selectOperatorResult =
+            odataSelectToMongoProjectParser.parse(
+                eOption.getSelectOption(),
+                facade,
+                odataSelectToMongoProjectParserContextBuilder.build());
+        lookupPipeline.addAll(selectOperatorResult.getStageObjects());
       }
       if (currentLevel != maxLevel) {
         lookupPipeline.addAll(
@@ -434,7 +437,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 currentLevel + 1,
                 maxLevel));
       }
-      // TODO remove lookupMongoStartWith if not selected!
+      if (selectOperatorResult != null
+          && !selectOperatorResult.getRequestedFields().contains(lookupMongoStartWith)) {
+        // Remove lookupMongoStartWith as not selected field
+        lookupPipeline.add(new Document("$unset", lookupMongoStartWith));
+      }
       lookupInnerObject.append("pipeline", lookupPipeline);
     }
     lookupInnerObject.append("as", navPropertyWithRootPrefix);
