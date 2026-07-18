@@ -7,7 +7,9 @@ import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.select.DefaultOdataSelectToMongoProjectParserContext;
 import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
+import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParserContext;
 import com.github.starnowski.jamolingo.core.operators.select.SelectOperatorOptionsForMapOperator;
 import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser;
 import com.github.starnowski.jamolingo.core.operators.top.OdataTopToMongoLimitParser;
@@ -406,11 +408,16 @@ public class ODataExpandToMongoAggregationPipelineParser {
         lookupPipeline.addAll(
             odataTopToMongoLimitParser.parse(eOption.getTopOption()).getStageObjects());
       }
+      boolean isLastLevelLookUp = currentLevel != maxLevel;
       // TODO check if _id or collection can be lost
       if (eOption.getSelectOption() != null) {
+        DefaultOdataSelectToMongoProjectParserContext.Builder odataSelectToMongoProjectParserContextBuilder = DefaultOdataSelectToMongoProjectParserContext.builder();
+        if (isLastLevelLookUp) {
+          odataSelectToMongoProjectParserContextBuilder.withAdditionalFields(Set.of(lookupMongoStartWith));
+        }
         lookupPipeline.addAll(
             odataSelectToMongoProjectParser
-                .parse(eOption.getSelectOption(), facade)
+                .parse(eOption.getSelectOption(), facade, odataSelectToMongoProjectParserContextBuilder.build())
                 .getStageObjects());
       }
       if (currentLevel != maxLevel) {
@@ -427,6 +434,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 currentLevel + 1,
                 maxLevel));
       }
+      // TODO remove lookupMongoStartWith if not selected!
       lookupInnerObject.append("pipeline", lookupPipeline);
     }
     lookupInnerObject.append("as", navPropertyWithRootPrefix);
