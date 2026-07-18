@@ -373,7 +373,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
         || eOption.getTopOption() != null
         || eOption.getSkipOption() != null
         || eOption.getSelectOption() != null
-        || currentLevel != maxLevel) {
+        || currentLevel != maxLevel
+        || eOption.getExpandOption() != null) {
       ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
           new ODataFilterToMongoMatchParser();
       OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
@@ -437,6 +438,13 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 currentLevel + 1,
                 maxLevel));
       }
+      if (eOption.getExpandOption() != null) {
+        ExpandOperatorResult nestedExpandResult =
+                parse(
+                        eOption.getExpandOption(),
+                        expandParserContext);
+        lookupPipeline.addAll(nestedExpandResult.getStageObjects());
+      }
       if (selectOperatorResult != null
           && !selectOperatorResult.getRequestedFields().contains(lookupMongoStartWith)) {
         // Remove lookupMongoStartWith as not selected field
@@ -459,29 +467,29 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   .append("preserveNullAndEmptyArrays", true)));
     }
     if (eOption.getExpandOption() != null) {
-      if (navProp.isCollection()) {
-        pipeline.add(
-            new Document(
-                "$unwind",
-                new Document("path", "$" + navPropertyWithRootPrefix)
-                    .append("preserveNullAndEmptyArrays", true)));
-      }
-      Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
-      newIdProperties.add(lookupMongoStartWith);
-      ExpandOperatorResult nestedExpandResult =
-          parse(
-              eOption.getExpandOption(),
-              expandParserContext,
-              new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
-      pipeline.addAll(nestedExpandResult.getStageObjects());
-      if (navProp.isCollection()) {
-        pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-        pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
-      } else {
-        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
-          pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-        }
-      }
+//      if (navProp.isCollection()) {
+//        pipeline.add(
+//            new Document(
+//                "$unwind",
+//                new Document("path", "$" + navPropertyWithRootPrefix)
+//                    .append("preserveNullAndEmptyArrays", true)));
+//      }
+//      Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
+//      newIdProperties.add(lookupMongoStartWith);
+//      ExpandOperatorResult nestedExpandResult =
+//          parse(
+//              eOption.getExpandOption(),
+//              expandParserContext,
+//              new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
+//      pipeline.addAll(nestedExpandResult.getStageObjects());
+//      if (navProp.isCollection()) {
+//        pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+//        pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
+//      } else {
+//        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+//          pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+//        }
+//      }
       // TODO group if nav is collection
 
       // TODO Remove properties that were foreign keys
