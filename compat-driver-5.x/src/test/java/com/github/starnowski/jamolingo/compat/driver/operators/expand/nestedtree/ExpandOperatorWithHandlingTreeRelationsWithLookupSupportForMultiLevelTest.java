@@ -469,13 +469,38 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (2, 3, 4))",
             """
-                                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                                             "children": [
-                                                             { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                                             { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                             { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 }
-                                                             ]
-                                                            }]
+                                                            [
+                                                        {
+                                                            "_id": 1,
+                                                            "index": 1,
+                                                            "parentId": null,
+                                                            "categoryId": 1,
+                                                            "children": [
+                                                                {
+                                                                    "_id": 2,
+                                                                    "index": 2,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": [
+                                                                        {
+                                                                            "_id": 3,
+                                                                            "index": 3,
+                                                                            "parentId": 2,
+                                                                            "categoryId": 2,
+                                                                            "children": [
+                                                                                {
+                                                                                    "_id": 4,
+                                                                                    "index": 4,
+                                                                                    "parentId": 3,
+                                                                                    "categoryId": 2
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
                                                             """,
             JSONCompareMode.NON_EXTENSIBLE),
         // Level with filters that condition pass for document with id 2 and 4, which means that 4
