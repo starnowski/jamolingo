@@ -440,9 +440,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
       if (eOption.getExpandOption() != null) {
         ExpandOperatorResult nestedExpandResult =
-                parse(
-                        eOption.getExpandOption(),
-                        expandParserContext);
+            parse(eOption.getExpandOption(), expandParserContext);
         lookupPipeline.addAll(nestedExpandResult.getStageObjects());
       }
       if (selectOperatorResult != null
@@ -467,29 +465,33 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   .append("preserveNullAndEmptyArrays", true)));
     }
     if (eOption.getExpandOption() != null) {
-//      if (navProp.isCollection()) {
-//        pipeline.add(
-//            new Document(
-//                "$unwind",
-//                new Document("path", "$" + navPropertyWithRootPrefix)
-//                    .append("preserveNullAndEmptyArrays", true)));
-//      }
-//      Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
-//      newIdProperties.add(lookupMongoStartWith);
-//      ExpandOperatorResult nestedExpandResult =
-//          parse(
-//              eOption.getExpandOption(),
-//              expandParserContext,
-//              new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
-//      pipeline.addAll(nestedExpandResult.getStageObjects());
-//      if (navProp.isCollection()) {
-//        pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-//        pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
-//      } else {
-//        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
-//          pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-//        }
-//      }
+      //      if (navProp.isCollection()) {
+      //        pipeline.add(
+      //            new Document(
+      //                "$unwind",
+      //                new Document("path", "$" + navPropertyWithRootPrefix)
+      //                    .append("preserveNullAndEmptyArrays", true)));
+      //      }
+      //      Set<String> newIdProperties = new
+      // HashSet<>(parserExpandItemContext.getIdProperties());
+      //      newIdProperties.add(lookupMongoStartWith);
+      //      ExpandOperatorResult nestedExpandResult =
+      //          parse(
+      //              eOption.getExpandOption(),
+      //              expandParserContext,
+      //              new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties,
+      // true));
+      //      pipeline.addAll(nestedExpandResult.getStageObjects());
+      //      if (navProp.isCollection()) {
+      //        pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+      //        pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix,
+      // newIdProperties));
+      //      } else {
+      //        if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
+      //
+      // pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+      //        }
+      //      }
       // TODO group if nav is collection
 
       // TODO Remove properties that were foreign keys
