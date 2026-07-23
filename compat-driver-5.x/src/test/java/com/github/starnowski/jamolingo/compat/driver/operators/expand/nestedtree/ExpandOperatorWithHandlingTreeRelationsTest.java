@@ -1182,25 +1182,22 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                                     "categoryId": 1,
                                                                                                     "children": [
                                                                                                         {
+                                                                                                            "_id": 3,
+                                                                                                            "index": 3,
+                                                                                                            "parentId": 2,
+                                                                                                            "categoryId": 2
+                                                                                                        },
+                                                                                                        {
                                                                                                             "_id": 2,
                                                                                                             "index": 2,
                                                                                                             "parentId": 1,
-                                                                                                            "categoryId": 1,
-                                                                                                            "children": [
-                                                                                                                {
-                                                                                                                    "_id": 3,
-                                                                                                                    "index": 3,
-                                                                                                                    "parentId": 2,
-                                                                                                                    "categoryId": 2
-                                                                                                                }
-                                                                                                            ]
+                                                                                                            "categoryId": 1
                                                                                                         },
                                                                                                         {
                                                                                                             "_id": 5,
                                                                                                             "index": 5,
                                                                                                             "parentId": 1,
-                                                                                                            "categoryId": 1,
-                                                                                                            "children": []
+                                                                                                            "categoryId": 1
                                                                                                         }
                                                                                                     ]
                                                                                                 }
