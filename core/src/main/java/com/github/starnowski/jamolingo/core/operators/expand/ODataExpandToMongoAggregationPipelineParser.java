@@ -179,13 +179,13 @@ public class ODataExpandToMongoAggregationPipelineParser {
         Document graphLookupInnerObject =
             new Document()
                 .append("from", targetCollection)
-                .append("startWith", "$" + mongoStartWith)
+                .append("startWith", "$" + lookupMongoStartWith)
                 .append("connectFromField", mongoConnectFrom)
                 .append("connectToField", mongoConnectTo)
                 .append(
                     "maxDepth",
                     translateODataExpandLevelsToGraphLookupMaxDepth(eOption, expandParserContext))
-                .append("as", navProp.getName());
+                .append("as", navPropertyWithRootPrefix);
         String depthVariable = navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX;
         if (eOption.getFilterOption() != null) {
           ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
@@ -203,7 +203,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         if (eOption.getFilterOption() != null) {
           pipeline.add(
               prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
-                  navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
+                  navPropertyWithRootPrefix, depthVariable, mongoConnectTo, mongoConnectFrom));
         }
 
         Document sortDocument = null;
@@ -224,37 +224,47 @@ public class ODataExpandToMongoAggregationPipelineParser {
               new Document(
                   "$set",
                   new Document(
-                      navProp.getName(),
+                      navPropertyWithRootPrefix,
                       new Document(
                           "$sortArray",
-                          new Document("input", "$" + navProp.getName())
+                          new Document("input", "$" + navPropertyWithRootPrefix)
                               .append("sortBy", sortDocument)))));
         }
         if (eOption.getTopOption() != null || eOption.getSkipOption() != null) {
           pipeline.add(
               prepareArrayWithChildrenArrayGroupByParentAndLevel(
-                  navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
+                  navPropertyWithRootPrefix,
+                  navProp.getName(),
+                  depthVariable,
+                  mongoConnectTo,
+                  mongoConnectFrom));
           if (eOption.getOrderByOption() != null) {
-            pipeline.add(prepareArrayWithSortedChildrenArray(navProp, sortDocument));
+            pipeline.add(
+                prepareArrayWithSortedChildrenArray(
+                    navPropertyWithRootPrefix, navProp.getName(), sortDocument));
           }
           pipeline.add(
               prepareArrayWithSkippedAndLimitedChildrenArray(
-                  navProp,
+                  navPropertyWithRootPrefix,
+                  navProp.getName(),
                   eOption.getSkipOption() == null ? null : eOption.getSkipOption().getValue(),
                   eOption.getTopOption() == null ? null : eOption.getTopOption().getValue()));
-          pipeline.add(prepareFlatterArrayBasedOnChildrenArray(navProp));
+          pipeline.add(
+              prepareFlatterArrayBasedOnChildrenArray(
+                  navPropertyWithRootPrefix, navProp.getName()));
           pipeline.add(
               new Document(
                   "$set",
                   new Document(
-                      navProp.getName(),
-                      "$" + navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX)));
+                      navPropertyWithRootPrefix,
+                      "$" + navPropertyWithRootPrefix + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX)));
           pipeline.add(
               prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
-                  navProp, depthVariable, mongoConnectTo, mongoConnectFrom));
+                  navPropertyWithRootPrefix, depthVariable, mongoConnectTo, mongoConnectFrom));
 
           pipeline.add(
-              new Document("$unset", navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX));
+              new Document(
+                  "$unset", navPropertyWithRootPrefix + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX));
         }
         if (eOption.getSelectOption() != null) {
           // TODO check if element does not have nested $expand, if yes then check if potential
@@ -273,20 +283,18 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // TODO Create helper component that combine selected fields from the SelectOperatorResult
           // collection
 
-          pipeline.add(prepareArrayWithSelectedProperties(navProp, selectResult));
+          pipeline.add(prepareArrayWithSelectedProperties(navPropertyWithRootPrefix, selectResult));
         }
         if (removeDepthProperty) {
           // Removing the "depthVariable" property from results
-          pipeline.add(new Document("$unset", navProp.getName() + "." + depthVariable));
+          pipeline.add(new Document("$unset", navPropertyWithRootPrefix + "." + depthVariable));
         }
         if (eOption.getExpandOption() != null) {
-          if (navProp.isCollection()) {
-            pipeline.add(
-                new Document(
-                    "$unwind",
-                    new Document("path", "$" + navPropertyWithRootPrefix)
-                        .append("preserveNullAndEmptyArrays", true)));
-          }
+          pipeline.add(
+              new Document(
+                  "$unwind",
+                  new Document("path", "$" + navPropertyWithRootPrefix)
+                      .append("preserveNullAndEmptyArrays", true)));
           Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
           newIdProperties.add(lookupMongoStartWith);
           ExpandOperatorResult nestedExpandResult =
@@ -295,15 +303,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   expandParserContext,
                   new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
           pipeline.addAll(nestedExpandResult.getStageObjects());
-          if (navProp.isCollection()) {
-            pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-            pipeline.addAll(
-                prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
-          } else {
-            if (parserExpandItemContext.isAddCleanUpEmptyPropertiesStage()) {
-              pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
-            }
-          }
+          pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
+          pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
           // TODO group if nav is collection
 
           // TODO Remove properties that were foreign keys
@@ -528,7 +529,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                                 }
                                               }
                                             }
-                    """
+            """
             .formatted(navProperty));
   }
 
@@ -623,7 +624,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
   }
 
   private static Bson prepareArrayWithSelectedProperties(
-      EdmNavigationProperty navProp, SelectOperatorOptionsForMapOperator selectResult) {
+      String navPropertyWithRootPrefix, SelectOperatorOptionsForMapOperator selectResult) {
     SelectOperatorResultToBsonDocumentConverter selectOptionToMapConverter =
         new SelectOperatorResultToBsonDocumentConverter();
     Document mapObject =
@@ -643,7 +644,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     }
                   }
                 """
-            .formatted(navProp.getName(), mapObject.toJson()));
+            .formatted(navPropertyWithRootPrefix, mapObject.toJson()));
   }
 
   /**
@@ -663,21 +664,21 @@ public class ODataExpandToMongoAggregationPipelineParser {
    * @return a BSON Document representing the $set stage
    */
   private static Document prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
-      EdmNavigationProperty navProp,
+      String navPropertyWithRootPrefix,
       String depthVariable,
       String mongoConnectTo,
       String mongoConnectFrom) {
     return new Document(
         "$set",
         new Document(
-            navProp.getName(),
+            navPropertyWithRootPrefix,
             new Document(
                 "$reduce",
                 new Document(
                         "input",
                         new Document(
                             "$sortArray",
-                            new Document("input", "$" + navProp.getName())
+                            new Document("input", "$" + navPropertyWithRootPrefix)
                                 .append("sortBy", new Document(depthVariable, 1))))
                     .append("initialValue", List.of())
                     .append(
@@ -710,7 +711,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
   }
 
   private static Document prepareArrayWithChildrenArrayGroupByParentAndLevel(
-      EdmNavigationProperty navProp,
+      String navPropertyWithRootPrefix,
+      String navPropName,
       String depthVariable,
       String mongoConnectTo,
       String mongoConnectFrom) {
@@ -734,7 +736,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                             {
                               $concatArrays: [
                               "$$value",
-                                  [{ %4$s: "$$this.%4$s", %3$s: "$$this.%3$s", %2$s: ["$$this"] }]
+                                  [{ %4$s: "$$this.%4$s", %3$s: "$$this.%3$s", %5$s: ["$$this"] }]
                                 ]
                             },
                             {
@@ -746,7 +748,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                   { $eq: ["$$bucket.%4$s", "$$this.%4$s"] },
                                   {
                                     %4$s: "$$bucket.%4$s",
-                                            %2$s: { $concatArrays: ["$$bucket.%2$s", ["$$this"]] }
+                                            %5$s: { $concatArrays: ["$$bucket.%5$s", ["$$this"]] }
                                   },
                                   "$$bucket"
                                     ]
@@ -763,14 +765,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
               }
             """
             .formatted(
-                navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
-                navProp.getName(),
+                navPropertyWithRootPrefix + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
+                navPropertyWithRootPrefix,
                 depthVariable,
-                mongoConnectTo));
+                mongoConnectTo,
+                navPropName));
   }
 
   private static Document prepareArrayWithSortedChildrenArray(
-      EdmNavigationProperty navProp, Document sortObject) {
+      String navPropertyWithRootPrefix, String navPropName, Document sortObject) {
 
     return Document.parse(
         """
@@ -799,13 +802,13 @@ public class ODataExpandToMongoAggregationPipelineParser {
               }
             """
             .formatted(
-                navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
-                navProp.getName(),
+                navPropertyWithRootPrefix + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
+                navPropName,
                 sortObject.toJson()));
   }
 
   private static Document prepareArrayWithSkippedAndLimitedChildrenArray(
-      EdmNavigationProperty navProp, Integer skip, Integer top) {
+      String navPropertyWithRootPrefix, String navPropName, Integer skip, Integer top) {
 
     return Document.parse(
         """
@@ -835,8 +838,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   }
                 """
             .formatted(
-                navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
-                navProp.getName(),
+                navPropertyWithRootPrefix + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
+                navPropName,
                 skip == null ? 0 : skip,
                 top == null
                     ? """
@@ -845,7 +848,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     : top));
   }
 
-  private static Document prepareFlatterArrayBasedOnChildrenArray(EdmNavigationProperty navProp) {
+  private static Document prepareFlatterArrayBasedOnChildrenArray(
+      String navPropertyWithRootPrefix, String navPropName) {
 
     return Document.parse(
         """
@@ -856,7 +860,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                                     input: "$%1$s",
                                     initialValue: [],
                                     in: {
-                                      $concatArrays: ["$$value", "$$this.%2$s"]
+                                      $concatArrays: ["$$value", "$$this.%3$s"]
                                     }
                             }
                           }
@@ -864,7 +868,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
                      }
                     """
             .formatted(
-                navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX, navProp.getName()));
+                navPropertyWithRootPrefix + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX,
+                navPropertyWithRootPrefix,
+                navPropName));
   }
 
   /**
