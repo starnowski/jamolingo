@@ -70,10 +70,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
       ExpandOption expandOption, ExpandParserContext expandParserContext)
       throws ExpressionVisitException, ODataApplicationException {
     List<Bson> stageObjects = new ArrayList<>();
+    Map<String, ExpandElement> expandElements = new HashMap<>();
     for (ExpandItem eOption : expandOption.getExpandItems()) {
-      stageObjects.addAll(prepareStageObjectsForExpandItem(eOption, expandParserContext));
+      stageObjects.addAll(
+          prepareStageObjectsForExpandItem(eOption, expandParserContext, expandElements));
     }
-    return new DefaultExpandOperatorResult(stageObjects);
+    return new DefaultExpandOperatorResult(stageObjects, expandElements);
   }
 
   private ExpandOperatorResult parse(
@@ -82,24 +84,32 @@ public class ODataExpandToMongoAggregationPipelineParser {
       ParserExpandItemContext parserExpandItemContext)
       throws ExpressionVisitException, ODataApplicationException {
     List<Bson> stageObjects = new ArrayList<>();
+    Map<String, ExpandElement> expandElements = new HashMap<>();
     for (ExpandItem eOption : expandOption.getExpandItems()) {
       stageObjects.addAll(
-          prepareStageObjectsForExpandItem(eOption, expandParserContext, parserExpandItemContext));
+          prepareStageObjectsForExpandItem(
+              eOption, expandParserContext, parserExpandItemContext, expandElements));
     }
-    return new DefaultExpandOperatorResult(stageObjects);
-  }
-
-  private Collection<? extends Bson> prepareStageObjectsForExpandItem(
-      ExpandItem eOption, ExpandParserContext expandParserContext)
-      throws ExpressionVisitException, ODataApplicationException {
-    return prepareStageObjectsForExpandItem(
-        eOption, expandParserContext, new ParserExpandItemContext(null, null, false));
+    return new DefaultExpandOperatorResult(stageObjects, expandElements);
   }
 
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
       ExpandItem eOption,
       ExpandParserContext expandParserContext,
-      ParserExpandItemContext parserExpandItemContext)
+      Map<String, ExpandElement> expandElements)
+      throws ExpressionVisitException, ODataApplicationException {
+    return prepareStageObjectsForExpandItem(
+        eOption,
+        expandParserContext,
+        new ParserExpandItemContext(null, null, false),
+        expandElements);
+  }
+
+  private Collection<? extends Bson> prepareStageObjectsForExpandItem(
+      ExpandItem eOption,
+      ExpandParserContext expandParserContext,
+      ParserExpandItemContext parserExpandItemContext,
+      Map<String, ExpandElement> expandElements)
       throws ExpressionVisitException, ODataApplicationException {
     UriResource lastResource =
         eOption
@@ -289,6 +299,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // Removing the "depthVariable" property from results
           pipeline.add(new Document("$unset", navPropertyWithRootPrefix + "." + depthVariable));
         }
+        Map<String, ExpandElement> nestedElements = null;
         if (eOption.getExpandOption() != null) {
           pipeline.add(
               new Document(
@@ -302,6 +313,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   eOption.getExpandOption(),
                   expandParserContext,
                   new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
+          nestedElements = nestedExpandResult.getExpandElements();
           pipeline.addAll(nestedExpandResult.getStageObjects());
           pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
           pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
@@ -310,8 +322,37 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // TODO Remove properties that were foreign keys
 
         }
+
+        int levelValue = 1;
+        boolean maxLevelRequest = false;
+        if (eOption.getLevelsOption() != null) {
+          maxLevelRequest = eOption.getLevelsOption().isMax();
+          levelValue =
+              maxLevelRequest
+                  ? expandParserContext.getMaxLevel()
+                  : eOption.getLevelsOption().getValue();
+        }
+        expandElements.put(
+            navProp.getName(),
+            ExpandElement.builder()
+                .withEdmPath(navProp.getName())
+                .withMongoPath(navProp.getName())
+                .withFetchType(FetchType.GRAPHLOOKUP)
+                .withLevel(levelValue)
+                .withMaxLevelRequest(maxLevelRequest)
+                .withLocalKeyProperty(edmStartWith)
+                .withForeignKeyProperty(edmConnectTo)
+                .withExpandElements(nestedElements)
+                .build());
         return pipeline;
       } else {
+        Map<String, ExpandElement> nestedElements = null;
+        ExpandOperatorResult nestedExpandResult = null;
+        if (eOption.getExpandOption() != null) {
+          nestedExpandResult = parse(eOption.getExpandOption(), expandParserContext);
+          nestedElements = nestedExpandResult.getExpandElements();
+        }
+
         if (eOption.getLevelsOption() != null
             && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)) {
           int maxDepth =
@@ -327,7 +368,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   navPropertyWithRootPrefix,
                   navProp,
                   1,
-                  maxDepth + 1));
+                  maxDepth + 1,
+                  nestedExpandResult));
         } else {
           pipeline.addAll(
               prepareLookUpStage(
@@ -340,8 +382,32 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   navPropertyWithRootPrefix,
                   navProp,
                   1,
-                  1));
+                  1,
+                  nestedExpandResult));
         }
+
+        int levelValue = 1;
+        boolean maxLevelRequest = false;
+        if (eOption.getLevelsOption() != null) {
+          maxLevelRequest = eOption.getLevelsOption().isMax();
+          levelValue =
+              maxLevelRequest
+                  ? expandParserContext.getMaxLevel()
+                  : eOption.getLevelsOption().getValue();
+        }
+        expandElements.put(
+            navProp.getName(),
+            ExpandElement.builder()
+                .withEdmPath(navProp.getName())
+                .withMongoPath(navProp.getName())
+                .withFetchType(FetchType.LOOKUP)
+                .withLevel(levelValue)
+                .withMaxLevelRequest(maxLevelRequest)
+                .withLocalKeyProperty(edmStartWith)
+                .withForeignKeyProperty(edmConnectTo)
+                .withExpandElements(nestedElements)
+                .build());
+
         return pipeline;
       }
     }
@@ -358,7 +424,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
       String navPropertyWithRootPrefix,
       EdmNavigationProperty navProp,
       int currentLevel,
-      int maxLevel)
+      int maxLevel,
+      ExpandOperatorResult nestedExpandResult)
       throws ExpressionVisitException, ODataApplicationException {
     // Adding $lookup
     List<Bson> pipeline = new ArrayList<>();
@@ -437,11 +504,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 navPropertyWithRootPrefix,
                 navProp,
                 currentLevel + 1,
-                maxLevel));
+                maxLevel,
+                nestedExpandResult));
       }
-      if (eOption.getExpandOption() != null) {
-        ExpandOperatorResult nestedExpandResult =
-            parse(eOption.getExpandOption(), expandParserContext);
+      if (nestedExpandResult != null) {
         lookupPipeline.addAll(nestedExpandResult.getStageObjects());
       }
       if (selectOperatorResult != null
@@ -898,9 +964,25 @@ public class ODataExpandToMongoAggregationPipelineParser {
   private static class DefaultExpandOperatorResult implements ExpandOperatorResult {
 
     private final List<Bson> stageObjects;
+    private final Map<String, ExpandElement> expandElements;
 
     private DefaultExpandOperatorResult(List<Bson> stageObjects) {
       this.stageObjects = stageObjects;
+      this.expandElements = Collections.emptyMap();
+    }
+
+    private DefaultExpandOperatorResult(
+        List<Bson> stageObjects, Map<String, ExpandElement> expandElements) {
+      this.stageObjects = stageObjects;
+      this.expandElements =
+          expandElements != null
+              ? Collections.unmodifiableMap(new HashMap<>(expandElements))
+              : Collections.emptyMap();
+    }
+
+    @Override
+    public Map<String, ExpandElement> getExpandElements() {
+      return expandElements;
     }
 
     @Override

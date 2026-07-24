@@ -135,4 +135,87 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
             stage instanceof Document && stage.containsKey("\$graphLookup")
         }
     }
+
+    def 'should correctly populate getExpandElements for complex expand #expandQuery'() {
+        given:
+        Edm edm = loadEmdProvider(edmFilePath)
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri(entitySetName, expandQuery, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withUseLookupForLevelGreaterThanOne(lookUpUserForGraph)
+                .withMaxLevel(maxLevel)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        def result = parser.parse(uriInfo.getExpandOption(), context)
+        def expandElements = result.getExpandElements()
+
+        then:
+        verifyExpandElements(expandElements, expectedResult)
+
+        where:
+        expandQuery | edmFilePath | entitySetName | lookUpUserForGraph | maxLevel || expectedResult
+        // Example 1
+        "\$expand=parent(\$levels=2;\$expand=children(\$levels=2))" | "edm/edm_expand.xml" | "examples2" | true | 5 || [
+            "parent": [
+                edmPath: "parent", mongoPath: "parent", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id",
+                expandElements: [
+                    "children": [
+                        edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                    ]
+                ]
+            ]
+        ]
+        // Example 2
+        "\$expand=parent(\$levels=2;\$expand=children(\$levels=2))" | "edm/edm_expand.xml" | "examples2" | false | 5 || [
+            "parent": [
+                edmPath: "parent", mongoPath: "parent", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id",
+                expandElements: [
+                    "children": [
+                        edmPath: "children", mongoPath: "children", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                    ]
+                ]
+            ]
+        ]
+        // Example 3
+        "\$expand=children(\$levels=max;\$expand=treeType2s(\$expand=children(\$levels=max)))" | "edm/edm_tree.xml" | "treeType1s" | true | 5 || [
+            "children": [
+                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 5, maxLevelRequest: true, localKeyProperty: "_id", foreignKeyProperty: "parentId",
+                expandElements: [
+                    "treeType2s": [
+                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id",
+                        expandElements: [
+                            "children": [
+                                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 5, maxLevelRequest: true, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ]
+    }
+
+    private void verifyExpandElements(Map<String, ExpandElement> actual, Map<String, Object> expected) {
+        if (expected == null || expected.isEmpty()) {
+            assert actual == null || actual.isEmpty()
+            return
+        }
+        assert actual != null
+        assert actual.size() == expected.size()
+        expected.each { key, expectedElement ->
+            def actualElement = actual.get(key)
+            assert actualElement != null
+            assert actualElement.getEdmPath() == expectedElement.edmPath
+            assert actualElement.getMongoPath() == expectedElement.mongoPath
+            assert actualElement.getFetchType().name() == expectedElement.fetchType
+            assert actualElement.getLevel() == expectedElement.level
+            assert actualElement.getMaxLevelRequest() == expectedElement.maxLevelRequest
+            assert actualElement.getLocalKeyProperty() == expectedElement.localKeyProperty
+            assert actualElement.getForeignKeyProperty() == expectedElement.foreignKeyProperty
+            verifyExpandElements(actualElement.getExpandElements(), expectedElement.expandElements as Map<String, Object>)
+        }
+    }
 }

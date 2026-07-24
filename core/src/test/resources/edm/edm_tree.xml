@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="MyService">
+            <EntityType Name="Category">
+                <Key>
+                    <PropertyRef Name="_id" />
+                </Key>
+                <Property Name="_id" Type="Edm.Int32" Nullable="false" />
+                <Property Name="name" Type="Edm.String" />
+            </EntityType>
+            <EntityType Name="TreeType1">
+                <Key>
+                    <PropertyRef Name="_id" />
+                </Key>
+                <Property Name="_id" Type="Edm.Int32" Nullable="false" />
+                <Property Name="index" Type="Edm.Int32" />
+                <Property Name="parentId" Type="Edm.Int32" />
+                <Property Name="categoryId" Type="Edm.Int32" />
+                <NavigationProperty Name="category" Type="MyService.Category">
+                    <ReferentialConstraint Property="categoryId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="parent" Type="MyService.TreeType1" Nullable="true" Partner="children">
+                    <ReferentialConstraint Property="parentId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="children" Type="Collection(MyService.TreeType1)" Partner="parent"/>
+                <NavigationProperty Name="treeType2s" Type="Collection(MyService.TreeType2)" Partner="treeType1"/>
+            </EntityType>
+            <EntityType Name="TreeType2">
+                <Key>
+                    <PropertyRef Name="_id" />
+                </Key>
+                <Property Name="_id" Type="Edm.Int32" Nullable="false" />
+                <Property Name="index" Type="Edm.Int32" />
+                <Property Name="parentId" Type="Edm.Int32" />
+                <Property Name="categoryId" Type="Edm.Int32" />
+                <Property Name="treeType1Id" Type="Edm.Int32" />
+                <NavigationProperty Name="category" Type="MyService.Category">
+                    <ReferentialConstraint Property="categoryId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="parent" Type="MyService.TreeType2" Nullable="true" Partner="children">
+                    <ReferentialConstraint Property="parentId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="children" Type="Collection(MyService.TreeType2)" Partner="parent"/>
+                <NavigationProperty Name="treeType1" Type="MyService.TreeType1" Partner="treeType2s">
+                    <ReferentialConstraint Property="treeType1Id" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="treeType3s" Type="Collection(MyService.TreeType3)" Partner="treeType2"/>
+            </EntityType>
+            <EntityType Name="TreeType3">
+                <Key>
+                    <PropertyRef Name="_id" />
+                </Key>
+                <Property Name="_id" Type="Edm.Int32" Nullable="false" />
+                <Property Name="index" Type="Edm.Int32" />
+                <Property Name="parentId" Type="Edm.Int32" />
+                <Property Name="categoryId" Type="Edm.Int32" />
+                <Property Name="treeType2Id" Type="Edm.Int32" />
+                <NavigationProperty Name="category" Type="MyService.Category">
+                    <ReferentialConstraint Property="categoryId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="parent" Type="MyService.TreeType3" Nullable="true" Partner="children">
+                    <ReferentialConstraint Property="parentId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="children" Type="Collection(MyService.TreeType3)" Partner="parent"/>
+                <NavigationProperty Name="treeType2" Type="MyService.TreeType2" Partner="treeType3s">
+                    <ReferentialConstraint Property="treeType2Id" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="treeType4s" Type="Collection(MyService.TreeType4)" Partner="treeType3"/>
+            </EntityType>
+            <EntityType Name="TreeType4">
+                <Key>
+                    <PropertyRef Name="_id" />
+                </Key>
+                <Property Name="_id" Type="Edm.Int32" Nullable="false" />
+                <Property Name="index" Type="Edm.Int32" />
+                <Property Name="parentId" Type="Edm.Int32" />
+                <Property Name="categoryId" Type="Edm.Int32" />
+                <Property Name="treeType3Id" Type="Edm.Int32" />
+                <NavigationProperty Name="category" Type="MyService.Category">
+                    <ReferentialConstraint Property="categoryId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="parent" Type="MyService.TreeType4" Nullable="true" Partner="children">
+                    <ReferentialConstraint Property="parentId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty Name="children" Type="Collection(MyService.TreeType4)" Partner="parent"/>
+                <NavigationProperty Name="treeType3" Type="MyService.TreeType3" Partner="treeType4s">
+                    <ReferentialConstraint Property="treeType3Id" ReferencedProperty="_id" />
+                </NavigationProperty>
+            </EntityType>
+            <EntityContainer Name="Container">
+                <EntitySet Name="categories" EntityType="MyService.Category"/>
+                <EntitySet Name="treeType1s" EntityType="MyService.TreeType1">
+                    <NavigationPropertyBinding Path="parent" Target="treeType1s" />
+                    <NavigationPropertyBinding Path="children" Target="treeType1s" />
+                    <NavigationPropertyBinding Path="category" Target="categories" />
+                    <NavigationPropertyBinding Path="treeType2s" Target="treeType2s" />
+                </EntitySet>
+                <EntitySet Name="treeType2s" EntityType="MyService.TreeType2">
+                    <NavigationPropertyBinding Path="parent" Target="treeType2s" />
+                    <NavigationPropertyBinding Path="children" Target="treeType2s" />
+                    <NavigationPropertyBinding Path="category" Target="categories" />
+                    <NavigationPropertyBinding Path="treeType1" Target="treeType1s" />
+                    <NavigationPropertyBinding Path="treeType3s" Target="treeType3s" />
+                </EntitySet>
+                <EntitySet Name="treeType3s" EntityType="MyService.TreeType3">
+                    <NavigationPropertyBinding Path="parent" Target="treeType3s" />
+                    <NavigationPropertyBinding Path="children" Target="treeType3s" />
+                    <NavigationPropertyBinding Path="category" Target="categories" />
+                    <NavigationPropertyBinding Path="treeType2" Target="treeType2s" />
+                    <NavigationPropertyBinding Path="treeType4s" Target="treeType4s" />
+                </EntitySet>
+                <EntitySet Name="treeType4s" EntityType="MyService.TreeType4">
+                    <NavigationPropertyBinding Path="parent" Target="treeType4s" />
+                    <NavigationPropertyBinding Path="children" Target="treeType4s" />
+                    <NavigationPropertyBinding Path="category" Target="categories" />
+                    <NavigationPropertyBinding Path="treeType3" Target="treeType3s" />
+                </EntitySet>
+            </EntityContainer>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>
