@@ -196,6 +196,18 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
                 ]
             ]
         ]
+        // Example 4
+        "\$expand=category,children,treeType2s" | "edm/edm_tree.xml" | "treeType1s" | true | 5 || [
+            "category": [
+                edmPath: "category", mongoPath: "category", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "categoryId", foreignKeyProperty: "_id", expandElements: [:]
+            ],
+            "children": [
+                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+            ],
+            "treeType2s": [
+                edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", expandElements: [:]
+            ]
+        ]
     }
 
     private void verifyExpandElements(Map<String, ExpandElement> actual, Map<String, Object> expected) {
