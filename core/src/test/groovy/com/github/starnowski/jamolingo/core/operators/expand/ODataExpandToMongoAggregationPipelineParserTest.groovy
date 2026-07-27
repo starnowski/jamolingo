@@ -9,6 +9,7 @@ import org.apache.olingo.server.api.OData
 import org.apache.olingo.server.api.uri.UriInfo
 import org.apache.olingo.server.core.uri.parser.Parser
 import org.bson.Document
+import spock.lang.Unroll
 
 class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecification {
 
@@ -136,6 +137,7 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         }
     }
 
+    @Unroll
     def 'should correctly populate getExpandElements for complex expand #expandQuery'() {
         given:
         Edm edm = loadEmdProvider(edmFilePath)
@@ -207,6 +209,34 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
             "treeType2s": [
                 edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", expandElements: [:]
             ]
+        ]
+        // Example 5
+        "\$expand=parent(\$levels=2;\$expand=children(\$levels=2),treeType2s)" | "edm/edm_tree.xml" | "treeType1s" | true | 5 || [
+            "parent": [
+                edmPath: "parent", mongoPath: "parent", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id",
+                expandElements: [
+                    "children": [
+                        edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                    ],
+                    "treeType2s": [
+                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", expandElements: [:]
+                    ]
+                ]
+            ]
+        ]
+        // Example 6
+        "\$expand=parent(\$levels=2;\$expand=children(\$levels=2),treeType2s)" | "edm/edm_tree.xml" | "treeType1s" | false | 5 || [
+                "parent": [
+                        edmPath: "parent", mongoPath: "parent", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id",
+                        expandElements: [
+                                "children": [
+                                        edmPath: "children", mongoPath: "children", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                                ],
+                                "treeType2s": [
+                                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", expandElements: [:]
+                                ]
+                        ]
+                ]
         ]
     }
 
