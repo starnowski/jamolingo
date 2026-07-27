@@ -1267,12 +1267,12 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                             ]
                                                                             """,
             JSONCompareMode.LENIENT),
-            Arguments.of(
-                    TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-                    Set.of(5, 7),
-                    //TODO Invalid
-                    "$expand=parent($levels=2;$expand=children($levels=2),treeType2s)",
-                    """
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(5, 7),
+            // TODO Invalid
+            "$expand=parent($levels=2;$expand=children($levels=2),treeType2s)",
+            """
                                                                                     [
                                                                                         {
                                                                                             "_id": 5,
@@ -1312,19 +1312,22 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                                         "_id": 1,
                                                                                                         "index": 1,
                                                                                                         "parentId": null,
-                                                                                                        "categoryId": 1
+                                                                                                        "categoryId": 1,
+                                                                                                        "treeType1Id": 1
                                                                                                     },
                                                                                                     {
                                                                                                         "_id": 2,
                                                                                                         "index": 2,
                                                                                                         "parentId": 1,
-                                                                                                        "categoryId": 1
+                                                                                                        "categoryId": 1,
+                                                                                                        "treeType1Id": 1
                                                                                                     },
                                                                                                     {
                                                                                                         "_id": 3,
                                                                                                         "index": 3,
                                                                                                         "parentId": 2,
-                                                                                                        "categoryId": 2
+                                                                                                        "categoryId": 2,
+                                                                                                        "treeType1Id": 1
                                                                                                     }
                                                                                                 ]
                                                                                             }
@@ -1359,7 +1362,8 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                                                 }
                                                                                                             ]
                                                                                                         }
-                                                                                                    ]
+                                                                                                    ],
+                                                                                                    "treeType2s": []
                                                                                                 },
                                                                                                 "children": [
                                                                                                     {
@@ -1376,12 +1380,13 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                                             }
                                                                                                         ]
                                                                                                     }
-                                                                                                ]
+                                                                                                ],
+                                                                                                "treeType2s": []
                                                                                             }
                                                                                         }
                                                                                     ]
                                                                                     """,
-                    JSONCompareMode.STRICT));
+            JSONCompareMode.STRICT));
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document
