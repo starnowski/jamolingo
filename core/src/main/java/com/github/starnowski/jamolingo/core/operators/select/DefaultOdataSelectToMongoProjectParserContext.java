@@ -52,7 +52,8 @@ public class DefaultOdataSelectToMongoProjectParserContext
     private Set<String> additionalFields = Collections.emptySet();
 
     public Builder withAdditionalFields(Set<String> additionalFields) {
-      this.additionalFields = additionalFields != null
+      this.additionalFields =
+          additionalFields != null
               ? Collections.unmodifiableSet(additionalFields)
               : Collections.emptySet();
       return this;

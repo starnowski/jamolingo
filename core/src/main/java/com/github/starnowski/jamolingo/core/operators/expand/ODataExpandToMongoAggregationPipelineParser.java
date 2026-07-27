@@ -481,12 +481,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
         DefaultOdataSelectToMongoProjectParserContext.Builder
             odataSelectToMongoProjectParserContextBuilder =
                 DefaultOdataSelectToMongoProjectParserContext.builder();
+        odataSelectToMongoProjectParserContextBuilder.appendAdditionalFields(
+            Set.of(navPropertyWithRootPrefix));
         if (isNotLastLevelLookUp) {
-          odataSelectToMongoProjectParserContextBuilder.withAdditionalFields(
+          odataSelectToMongoProjectParserContextBuilder.appendAdditionalFields(
               Set.of(lookupMongoStartWith));
         }
-        if (nestedExpandResult != null){
-          odataSelectToMongoProjectParserContextBuilder.appendAdditionalFields(nestedExpandResult.getExpandElements().keySet());
+        if (nestedExpandResult != null) {
+          odataSelectToMongoProjectParserContextBuilder.appendAdditionalFields(
+              nestedExpandResult.getExpandElements().keySet());
         }
         selectOperatorResult =
             odataSelectToMongoProjectParser.parse(

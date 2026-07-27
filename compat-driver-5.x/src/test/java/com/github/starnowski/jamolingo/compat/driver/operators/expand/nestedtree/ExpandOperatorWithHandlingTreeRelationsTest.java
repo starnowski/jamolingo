@@ -1368,96 +1368,179 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                             ]
                                                                                             """,
             JSONCompareMode.LENIENT)
-//            ,
-//        Arguments.of(
-//            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-//            Set.of(5, 7),
-//            "$expand=parent($levels=2;$expand=children($levels=2),treeType2s($select=_id,index,treeType1Id;$orderby=index asc);$select=_id,index;$orderby=index asc)&$orderby=index desc",
-//            """
-//                                                                                                    [
-//                                                                                                        {
-//                                                                                                            "_id": 7,
-//                                                                                                            "index": 7,
-//                                                                                                            "parentId": 6,
-//                                                                                                            "categoryId": 2,
-//                                                                                                            "parent": [
-//                                                                                                                {
-//                                                                                                                    "index": 4,
-//                                                                                                                    "_id": 4,
-//                                                                                                                    "children": [
-//                                                                                                                        {
-//                                                                                                                            "_id": 6,
-//                                                                                                                            "index": 6
-//                                                                                                                        },
-//                                                                                                                        {
-//                                                                                                                            "_id": 7,
-//                                                                                                                            "index": 7
-//                                                                                                                        }
-//                                                                                                                    ]
-//                                                                                                                },
-//                                                                                                                {
-//                                                                                                                    "index": 6,
-//                                                                                                                    "_id": 6,
-//                                                                                                                    "children": [
-//                                                                                                                        {
-//                                                                                                                            "_id": 8,
-//                                                                                                                            "index": 8
-//                                                                                                                        },
-//                                                                                                                        {
-//                                                                                                                            "_id": 7,
-//                                                                                                                            "index": 7
-//                                                                                                                        }
-//                                                                                                                    ]
-//                                                                                                                }
-//                                                                                                            ]
-//                                                                                                        },
-//                                                                                                        {
-//                                                                                                            "_id": 5,
-//                                                                                                            "index": 5,
-//                                                                                                            "parentId": 1,
-//                                                                                                            "categoryId": 1,
-//                                                                                                            "parent": [
-//                                                                                                                {
-//                                                                                                                    "index": 1,
-//                                                                                                                    "_id": 1,
-//                                                                                                                    "children": [
-//                                                                                                                        {
-//                                                                                                                            "_id": 3,
-//                                                                                                                            "index": 3
-//                                                                                                                        },
-//                                                                                                                        {
-//                                                                                                                            "_id": 2,
-//                                                                                                                            "index": 2
-//                                                                                                                        },
-//                                                                                                                        {
-//                                                                                                                            "_id": 5,
-//                                                                                                                            "index": 5
-//                                                                                                                        }
-//                                                                                                                    ],
-//                                                                                                                    "treeType2s": [
-//                                                                                                                        {
-//                                                                                                                            "_id": 1,
-//                                                                                                                            "index": 1,
-//                                                                                                                            "treeType1Id": 1
-//                                                                                                                        },
-//                                                                                                                        {
-//                                                                                                                            "_id": 2,
-//                                                                                                                            "index": 2,
-//                                                                                                                            "treeType1Id": 1
-//                                                                                                                        },
-//                                                                                                                        {
-//                                                                                                                            "_id": 3,
-//                                                                                                                            "index": 3,
-//                                                                                                                            "treeType1Id": 1
-//                                                                                                                        }
-//                                                                                                                    ]
-//                                                                                                                }
-//                                                                                                            ]
-//                                                                                                        }
-//                                                                                                    ]
-//                                                                                                    """,
-//            JSONCompareMode.STRICT)
-    );
+        //            ,
+        //        Arguments.of(
+        //            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+        //            Set.of(5, 7),
+        //
+        // "$expand=parent($levels=2;$expand=children($levels=2),treeType2s($select=_id,index,treeType1Id;$orderby=index asc);$select=_id,index;$orderby=index asc)&$orderby=index desc",
+        //            """
+        //
+        //          [
+        //
+        //              {
+        //
+        //                  "_id": 7,
+        //
+        //                  "index": 7,
+        //
+        //                  "parentId": 6,
+        //
+        //                  "categoryId": 2,
+        //
+        //                  "parent": [
+        //
+        //                      {
+        //
+        //                          "index": 4,
+        //
+        //                          "_id": 4,
+        //
+        //                          "children": [
+        //
+        //                              {
+        //
+        //                                  "_id": 6,
+        //
+        //                                  "index": 6
+        //
+        //                              },
+        //
+        //                              {
+        //
+        //                                  "_id": 7,
+        //
+        //                                  "index": 7
+        //
+        //                              }
+        //
+        //                          ]
+        //
+        //                      },
+        //
+        //                      {
+        //
+        //                          "index": 6,
+        //
+        //                          "_id": 6,
+        //
+        //                          "children": [
+        //
+        //                              {
+        //
+        //                                  "_id": 8,
+        //
+        //                                  "index": 8
+        //
+        //                              },
+        //
+        //                              {
+        //
+        //                                  "_id": 7,
+        //
+        //                                  "index": 7
+        //
+        //                              }
+        //
+        //                          ]
+        //
+        //                      }
+        //
+        //                  ]
+        //
+        //              },
+        //
+        //              {
+        //
+        //                  "_id": 5,
+        //
+        //                  "index": 5,
+        //
+        //                  "parentId": 1,
+        //
+        //                  "categoryId": 1,
+        //
+        //                  "parent": [
+        //
+        //                      {
+        //
+        //                          "index": 1,
+        //
+        //                          "_id": 1,
+        //
+        //                          "children": [
+        //
+        //                              {
+        //
+        //                                  "_id": 3,
+        //
+        //                                  "index": 3
+        //
+        //                              },
+        //
+        //                              {
+        //
+        //                                  "_id": 2,
+        //
+        //                                  "index": 2
+        //
+        //                              },
+        //
+        //                              {
+        //
+        //                                  "_id": 5,
+        //
+        //                                  "index": 5
+        //
+        //                              }
+        //
+        //                          ],
+        //
+        //                          "treeType2s": [
+        //
+        //                              {
+        //
+        //                                  "_id": 1,
+        //
+        //                                  "index": 1,
+        //
+        //                                  "treeType1Id": 1
+        //
+        //                              },
+        //
+        //                              {
+        //
+        //                                  "_id": 2,
+        //
+        //                                  "index": 2,
+        //
+        //                                  "treeType1Id": 1
+        //
+        //                              },
+        //
+        //                              {
+        //
+        //                                  "_id": 3,
+        //
+        //                                  "index": 3,
+        //
+        //                                  "treeType1Id": 1
+        //
+        //                              }
+        //
+        //                          ]
+        //
+        //                      }
+        //
+        //                  ]
+        //
+        //              }
+        //
+        //          ]
+        //
+        //          """,
+        //            JSONCompareMode.STRICT)
+        );
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document
