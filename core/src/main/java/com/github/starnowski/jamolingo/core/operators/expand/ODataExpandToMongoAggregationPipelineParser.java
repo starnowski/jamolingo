@@ -474,23 +474,25 @@ public class ODataExpandToMongoAggregationPipelineParser {
         lookupPipeline.addAll(
             odataTopToMongoLimitParser.parse(eOption.getTopOption()).getStageObjects());
       }
-      boolean isLastLevelLookUp = currentLevel != maxLevel;
+      boolean isNotLastLevelLookUp = currentLevel != maxLevel;
       SelectOperatorResult selectOperatorResult = null;
       // TODO check if _id or collection can be lost
       if (eOption.getSelectOption() != null) {
         DefaultOdataSelectToMongoProjectParserContext.Builder
             odataSelectToMongoProjectParserContextBuilder =
                 DefaultOdataSelectToMongoProjectParserContext.builder();
-        if (isLastLevelLookUp) {
+        if (isNotLastLevelLookUp) {
           odataSelectToMongoProjectParserContextBuilder.withAdditionalFields(
               Set.of(lookupMongoStartWith));
+        }
+        if (nestedExpandResult != null){
+          odataSelectToMongoProjectParserContextBuilder.appendAdditionalFields(nestedExpandResult.getExpandElements().keySet());
         }
         selectOperatorResult =
             odataSelectToMongoProjectParser.parse(
                 eOption.getSelectOption(),
                 facade,
                 odataSelectToMongoProjectParserContextBuilder.build());
-        lookupPipeline.addAll(selectOperatorResult.getStageObjects());
       }
       if (currentLevel != maxLevel) {
         lookupPipeline.addAll(
@@ -509,6 +511,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
       if (nestedExpandResult != null) {
         lookupPipeline.addAll(nestedExpandResult.getStageObjects());
+      }
+      if (selectOperatorResult != null) {
+        lookupPipeline.addAll(selectOperatorResult.getStageObjects());
       }
       if (selectOperatorResult != null
           && !selectOperatorResult.getRequestedFields().contains(lookupMongoStartWith)) {

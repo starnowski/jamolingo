@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.select;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
@@ -51,7 +52,20 @@ public class DefaultOdataSelectToMongoProjectParserContext
     private Set<String> additionalFields = Collections.emptySet();
 
     public Builder withAdditionalFields(Set<String> additionalFields) {
-      this.additionalFields = additionalFields;
+      this.additionalFields = additionalFields != null
+              ? Collections.unmodifiableSet(additionalFields)
+              : Collections.emptySet();
+      return this;
+    }
+
+    public Builder appendAdditionalFields(Set<String> additionalFields) {
+      if (additionalFields == null) {
+        return this;
+      }
+      Set<String> tmp = new HashSet<>();
+      tmp.addAll(this.additionalFields);
+      tmp.addAll(additionalFields);
+      this.additionalFields = Collections.unmodifiableSet(tmp);
       return this;
     }
 
