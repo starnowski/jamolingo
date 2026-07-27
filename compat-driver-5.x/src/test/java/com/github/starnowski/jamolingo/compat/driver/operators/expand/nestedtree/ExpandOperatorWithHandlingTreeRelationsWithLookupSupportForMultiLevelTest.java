@@ -1270,7 +1270,6 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(5, 7),
-            // TODO Invalid
             "$expand=parent($levels=2;$expand=children($levels=2),treeType2s)",
             """
                                                                                     [
