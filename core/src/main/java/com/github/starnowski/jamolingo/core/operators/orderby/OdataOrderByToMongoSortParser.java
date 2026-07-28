@@ -27,35 +27,53 @@ public class OdataOrderByToMongoSortParser {
    * @return the result of the parsing containing the MongoDB sort stage
    */
   public OrderByOperatorResult parse(OrderByOption orderByOption) {
-    return parse(orderByOption, DefaultEdmMongoContextFacade.builder().build());
+    return parse(
+        orderByOption,
+        DefaultEdmMongoContextFacade.builder().build());
   }
 
-  /**
-   * Parses the given OrderByOption using the provided context facade.
-   *
-   * @param orderByOption the OData orderby option to parse
-   * @param edmMongoContextFacade the context facade for resolving paths
-   * @return the result of the parsing containing the MongoDB sort stage
-   */
   public OrderByOperatorResult parse(
       OrderByOption orderByOption, EdmMongoContextFacade edmMongoContextFacade) {
-    if (orderByOption == null || orderByOption.getOrders().isEmpty()) {
-      return new DefaultOrderByOperatorResult(
-          Collections.emptyList(), false, Collections.emptyList());
+    return parse(
+        orderByOption,
+        edmMongoContextFacade,
+        DefaultOdataOrderByToMongoSortParserContext.builder().build());
+  }
+
+  public OrderByOperatorResult parse(
+      OrderByOption orderByOption,
+      EdmMongoContextFacade edmMongoContextFacade,
+      OdataOrderByToMongoSortParserContext context) {
+    Map<String, Object> sortFields = new LinkedHashMap<>();
+
+    if (context != null && context.getPrependedSortProperties() != null) {
+      for (SortProperty sortProp : context.getPrependedSortProperties()) {
+        sortFields.put(sortProp.getPropertyName(), sortProp.isDescending() ? -1 : 1);
+      }
     }
 
-    Map<String, Object> sortFields = new LinkedHashMap<>();
-    for (OrderByItem item : orderByOption.getOrders()) {
-      Expression expression = item.getExpression();
-      if (!(expression instanceof Member)) {
-        throw new IllegalArgumentException(
-            "Only Member expressions are supported in $orderby, found: "
-                + expression.getClass().getSimpleName());
+    if (orderByOption != null
+        && orderByOption.getOrders() != null
+        && !orderByOption.getOrders().isEmpty()) {
+      for (OrderByItem item : orderByOption.getOrders()) {
+        Expression expression = item.getExpression();
+        if (!(expression instanceof Member)) {
+          throw new IllegalArgumentException(
+              "Only Member expressions are supported in $orderby, found: "
+                  + expression.getClass().getSimpleName());
+        }
+        Member member = (Member) expression;
+        String mongoPath =
+            edmMongoContextFacade
+                .resolveMongoPathForEDMPath(member.getResourcePath())
+                .getMongoPath();
+        sortFields.put(mongoPath, item.isDescending() ? -1 : 1);
       }
-      Member member = (Member) expression;
-      String mongoPath =
-          edmMongoContextFacade.resolveMongoPathForEDMPath(member.getResourcePath()).getMongoPath();
-      sortFields.put(mongoPath, item.isDescending() ? -1 : 1);
+    }
+
+    if (sortFields.isEmpty()) {
+      return new DefaultOrderByOperatorResult(
+          Collections.emptyList(), false, Collections.emptyList());
     }
 
     return new DefaultOrderByOperatorResult(

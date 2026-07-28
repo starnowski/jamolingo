@@ -1,0 +1,7 @@
+{
+  "$sort": {
+    "prependedField1": -1,
+    "prependedField2": 1,
+    "plainString": 1
+  }
+}
