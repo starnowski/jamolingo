@@ -227,9 +227,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
           OrderByOperatorResult orderByResult =
               odataOrderByToMongoSortParser.parse(eOption.getOrderByOption(), facade);
+          // TODO Add the first sort property as "navPropertyWithRootPrefix + "." + depthVariable"
+          // with asc
           sortDocument =
               (Document) ((Document) orderByResult.getStageObjects().get(0)).get("$sort");
-
           pipeline.add(
               new Document(
                   "$set",
