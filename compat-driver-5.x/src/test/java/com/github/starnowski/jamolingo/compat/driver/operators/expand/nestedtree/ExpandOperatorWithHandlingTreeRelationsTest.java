@@ -1373,107 +1373,102 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(5, 7),
             "$expand=parent($levels=2;$expand=children($levels=2),treeType2s($select=_id,index,treeType1Id;$orderby=index asc);$select=_id,index;$orderby=index asc)&$orderby=index desc",
             """
-                            [
-                                {
-                                    "_id": 5,
-                                    "index": 5,
-                                    "parentId": 1,
-                                    "categoryId": 1,
-                                    "parent": {
-                                        "_id": 1,
-                                        "index": 1,
-                                        "children": [
-                                            {
-                                                "_id": 2,
-                                                "index": 2,
-                                                "parentId": 1,
-                                                "categoryId": 1,
-                                                "children": [
-                                                    {
-                                                        "_id": 3,
-                                                        "index": 3,
-                                                        "parentId": 2,
-                                                        "categoryId": 2
-                                                    }
-                                                ]
-                                            },
-                                            {
-                                                "_id": 5,
-                                                "index": 5,
-                                                "parentId": 1,
-                                                "categoryId": 1,
-                                                "children": []
-                                            }
-                                        ],
-                                        "treeType2s": [
-                                            {
-                                                "_id": 1,
-                                                "index": 1,
-                                                "treeType1Id": 1
-                                            },
-                                            {
-                                                "_id": 2,
-                                                "index": 2,
-                                                "treeType1Id": 1
-                                            },
-                                            {
-                                                "_id": 3,
-                                                "index": 3,
-                                                "treeType1Id": 1
-                                            }
-                                        ]
-                                    }
-                                },
-                                {
-                                    "_id": 7,
-                                    "index": 7,
-                                    "parentId": 6,
-                                    "categoryId": 2,
-                                    "parent": {
-                                        "_id": 6,
-                                        "index": 6,
-                                        "parent": {
-                                            "_id": 4,
-                                            "index": 4,
-                                            "children": [
-                                                {
-                                                    "_id": 6,
-                                                    "index": 6,
-                                                    "parentId": 4,
-                                                    "categoryId": 2,
-                                                    "children": [
-                                                        {
-                                                            "_id": 7,
-                                                            "index": 7,
-                                                            "parentId": 6,
-                                                            "categoryId": 2
-                                                        }
-                                                    ]
-                                                }
-                                            ],
-                                            "treeType2s": []
-                                        },
-                                        "children": [
-                                            {
-                                                "_id": 7,
-                                                "index": 7,
-                                                "parentId": 6,
-                                                "categoryId": 2,
-                                                "children": [
-                                                    {
-                                                        "_id": 8,
-                                                        "index": 8,
-                                                        "parentId": 7,
-                                                        "categoryId": 2
-                                                    }
-                                                ]
-                                            }
-                                        ],
-                                        "treeType2s": []
-                                    }
-                                }
-                            ]
-                    """,
+                    [
+                    	{
+                    		"_id": 5,
+                    		"index": 5,
+                    		"parentId": 1,
+                    		"categoryId": 1,
+                    		"parent": [
+                    			{
+                    				"index": 1,
+                    				"_id": 1,
+                    				"children": [
+                    					{
+                    						"_id": 3,
+                    						"index": 3,
+                    						"parentId": 2,
+                    						"categoryId": 2
+                    					},
+                    					{
+                    						"_id": 2,
+                    						"index": 2,
+                    						"parentId": 1,
+                    						"categoryId": 1
+                    					},
+                    					{
+                    						"_id": 5,
+                    						"index": 5,
+                    						"parentId": 1,
+                    						"categoryId": 1
+                    					}
+                    				],
+                    				"treeType2s": [
+                    					{
+                    						"_id": 1,
+                    						"index": 1,
+                    						"treeType1Id": 1
+                    					},
+                    					{
+                    						"_id": 2,
+                    						"index": 2,
+                    						"treeType1Id": 1
+                    					},
+                    					{
+                    						"_id": 3,
+                    						"index": 3,
+                    						"treeType1Id": 1
+                    					}
+                    				]
+                    			}
+                    		]
+                    	},
+                    	{
+                    		"_id": 7,
+                    		"index": 7,
+                    		"parentId": 6,
+                    		"categoryId": 2,
+                    		"parent": [
+                    			{
+                    				"index": 4,
+                    				"_id": 4,
+                    				"children": [
+                    					{
+                    						"_id": 6,
+                    						"index": 6,
+                    						"parentId": 4,
+                    						"categoryId": 2
+                    					},
+                    					{
+                    						"_id": 7,
+                    						"index": 7,
+                    						"parentId": 6,
+                    						"categoryId": 2
+                    					}
+                    				]
+                    			},
+                    			{
+                    				"index": 6,
+                    				"_id": 6,
+                    				"children": [
+                    					{
+                    						"_id": 8,
+                    						"index": 8,
+                    						"parentId": 7,
+                    						"categoryId": 2
+                    					},
+                    					{
+                    						"_id": 7,
+                    						"index": 7,
+                    						"parentId": 6,
+                    						"categoryId": 2
+                    					}
+                    				]
+                    			}
+                    		]
+                    	}
+                    ]
+            """,
             JSONCompareMode.STRICT));
   }
 
