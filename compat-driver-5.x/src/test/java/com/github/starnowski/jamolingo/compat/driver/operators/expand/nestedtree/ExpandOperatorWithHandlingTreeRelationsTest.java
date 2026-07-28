@@ -1375,55 +1375,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             """
                     [
                     	{
-                    		"_id": 5,
-                    		"index": 5,
-                    		"parentId": 1,
-                    		"categoryId": 1,
-                    		"parent": [
-                    			{
-                    				"index": 1,
-                    				"_id": 1,
-                    				"children": [
-                    					{
-                    						"_id": 3,
-                    						"index": 3,
-                    						"parentId": 2,
-                    						"categoryId": 2
-                    					},
-                    					{
-                    						"_id": 2,
-                    						"index": 2,
-                    						"parentId": 1,
-                    						"categoryId": 1
-                    					},
-                    					{
-                    						"_id": 5,
-                    						"index": 5,
-                    						"parentId": 1,
-                    						"categoryId": 1
-                    					}
-                    				],
-                    				"treeType2s": [
-                    					{
-                    						"_id": 1,
-                    						"index": 1,
-                    						"treeType1Id": 1
-                    					},
-                    					{
-                    						"_id": 2,
-                    						"index": 2,
-                    						"treeType1Id": 1
-                    					},
-                    					{
-                    						"_id": 3,
-                    						"index": 3,
-                    						"treeType1Id": 1
-                    					}
-                    				]
-                    			}
-                    		]
-                    	},
-                    	{
                     		"_id": 7,
                     		"index": 7,
                     		"parentId": 6,
@@ -1452,16 +1403,65 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     				"_id": 6,
                     				"children": [
                     					{
-                    						"_id": 8,
-                    						"index": 8,
-                    						"parentId": 7,
-                    						"categoryId": 2
-                    					},
-                    					{
                     						"_id": 7,
                     						"index": 7,
                     						"parentId": 6,
                     						"categoryId": 2
+                    					},
+                    					{
+                    						"_id": 8,
+                    						"index": 8,
+                    						"parentId": 7,
+                    						"categoryId": 2
+                    					}
+                    				]
+                    			}
+                    		]
+                    	},
+                    	{
+                    		"_id": 5,
+                    		"index": 5,
+                    		"parentId": 1,
+                    		"categoryId": 1,
+                    		"parent": [
+                    			{
+                    				"index": 1,
+                    				"_id": 1,
+                    				"children": [
+                    					{
+                    						"_id": 5,
+                    						"index": 5,
+                    						"parentId": 1,
+                    						"categoryId": 1
+                    					},
+                    					{
+                    						"_id": 3,
+                    						"index": 3,
+                    						"parentId": 2,
+                    						"categoryId": 2
+                    					},
+                    					{
+                    						"_id": 2,
+                    						"index": 2,
+                    						"parentId": 1,
+                    						"categoryId": 1
+                    					}
+                    				],
+                    				"treeType2s": [
+                    					{
+                    						"_id": 1,
+                    						"index": 1,
+                    						"treeType1Id": 1
+                    					},
+                    					{
+                    						"_id": 2,
+                    						"index": 2,
+                    						"treeType1Id": 1
+                    					},
+                    					{
+                    						"_id": 3,
+                    						"index": 3,
+                    						"treeType1Id": 1
                     					}
                     				]
                     			}
