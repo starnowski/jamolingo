@@ -233,9 +233,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   facade,
                   DefaultOdataOrderByToMongoSortParserContext.builder()
                       .withPrependedSortProperties(
-                          Arrays.asList(
-                              new SortProperty(
-                                  navPropertyWithRootPrefix + "." + depthVariable, false)))
+                          Arrays.asList(new SortProperty(depthVariable, false)))
                       .build());
           // TODO Add the first sort property as "navPropertyWithRootPrefix + "." + depthVariable"
           // with asc
