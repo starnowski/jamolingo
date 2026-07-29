@@ -5,8 +5,10 @@ import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
+import com.github.starnowski.jamolingo.core.operators.orderby.DefaultOdataOrderByToMongoSortParserContext;
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.orderby.SortProperty;
 import com.github.starnowski.jamolingo.core.operators.select.*;
 import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser;
 import com.github.starnowski.jamolingo.core.operators.top.OdataTopToMongoLimitParser;
@@ -226,7 +228,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   .build();
 
           OrderByOperatorResult orderByResult =
-              odataOrderByToMongoSortParser.parse(eOption.getOrderByOption(), facade);
+              odataOrderByToMongoSortParser.parse(
+                  eOption.getOrderByOption(),
+                  facade,
+                  DefaultOdataOrderByToMongoSortParserContext.builder()
+                      .withPrependedSortProperties(
+                          Arrays.asList(
+                              new SortProperty(
+                                  navPropertyWithRootPrefix + "." + depthVariable, false)))
+                      .build());
           // TODO Add the first sort property as "navPropertyWithRootPrefix + "." + depthVariable"
           // with asc
           sortDocument =

@@ -27,9 +27,7 @@ public class OdataOrderByToMongoSortParser {
    * @return the result of the parsing containing the MongoDB sort stage
    */
   public OrderByOperatorResult parse(OrderByOption orderByOption) {
-    return parse(
-        orderByOption,
-        DefaultEdmMongoContextFacade.builder().build());
+    return parse(orderByOption, DefaultEdmMongoContextFacade.builder().build());
   }
 
   public OrderByOperatorResult parse(
