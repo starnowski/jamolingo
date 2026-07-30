@@ -40,4 +40,14 @@ public interface ExpandParserContext {
   default boolean isUseLookupForLevelGreaterThanOne() {
     return false;
   }
+
+  /**
+   * Determines if the join keys used for the $graphLookup stage should be propagated to the
+   * transformation result when tree structures are built.
+   *
+   * @return true if the join keys should be propagated, false otherwise
+   */
+  default boolean propagateGraphLookUpJoinKeys() {
+    return false;
+  }
 }

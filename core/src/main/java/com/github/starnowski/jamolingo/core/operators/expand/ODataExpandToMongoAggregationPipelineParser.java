@@ -1048,6 +1048,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     private final Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections;
     private final Integer maxLevel;
     private final boolean useLookupForLevelGreaterThanOne;
+    private final boolean propagateGraphLookUpJoinKeys;
 
     /**
      * Constructs a new DefaultExpandParserContext.
@@ -1079,10 +1080,37 @@ public class ODataExpandToMongoAggregationPipelineParser {
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
         Integer maxLevel,
         boolean useLookupForLevelGreaterThanOne) {
+      this(
+          edmTypeMapping,
+          edmTablesToMongoDBCollections,
+          maxLevel,
+          useLookupForLevelGreaterThanOne,
+          false);
+    }
+
+    /**
+     * Constructs a new DefaultExpandParserContext.
+     *
+     * @param edmTypeMapping mapping between EDM type names and their Mongo path resolvers
+     * @param edmTablesToMongoDBCollections mapping between EDM entity sets and their MongoDB
+     *     collection names
+     * @param maxLevel maximum level of recursion for $expand
+     * @param useLookupForLevelGreaterThanOne true if the $lookup stage should be used to handle
+     *     $level greater than 1
+     * @param propagateGraphLookUpJoinKeys true if join keys used for the $graphLookup stage should
+     *     be propagated
+     */
+    public DefaultExpandParserContext(
+        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
+        Integer maxLevel,
+        boolean useLookupForLevelGreaterThanOne,
+        boolean propagateGraphLookUpJoinKeys) {
       this.edmTypeMapping = edmTypeMapping;
       this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
       this.maxLevel = maxLevel;
       this.useLookupForLevelGreaterThanOne = useLookupForLevelGreaterThanOne;
+      this.propagateGraphLookUpJoinKeys = propagateGraphLookUpJoinKeys;
     }
 
     @Override
@@ -1106,11 +1134,17 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
+    public boolean propagateGraphLookUpJoinKeys() {
+      return propagateGraphLookUpJoinKeys;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       DefaultExpandParserContext that = (DefaultExpandParserContext) o;
       return useLookupForLevelGreaterThanOne == that.useLookupForLevelGreaterThanOne
+          && propagateGraphLookUpJoinKeys == that.propagateGraphLookUpJoinKeys
           && Objects.equals(edmTypeMapping, that.edmTypeMapping)
           && Objects.equals(edmTablesToMongoDBCollections, that.edmTablesToMongoDBCollections)
           && Objects.equals(maxLevel, that.maxLevel);
@@ -1119,7 +1153,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
     @Override
     public int hashCode() {
       return Objects.hash(
-          edmTypeMapping, edmTablesToMongoDBCollections, maxLevel, useLookupForLevelGreaterThanOne);
+          edmTypeMapping,
+          edmTablesToMongoDBCollections,
+          maxLevel,
+          useLookupForLevelGreaterThanOne,
+          propagateGraphLookUpJoinKeys);
     }
 
     @Override
@@ -1133,6 +1171,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           + maxLevel
           + ", useLookupForLevelGreaterThanOne="
           + useLookupForLevelGreaterThanOne
+          + ", propagateGraphLookUpJoinKeys="
+          + propagateGraphLookUpJoinKeys
           + '}';
     }
 
@@ -1151,6 +1191,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       private Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections = new HashMap<>();
       private Integer maxLevel = DEFAULT_MAX_LEVEL;
       private boolean useLookupForLevelGreaterThanOne = false;
+      private boolean propagateGraphLookUpJoinKeys = false;
 
       /**
        * Sets the mapping between EDM type names and their Mongo path resolvers.
@@ -1198,6 +1239,17 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       /**
+       * Sets whether join keys used for the $graphLookup stage should be propagated.
+       *
+       * @param propagateGraphLookUpJoinKeys true to propagate, false otherwise
+       * @return the builder instance
+       */
+      public Builder withPropagateGraphLookUpJoinKeys(boolean propagateGraphLookUpJoinKeys) {
+        this.propagateGraphLookUpJoinKeys = propagateGraphLookUpJoinKeys;
+        return this;
+      }
+
+      /**
        * Initializes the builder with values from an existing context.
        *
        * @param defaultExpandParserContext the context to copy values from
@@ -1216,6 +1268,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         this.maxLevel = defaultExpandParserContext.maxLevel;
         this.useLookupForLevelGreaterThanOne =
             defaultExpandParserContext.useLookupForLevelGreaterThanOne;
+        this.propagateGraphLookUpJoinKeys = defaultExpandParserContext.propagateGraphLookUpJoinKeys;
         return this;
       }
 
@@ -1233,7 +1286,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 ? Collections.unmodifiableMap(new HashMap<>(edmTablesToMongoDBCollections))
                 : null,
             maxLevel,
-            useLookupForLevelGreaterThanOne);
+            useLookupForLevelGreaterThanOne,
+            propagateGraphLookUpJoinKeys);
       }
     }
   }
