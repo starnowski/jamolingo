@@ -163,10 +163,10 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         // Example 1
         "\$expand=parent(\$levels=2;\$expand=children(\$levels=2))" | "edm/edm_expand.xml" | "examples2" | true | 5 || [
             "parent": [
-                edmPath: "parent", mongoPath: "parent", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id",
+                edmPath: "parent", mongoPath: "parent", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id", foreignCollection: "MyService.Example2", edmEntityFullName: "MyService.Example2", collection: false, depthVariableName: null,
                 expandElements: [
                     "children": [
-                        edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                        edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", foreignCollection: "MyService.Example2", edmEntityFullName: "MyService.Example2", collection: true, depthVariableName: null, expandElements: [:]
                     ]
                 ]
             ]
@@ -174,10 +174,10 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         // Example 2
         "\$expand=parent(\$levels=2;\$expand=children(\$levels=2))" | "edm/edm_expand.xml" | "examples2" | false | 5 || [
             "parent": [
-                edmPath: "parent", mongoPath: "parent", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id",
+                edmPath: "parent", mongoPath: "parent", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id", foreignCollection: "MyService.Example2", edmEntityFullName: "MyService.Example2", collection: false, depthVariableName: "parent_odata_graphlookup_depth_variable",
                 expandElements: [
                     "children": [
-                        edmPath: "children", mongoPath: "children", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                        edmPath: "children", mongoPath: "children", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", foreignCollection: "MyService.Example2", edmEntityFullName: "MyService.Example2", collection: true, depthVariableName: "children_odata_graphlookup_depth_variable", expandElements: [:]
                     ]
                 ]
             ]
@@ -185,13 +185,13 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         // Example 3
         "\$expand=children(\$levels=max;\$expand=treeType2s(\$expand=children(\$levels=max)))" | "edm/edm_tree.xml" | "treeType1s" | true | 5 || [
             "children": [
-                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 5, maxLevelRequest: true, localKeyProperty: "_id", foreignKeyProperty: "parentId",
+                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 5, maxLevelRequest: true, localKeyProperty: "_id", foreignKeyProperty: "parentId", foreignCollection: "MyService.TreeType1", edmEntityFullName: "MyService.TreeType1", collection: true, depthVariableName: null,
                 expandElements: [
                     "treeType2s": [
-                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id",
+                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", foreignCollection: "MyService.TreeType2", edmEntityFullName: "MyService.TreeType2", collection: true, depthVariableName: null,
                         expandElements: [
                             "children": [
-                                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 5, maxLevelRequest: true, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 5, maxLevelRequest: true, localKeyProperty: "_id", foreignKeyProperty: "parentId", foreignCollection: "MyService.TreeType2", edmEntityFullName: "MyService.TreeType2", collection: true, depthVariableName: null, expandElements: [:]
                             ]
                         ]
                     ]
@@ -201,25 +201,25 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         // Example 4
         "\$expand=category,children,treeType2s" | "edm/edm_tree.xml" | "treeType1s" | true | 5 || [
             "category": [
-                edmPath: "category", mongoPath: "category", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "categoryId", foreignKeyProperty: "_id", expandElements: [:]
+                edmPath: "category", mongoPath: "category", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "categoryId", foreignKeyProperty: "_id", foreignCollection: "MyService.Category", edmEntityFullName: "MyService.Category", collection: false, depthVariableName: null, expandElements: [:]
             ],
             "children": [
-                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", foreignCollection: "MyService.TreeType1", edmEntityFullName: "MyService.TreeType1", collection: true, depthVariableName: null, expandElements: [:]
             ],
             "treeType2s": [
-                edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", expandElements: [:]
+                edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", foreignCollection: "MyService.TreeType2", edmEntityFullName: "MyService.TreeType2", collection: true, depthVariableName: null, expandElements: [:]
             ]
         ]
         // Example 5
         "\$expand=parent(\$levels=2;\$expand=children(\$levels=2),treeType2s)" | "edm/edm_tree.xml" | "treeType1s" | true | 5 || [
             "parent": [
-                edmPath: "parent", mongoPath: "parent", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id",
+                edmPath: "parent", mongoPath: "parent", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id", foreignCollection: "MyService.TreeType1", edmEntityFullName: "MyService.TreeType1", collection: false, depthVariableName: null,
                 expandElements: [
                     "children": [
-                        edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                        edmPath: "children", mongoPath: "children", fetchType: "LOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", foreignCollection: "MyService.TreeType1", edmEntityFullName: "MyService.TreeType1", collection: true, depthVariableName: null, expandElements: [:]
                     ],
                     "treeType2s": [
-                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", expandElements: [:]
+                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", foreignCollection: "MyService.TreeType2", edmEntityFullName: "MyService.TreeType2", collection: true, depthVariableName: null, expandElements: [:]
                     ]
                 ]
             ]
@@ -227,13 +227,13 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         // Example 6
         "\$expand=parent(\$levels=2;\$expand=children(\$levels=2),treeType2s)" | "edm/edm_tree.xml" | "treeType1s" | false | 5 || [
                 "parent": [
-                        edmPath: "parent", mongoPath: "parent", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id",
+                        edmPath: "parent", mongoPath: "parent", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "parentId", foreignKeyProperty: "_id", foreignCollection: "MyService.TreeType1", edmEntityFullName: "MyService.TreeType1", collection: false, depthVariableName: "parent_odata_graphlookup_depth_variable",
                         expandElements: [
                                 "children": [
-                                        edmPath: "children", mongoPath: "children", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", expandElements: [:]
+                                        edmPath: "children", mongoPath: "children", fetchType: "GRAPHLOOKUP", level: 2, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "parentId", foreignCollection: "MyService.TreeType1", edmEntityFullName: "MyService.TreeType1", collection: true, depthVariableName: "children_odata_graphlookup_depth_variable", expandElements: [:]
                                 ],
                                 "treeType2s": [
-                                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", expandElements: [:]
+                                        edmPath: "treeType2s", mongoPath: "treeType2s", fetchType: "LOOKUP", level: 1, maxLevelRequest: false, localKeyProperty: "_id", foreignKeyProperty: "treeType1Id", foreignCollection: "MyService.TreeType2", edmEntityFullName: "MyService.TreeType2", collection: true, depthVariableName: null, expandElements: [:]
                                 ]
                         ]
                 ]
@@ -257,6 +257,10 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
             assert actualElement.getMaxLevelRequest() == expectedElement.maxLevelRequest
             assert actualElement.getLocalKeyProperty() == expectedElement.localKeyProperty
             assert actualElement.getForeignKeyProperty() == expectedElement.foreignKeyProperty
+            assert actualElement.getForeignCollection() == expectedElement.foreignCollection
+            assert actualElement.getEdmEntityFullName() == expectedElement.edmEntityFullName
+            assert actualElement.getCollection() == expectedElement.collection
+            assert actualElement.getDepthVariableName() == expectedElement.depthVariableName
             verifyExpandElements(actualElement.getExpandElements(), expectedElement.expandElements as Map<String, Object>)
         }
     }

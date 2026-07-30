@@ -351,6 +351,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .withMaxLevelRequest(maxLevelRequest)
                 .withLocalKeyProperty(edmStartWith)
                 .withForeignKeyProperty(edmConnectTo)
+                .withForeignCollection(targetCollection)
+                .withEdmEntityFullName(targetFullTypeName)
+                .withCollection(navProp.isCollection())
+                .withDepthVariableName(depthVariable)
                 .withExpandElements(nestedElements)
                 .build());
         return pipeline;
@@ -414,6 +418,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .withMaxLevelRequest(maxLevelRequest)
                 .withLocalKeyProperty(edmStartWith)
                 .withForeignKeyProperty(edmConnectTo)
+                .withForeignCollection(targetCollection)
+                .withEdmEntityFullName(targetFullTypeName)
+                .withCollection(navProp.isCollection())
+                .withDepthVariableName(null)
                 .withExpandElements(nestedElements)
                 .build());
 

@@ -14,6 +14,10 @@ public class ExpandElement {
   private final Map<String, ExpandElement> expandElements;
   private final String localKeyProperty;
   private final String foreignKeyProperty;
+  private final String foreignCollection;
+  private final String edmEntityFullName;
+  private final Boolean collection;
+  private final String depthVariableName;
 
   public ExpandElement(
       String edmPath,
@@ -23,7 +27,11 @@ public class ExpandElement {
       Boolean maxLevelRequest,
       Map<String, ExpandElement> expandElements,
       String localKeyProperty,
-      String foreignKeyProperty) {
+      String foreignKeyProperty,
+      String foreignCollection,
+      String edmEntityFullName,
+      Boolean collection,
+      String depthVariableName) {
     this.edmPath = edmPath;
     this.mongoPath = mongoPath;
     this.fetchType = fetchType;
@@ -35,6 +43,10 @@ public class ExpandElement {
             : Collections.unmodifiableMap(new HashMap<>(expandElements));
     this.localKeyProperty = localKeyProperty;
     this.foreignKeyProperty = foreignKeyProperty;
+    this.foreignCollection = foreignCollection;
+    this.edmEntityFullName = edmEntityFullName;
+    this.collection = collection;
+    this.depthVariableName = depthVariableName;
   }
 
   public String getEdmPath() {
@@ -69,6 +81,22 @@ public class ExpandElement {
     return foreignKeyProperty;
   }
 
+  public String getForeignCollection() {
+    return foreignCollection;
+  }
+
+  public String getEdmEntityFullName() {
+    return edmEntityFullName;
+  }
+
+  public Boolean getCollection() {
+    return collection;
+  }
+
+  public String getDepthVariableName() {
+    return depthVariableName;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -81,7 +109,11 @@ public class ExpandElement {
         && Objects.equals(maxLevelRequest, that.maxLevelRequest)
         && Objects.equals(expandElements, that.expandElements)
         && Objects.equals(localKeyProperty, that.localKeyProperty)
-        && Objects.equals(foreignKeyProperty, that.foreignKeyProperty);
+        && Objects.equals(foreignKeyProperty, that.foreignKeyProperty)
+        && Objects.equals(foreignCollection, that.foreignCollection)
+        && Objects.equals(edmEntityFullName, that.edmEntityFullName)
+        && Objects.equals(collection, that.collection)
+        && Objects.equals(depthVariableName, that.depthVariableName);
   }
 
   @Override
@@ -94,7 +126,11 @@ public class ExpandElement {
         maxLevelRequest,
         expandElements,
         localKeyProperty,
-        foreignKeyProperty);
+        foreignKeyProperty,
+        foreignCollection,
+        edmEntityFullName,
+        collection,
+        depthVariableName);
   }
 
   @Override
@@ -120,6 +156,17 @@ public class ExpandElement {
         + ", foreignKeyProperty='"
         + foreignKeyProperty
         + '\''
+        + ", foreignCollection='"
+        + foreignCollection
+        + '\''
+        + ", edmEntityFullName='"
+        + edmEntityFullName
+        + '\''
+        + ", collection="
+        + collection
+        + ", depthVariableName='"
+        + depthVariableName
+        + '\''
         + '}';
   }
 
@@ -136,6 +183,10 @@ public class ExpandElement {
     private Map<String, ExpandElement> expandElements = new HashMap<>();
     private String localKeyProperty;
     private String foreignKeyProperty;
+    private String foreignCollection;
+    private String edmEntityFullName;
+    private Boolean collection;
+    private String depthVariableName;
 
     public Builder withExpandElement(ExpandElement expandElement) {
       this.edmPath = expandElement.edmPath;
@@ -146,6 +197,10 @@ public class ExpandElement {
       this.expandElements = new HashMap<>(expandElement.expandElements);
       this.localKeyProperty = expandElement.localKeyProperty;
       this.foreignKeyProperty = expandElement.foreignKeyProperty;
+      this.foreignCollection = expandElement.foreignCollection;
+      this.edmEntityFullName = expandElement.edmEntityFullName;
+      this.collection = expandElement.collection;
+      this.depthVariableName = expandElement.depthVariableName;
       return this;
     }
 
@@ -195,6 +250,26 @@ public class ExpandElement {
       return this;
     }
 
+    public Builder withForeignCollection(String foreignCollection) {
+      this.foreignCollection = foreignCollection;
+      return this;
+    }
+
+    public Builder withEdmEntityFullName(String edmEntityFullName) {
+      this.edmEntityFullName = edmEntityFullName;
+      return this;
+    }
+
+    public Builder withCollection(Boolean collection) {
+      this.collection = collection;
+      return this;
+    }
+
+    public Builder withDepthVariableName(String depthVariableName) {
+      this.depthVariableName = depthVariableName;
+      return this;
+    }
+
     public ExpandElement build() {
       return new ExpandElement(
           edmPath,
@@ -204,7 +279,11 @@ public class ExpandElement {
           maxLevelRequest,
           expandElements,
           localKeyProperty,
-          foreignKeyProperty);
+          foreignKeyProperty,
+          foreignCollection,
+          edmEntityFullName,
+          collection,
+          depthVariableName);
     }
   }
 }
