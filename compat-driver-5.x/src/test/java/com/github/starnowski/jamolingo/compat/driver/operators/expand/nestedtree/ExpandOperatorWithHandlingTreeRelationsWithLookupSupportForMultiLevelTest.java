@@ -7,6 +7,7 @@ import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.expand.GraphLookUpToLookUpStrategyResultsTransformer;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
@@ -1544,6 +1545,59 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
         """
             {"value": %s }
             """.formatted(expectedJson),
+        currentResult,
+        jsonCompareMode);
+  }
+
+  @ParameterizedTest(name = "{2} - {0} - {1}")
+  @MethodSource("provideData")
+  public void
+      shouldReturnExpectedDocumentsForExpandOperatorWithGraphLookUpStrategyThenMapResultsToLookUpStrategy(
+          KeyValue<String, String> rootMongoCollection,
+          Set<Integer> ids,
+          String expandPart,
+          String expectedJson,
+          JSONCompareMode jsonCompareMode)
+          throws UriValidationException,
+              UriParserException,
+              XMLStreamException,
+              ExpressionVisitException,
+              ODataApplicationException,
+              JSONException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
+    MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
+    Edm edm = loadEmdProvider("edm/tree_types.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance())
+            .parseUri(rootMongoCollection.getValue(), expandPart, null, null);
+    ODataExpandToMongoAggregationPipelineParser tested =
+        new ODataExpandToMongoAggregationPipelineParser();
+
+    // WHEN
+    ExpandOperatorResult result =
+        tested.parse(
+            uriInfo.getExpandOption(),
+            ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+                .withUseLookupForLevelGreaterThanOne(
+                    false) // GraphLookUp is suppose to be used to resolve
+                .build());
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
+    pipeline.addAll(result.getStageObjects());
+    System.out.println(wrapBsonList(pipeline).toJson());
+    List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+    GraphLookUpToLookUpStrategyResultsTransformer graphLookUpToLookUpStrategyResultsTransformer =
+        new GraphLookUpToLookUpStrategyResultsTransformer();
+    results = graphLookUpToLookUpStrategyResultsTransformer.transform(results, result);
+    String currentResult = wrapDocumentsList(results).toJson();
+    System.out.println(currentResult);
+
+    // THEN
+    JSONAssert.assertEquals(
+        """
+                    {"value": %s }
+                    """.formatted(expectedJson),
         currentResult,
         jsonCompareMode);
   }
