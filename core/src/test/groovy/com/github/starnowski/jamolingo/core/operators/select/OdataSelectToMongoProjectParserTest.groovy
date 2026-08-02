@@ -196,6 +196,41 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
     }
 
     @Unroll
+    def "should return expected values for the map operator with additional fields from context"() {
+        given:
+            Edm edm = loadEmdProvider(edmConfigFile)
+            ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+            def odataMapping = factory.build(edm.getSchema("Demo"))
+            def entityMapping = odataMapping.getEntities().get("Item")
+            EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+            def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
+
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri("Items",
+                            "\$select=" +
+                                    selectFields.stream().filter(Objects::nonNull)
+                                            .filter(s -> !s.trim().isEmpty())
+                                            .collect(Collectors.joining(","))
+                            , null, null)
+            OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+            def parserContext = DefaultOdataSelectToMongoProjectParserContext.builder()
+                    .withAdditionalFields(additionalFields as Set)
+                    .build()
+
+        when:
+            def result = tested.computeValueForMapOperator(uriInfo.getSelectOption(), new DefaultEdmMongoContextFacade(context, null, null), parserContext)
+
+        then:
+            result.getRequestedFields() == expectedRequestedFields as Set
+            result.getAdditionalFields() == additionalFields as Set
+            result.getSelectedFields() == expectedSelectedFields as Set
+
+        where:
+            edmConfigFile | selectFields | additionalFields | expectedRequestedFields | expectedSelectedFields
+            "edm/edm1.xml" | ["plainString"] | ["additionalField1", "additionalField2"] | ["plainString"] | ["plainString", "additionalField1", "additionalField2"]
+    }
+
+    @Unroll
     def "should determine if wildcard is used for the map operator"(){
         given:
             Edm edm = loadEmdProvider(edmConfigFile)

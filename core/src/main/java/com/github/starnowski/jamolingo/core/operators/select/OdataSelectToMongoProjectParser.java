@@ -120,7 +120,26 @@ public class OdataSelectToMongoProjectParser {
    */
   public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
       SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
-    SelectOperatorResult selectResult = parse(selectOption, edmMongoContextFacade);
+    return computeValueForMapOperator(
+        selectOption,
+        edmMongoContextFacade,
+        DefaultOdataSelectToMongoProjectParserContext.builder().build());
+  }
+
+  /**
+   * Computes select operator options for a $map operator using provided context and additional
+   * options.
+   *
+   * @param selectOption the select option
+   * @param edmMongoContextFacade the context facade
+   * @param context the context containing additional configurations
+   * @return the select operator options for $map operator
+   */
+  public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
+      SelectOption selectOption,
+      EdmMongoContextFacade edmMongoContextFacade,
+      OdataSelectToMongoProjectParserContext context) {
+    SelectOperatorResult selectResult = parse(selectOption, edmMongoContextFacade, context);
     Set<String> arrayFields = new HashSet<>();
     if (selectOption != null) {
       for (SelectItem item : selectOption.getSelectItems()) {
@@ -143,14 +162,18 @@ public class OdataSelectToMongoProjectParser {
 
     return new DefaultSelectOperatorOptionsForMapOperator(
         selectResult.isWildCard(),
-        selectResult.isWildCard() ? Set.of() : selectResult.getSelectedFields(),
+        selectResult.isWildCard() ? Set.of() : selectResult.getRequestedFields(),
+        selectResult.isWildCard() ? Set.of() : selectResult.getAdditionalFields(),
         arrayFields);
   }
 
   private static class DefaultSelectOperatorOptionsForMapOperator
       implements SelectOperatorOptionsForMapOperator {
     private final boolean wildCard;
+    private final Set<String> requestedFields;
+    private final Set<String> additionalFields;
     private final Set<String> selectedFields;
+    private final Set<String> arrayFields;
 
     public boolean isWildCard() {
       return wildCard;
@@ -164,12 +187,31 @@ public class OdataSelectToMongoProjectParser {
       return arrayFields;
     }
 
-    private final Set<String> arrayFields;
+    public Set<String> getRequestedFields() {
+      return requestedFields;
+    }
+
+    public Set<String> getAdditionalFields() {
+      return additionalFields;
+    }
 
     private DefaultSelectOperatorOptionsForMapOperator(
-        boolean wildCard, Set<String> selectedFields, Set<String> arrayFields) {
+        boolean wildCard,
+        Set<String> requestedFields,
+        Set<String> additionalFields,
+        Set<String> arrayFields) {
       this.wildCard = wildCard;
-      this.selectedFields = selectedFields;
+      this.requestedFields =
+          requestedFields != null
+              ? Collections.unmodifiableSet(requestedFields)
+              : Collections.emptySet();
+      this.additionalFields =
+          additionalFields != null
+              ? Collections.unmodifiableSet(additionalFields)
+              : Collections.emptySet();
+      Set<String> union = new HashSet<>(this.requestedFields);
+      union.addAll(this.additionalFields);
+      this.selectedFields = Collections.unmodifiableSet(union);
       this.arrayFields = arrayFields;
     }
   }
