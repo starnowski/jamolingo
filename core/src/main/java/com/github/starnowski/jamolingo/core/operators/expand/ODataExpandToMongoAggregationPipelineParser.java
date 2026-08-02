@@ -211,7 +211,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         graphLookupInnerObject.append("depthField", depthVariable);
         graphLookup.append("$graphLookup", graphLookupInnerObject);
         pipeline.add(graphLookup);
-        boolean removeDepthProperty = true;
+        boolean removeDepthProperty = !expandParserContext.propagateGraphLookUpJoinKeys();
         if (eOption.getFilterOption() != null) {
           pipeline.add(
               prepareReduceStageThatRemovesOrphansFromGraphLookupStage(
@@ -294,6 +294,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // TODO remove it
           OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
               new OdataSelectToMongoProjectParser();
+          // TODO Select object expandParserContext.propagateGraphLookUpJoinKeys()
           SelectOperatorOptionsForMapOperator selectResult =
               odataSelectToMongoProjectParser.computeValueForMapOperator(eOption.getSelectOption());
           // TODO create object that returns select properties for graphLookup
