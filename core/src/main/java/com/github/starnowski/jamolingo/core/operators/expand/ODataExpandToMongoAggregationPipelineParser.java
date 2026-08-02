@@ -294,9 +294,14 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // TODO remove it
           OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
               new OdataSelectToMongoProjectParser();
-          // TODO Select object expandParserContext.propagateGraphLookUpJoinKeys()
+          DefaultOdataSelectToMongoProjectParserContext.Builder builder =
+              DefaultOdataSelectToMongoProjectParserContext.builder();
+          if (expandParserContext.propagateGraphLookUpJoinKeys()) {
+            builder.appendAdditionalFields(Set.of(mongoConnectFrom, mongoConnectTo));
+          }
           SelectOperatorOptionsForMapOperator selectResult =
-              odataSelectToMongoProjectParser.computeValueForMapOperator(eOption.getSelectOption());
+              odataSelectToMongoProjectParser.computeValueForMapOperator(
+                  eOption.getSelectOption(), DefaultEdmMongoContextFacade.builder().build());
           // TODO create object that returns select properties for graphLookup
           // TODO It should return the SelectOperatorResult operator that should be applied instead
           // of just the fields names
@@ -749,7 +754,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
    * the flat array of results and only keeps documents that have a valid path back to the root
    * (depth 0).
    *
-   * @param navProp the navigation property being expanded
+   * @param navPropertyWithRootPrefix the navigation property being expanded
    * @param depthVariable the name of the field storing the recursion depth
    * @param mongoConnectTo the field name used for the "connectToField" in $graphLookup
    * @param mongoConnectFrom the field name used for the "connectFromField" in $graphLookup
