@@ -42,6 +42,19 @@ class ODataExpandToMongoAggregationPipelineParserTreeRelationsTest extends Abstr
         return doc.get("arr", List.class)
     }
 
+    private Object sortKeys(Object obj) {
+        if (obj instanceof Document) {
+            Document sorted = new Document()
+            ((Document) obj).entrySet().stream()
+                .sorted(Map.Entry.comparingByKey())
+                .forEach { e -> sorted.put(e.getKey(), sortKeys(e.getValue())) }
+            return sorted
+        } else if (obj instanceof List) {
+            return ((List) obj).collect { sortKeys(it) }
+        }
+        return obj
+    }
+
     @Unroll
     def "should return expected pipeline stages for tree relations with graphLookup: #expandQuery"() {
         given:
@@ -66,8 +79,8 @@ class ODataExpandToMongoAggregationPipelineParserTreeRelationsTest extends Abstr
         def expectedList = parseJsonArray(expectedPipelineBsonArray)
         def actualList = result.getStageObjects() as List<Document>
         
-        def actualJsonNormalized = convertToFormattedJsonArray(actualList)
-        def expectedJsonNormalized = convertToFormattedJsonArray(expectedList)
+        def actualJsonNormalized = convertToFormattedJsonArray(sortKeys(actualList) as List<Document>)
+        def expectedJsonNormalized = convertToFormattedJsonArray(sortKeys(expectedList) as List<Document>)
         
         actualJsonNormalized == expectedJsonNormalized
 
@@ -99,8 +112,8 @@ class ODataExpandToMongoAggregationPipelineParserTreeRelationsTest extends Abstr
         def expectedList = parseJsonArray(expectedPipelineBsonArray)
         def actualList = result.getStageObjects() as List<Document>
         
-        def actualJsonNormalized = convertToFormattedJsonArray(actualList)
-        def expectedJsonNormalized = convertToFormattedJsonArray(expectedList)
+        def actualJsonNormalized = convertToFormattedJsonArray(sortKeys(actualList) as List<Document>)
+        def expectedJsonNormalized = convertToFormattedJsonArray(sortKeys(expectedList) as List<Document>)
         
         actualJsonNormalized == expectedJsonNormalized
 
