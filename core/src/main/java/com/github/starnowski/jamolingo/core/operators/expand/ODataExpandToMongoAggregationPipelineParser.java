@@ -285,6 +285,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
               new Document(
                   "$unset", navPropertyWithRootPrefix + ODATA_GRAPHLOOKUP_STAGE_TMP_ARRAY_SUFFIX));
         }
+        SelectOperatorOptionsForMapOperator selectResult = null;
         if (eOption.getSelectOption() != null) {
           // TODO check if element does not have nested $expand, if yes then check if potential
           // excluded property would not be
@@ -301,7 +302,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
             odataSelectToMongoProjectParserContextBuilder.appendAdditionalFields(
                 Set.of(mongoConnectFrom, mongoConnectTo));
           }
-          SelectOperatorOptionsForMapOperator selectResult =
+          selectResult =
               odataSelectToMongoProjectParser.computeValueForMapOperator(
                   eOption.getSelectOption(),
                   DefaultEdmMongoContextFacade.builder().build(),
@@ -352,6 +353,19 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   : eOption.getLevelsOption().getValue();
         }
         // TODO add clean-up property
+        GraphLookUpCleanUpInfo graphLookUpCleanUpInfo = null;
+        if (selectResult != null) {
+          // TODO
+          graphLookUpCleanUpInfo =
+              GraphLookUpCleanUpInfo.builder()
+                  .withRemoveLocalKeyProperty(
+                      !(selectResult.isWildCard()
+                          || selectResult.getRequestedFields().contains(edmStartWith)))
+                  .withRemoveForeignKeyProperty(
+                      !(selectResult.isWildCard()
+                          || selectResult.getRequestedFields().contains(edmConnectTo)))
+                  .build();
+        }
         expandElements.put(
             navProp.getName(),
             ExpandElement.builder()
@@ -367,6 +381,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .withCollection(navProp.isCollection())
                 .withDepthVariableName(depthVariable)
                 .withExpandElements(nestedElements)
+                .withGraphLookUpCleanUpInfo(graphLookUpCleanUpInfo)
                 .build());
         return pipeline;
       } else {
