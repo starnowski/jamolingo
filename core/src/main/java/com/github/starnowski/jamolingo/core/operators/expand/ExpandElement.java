@@ -18,6 +18,7 @@ public class ExpandElement {
   private final String edmEntityFullName;
   private final Boolean collection;
   private final String depthVariableName;
+  private final GraphLookUpCleanUpInfo graphLookUpCleanUpInfo;
 
   public ExpandElement(
       String edmPath,
@@ -31,7 +32,8 @@ public class ExpandElement {
       String foreignCollection,
       String edmEntityFullName,
       Boolean collection,
-      String depthVariableName) {
+      String depthVariableName,
+      GraphLookUpCleanUpInfo graphLookUpCleanUpInfo) {
     this.edmPath = edmPath;
     this.mongoPath = mongoPath;
     this.fetchType = fetchType;
@@ -47,6 +49,7 @@ public class ExpandElement {
     this.edmEntityFullName = edmEntityFullName;
     this.collection = collection;
     this.depthVariableName = depthVariableName;
+    this.graphLookUpCleanUpInfo = graphLookUpCleanUpInfo;
   }
 
   public String getEdmPath() {
@@ -97,6 +100,10 @@ public class ExpandElement {
     return depthVariableName;
   }
 
+  public GraphLookUpCleanUpInfo getGraphLookUpCleanUpInfo() {
+    return graphLookUpCleanUpInfo;
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -113,7 +120,8 @@ public class ExpandElement {
         && Objects.equals(foreignCollection, that.foreignCollection)
         && Objects.equals(edmEntityFullName, that.edmEntityFullName)
         && Objects.equals(collection, that.collection)
-        && Objects.equals(depthVariableName, that.depthVariableName);
+        && Objects.equals(depthVariableName, that.depthVariableName)
+        && Objects.equals(graphLookUpCleanUpInfo, that.graphLookUpCleanUpInfo);
   }
 
   @Override
@@ -130,7 +138,8 @@ public class ExpandElement {
         foreignCollection,
         edmEntityFullName,
         collection,
-        depthVariableName);
+        depthVariableName,
+        graphLookUpCleanUpInfo);
   }
 
   @Override
@@ -167,6 +176,8 @@ public class ExpandElement {
         + ", depthVariableName='"
         + depthVariableName
         + '\''
+        + ", graphLookUpCleanUpInfo="
+        + graphLookUpCleanUpInfo
         + '}';
   }
 
@@ -187,6 +198,7 @@ public class ExpandElement {
     private String edmEntityFullName;
     private Boolean collection;
     private String depthVariableName;
+    private GraphLookUpCleanUpInfo graphLookUpCleanUpInfo;
 
     public Builder withExpandElement(ExpandElement expandElement) {
       this.edmPath = expandElement.edmPath;
@@ -201,6 +213,7 @@ public class ExpandElement {
       this.edmEntityFullName = expandElement.edmEntityFullName;
       this.collection = expandElement.collection;
       this.depthVariableName = expandElement.depthVariableName;
+      this.graphLookUpCleanUpInfo = expandElement.graphLookUpCleanUpInfo;
       return this;
     }
 
@@ -270,6 +283,11 @@ public class ExpandElement {
       return this;
     }
 
+    public Builder withGraphLookUpCleanUpInfo(GraphLookUpCleanUpInfo graphLookUpCleanUpInfo) {
+      this.graphLookUpCleanUpInfo = graphLookUpCleanUpInfo;
+      return this;
+    }
+
     public ExpandElement build() {
       return new ExpandElement(
           edmPath,
@@ -283,7 +301,8 @@ public class ExpandElement {
           foreignCollection,
           edmEntityFullName,
           collection,
-          depthVariableName);
+          depthVariableName,
+          graphLookUpCleanUpInfo);
     }
   }
 }
