@@ -1390,7 +1390,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(5, 7),
-            "$expand=parent($levels=2;$expand=children($levels=2),treeType2s($select=_id,index,treeType1Id;$orderby=index asc);$select=_id,index;$orderby=index asc)&$orderby=index desc",
+            "$expand=parent($levels=2;$expand=children($levels=2;$orderby=index asc),treeType2s($select=_id,index,treeType1Id;$orderby=index asc);$select=_id,index;$orderby=index asc)&$orderby=index desc",
             """
                     [
                     	{
@@ -1537,6 +1537,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
     pipeline.addAll(result.getStageObjects());
+    pipeline.add(new Document("$sort", new Document("index", 1)));
     System.out.println(wrapBsonList(pipeline).toJson());
     List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
     String currentResult = wrapDocumentsList(results).toJson();
@@ -1586,6 +1587,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
     pipeline.addAll(result.getStageObjects());
+    pipeline.add(new Document("$sort", new Document("index", 1)));
     System.out.println(wrapBsonList(pipeline).toJson());
     List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
     GraphLookUpToLookUpStrategyResultsTransformer graphLookUpToLookUpStrategyResultsTransformer =
