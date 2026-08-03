@@ -80,7 +80,7 @@ FilterOption filterOption = uriInfo.getFilterOption();
 // 3. (Optional) Provide a context facade if you have custom mappings
 // EdmPropertyMongoPathResolver contextFacade = ...; 
 
-// 4. Parse the option
+// 4. Parse the option to an aggregation pipeline result
 // If using default context:
 FilterOperatorResult result = parser.parse(filterOption);
 // If using custom context:
@@ -89,6 +89,13 @@ FilterOperatorResult result = parser.parse(filterOption);
 // 5. Use the result in your MongoDB aggregation pipeline
 List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
+
+// Alternatively, you can parse the filter to a raw Bson query object (e.g., for find queries):
+// FilterOperatorQueryObjectResult queryObjectResult = parser.parseQueryObject(filterOption);
+// if (!queryObjectResult.isAggregationPipelineRequired()) {
+//     Bson query = queryObjectResult.getQueryObject();
+//     collection.find(query);
+// }
 ```
 
 #### $search
@@ -150,6 +157,7 @@ The `$expand` operator allows clients to include related resources in the respon
     - `$select`: Projects specific properties of related resources.
     - `$top` and `$skip`: Implements pagination for related resources.
 - Handles complex "orphan" removal logic in `$graphLookup` to ensure integrity when `$filter` is used.
+- Allows limiting the maximum number of explicitly nested `$expand` operations to prevent performance issues (throws `NestedExpandLevelExceededException` when exceeded).
 
 **Usage:**
 
@@ -167,8 +175,11 @@ ODataExpandToMongoAggregationPipelineParser parser = new ODataExpandToMongoAggre
 // 2. Obtain the ExpandOption from the Olingo UriInfo
 ExpandOption expandOption = uriInfo.getExpandOption();
 
-// 3. (Optional) Provide an ExpandParserContext for type and collection mapping
-// ExpandParserContext context = ...;
+// 3. (Optional) Provide an ExpandParserContext for type and collection mapping and nested limits
+// import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext;
+// ExpandParserContext context = DefaultExpandParserContext.builder()
+//     .withMaxAllowedNestedExpandLevel(2)
+//     .build();
 
 // 4. Parse the option
 ExpandOperatorResult result = parser.parse(expandOption, context);
