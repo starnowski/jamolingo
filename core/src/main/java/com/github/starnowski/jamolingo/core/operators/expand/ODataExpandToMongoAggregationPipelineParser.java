@@ -389,7 +389,14 @@ public class ODataExpandToMongoAggregationPipelineParser {
         Map<String, ExpandElement> nestedElements = null;
         ExpandOperatorResult nestedExpandResult = null;
         if (eOption.getExpandOption() != null) {
-          nestedExpandResult = parse(eOption.getExpandOption(), expandParserContext);
+          try {
+            nestedExpandResult = parse(eOption.getExpandOption(), expandParserContext);
+          } catch (ExpandLevelExceededException e) {
+            throw new ExpandLevelExceededException(
+                navPropertyWithRootPrefix + "." + e.getEdmPath(),
+                e.getRequestedLevel(),
+                e.getMaxLevel());
+          }
           nestedElements = nestedExpandResult.getExpandElements();
         }
 
