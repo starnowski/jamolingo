@@ -80,5 +80,7 @@ class ODataExpandNestedLimitTest extends AbstractSpecification {
         3                           | 4              | "children.parent.children.parent"   | "\$expand=children(\$expand=parent(\$expand=children(\$expand=parent)))"
         1                           | 2              | "parent.children"                   | "\$expand=parent(\$expand=children)"
         2                           | 3              | "parent.children.parent"            | "\$expand=children(\$expand=parent),parent(\$expand=children(\$expand=parent))"
+        2                           | 3              | "parent.children.parent"            | "\$expand=children(\$expand=parent;\$levels=3),parent(\$expand=children(\$expand=parent))"
+        2                           | 3              | "parent.children.parent"            | "\$expand=children(\$expand=parent;\$levels=3),parent(\$expand=children(\$expand=parent;\$levels=3))"
     }
 }
