@@ -83,4 +83,34 @@ class ODataExpandNestedLimitTest extends AbstractSpecification {
         2                           | 3              | "parent.children.parent"            | "\$expand=children(\$expand=parent;\$levels=3),parent(\$expand=children(\$expand=parent))"
         2                           | 3              | "parent.children.parent"            | "\$expand=children(\$expand=parent;\$levels=3),parent(\$expand=children(\$expand=parent;\$levels=3))"
     }
+
+    @Unroll
+    def "should throw NestedExpandLevelExceededException when maxAllowedNestedExpandLevel is #maxAllowedNestedExpandLevel and nested expand level is #requestedLevel and multi level expand handle by \$lookup stage"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_expand.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2", expandQuery, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxAllowedNestedExpandLevel(maxAllowedNestedExpandLevel)
+                .withUseLookupForLevelGreaterThanOne(true)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        def e = thrown(NestedExpandLevelExceededException)
+        e.getEdmPath() == expectedEdmPath
+        e.getRequestedLevel() == requestedLevel
+        e.getMaxLevel() == maxAllowedNestedExpandLevel
+        e.getMessage() == "The requested nested expand level $requestedLevel for path '$expectedEdmPath' exceeds the maximum allowed level $maxAllowedNestedExpandLevel."
+
+        where:
+        maxAllowedNestedExpandLevel | requestedLevel | expectedEdmPath                     | expandQuery
+        2                           | 3              | "parent.children.parent"            | "\$expand=children(\$expand=parent;\$levels=3),parent(\$expand=children(\$expand=parent))"
+        2                           | 3              | "parent.children.parent"            | "\$expand=children(\$expand=parent;\$levels=3),parent(\$expand=children(\$expand=parent;\$levels=3))"
+    }
 }
