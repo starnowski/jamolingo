@@ -10,14 +10,15 @@ import spock.lang.Unroll
 
 class ODataExpandNestedLimitTest extends AbstractSpecification {
 
-    def "should pass when maxAllowedNestedExpandLevel is 2 and nested expand level is 1"() {
+    @Unroll
+    def "should pass when maxAllowedNestedExpandLevel is #maxAllowedNestedExpandLevel and nested expand level is #requestedLevel"() {
         given:
         Edm edm = loadEmdProvider("edm/edm_expand.xml")
         UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                .parseUri("examples2", "\$expand=children", null, null)
+                .parseUri("examples2", expandQuery, null, null)
 
         def context = DefaultExpandParserContext.builder()
-                .withMaxAllowedNestedExpandLevel(2)
+                .withMaxAllowedNestedExpandLevel(maxAllowedNestedExpandLevel)
                 .build()
 
         def parser = new ODataExpandToMongoAggregationPipelineParser()
@@ -28,16 +29,26 @@ class ODataExpandNestedLimitTest extends AbstractSpecification {
         then:
         noExceptionThrown()
         result.getStageObjects().size() > 0
+
+        where:
+        maxAllowedNestedExpandLevel | requestedLevel | expandQuery
+        2                           | 1              | "\$expand=children"
+        2                           | 2              | "\$expand=children(\$expand=parent)"
+        3                           | 3              | "\$expand=children(\$expand=parent(\$expand=children))"
+        5                           | 4              | "\$expand=children(\$expand=parent(\$expand=children(\$expand=parent)))"
+        1                           | 1              | "\$expand=parent"
     }
 
-    def "should pass when maxAllowedNestedExpandLevel is 2 and nested expand level is 2"() {
+    @Unroll
+    def "should pass when maxAllowedNestedExpandLevel is #maxAllowedNestedExpandLevel and nested expand level is #requestedLevel and multi level expand handle by \$lookup stage"() {
         given:
         Edm edm = loadEmdProvider("edm/edm_expand.xml")
         UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                .parseUri("examples2", "\$expand=children(\$expand=parent)", null, null)
+                .parseUri("examples2", expandQuery, null, null)
 
         def context = DefaultExpandParserContext.builder()
-                .withMaxAllowedNestedExpandLevel(2)
+                .withMaxAllowedNestedExpandLevel(maxAllowedNestedExpandLevel)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .build()
 
         def parser = new ODataExpandToMongoAggregationPipelineParser()
@@ -48,6 +59,12 @@ class ODataExpandNestedLimitTest extends AbstractSpecification {
         then:
         noExceptionThrown()
         result.getStageObjects().size() > 0
+
+        where:
+        maxAllowedNestedExpandLevel | requestedLevel | expandQuery
+        2                           | 1              | "\$expand=children"
+        2                           | 2              | "\$expand=children(\$expand=parent)"
+        3                           | 3              | "\$expand=children(\$expand=parent(\$expand=children))"
     }
 
     @Unroll
