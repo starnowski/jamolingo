@@ -60,4 +60,14 @@ public interface ExpandParserContext {
   default boolean isThrowExceptionOnExpandLevelsExceeded() {
     return false;
   }
+
+  /**
+   * Returns the maximum number of nested expand operations that can be used. If null, no limit is
+   * applied.
+   *
+   * @return maximum nested expand operations limit, or null if no limit
+   */
+  default Integer getMaxAllowedNestedExpandLevel() {
+    return null;
+  }
 }

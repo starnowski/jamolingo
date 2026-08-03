@@ -123,6 +123,17 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
     EdmNavigationProperty navProp = ((UriResourceNavigation) lastResource).getProperty();
 
+    int currentLevel = parserExpandItemContext.getCurrentNestedLevel();
+    String currentPath =
+        parserExpandItemContext.getCurrentEdmPath() == null
+            ? navProp.getName()
+            : parserExpandItemContext.getCurrentEdmPath() + "." + navProp.getName();
+
+    Integer maxAllowed = expandParserContext.getMaxAllowedNestedExpandLevel();
+    if (maxAllowed != null && currentLevel > maxAllowed) {
+      throw new NestedExpandLevelExceededException(currentPath, currentLevel, maxAllowed);
+    }
+
     int currentLevelsOptionValue = 1;
     if (eOption.getLevelsOption() != null && !eOption.getLevelsOption().isMax()) {
       currentLevelsOptionValue = eOption.getLevelsOption().getValue();
@@ -359,7 +370,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     eOption.getExpandOption(),
                     expandParserContext,
                     new ParserExpandItemContext(
-                        navPropertyWithRootPrefix, newIdProperties, true, newAccumulatedLevels));
+                        navPropertyWithRootPrefix,
+                        newIdProperties,
+                        true,
+                        newAccumulatedLevels,
+                        currentLevel + 1,
+                        currentPath));
           } catch (ExpandLevelExceededException e) {
             String path = e.getEdmPath();
             if (!navProp.getName().equals(path)) {
@@ -427,7 +443,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 parse(
                     eOption.getExpandOption(),
                     expandParserContext,
-                    new ParserExpandItemContext(null, null, false, newAccumulatedLevels));
+                    new ParserExpandItemContext(
+                        null, null, false, newAccumulatedLevels, currentLevel + 1, currentPath));
           } catch (ExpandLevelExceededException e) {
             String path = e.getEdmPath();
             if (!navProp.getName().equals(path)) {
@@ -722,6 +739,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
     private final Set<String> idProperties;
     private final boolean addCleanUpEmptyPropertiesStage;
     private final Map<String, Integer> accumulatedLevels;
+    private final int currentNestedLevel;
+    private final String currentEdmPath;
 
     public boolean isAddCleanUpEmptyPropertiesStage() {
       return addCleanUpEmptyPropertiesStage;
@@ -729,7 +748,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
     public ParserExpandItemContext(
         String root, Set<String> idProperties, boolean addCleanUpEmptyPropertiesStage) {
-      this(root, idProperties, addCleanUpEmptyPropertiesStage, Collections.emptyMap());
+      this(root, idProperties, addCleanUpEmptyPropertiesStage, Collections.emptyMap(), 1, null);
     }
 
     public ParserExpandItemContext(
@@ -737,6 +756,16 @@ public class ODataExpandToMongoAggregationPipelineParser {
         Set<String> idProperties,
         boolean addCleanUpEmptyPropertiesStage,
         Map<String, Integer> accumulatedLevels) {
+      this(root, idProperties, addCleanUpEmptyPropertiesStage, accumulatedLevels, 1, null);
+    }
+
+    public ParserExpandItemContext(
+        String root,
+        Set<String> idProperties,
+        boolean addCleanUpEmptyPropertiesStage,
+        Map<String, Integer> accumulatedLevels,
+        int currentNestedLevel,
+        String currentEdmPath) {
       this.root = root;
       this.idProperties =
           Collections.unmodifiableSet(idProperties == null ? Collections.emptySet() : idProperties);
@@ -746,6 +775,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
               accumulatedLevels == null
                   ? Collections.emptyMap()
                   : new HashMap<>(accumulatedLevels));
+      this.currentNestedLevel = currentNestedLevel;
+      this.currentEdmPath = currentEdmPath;
     }
 
     public Map<String, Integer> getAccumulatedLevels() {
@@ -758,6 +789,14 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
     public Set<String> getIdProperties() {
       return idProperties;
+    }
+
+    public int getCurrentNestedLevel() {
+      return currentNestedLevel;
+    }
+
+    public String getCurrentEdmPath() {
+      return currentEdmPath;
     }
   }
 
@@ -1145,6 +1184,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     private final boolean useLookupForLevelGreaterThanOne;
     private final boolean propagateGraphLookUpJoinKeys;
     private final boolean throwExceptionOnExpandLevelsExceeded;
+    private final Integer maxAllowedNestedExpandLevel;
 
     /**
      * Constructs a new DefaultExpandParserContext.
@@ -1218,12 +1258,31 @@ public class ODataExpandToMongoAggregationPipelineParser {
         boolean useLookupForLevelGreaterThanOne,
         boolean propagateGraphLookUpJoinKeys,
         boolean throwExceptionOnExpandLevelsExceeded) {
+      this(
+          edmTypeMapping,
+          edmTablesToMongoDBCollections,
+          maxLevel,
+          useLookupForLevelGreaterThanOne,
+          propagateGraphLookUpJoinKeys,
+          throwExceptionOnExpandLevelsExceeded,
+          null);
+    }
+
+    public DefaultExpandParserContext(
+        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
+        Integer maxLevel,
+        boolean useLookupForLevelGreaterThanOne,
+        boolean propagateGraphLookUpJoinKeys,
+        boolean throwExceptionOnExpandLevelsExceeded,
+        Integer maxAllowedNestedExpandLevel) {
       this.edmTypeMapping = edmTypeMapping;
       this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
       this.maxLevel = maxLevel;
       this.useLookupForLevelGreaterThanOne = useLookupForLevelGreaterThanOne;
       this.propagateGraphLookUpJoinKeys = propagateGraphLookUpJoinKeys;
       this.throwExceptionOnExpandLevelsExceeded = throwExceptionOnExpandLevelsExceeded;
+      this.maxAllowedNestedExpandLevel = maxAllowedNestedExpandLevel;
     }
 
     @Override
@@ -1257,6 +1316,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
+    public Integer getMaxAllowedNestedExpandLevel() {
+      return maxAllowedNestedExpandLevel;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1266,7 +1330,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           && throwExceptionOnExpandLevelsExceeded == that.throwExceptionOnExpandLevelsExceeded
           && Objects.equals(edmTypeMapping, that.edmTypeMapping)
           && Objects.equals(edmTablesToMongoDBCollections, that.edmTablesToMongoDBCollections)
-          && Objects.equals(maxLevel, that.maxLevel);
+          && Objects.equals(maxLevel, that.maxLevel)
+          && Objects.equals(maxAllowedNestedExpandLevel, that.maxAllowedNestedExpandLevel);
     }
 
     @Override
@@ -1277,7 +1342,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           maxLevel,
           useLookupForLevelGreaterThanOne,
           propagateGraphLookUpJoinKeys,
-          throwExceptionOnExpandLevelsExceeded);
+          throwExceptionOnExpandLevelsExceeded,
+          maxAllowedNestedExpandLevel);
     }
 
     @Override
@@ -1295,6 +1361,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           + propagateGraphLookUpJoinKeys
           + ", throwExceptionOnExpandLevelsExceeded="
           + throwExceptionOnExpandLevelsExceeded
+          + ", maxAllowedNestedExpandLevel="
+          + maxAllowedNestedExpandLevel
           + '}';
     }
 
@@ -1315,6 +1383,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       private boolean useLookupForLevelGreaterThanOne = false;
       private boolean propagateGraphLookUpJoinKeys = false;
       private boolean throwExceptionOnExpandLevelsExceeded = false;
+      private Integer maxAllowedNestedExpandLevel = null;
 
       /**
        * Sets the mapping between EDM type names and their Mongo path resolvers.
@@ -1378,6 +1447,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
         return this;
       }
 
+      public Builder withMaxAllowedNestedExpandLevel(Integer maxAllowedNestedExpandLevel) {
+        this.maxAllowedNestedExpandLevel = maxAllowedNestedExpandLevel;
+        return this;
+      }
+
       /**
        * Initializes the builder with values from an existing context.
        *
@@ -1400,6 +1474,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         this.propagateGraphLookUpJoinKeys = defaultExpandParserContext.propagateGraphLookUpJoinKeys;
         this.throwExceptionOnExpandLevelsExceeded =
             defaultExpandParserContext.throwExceptionOnExpandLevelsExceeded;
+        this.maxAllowedNestedExpandLevel = defaultExpandParserContext.maxAllowedNestedExpandLevel;
         return this;
       }
 
@@ -1419,7 +1494,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
             maxLevel,
             useLookupForLevelGreaterThanOne,
             propagateGraphLookUpJoinKeys,
-            throwExceptionOnExpandLevelsExceeded);
+            throwExceptionOnExpandLevelsExceeded,
+            maxAllowedNestedExpandLevel);
       }
     }
   }
