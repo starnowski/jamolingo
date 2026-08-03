@@ -139,8 +139,33 @@ public class SpringMongoDataLoaderExtensionTest {
                 new MongoCollectionKey("second", "first"),
                 Set.of(EXAMPLE_3),
                 new MongoCollectionKey("second", "second"),
-                Set.of(EXAMPLE_4))));
+                Set.of(EXAMPLE_4))),
+        Arguments.of(
+            "insertDataIntoCollectionsBatchMode",
+            Map.of(
+                new MongoCollectionKey("first", "first"),
+                Set.of(EXAMPLE_1, EXAMPLE_2),
+                new MongoCollectionKey("second", "second"),
+                Set.of(EXAMPLE_5))));
   }
+
+  @MongoSetup(
+      batchInsertToCollection = true,
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = EXAMPLE_1_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = EXAMPLE_2_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = EXAMPLE_5_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsBatchMode() {}
 
   @MongoSetup(
       mongoDocuments = {

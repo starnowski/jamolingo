@@ -20,6 +20,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Core Module
+*   Added `rootMongoPath` property to `com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade` to provide access to the root MongoDB path. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `rootMongoPath` property to `com.github.starnowski.jamolingo.core.operators.select.SelectOperatorResult` to retrieve the root path applied to the selection. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `database` property to `com.github.starnowski.jamolingo.core.mapping.EntityMapping` to support specifying the MongoDB database name. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `database` property to `com.github.starnowski.jamolingo.core.mapping.NavigationMapping` to support cross-database joins in OData navigation properties. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `isUseLookupForLevelGreaterThanOne()` property to `com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext` interface to configure whether `$lookup` should be used instead of `$graphLookup` for levels greater than 1. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `useLookupForLevelGreaterThanOne` support to `com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext` and its builder. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added support for `$expand` operator translation to MongoDB `$lookup` or `$graphLookup` aggregation stages. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser` class for parsing OData expand options. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `maxAllowedNestedExpandLevel` property to `com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext` to configure limits for explicit nested `$expand` operations. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `com.github.starnowski.jamolingo.core.operators.expand.ExpandException` as a base exception for `$expand` operator parsing errors. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `com.github.starnowski.jamolingo.core.operators.expand.ExpandLevelExceededException` to signal when the `$expand` `$levels` option limit is exceeded. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `com.github.starnowski.jamolingo.core.operators.expand.NestedExpandLevelExceededException` to signal when the nested `$expand` limit is exceeded. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `parseQueryObject` methods to `com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser` for parsing filters into standalone `Bson` query objects. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorQueryObjectResult` to encapsulate query object parsing results. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+*   Added `com.github.starnowski.jamolingo.core.operators.select.SelectOperatorOptionsForMapOperator` to support `$select` operations inside array mapping contexts. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+
+### Changed
+
+#### Core Module
+*   Updated `com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory` to automatically map OData Schema namespaces to MongoDB database names. ([#35](https://github.com/starnowski/jamolingo/issues/35))
+
 ## [0.8.1] - 2026-03-19
 
 ### Added

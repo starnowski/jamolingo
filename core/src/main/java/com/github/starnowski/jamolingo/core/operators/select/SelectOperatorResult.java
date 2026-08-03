@@ -34,4 +34,25 @@ public interface SelectOperatorResult extends OlingoOperatorResult {
    * @return the BSON stage object
    */
   Bson getStageObject();
+
+  /**
+   * Returns the root Mongo path to prefix to all resolved paths.
+   *
+   * @return the root Mongo path
+   */
+  String getRootMongoPath();
+
+  /**
+   * Returns the set of fields requested in the URL.
+   *
+   * @return set of requested fields
+   */
+  Set<String> getRequestedFields();
+
+  /**
+   * Returns the set of additional fields.
+   *
+   * @return set of additional fields
+   */
+  Set<String> getAdditionalFields();
 }

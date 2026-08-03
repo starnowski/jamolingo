@@ -1,0 +1,5 @@
+{
+  "$sort": {
+    "prependedField1": 1
+  }
+}

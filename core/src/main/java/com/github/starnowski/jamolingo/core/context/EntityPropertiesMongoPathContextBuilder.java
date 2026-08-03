@@ -112,7 +112,8 @@ public class EntityPropertiesMongoPathContextBuilder {
               Boolean.TRUE.equals(property.getKey()),
               property.getType(),
               toRecord(property.getCircularReferenceMapping()),
-              property.getMaxCircularLimitPerEdmPath()));
+              property.getMaxCircularLimitPerEdmPath(),
+              property.getNavigation()));
       return;
     }
 
@@ -139,7 +140,8 @@ public class EntityPropertiesMongoPathContextBuilder {
             Boolean.TRUE.equals(property.getKey()),
             property.getType(),
             toRecord(property.getCircularReferenceMapping()),
-            property.getMaxCircularLimitPerEdmPath()));
+            property.getMaxCircularLimitPerEdmPath(),
+            property.getNavigation()));
   }
 
   private CircularReferenceMappingRecord toRecord(

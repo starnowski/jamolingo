@@ -1,0 +1,9 @@
+{
+  "$project": {
+    "nested.root.plainString": 1,
+    "nested.root.Name": 1,
+    "nested.root.Addresses.Street": 1,
+    "nested.root.Addresses.ZipCode": 1,
+    "_id": 0
+  }
+}

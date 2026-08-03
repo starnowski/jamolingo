@@ -53,6 +53,10 @@
             <artifactId>mongodb-driver-sync</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>com.github.starnowski.jamolingo</groupId>
+            <artifactId>beans</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

@@ -878,7 +878,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 /*
                  * The all operator applies a Boolean expression to each member of a collection and returns true if the expression is true for all members of the collection, otherwise it returns false.
                  * This implies that the all operator always returns true for an empty collection.
-                 * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html?utm_source=chatgpt.com#sec_all
+                 * https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html
                  */
                 new Document(
                     "$size", new Document("$ifNull", Arrays.asList(fieldReference, List.of())))
@@ -972,33 +972,6 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       return (List<Bson>) innerPart.toBsonDocument().get("$or");
     }
     return List.of(prepareElementMatchDocumentForAllLambda(innerPart, field, true));
-  }
-
-  private String resolveMongoPathForMember(Member member) {
-    if (edmPropertyMongoPathResolver != null) {
-      MongoPathResolution result =
-          edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
-              context.resolveFullEdmPathForMember(member));
-      String full = result.getMongoPath();
-      if (member.getResourcePath().getUriResourceParts().get(0)
-          instanceof UriResourceLambdaVariable) {
-        UriResourceLambdaVariable variable =
-            (UriResourceLambdaVariable) member.getResourcePath().getUriResourceParts().get(0);
-        String lambdaPath =
-            this.context
-                .resolveFullPathForLambdaVariable(variable.getVariableName())
-                .replace(".", "/");
-        MongoPathResolution lambdaMongoPath =
-            edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(lambdaPath);
-        return full.substring(lambdaMongoPath.getMongoPath().length() + 1);
-      }
-      return full;
-      // TODO
-      // if no lambda variable then take the whole path
-      // if any lambda variable then (memberFullPath - lambdaPath) set as finalPath
-    }
-    // TODO resolve Member
-    return null;
   }
 
   private String resolvePropertyTypeBasedOnMember(Member member) {

@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.core.mapping;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.Map;
@@ -11,8 +12,11 @@ public class EntityMapping {
   @Override
   public String toString() {
     return "EntityMapping{"
-        + "collection='"
-        + collection
+        + "namespace='"
+        + namespace
+        + '\''
+        + ", table='"
+        + table
         + '\''
         + ", rootPath='"
         + rootPath
@@ -22,9 +26,14 @@ public class EntityMapping {
         + '}';
   }
 
-  /** MongoDB collection name */
-  @JsonProperty("collection")
-  private String collection;
+  /** EDM namespace name */
+  @JsonProperty("namespace")
+  private String namespace;
+
+  /** EDM table name */
+  @JsonAlias("collection")
+  @JsonProperty("table")
+  private String table;
 
   /** Root path inside Mongo document (optional) Example: "orders[]" */
   @JsonProperty("rootPath")
@@ -35,22 +44,51 @@ public class EntityMapping {
   private Map<String, PropertyMapping> properties;
 
   /**
+   * Returns the EDM namespace name.
+   *
+   * @return the EDM namespace name
+   */
+  public String getNamespace() {
+    return namespace;
+  }
+
+  /**
+   * Sets the EDM namespace name.
+   *
+   * @param namespace the EDM namespace name
+   */
+  public void setNamespace(String namespace) {
+    this.namespace = namespace;
+  }
+
+  /**
+   * Sets the EDM namespace name.
+   *
+   * @param namespace EDM namespace name
+   * @return this entity mapping
+   */
+  public EntityMapping withNamespace(String namespace) {
+    this.namespace = namespace;
+    return this;
+  }
+
+  /**
    * Returns the MongoDB collection name.
    *
    * @return the collection name
    */
-  public String getCollection() {
-    return collection;
+  public String getTable() {
+    return table;
   }
 
   /**
-   * Sets the MongoDB collection name.
+   * Sets the EDM table name.
    *
-   * @param collection the collection name
+   * @param table the EDM table name
    * @return this entity mapping
    */
-  public EntityMapping withCollection(String collection) {
-    this.collection = collection;
+  public EntityMapping withTable(String table) {
+    this.table = table;
     return this;
   }
 
@@ -69,14 +107,15 @@ public class EntityMapping {
   public boolean equals(Object o) {
     if (o == null || getClass() != o.getClass()) return false;
     EntityMapping that = (EntityMapping) o;
-    return Objects.equals(collection, that.collection)
+    return Objects.equals(namespace, that.namespace)
+        && Objects.equals(table, that.table)
         && Objects.equals(rootPath, that.rootPath)
         && Objects.equals(properties, that.properties);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(collection, rootPath, properties);
+    return Objects.hash(namespace, table, rootPath, properties);
   }
 
   /**
@@ -91,12 +130,12 @@ public class EntityMapping {
   }
 
   /**
-   * Sets the MongoDB collection name.
+   * Sets the EDM table name.
    *
-   * @param collection the collection name
+   * @param table the table name
    */
-  public void setCollection(String collection) {
-    this.collection = collection;
+  public void setTable(String table) {
+    this.table = table;
   }
 
   /**

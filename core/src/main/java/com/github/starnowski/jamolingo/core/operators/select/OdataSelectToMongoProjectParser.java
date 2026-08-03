@@ -3,6 +3,8 @@ package com.github.starnowski.jamolingo.core.operators.select;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import java.util.*;
+import java.util.stream.Collectors;
+import org.apache.olingo.server.api.uri.UriResource;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
@@ -34,16 +36,47 @@ public class OdataSelectToMongoProjectParser {
    */
   public SelectOperatorResult parse(
       SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
+    return parse(
+        selectOption,
+        edmMongoContextFacade,
+        DefaultOdataSelectToMongoProjectParserContext.builder().build());
+  }
+
+  /**
+   * Parses the given SelectOption using the provided context facade and additional context.
+   *
+   * @param selectOption the OData select option to parse
+   * @param edmMongoContextFacade the context facade for resolving paths
+   * @param context the context containing additional project configurations
+   * @return the result of the parsing containing the MongoDB projection
+   */
+  public SelectOperatorResult parse(
+      SelectOption selectOption,
+      EdmMongoContextFacade edmMongoContextFacade,
+      OdataSelectToMongoProjectParserContext context) {
+    OdataSelectToMongoProjectParserContext nonNullContext =
+        context != null ? context : DefaultOdataSelectToMongoProjectParserContext.builder().build();
+
     if (selectOption == null || selectOption.getSelectItems().isEmpty()) {
       // TODO check if _id is part of available register property
-      return new DefaultSelectOperatorResult(new HashSet<>(), true, true);
+      return new DefaultSelectOperatorResult(
+          new HashSet<>(),
+          nonNullContext.getAdditionalFields(),
+          true,
+          true,
+          edmMongoContextFacade.getRootMongoPath());
     }
 
     List<String> fields = new ArrayList<>();
     for (SelectItem item : selectOption.getSelectItems()) {
       if (item.isStar()) {
         // TODO check if _id is part of available register property
-        return new DefaultSelectOperatorResult(new HashSet<>(), true, true);
+        return new DefaultSelectOperatorResult(
+            new HashSet<>(),
+            nonNullContext.getAdditionalFields(),
+            true,
+            true,
+            edmMongoContextFacade.getRootMongoPath());
       }
       if (!item.getResourcePath().getUriResourceParts().stream()
           .allMatch(p -> p instanceof UriResourceProperty)) {
@@ -54,20 +87,174 @@ public class OdataSelectToMongoProjectParser {
       fields.add(propertyName);
     }
     // TODO check if _id is part of available register property
-    return new DefaultSelectOperatorResult(new HashSet<>(fields), true, false);
+    return new DefaultSelectOperatorResult(
+        new HashSet<>(fields),
+        nonNullContext.getAdditionalFields(),
+        true,
+        false,
+        edmMongoContextFacade.getRootMongoPath());
+  }
+
+  /**
+   * Computes select operator options for a $map operator using default context.
+   *
+   * @param selectOption the select option
+   * @return the select operator options for $map operator
+   */
+  public SelectOperatorOptionsForMapOperator computeValueForMapOperator(SelectOption selectOption) {
+    return computeValueForMapOperator(selectOption, DefaultEdmMongoContextFacade.builder().build());
+  }
+
+  private String prepareEDMPath(List<UriResource> parts) {
+    return parts.stream()
+        .map(p -> ((UriResourceProperty) p).getProperty().getName())
+        .collect(Collectors.joining("/"));
+  }
+
+  /**
+   * Computes select operator options for a $map operator using provided context.
+   *
+   * @param selectOption the select option
+   * @param edmMongoContextFacade the context facade
+   * @return the select operator options for $map operator
+   */
+  public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
+      SelectOption selectOption, EdmMongoContextFacade edmMongoContextFacade) {
+    return computeValueForMapOperator(
+        selectOption,
+        edmMongoContextFacade,
+        DefaultOdataSelectToMongoProjectParserContext.builder().build());
+  }
+
+  /**
+   * Computes select operator options for a $map operator using provided context and additional
+   * options.
+   *
+   * @param selectOption the select option
+   * @param edmMongoContextFacade the context facade
+   * @param context the context containing additional configurations
+   * @return the select operator options for $map operator
+   */
+  public SelectOperatorOptionsForMapOperator computeValueForMapOperator(
+      SelectOption selectOption,
+      EdmMongoContextFacade edmMongoContextFacade,
+      OdataSelectToMongoProjectParserContext context) {
+    SelectOperatorResult selectResult = parse(selectOption, edmMongoContextFacade, context);
+    Set<String> arrayFields = new HashSet<>();
+    if (selectOption != null) {
+      for (SelectItem item : selectOption.getSelectItems()) {
+        if (item.isStar()) {
+          continue;
+        }
+        List<UriResource> parts = item.getResourcePath().getUriResourceParts();
+        for (int i = 0; i < parts.size(); i++) {
+          final int index = i;
+          UriResource part = parts.get(index);
+          if (part instanceof UriResourceProperty && ((UriResourceProperty) part).isCollection()) {
+            arrayFields.add(
+                edmMongoContextFacade
+                    .resolveMongoPathForEDMPath(prepareEDMPath(parts.subList(0, i + 1)))
+                    .getMongoPath());
+          }
+        }
+      }
+    }
+
+    return new DefaultSelectOperatorOptionsForMapOperator(
+        selectResult.isWildCard(),
+        selectResult.isWildCard() ? Set.of() : selectResult.getRequestedFields(),
+        selectResult.isWildCard() ? Set.of() : selectResult.getAdditionalFields(),
+        arrayFields);
+  }
+
+  private static class DefaultSelectOperatorOptionsForMapOperator
+      implements SelectOperatorOptionsForMapOperator {
+    private final boolean wildCard;
+    private final Set<String> requestedFields;
+    private final Set<String> additionalFields;
+    private final Set<String> selectedFields;
+    private final Set<String> arrayFields;
+
+    public boolean isWildCard() {
+      return wildCard;
+    }
+
+    public Set<String> getSelectedFields() {
+      return selectedFields;
+    }
+
+    public Set<String> getArrayFields() {
+      return arrayFields;
+    }
+
+    public Set<String> getRequestedFields() {
+      return requestedFields;
+    }
+
+    public Set<String> getAdditionalFields() {
+      return additionalFields;
+    }
+
+    private DefaultSelectOperatorOptionsForMapOperator(
+        boolean wildCard,
+        Set<String> requestedFields,
+        Set<String> additionalFields,
+        Set<String> arrayFields) {
+      this.wildCard = wildCard;
+      this.requestedFields =
+          requestedFields != null
+              ? Collections.unmodifiableSet(requestedFields)
+              : Collections.emptySet();
+      this.additionalFields =
+          additionalFields != null
+              ? Collections.unmodifiableSet(additionalFields)
+              : Collections.emptySet();
+      Set<String> union = new HashSet<>(this.requestedFields);
+      union.addAll(this.additionalFields);
+      this.selectedFields = Collections.unmodifiableSet(union);
+      this.arrayFields = arrayFields;
+    }
   }
 
   private static class DefaultSelectOperatorResult implements SelectOperatorResult {
 
+    private final Set<String> requestedFields;
+    private final Set<String> additionalFields;
     private final Set<String> selectedFields;
     private final boolean removeIdPropertyIfNotSpecified;
     private final boolean wildCard;
+    private final String rootMongoPath;
 
     private DefaultSelectOperatorResult(
-        Set<String> selectedFields, boolean removeIdPropertyIfNotSpecified, boolean wildCard) {
-      this.selectedFields = selectedFields;
+        Set<String> requestedFields,
+        Set<String> additionalFields,
+        boolean removeIdPropertyIfNotSpecified,
+        boolean wildCard,
+        String rootMongoPath) {
+      this.requestedFields =
+          requestedFields != null
+              ? Collections.unmodifiableSet(requestedFields)
+              : Collections.emptySet();
+      this.additionalFields =
+          additionalFields != null
+              ? Collections.unmodifiableSet(additionalFields)
+              : Collections.emptySet();
+      Set<String> union = new HashSet<>(this.requestedFields);
+      union.addAll(this.additionalFields);
+      this.selectedFields = Collections.unmodifiableSet(union);
       this.removeIdPropertyIfNotSpecified = removeIdPropertyIfNotSpecified;
       this.wildCard = wildCard;
+      this.rootMongoPath = rootMongoPath;
+    }
+
+    @Override
+    public Set<String> getRequestedFields() {
+      return requestedFields;
+    }
+
+    @Override
+    public Set<String> getAdditionalFields() {
+      return additionalFields;
     }
 
     @Override
@@ -78,6 +265,11 @@ public class OdataSelectToMongoProjectParser {
     @Override
     public boolean isWildCard() {
       return wildCard;
+    }
+
+    @Override
+    public String getRootMongoPath() {
+      return rootMongoPath;
     }
 
     @Override

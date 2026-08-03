@@ -1,0 +1,7 @@
+description="Prepare implementation plan based on particular specification file"
+prompt="""
+Analyze the {{args}} specification file.
+Prepare the implementation plan with points that would contain the checkbox that would suggest that particular task was completed.
+After completing task analyze once more if tasks wac completed correctly and mark checkbox.
+The file with implementation plan would be called that same as {{args}} but with prefix "impl_".
+"""

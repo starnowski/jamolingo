@@ -84,6 +84,34 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
             [filter, bson, expectedFields] << oneToOneEdmPathsMappings()
     }
 
+    @Unroll
+    def "should return expected query object"(){
+        given:
+            Bson expectedBson = Document.parse(bson)
+            Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+            JsonWriterSettings settings = JsonWriterSettings.builder().build()
+            CodecRegistry registry = CodecRegistries.fromRegistries(
+                    CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                    MongoClientSettings.getDefaultCodecRegistry()
+            )
+            DocumentCodec codec = new DocumentCodec(registry)
+
+            UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                    .parseUri("examples2",
+                            "\$filter=" +filter
+                            , null, null)
+            ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
+
+        when:
+            def result = tested.parseQueryObject(uriInfo.getFilterOption())
+
+        then:
+            ((Document)result.getQueryObject()).toJson(settings, codec) == ((Document)expectedBson).get("\$match", Document.class).toJson(settings, codec)
+
+        where:
+            [filter, bson] << oneToOneEdmPathsMappings()
+    }
+
     /**
      * Provides test data mapping OData filters to expected MongoDB $match documents and used properties.
      * In this provider, the mapping between EDM and MongoDB is one-to-one.

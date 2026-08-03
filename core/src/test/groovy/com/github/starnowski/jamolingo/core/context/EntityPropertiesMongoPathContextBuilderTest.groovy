@@ -28,19 +28,19 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
         where:
             entityMapping   ||  expecteMongoPatsh
             new EntityMapping()
-                            .withCollection("Item")
+                            .withTable("Item")
                             .withProperties(Map.of("plainString", new PropertyMapping()))
             || Map.of("plainString", "plainString")
-            new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
+            new EntityMapping().withTable("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
                     || Map.of("plainString", "plainString", "Addresses/City", "Addresses.City", "Addresses/ZipCode","Addresses.ZipCode", "Addresses/Street","Addresses.Street", "Name", "Name")
             // EDM flat property - Mongo nested object
             new EntityMapping()
-                .withCollection("Item")
+                .withTable("Item")
                 .withProperties(Map.of("plainString", new PropertyMapping().withRelativeTo("nestedObject")))
                 || Map.of("plainString", "nestedObject.plainString")
             // EDM nested object - Mongo flat property
             new EntityMapping()
-                .withCollection("Item")
+                .withTable("Item")
                 .withProperties(Map.of("nestedObject", new PropertyMapping().withProperties(Map.of("plainString", new PropertyMapping().withFlattenedLevelUp(1)) )))
                 || Map.of("nestedObject/plainString", "plainString")
     }
@@ -61,23 +61,23 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
         where:
         entityMapping   ||  expecteMongoPatsh
         new EntityMapping()
-                .withCollection("Item")
+                .withTable("Item")
                 .withProperties(Map.of("plainString", new PropertyMapping()))
                         || Map.of("plainString", "plainString")
-        new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
+        new EntityMapping().withTable("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
                         || Map.of("plainString", "plainString", "Addresses/City", "Addresses.City", "Addresses/ZipCode","Addresses.ZipCode", "Addresses/Street","Addresses.Street", "Name", "Name", "Addresses", "Addresses")
         // EDM flat property - Mongo nested object
         new EntityMapping()
-                .withCollection("Item")
+                .withTable("Item")
                 .withProperties(Map.of("plainString", new PropertyMapping().withRelativeTo("nestedObject")))
                         || Map.of("plainString", "nestedObject.plainString")
         // EDM nested object - Mongo flat property
         new EntityMapping()
-                .withCollection("Item")
+                .withTable("Item")
                 .withProperties(Map.of("nestedObject", new PropertyMapping().withProperties(Map.of("plainString", new PropertyMapping().withFlattenedLevelUp(1)) )))
                         || Map.of("nestedObject/plainString", "plainString", "nestedObject", "nestedObject")
         // EDM Circular complex type
-        new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
+        new EntityMapping().withTable("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
                 || Map.ofEntries(Map.entry("plainString", "plainString"), Map.entry("Addresses/City", "Addresses.City"), Map.entry("Addresses/ZipCode","Addresses.ZipCode"), Map.entry("Addresses/Street","Addresses.Street"), Map.entry("Addresses", "Addresses"), Map.entry("Name", "Name"), Map.entry("Addresses/BackUpAddresses","Addresses.BackUpAddresses"))
     }
 
@@ -96,7 +96,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
         where:
         testCaseName | entityMapping || expectedMessage
         "simple case" | new EntityMapping()
-                .withCollection("Item")
+                .withTable("Item")
                 .withProperties(Map.of(
                         "Addresses", new PropertyMapping().withProperties(Map.of(
                                 "BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(
@@ -108,7 +108,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
                         ))
                 )) || "The anchor path 'InvalidAnchor' defined in the circular reference mapping for 'Addresses/BackUpAddresses' is not a valid EDM path."
         "nested case" | new EntityMapping()
-                .withCollection("Item")
+                .withTable("Item")
                 .withProperties(Map.of(
                         "Person", new PropertyMapping().withProperties(Map.of(
                                 "Addresses", new PropertyMapping().withProperties(Map.of(
@@ -138,7 +138,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
             entityMapping   ||  expecteMongoPatsh
 
             // EDM Circular complex type
-            new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
+            new EntityMapping().withTable("Item").withProperties(Map.of("plainString", new PropertyMapping(), "Name", new PropertyMapping(), "Addresses", new PropertyMapping().withProperties(Map.of("BackUpAddresses", new PropertyMapping().withCircularReferenceMapping(CircularReferenceMapping.builder().withAnchorEdmPath("Addresses").withStrategy(CircularStrategy.EMBED_LIMITED).build()), "Street", new PropertyMapping(), "City", new PropertyMapping(), "ZipCode", new PropertyMapping())) ))
                         || Map.ofEntries(
                     Map.entry("plainString", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("plainString").withMongoPath("plainString").build()),
                     Map.entry("Name", new MongoPathEntry.MongoPathEntryBuilder().withEdmPath("Name").withMongoPath("Name").build()),
@@ -156,7 +156,7 @@ class EntityPropertiesMongoPathContextBuilderTest extends Specification {
             */
 
             new EntityMapping()
-                .withCollection("RootEntity")
+                .withTable("RootEntity")
                 .withProperties(
                         Map.of(
                                 "Id",

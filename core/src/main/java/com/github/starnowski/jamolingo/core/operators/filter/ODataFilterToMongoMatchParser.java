@@ -91,6 +91,81 @@ public class ODataFilterToMongoMatchParser {
         rootMongoFilterVisitor.getUsedMongoDBProperties());
   }
 
+  /**
+   * Parses the given OData filter option into a FilterOperatorQueryObjectResult.
+   *
+   * @param filter the OData filter option
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
+  public FilterOperatorQueryObjectResult parseQueryObject(FilterOption filter)
+      throws ODataApplicationException, ExpressionVisitException {
+    return parseQueryObject(filter, DefaultEdmMongoContextFacade.builder().build());
+  }
+
+  /**
+   * Parses the given OData filter option into a FilterOperatorQueryObjectResult using the specified
+   * common context.
+   *
+   * @param filter the OData filter option
+   * @param mongoFilterVisitorCommonContext the common context for the filter visitor
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
+  public FilterOperatorQueryObjectResult parseQueryObject(
+      FilterOption filter, MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
+      throws ODataApplicationException, ExpressionVisitException {
+    return parseQueryObject(
+        filter, DefaultEdmMongoContextFacade.builder().build(), mongoFilterVisitorCommonContext);
+  }
+
+  /**
+   * Parses the given OData filter option into a FilterOperatorQueryObjectResult using the specified
+   * path resolver.
+   *
+   * @param filter the OData filter option
+   * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
+  public FilterOperatorQueryObjectResult parseQueryObject(
+      FilterOption filter, EdmPropertyMongoPathResolver edmMongoContextFacade)
+      throws ODataApplicationException, ExpressionVisitException {
+    return parseQueryObject(
+        filter, edmMongoContextFacade, DefaultMongoFilterVisitorCommonContext.builder().build());
+  }
+
+  /**
+   * Parses the given OData filter option into a FilterOperatorQueryObjectResult using the specified
+   * path resolver and common context.
+   *
+   * @param filter the OData filter option
+   * @param edmMongoContextFacade the path resolver for mapping EDM properties to MongoDB paths
+   * @param mongoFilterVisitorCommonContext the common context for the filter visitor
+   * @return the result of the parsing operation
+   * @throws ODataApplicationException if an error occurs during parsing
+   * @throws ExpressionVisitException if an error occurs during expression visiting
+   */
+  public FilterOperatorQueryObjectResult parseQueryObject(
+      FilterOption filter,
+      EdmPropertyMongoPathResolver edmMongoContextFacade,
+      MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext)
+      throws ODataApplicationException, ExpressionVisitException {
+    if (filter == null) return new DefaultFilterOperatorQueryObjectResult(null, false, null);
+    if (edmMongoContextFacade == null) {
+      throw new IllegalArgumentException("The edmMongoContextFacade can not be nul;");
+    }
+    Expression expr = filter.getExpression();
+    MongoFilterVisitor rootMongoFilterVisitor =
+        new MongoFilterVisitor(edmMongoContextFacade, mongoFilterVisitorCommonContext);
+    Bson result = MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(rootMongoFilterVisitor));
+    return new DefaultFilterOperatorQueryObjectResult(
+        new Document("$and", List.of(result)), false, null);
+  }
+
   /** Default implementation of the FilterOperatorResult. */
   private static class DefaultFilterOperatorResult implements FilterOperatorResult {
 
@@ -142,6 +217,32 @@ public class ODataFilterToMongoMatchParser {
     @Override
     public boolean isDocumentShapeRedefined() {
       return false;
+    }
+  }
+
+  private static class DefaultFilterOperatorQueryObjectResult
+      implements FilterOperatorQueryObjectResult {
+    private final Bson queryObject;
+    private final boolean aggregationPipelineRequired;
+    private final Throwable cause;
+
+    public DefaultFilterOperatorQueryObjectResult(
+        Bson queryObject, boolean aggregationPipelineRequired, Throwable cause) {
+      this.queryObject = queryObject;
+      this.aggregationPipelineRequired = aggregationPipelineRequired;
+      this.cause = cause;
+    }
+
+    public Bson getQueryObject() {
+      return queryObject;
+    }
+
+    public boolean isAggregationPipelineRequired() {
+      return aggregationPipelineRequired;
+    }
+
+    public Throwable getCause() {
+      return cause;
     }
   }
 }

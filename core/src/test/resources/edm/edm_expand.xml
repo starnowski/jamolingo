@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+    <edmx:DataServices>
+        <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="MyService">
+            <EntityType Name="Example2">
+                <Key>
+                    <PropertyRef Name="_id" />
+                </Key>
+                <Property Name="_id" Type="Edm.Int32" Nullable="false" />
+                <Property Name="parentId" Type="Edm.Int32" />
+                <NavigationProperty
+                        Name="parent"
+                        Type="MyService.Example2"
+                        Nullable="true"
+                        Partner="children">
+                    <ReferentialConstraint Property="parentId" ReferencedProperty="_id" />
+                </NavigationProperty>
+                <NavigationProperty
+                        Name="children"
+                        Type="Collection(MyService.Example2)"
+                        Partner="parent"/>
+            </EntityType>
+            <EntityContainer Name="Container">
+                <EntitySet Name="examples2" EntityType="MyService.Example2">
+                    <NavigationPropertyBinding Path="parent" Target="examples2" />
+                    <NavigationPropertyBinding Path="children" Target="examples2" />
+                </EntitySet>
+            </EntityContainer>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

@@ -42,10 +42,10 @@ OdataSelectToMongoProjectParser parser = new OdataSelectToMongoProjectParser();
 
 #### $filter
 
-The `$filter` operator allows clients to filter a collection of resources. The `core` module translates this into a MongoDB `$match` aggregation stage.
+The `$filter` operator allows clients to filter a collection of resources. The `core` module translates this into a MongoDB `$match` aggregation stage or a standalone query object.
 
 **Translation Details:**
-- Translates to a `$match` aggregation stage.
+- Translates to a `$match` aggregation stage or a Bson query object.
 - Supports a wide range of OData filter expressions, including:
     - **Comparison operators:** `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `in`.
     - **Logical operators:** `and`, `or`, `not`.
@@ -66,6 +66,7 @@ The `ODataFilterToMongoMatchParser` class is responsible for this translation.
 ```java
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
+import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorQueryObjectResult;
 import org.apache.olingo.server.api.uri.queryoption.FilterOption;
 import org.apache.olingo.commons.api.edm.Edm;
 // ... other imports
@@ -79,7 +80,7 @@ FilterOption filterOption = uriInfo.getFilterOption();
 // 3. (Optional) Provide a context facade if you have custom mappings
 // EdmPropertyMongoPathResolver contextFacade = ...; 
 
-// 4. Parse the option
+// 4. Parse the option to an aggregation pipeline result
 // If using default context:
 FilterOperatorResult result = parser.parse(filterOption);
 // If using custom context:
@@ -88,6 +89,13 @@ FilterOperatorResult result = parser.parse(filterOption);
 // 5. Use the result in your MongoDB aggregation pipeline
 List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
+
+// Alternatively, you can parse the filter to a raw Bson query object (e.g., for find queries):
+// FilterOperatorQueryObjectResult queryObjectResult = parser.parseQueryObject(filterOption);
+// if (!queryObjectResult.isAggregationPipelineRequired()) {
+//     Bson query = queryObjectResult.getQueryObject();
+//     collection.find(query);
+// }
 ```
 
 #### $search
@@ -133,6 +141,51 @@ List<Bson> stages = result.getStageObjects();
 // Or get specific stages
 List<Bson> searchStages = result.getSearchStages();
 List<Bson> scoreFilterStages = result.getScoreFilterStages();
+// e.g. collection.aggregate(stages);
+```
+
+#### $expand
+
+The `$expand` operator allows clients to include related resources in the response. The `core` module translates this into MongoDB `$lookup` or `$graphLookup` aggregation stages.
+
+**Translation Details:**
+- Translates to a `$lookup` stage for simple expansions.
+- Translates to a `$graphLookup` stage when the `$levels` option is used (for recursive expansion).
+- Supports nested system query options within `$expand`:
+    - `$filter`: Filters related resources.
+    - `$orderby`: Sorts related resources.
+    - `$select`: Projects specific properties of related resources.
+    - `$top` and `$skip`: Implements pagination for related resources.
+- Handles complex "orphan" removal logic in `$graphLookup` to ensure integrity when `$filter` is used.
+- Allows limiting the maximum number of explicitly nested `$expand` operations to prevent performance issues (throws `NestedExpandLevelExceededException` when exceeded).
+
+**Usage:**
+
+The `ODataExpandToMongoAggregationPipelineParser` class is responsible for this translation.
+
+```java
+import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
+import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
+import org.apache.olingo.server.api.uri.queryoption.ExpandOption;
+// ... other imports
+
+// 1. Initialize the parser
+ODataExpandToMongoAggregationPipelineParser parser = new ODataExpandToMongoAggregationPipelineParser();
+
+// 2. Obtain the ExpandOption from the Olingo UriInfo
+ExpandOption expandOption = uriInfo.getExpandOption();
+
+// 3. (Optional) Provide an ExpandParserContext for type and collection mapping and nested limits
+// import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext;
+// ExpandParserContext context = DefaultExpandParserContext.builder()
+//     .withMaxAllowedNestedExpandLevel(2)
+//     .build();
+
+// 4. Parse the option
+ExpandOperatorResult result = parser.parse(expandOption, context);
+
+// 5. Use the result in your MongoDB aggregation pipeline
+List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
 ```
 

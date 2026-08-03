@@ -19,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(QuarkusMongoDataLoaderExtension.class)
 public abstract class AbstractItTest {
 
+  public static final String TEST_DATABASE = "testdb";
+
   protected Edm loadEmdProvider(String filePath) throws XMLStreamException {
     Reader reader =
         new InputStreamReader(

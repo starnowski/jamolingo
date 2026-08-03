@@ -4,6 +4,8 @@ import com.github.starnowski.jamolingo.core.AbstractSpecification
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder
 import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory
+import com.github.starnowski.jamolingo.core.operators.orderby.DefaultOdataOrderByToMongoSortParserContext
+import com.github.starnowski.jamolingo.core.operators.orderby.SortProperty
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
 import org.apache.olingo.server.api.uri.UriInfo
@@ -49,7 +51,7 @@ class OdataOrderByToMongoSortParserTest extends AbstractSpecification {
         OdataOrderByToMongoSortParser tested = new OdataOrderByToMongoSortParser()
 
         when:
-        def result = tested.parse(uriInfo.getOrderByOption(), new DefaultEdmMongoContextFacade(context, null))
+        def result = tested.parse(uriInfo.getOrderByOption(), DefaultEdmMongoContextFacade.builder().withEntityPropertiesMongoPathContext(context).build())
 
         then:
         result.getStageObjects().get(0) == expectedBson
@@ -90,6 +92,45 @@ class OdataOrderByToMongoSortParserTest extends AbstractSpecification {
                 ["edm/edm1.xml", "plainString", ["plainString"]],
                 ["edm/edm1.xml", "plainString desc", ["plainString"]],
                 ["edm/edm2_with_nested_collections.xml", "plainString asc,Name desc", ["plainString", "Name"]]
+        ]
+    }
+
+    @Unroll
+    def "should return expected stage bson object with prepended sort properties"() {
+        given:
+        Bson expectedBson = loadBsonFromFile(bsonFile)
+        Edm edm = loadEmdProvider(edmConfigFile)
+        ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+        def odataMapping = factory.build(edm.getSchema("Demo"))
+        def entityMapping = odataMapping.getEntities().get("Item")
+        EntityPropertiesMongoPathContextBuilder entityPropertiesMongoPathContextBuilder = new EntityPropertiesMongoPathContextBuilder()
+        def context = entityPropertiesMongoPathContextBuilder.build(entityMapping)
+        
+        UriInfo uriInfo = null
+        if (orderByClause != null) {
+            uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("Items", "\$orderby=" + orderByClause, null, null)
+        }
+        
+        OdataOrderByToMongoSortParser tested = new OdataOrderByToMongoSortParser()
+
+        when:
+        def result = tested.parse(
+            uriInfo != null ? uriInfo.getOrderByOption() : null, 
+            DefaultEdmMongoContextFacade.builder().withEntityPropertiesMongoPathContext(context).build(), 
+            sortParserContext)
+
+        then:
+        result.getStageObjects().get(0) == expectedBson
+
+        where:
+        [bsonFile, edmConfigFile, orderByClause, sortParserContext] << contextTestCases()
+    }
+
+    static contextTestCases() {
+        [
+                ["orderby/stages/case4_context.json", "edm/edm1.xml", "plainString", DefaultOdataOrderByToMongoSortParserContext.builder().withPrependedSortProperties([new SortProperty("prependedField1", true), new SortProperty("prependedField2", false)]).build()],
+                ["orderby/stages/case5_context.json", "edm/edm1.xml", null, DefaultOdataOrderByToMongoSortParserContext.builder().withPrependedSortProperties([new SortProperty("prependedField1", false)]).build()]
         ]
     }
 }

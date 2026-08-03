@@ -21,10 +21,10 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
 
         where:
             edmConfigFile   | schema    || expectedODataMongoMapping
-            "edm/edm1.xml"  | "Demo"    || new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String")))))
-            "edm/edm2_with_nested_collections.xml"  | "Demo"    || new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String"), "Name", new PropertyMapping().withType("Edm.String"), "Addresses", new PropertyMapping().withType("Demo.Address").withProperties(Map.of("Street", new PropertyMapping().withType("Edm.String"), "City", new PropertyMapping().withType("Edm.String"), "ZipCode", new PropertyMapping().withType("Edm.String"))) ))))
+            "edm/edm1.xml"  | "Demo"    || new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withNamespace("Demo").withTable("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String")))))
+            "edm/edm2_with_nested_collections.xml"  | "Demo"    || new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withNamespace("Demo").withTable("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String"), "Name", new PropertyMapping().withType("Edm.String"), "Addresses", new PropertyMapping().withType("Demo.Address").withProperties(Map.of("Street", new PropertyMapping().withType("Edm.String"), "City", new PropertyMapping().withType("Edm.String"), "ZipCode", new PropertyMapping().withType("Edm.String"))) ))))
             "edm/edm2_complextype_with_circular_reference.xml"  | "Demo"    ||
-                    new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String"), "Name", new PropertyMapping().withType("Edm.String"), "Addresses", new PropertyMapping().withType("Demo.Address").withProperties(
+                    new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withNamespace("Demo").withTable("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String"), "Name", new PropertyMapping().withType("Edm.String"), "Addresses", new PropertyMapping().withType("Demo.Address").withProperties(
                             Map.of(
                                     "Street", new PropertyMapping().withType("Edm.String"),
                                     "City", new PropertyMapping().withType("Edm.String"),
@@ -36,7 +36,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                             )
                     ) ))))
             "edm/edm3_complextype_with_circular_reference_collection.xml"  | "Demo"    ||
-                new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withCollection("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String"), "Name", new PropertyMapping().withType("Edm.String"), "Addresses", new PropertyMapping().withType("Demo.Address").withProperties(
+                new ODataMongoMapping().withEntities(Map.of("Item", new EntityMapping().withNamespace("Demo").withTable("Item").withProperties(Map.of("plainString", new PropertyMapping().withType("Edm.String"), "Name", new PropertyMapping().withType("Edm.String"), "Addresses", new PropertyMapping().withType("Demo.Address").withProperties(
                         Map.of(
                                 "Street", new PropertyMapping().withType("Edm.String"),
                                 "City", new PropertyMapping().withType("Edm.String"),
@@ -49,7 +49,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                 ) ))))
             // Complex Types circular reference Entity -> Type A -> Type B -> Type A
             "edm/edm4_complextype_with_long_circular_reference.xml"  | "Workflow.Model"    ||
-                new ODataMongoMapping().withEntities(Map.of("WorkflowInstance", new EntityMapping().withCollection("WorkflowInstance").withProperties(
+                new ODataMongoMapping().withEntities(Map.of("WorkflowInstance", new EntityMapping().withNamespace("Workflow.Model").withTable("WorkflowInstance").withProperties(
                         Map.of("InstanceId", new PropertyMapping().withType("Edm.String").withKey(true),
                                 "Definition", new PropertyMapping().withType("Workflow.Model.WorkflowDefinition").withProperties(
                         Map.of(
@@ -71,7 +71,7 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                 )
             // Complex Types circular reference, where one type is from different schema Entity -> Type A -> Type B -> Type A
             "edm/edm4_complextype_with_long_circular_reference_different_schema.xml"  | "Sales.Model"    ||
-                new ODataMongoMapping().withEntities(Map.of("SalesOrder", new EntityMapping().withCollection("SalesOrder").withProperties(
+                new ODataMongoMapping().withEntities(Map.of("SalesOrder", new EntityMapping().withNamespace("Sales.Model").withTable("SalesOrder").withProperties(
                         Map.of("OrderId", new PropertyMapping().withType("Edm.String").withKey(true),
                                 "Configuration", new PropertyMapping().withType("Sales.Model.ProductConfiguration").withProperties(
                                 Map.of(
@@ -97,7 +97,8 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                 Map.of(
                                         "InsurancePolicy",
                                         new EntityMapping()
-                                                .withCollection("InsurancePolicy")
+                                                .withNamespace("Policy.Model")
+                                                .withTable("InsurancePolicy")
                                                 .withProperties(
                                                         Map.of(
                                                                 "PolicyNumber",
@@ -166,7 +167,8 @@ class ODataMongoMappingFactoryTest extends AbstractSpecification {
                                 Map.of(
                                         "RootEntity",
                                         new EntityMapping()
-                                                .withCollection("RootEntity")
+                                                .withNamespace("Demo.Model")
+                                                .withTable("RootEntity")
                                                 .withProperties(
                                                         Map.of(
                                                                 "Id",
