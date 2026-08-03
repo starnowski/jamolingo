@@ -196,7 +196,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .append("connectToField", mongoConnectTo)
                 .append(
                     "maxDepth",
-                    translateODataExpandLevelsToGraphLookupMaxDepth(eOption, expandParserContext))
+                    translateODataExpandLevelsToGraphLookupMaxDepth(
+                        eOption, expandParserContext, navPropertyWithRootPrefix))
                 .append("as", navPropertyWithRootPrefix);
         String depthVariable = navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX;
         if (eOption.getFilterOption() != null) {
@@ -395,7 +396,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
         if (eOption.getLevelsOption() != null
             && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)) {
           int maxDepth =
-              translateODataExpandLevelsToGraphLookupMaxDepth(eOption, expandParserContext);
+              translateODataExpandLevelsToGraphLookupMaxDepth(
+                  eOption, expandParserContext, navPropertyWithRootPrefix);
           pipeline.addAll(
               prepareLookUpStage(
                   targetCollection,
@@ -1001,12 +1003,17 @@ public class ODataExpandToMongoAggregationPipelineParser {
    * @return the calculated maxDepth for $graphLookup
    */
   private int translateODataExpandLevelsToGraphLookupMaxDepth(
-      ExpandItem eOption, ExpandParserContext expandParserContext) {
+      ExpandItem eOption, ExpandParserContext expandParserContext, String edmPath)
+      throws ODataApplicationException {
     int levelsValue =
         eOption.getLevelsOption().isMax()
             ? expandParserContext.getMaxLevel()
             : eOption.getLevelsOption().getValue();
     if (levelsValue > expandParserContext.getMaxLevel()) {
+      if (expandParserContext.isThrowExceptionOnExpandLevelsExceeded()) {
+        throw new ExpandLevelExceededException(
+            edmPath, eOption.getLevelsOption().getValue(), expandParserContext.getMaxLevel());
+      }
       levelsValue = expandParserContext.getMaxLevel();
     }
     return levelsValue - 1;
@@ -1075,6 +1082,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     private final Integer maxLevel;
     private final boolean useLookupForLevelGreaterThanOne;
     private final boolean propagateGraphLookUpJoinKeys;
+    private final boolean throwExceptionOnExpandLevelsExceeded;
 
     /**
      * Constructs a new DefaultExpandParserContext.
@@ -1132,11 +1140,28 @@ public class ODataExpandToMongoAggregationPipelineParser {
         Integer maxLevel,
         boolean useLookupForLevelGreaterThanOne,
         boolean propagateGraphLookUpJoinKeys) {
+      this(
+          edmTypeMapping,
+          edmTablesToMongoDBCollections,
+          maxLevel,
+          useLookupForLevelGreaterThanOne,
+          propagateGraphLookUpJoinKeys,
+          false);
+    }
+
+    public DefaultExpandParserContext(
+        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
+        Integer maxLevel,
+        boolean useLookupForLevelGreaterThanOne,
+        boolean propagateGraphLookUpJoinKeys,
+        boolean throwExceptionOnExpandLevelsExceeded) {
       this.edmTypeMapping = edmTypeMapping;
       this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
       this.maxLevel = maxLevel;
       this.useLookupForLevelGreaterThanOne = useLookupForLevelGreaterThanOne;
       this.propagateGraphLookUpJoinKeys = propagateGraphLookUpJoinKeys;
+      this.throwExceptionOnExpandLevelsExceeded = throwExceptionOnExpandLevelsExceeded;
     }
 
     @Override
@@ -1165,12 +1190,18 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
+    public boolean isThrowExceptionOnExpandLevelsExceeded() {
+      return throwExceptionOnExpandLevelsExceeded;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       DefaultExpandParserContext that = (DefaultExpandParserContext) o;
       return useLookupForLevelGreaterThanOne == that.useLookupForLevelGreaterThanOne
           && propagateGraphLookUpJoinKeys == that.propagateGraphLookUpJoinKeys
+          && throwExceptionOnExpandLevelsExceeded == that.throwExceptionOnExpandLevelsExceeded
           && Objects.equals(edmTypeMapping, that.edmTypeMapping)
           && Objects.equals(edmTablesToMongoDBCollections, that.edmTablesToMongoDBCollections)
           && Objects.equals(maxLevel, that.maxLevel);
@@ -1183,7 +1214,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           edmTablesToMongoDBCollections,
           maxLevel,
           useLookupForLevelGreaterThanOne,
-          propagateGraphLookUpJoinKeys);
+          propagateGraphLookUpJoinKeys,
+          throwExceptionOnExpandLevelsExceeded);
     }
 
     @Override
@@ -1199,6 +1231,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           + useLookupForLevelGreaterThanOne
           + ", propagateGraphLookUpJoinKeys="
           + propagateGraphLookUpJoinKeys
+          + ", throwExceptionOnExpandLevelsExceeded="
+          + throwExceptionOnExpandLevelsExceeded
           + '}';
     }
 
@@ -1218,6 +1252,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       private Integer maxLevel = DEFAULT_MAX_LEVEL;
       private boolean useLookupForLevelGreaterThanOne = false;
       private boolean propagateGraphLookUpJoinKeys = false;
+      private boolean throwExceptionOnExpandLevelsExceeded = false;
 
       /**
        * Sets the mapping between EDM type names and their Mongo path resolvers.
@@ -1275,6 +1310,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
         return this;
       }
 
+      public Builder withThrowExceptionOnExpandLevelsExceeded(
+          boolean throwExceptionOnExpandLevelsExceeded) {
+        this.throwExceptionOnExpandLevelsExceeded = throwExceptionOnExpandLevelsExceeded;
+        return this;
+      }
+
       /**
        * Initializes the builder with values from an existing context.
        *
@@ -1295,6 +1336,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
         this.useLookupForLevelGreaterThanOne =
             defaultExpandParserContext.useLookupForLevelGreaterThanOne;
         this.propagateGraphLookUpJoinKeys = defaultExpandParserContext.propagateGraphLookUpJoinKeys;
+        this.throwExceptionOnExpandLevelsExceeded =
+            defaultExpandParserContext.throwExceptionOnExpandLevelsExceeded;
         return this;
       }
 
@@ -1313,7 +1356,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 : null,
             maxLevel,
             useLookupForLevelGreaterThanOne,
-            propagateGraphLookUpJoinKeys);
+            propagateGraphLookUpJoinKeys,
+            throwExceptionOnExpandLevelsExceeded);
       }
     }
   }

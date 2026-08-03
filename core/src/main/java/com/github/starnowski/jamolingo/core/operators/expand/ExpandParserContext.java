@@ -50,4 +50,14 @@ public interface ExpandParserContext {
   default boolean propagateGraphLookUpJoinKeys() {
     return false;
   }
+
+  /**
+   * Determines if an exception should be thrown when the requested expand level is higher than the
+   * allowed maximal level. By default, returns false.
+   *
+   * @return true if an exception should be thrown, false otherwise
+   */
+  default boolean isThrowExceptionOnExpandLevelsExceeded() {
+    return false;
+  }
 }
