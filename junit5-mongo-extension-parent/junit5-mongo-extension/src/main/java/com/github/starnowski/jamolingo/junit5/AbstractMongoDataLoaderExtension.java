@@ -100,7 +100,9 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
               .filter(an -> !an.bsonFilePath().trim().isEmpty())
               .collect(
                   Collectors.groupingBy(
-                      an -> new MongoCollectionKey(an.database(), an.collection())));
+                      an -> new MongoCollectionKey(an.database(), an.collection()),
+                      LinkedHashMap::new,
+                      Collectors.toList()));
 
       if (annotation.batchInsertToCollection()) {
         groupedDocuments.forEach(
