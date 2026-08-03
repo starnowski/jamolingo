@@ -1581,6 +1581,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
             ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
                 .withUseLookupForLevelGreaterThanOne(
                     false) // GraphLookUp is suppose to be used to resolve
+                .withPropagateGraphLookUpJoinKeys(true)
                 .build());
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));

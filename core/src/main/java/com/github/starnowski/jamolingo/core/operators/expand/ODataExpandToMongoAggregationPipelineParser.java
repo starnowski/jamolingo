@@ -294,14 +294,18 @@ public class ODataExpandToMongoAggregationPipelineParser {
           // TODO remove it
           OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
               new OdataSelectToMongoProjectParser();
-          DefaultOdataSelectToMongoProjectParserContext.Builder builder =
-              DefaultOdataSelectToMongoProjectParserContext.builder();
+          DefaultOdataSelectToMongoProjectParserContext.Builder
+              odataSelectToMongoProjectParserContextBuilder =
+                  DefaultOdataSelectToMongoProjectParserContext.builder();
           if (expandParserContext.propagateGraphLookUpJoinKeys()) {
-            builder.appendAdditionalFields(Set.of(mongoConnectFrom, mongoConnectTo));
+            odataSelectToMongoProjectParserContextBuilder.appendAdditionalFields(
+                Set.of(mongoConnectFrom, mongoConnectTo));
           }
           SelectOperatorOptionsForMapOperator selectResult =
               odataSelectToMongoProjectParser.computeValueForMapOperator(
-                  eOption.getSelectOption(), DefaultEdmMongoContextFacade.builder().build());
+                  eOption.getSelectOption(),
+                  DefaultEdmMongoContextFacade.builder().build(),
+                  odataSelectToMongoProjectParserContextBuilder.build());
           // TODO create object that returns select properties for graphLookup
           // TODO It should return the SelectOperatorResult operator that should be applied instead
           // of just the fields names
@@ -347,6 +351,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   ? expandParserContext.getMaxLevel()
                   : eOption.getLevelsOption().getValue();
         }
+        // TODO add clean-up property
         expandElements.put(
             navProp.getName(),
             ExpandElement.builder()
