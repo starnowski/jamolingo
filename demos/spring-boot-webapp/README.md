@@ -17,6 +17,7 @@ Supported OData system query options:
 *   **$top**: Limit the number of returned items.
 *   **$skip**: Skip a number of items.
 *   **$count**: Return the total count of items matching the filter (e.g., `$count=true`).
+*   **$expand**: Include related resources in the response.
 
 ## Technology Stack
 

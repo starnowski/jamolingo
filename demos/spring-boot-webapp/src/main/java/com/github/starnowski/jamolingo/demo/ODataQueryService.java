@@ -2,6 +2,7 @@ package com.github.starnowski.jamolingo.demo;
 
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.count.OdataCountToMongoCountParser;
+import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
 import com.github.starnowski.jamolingo.core.operators.select.OdataSelectToMongoProjectParser;
@@ -35,6 +36,8 @@ public class ODataQueryService {
   private final OdataTopToMongoLimitParser topParser = new OdataTopToMongoLimitParser();
   private final OdataSkipToMongoSkipParser skipParser = new OdataSkipToMongoSkipParser();
   private final OdataCountToMongoCountParser countParser = new OdataCountToMongoCountParser();
+  private final ODataExpandToMongoAggregationPipelineParser expandParser =
+      new ODataExpandToMongoAggregationPipelineParser();
 
   public static class QueryPlan {
     private final List<Bson> dataPipeline;
@@ -83,6 +86,11 @@ public class ODataQueryService {
     // 5. $select -> $project
     dataPipeline.addAll(
         selectParser.parse(uriInfo.getSelectOption(), edmMongoContextFacade).getStageObjects());
+
+    // 6. $expand -> $lookup or $graphLookup
+    if (uriInfo.getExpandOption() != null) {
+      dataPipeline.addAll(expandParser.parse(uriInfo.getExpandOption()).getStageObjects());
+    }
 
     List<Bson> countPipeline = new ArrayList<>(filterStages);
     countPipeline.add(new org.bson.Document("$count", "count"));
