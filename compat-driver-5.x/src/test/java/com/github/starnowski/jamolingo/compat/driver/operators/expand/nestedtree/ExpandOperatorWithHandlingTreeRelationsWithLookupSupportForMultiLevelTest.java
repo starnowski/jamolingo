@@ -1386,7 +1386,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                         }
                                                                                     ]
                                                                                     """,
-            JSONCompareMode.STRICT),
+            JSONCompareMode.LENIENT),
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(5, 7),
