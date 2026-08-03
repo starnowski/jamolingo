@@ -166,6 +166,33 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         "\$expand=children(\$levels=5)" | 5 | "children"
         "\$expand=parent(\$levels=4)" | 4 | "parent"
         "\$expand=children(\$expand=parent(\$levels=3))" | 3 | "children.parent"
+        "\$expand=children(\$levels=1;\$expand=children(\$levels=1;\$expand=children(\$levels=1)))" | 3 | "children"
+    }
+
+    @Unroll
+    def 'should NOT throw ExpandLevelExceededException when requested level is lower or equal to max level 2 for query #expandQuery'() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_expand.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2", expandQuery, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxLevel(2)
+                .withThrowExceptionOnExpandLevelsExceeded(true)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        expandQuery | _
+        "\$expand=children(\$levels=1;\$expand=children(\$levels=1))" | _
+        "\$expand=children(\$levels=2)" | _
     }
 
     @Unroll
@@ -198,6 +225,7 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         "\$expand=children(\$levels=5)" | 5 | "children"
         "\$expand=parent(\$levels=4)" | 4 | "parent"
         "\$expand=children(\$expand=parent(\$levels=3))" | 3 | "children.parent"
+        "\$expand=children(\$levels=1;\$expand=children(\$levels=1;\$expand=children(\$levels=1)))" | 3 | "children"
     }
 
     @Unroll

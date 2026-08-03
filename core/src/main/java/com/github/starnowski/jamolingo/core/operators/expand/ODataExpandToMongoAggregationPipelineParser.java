@@ -122,6 +122,29 @@ public class ODataExpandToMongoAggregationPipelineParser {
       return List.of();
     }
     EdmNavigationProperty navProp = ((UriResourceNavigation) lastResource).getProperty();
+
+    int currentLevelsOptionValue = 1;
+    if (eOption.getLevelsOption() != null && !eOption.getLevelsOption().isMax()) {
+      currentLevelsOptionValue = eOption.getLevelsOption().getValue();
+    } else if (eOption.getLevelsOption() != null && eOption.getLevelsOption().isMax()) {
+      currentLevelsOptionValue = expandParserContext.getMaxLevel();
+    }
+
+    int accumulatedLevel =
+        parserExpandItemContext.getAccumulatedLevels().getOrDefault(navProp.getName(), 0);
+    int totalLevel = accumulatedLevel + currentLevelsOptionValue;
+
+    if (totalLevel > expandParserContext.getMaxLevel()) {
+      if (expandParserContext.isThrowExceptionOnExpandLevelsExceeded()) {
+        throw new ExpandLevelExceededException(
+            navProp.getName(), totalLevel, expandParserContext.getMaxLevel());
+      }
+    }
+
+    Map<String, Integer> newAccumulatedLevels =
+        new HashMap<>(parserExpandItemContext.getAccumulatedLevels());
+    newAccumulatedLevels.put(navProp.getName(), totalLevel);
+
     EdmEntityType targetEntityType = (EdmEntityType) navProp.getType();
     String targetFullTypeName = targetEntityType.getNamespace() + "." + targetEntityType.getName();
 
@@ -329,11 +352,21 @@ public class ODataExpandToMongoAggregationPipelineParser {
                       .append("preserveNullAndEmptyArrays", true)));
           Set<String> newIdProperties = new HashSet<>(parserExpandItemContext.getIdProperties());
           newIdProperties.add(lookupMongoStartWith);
-          ExpandOperatorResult nestedExpandResult =
-              parse(
-                  eOption.getExpandOption(),
-                  expandParserContext,
-                  new ParserExpandItemContext(navPropertyWithRootPrefix, newIdProperties, true));
+          ExpandOperatorResult nestedExpandResult = null;
+          try {
+            nestedExpandResult =
+                parse(
+                    eOption.getExpandOption(),
+                    expandParserContext,
+                    new ParserExpandItemContext(
+                        navPropertyWithRootPrefix, newIdProperties, true, newAccumulatedLevels));
+          } catch (ExpandLevelExceededException e) {
+            String path = e.getEdmPath();
+            if (!navProp.getName().equals(path)) {
+              path = navProp.getName() + "." + path;
+            }
+            throw new ExpandLevelExceededException(path, e.getRequestedLevel(), e.getMaxLevel());
+          }
           nestedElements = nestedExpandResult.getExpandElements();
           pipeline.addAll(nestedExpandResult.getStageObjects());
           pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
@@ -390,12 +423,17 @@ public class ODataExpandToMongoAggregationPipelineParser {
         ExpandOperatorResult nestedExpandResult = null;
         if (eOption.getExpandOption() != null) {
           try {
-            nestedExpandResult = parse(eOption.getExpandOption(), expandParserContext);
+            nestedExpandResult =
+                parse(
+                    eOption.getExpandOption(),
+                    expandParserContext,
+                    new ParserExpandItemContext(null, null, false, newAccumulatedLevels));
           } catch (ExpandLevelExceededException e) {
-            throw new ExpandLevelExceededException(
-                navPropertyWithRootPrefix + "." + e.getEdmPath(),
-                e.getRequestedLevel(),
-                e.getMaxLevel());
+            String path = e.getEdmPath();
+            if (!navProp.getName().equals(path)) {
+              path = navProp.getName() + "." + path;
+            }
+            throw new ExpandLevelExceededException(path, e.getRequestedLevel(), e.getMaxLevel());
           }
           nestedElements = nestedExpandResult.getExpandElements();
         }
@@ -682,19 +720,36 @@ public class ODataExpandToMongoAggregationPipelineParser {
   private static final class ParserExpandItemContext {
     private final String root;
     private final Set<String> idProperties;
+    private final boolean addCleanUpEmptyPropertiesStage;
+    private final Map<String, Integer> accumulatedLevels;
 
     public boolean isAddCleanUpEmptyPropertiesStage() {
       return addCleanUpEmptyPropertiesStage;
     }
 
-    private final boolean addCleanUpEmptyPropertiesStage;
-
     public ParserExpandItemContext(
         String root, Set<String> idProperties, boolean addCleanUpEmptyPropertiesStage) {
+      this(root, idProperties, addCleanUpEmptyPropertiesStage, Collections.emptyMap());
+    }
+
+    public ParserExpandItemContext(
+        String root,
+        Set<String> idProperties,
+        boolean addCleanUpEmptyPropertiesStage,
+        Map<String, Integer> accumulatedLevels) {
       this.root = root;
       this.idProperties =
           Collections.unmodifiableSet(idProperties == null ? Collections.emptySet() : idProperties);
       this.addCleanUpEmptyPropertiesStage = addCleanUpEmptyPropertiesStage;
+      this.accumulatedLevels =
+          Collections.unmodifiableMap(
+              accumulatedLevels == null
+                  ? Collections.emptyMap()
+                  : new HashMap<>(accumulatedLevels));
+    }
+
+    public Map<String, Integer> getAccumulatedLevels() {
+      return accumulatedLevels;
     }
 
     public String getRoot() {
