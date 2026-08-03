@@ -31,6 +31,7 @@ public class EntityMapping {
   private String namespace;
 
   /** EDM table name */
+  @JsonAlias("collection")
   @JsonProperty("table")
   private String table;
 
