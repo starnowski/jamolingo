@@ -4,10 +4,9 @@ import com.mongodb.WriteConcern;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,23 +108,7 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
               MongoCollection<Document> collection = mongoCollectionMap.get(key);
               List<Document> documentsToInsert =
                   docs.stream()
-                      .map(
-                          an -> {
-                            try {
-                              String bson =
-                                  Files.readString(
-                                      Paths.get(
-                                          new File(
-                                                  getClass()
-                                                      .getClassLoader()
-                                                      .getResource(an.bsonFilePath())
-                                                      .getFile())
-                                              .getPath()));
-                              return Document.parse(bson);
-                            } catch (IOException e) {
-                              throw new RuntimeException(e);
-                            }
-                          })
+                      .map(an -> parseBsonDocument(an.bsonFilePath()))
                       .collect(Collectors.toList());
               collection.insertMany(documentsToInsert);
             });
@@ -135,23 +118,22 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
               MongoCollection<Document> collection = mongoCollectionMap.get(key);
               docs.forEach(
                   an -> {
-                    try {
-                      String bson =
-                          Files.readString(
-                              Paths.get(
-                                  new File(
-                                          getClass()
-                                              .getClassLoader()
-                                              .getResource(an.bsonFilePath())
-                                              .getFile())
-                                      .getPath()));
-                      collection.insertOne(Document.parse(bson));
-                    } catch (IOException e) {
-                      throw new RuntimeException(e);
-                    }
+                    collection.insertOne(parseBsonDocument(an.bsonFilePath()));
                   });
             });
       }
+    }
+  }
+
+  private Document parseBsonDocument(String bsonFilePath) {
+    try (InputStream is = getClass().getClassLoader().getResourceAsStream(bsonFilePath)) {
+      if (is == null) {
+        throw new RuntimeException("Resource not found: " + bsonFilePath);
+      }
+      String bson = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+      return Document.parse(bson);
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to read BSON resource: " + bsonFilePath, e);
     }
   }
 }
