@@ -1371,6 +1371,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
      *
      * @return the builder instance
      */
+    /**
+     * Creates a new Builder for DefaultExpandParserContext.
+     *
+     * @return a new builder
+     */
     public static Builder builder() {
       return new Builder();
     }
@@ -1447,6 +1452,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
         return this;
       }
 
+      /**
+       * Sets the maximum allowed nested expand level.
+       *
+       * @param maxAllowedNestedExpandLevel the max level to allow
+       * @return the builder
+       */
       public Builder withMaxAllowedNestedExpandLevel(Integer maxAllowedNestedExpandLevel) {
         this.maxAllowedNestedExpandLevel = maxAllowedNestedExpandLevel;
         return this;
