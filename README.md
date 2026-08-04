@@ -23,7 +23,7 @@ A Java library for translating OData queries and concepts into MongoDB aggregati
 ## Getting Started
 
 ### Prerequisites
-*   **Java 8** or higher.
+*   **Java 17** or higher.
 *   **MongoDB 4.4** or higher (supporting aggregation pipelines and explain).
 *   **MongoDB Atlas** or **MongoDB Atlas Local** (required for `$search` operator support).
 

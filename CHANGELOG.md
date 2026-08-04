@@ -23,6 +23,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.9.0] - 2026-08-04
 
+### Changed
+
+*   Updated minimum Java version requirement from Java 8 to Java 17 [49](https://github.com/starnowski/jamolingo/issues/49)
+
 ### Added
 
 #### Core Module
