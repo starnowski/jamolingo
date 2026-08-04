@@ -216,7 +216,6 @@ public class ODataExpandToMongoAggregationPipelineParser {
       if (eOption.getLevelsOption() != null
           && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)
           && !expandParserContext.isUseLookupForLevelGreaterThanOne()) {
-        // TODO Check approach with executing the nested $lookup stages (based on the levels value)
         // TODO Add default behaviour when $level value is larger than max then thrown an exception
         // TODO Add custom behaviour when $level value is larger than max then set the $level value
         // with the max value, required setting in the ExpandParserContext option
