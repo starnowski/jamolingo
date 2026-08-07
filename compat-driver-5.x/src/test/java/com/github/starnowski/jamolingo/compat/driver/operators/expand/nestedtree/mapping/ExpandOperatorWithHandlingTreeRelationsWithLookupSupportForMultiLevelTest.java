@@ -222,37 +222,37 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                 {
                                                     "_id": 1,
                                                     "renamed_index": 1,
-                                                    "parentId": null,
+                                                    "renamed_parentId": null,
                                                     "categoryId": 1,
                                                     "children": [
                                                         {
                                                             "_id": 2,
                                                             "renamed_index": 2,
-                                                            "parentId": 1,
+                                                            "renamed_parentId": 1,
                                                             "categoryId": 1,
                                                             "children": [
                                                                 {
                                                                     "_id": 3,
                                                                     "renamed_index": 3,
-                                                                    "parentId": 2,
+                                                                    "renamed_parentId": 2,
                                                                     "categoryId": 2,
                                                                     "children": [
                                                                         {
                                                                             "_id": 4,
                                                                             "renamed_index": 4,
-                                                                            "parentId": 3,
+                                                                            "renamed_parentId": 3,
                                                                             "categoryId": 2,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 6,
                                                                                     "renamed_index": 6,
-                                                                                    "parentId": 4,
+                                                                                    "renamed_parentId": 4,
                                                                                     "categoryId": 2,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 7,
                                                                                             "renamed_index": 7,
-                                                                                            "parentId": 6,
+                                                                                            "renamed_parentId": 6,
                                                                                             "categoryId": 2
                                                                                         }
                                                                                     ]
@@ -266,7 +266,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                         {
                                                             "_id": 5,
                                                             "renamed_index": 5,
-                                                            "parentId": 1,
+                                                            "renamed_parentId": 1,
                                                             "categoryId": 1,
                                                             "children": []
                                                         }
@@ -285,37 +285,37 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                         {
                                                             "_id": 1,
                                                             "renamed_index": 1,
-                                                            "parentId": null,
+                                                            "renamed_parentId": null,
                                                             "categoryId": 1,
                                                             "children": [
                                                                 {
                                                                     "_id": 2,
                                                                     "renamed_index": 2,
-                                                                    "parentId": 1,
+                                                                    "renamed_parentId": 1,
                                                                     "categoryId": 1,
                                                                     "children": [
                                                                         {
                                                                             "_id": 3,
                                                                             "renamed_index": 3,
-                                                                            "parentId": 2,
+                                                                            "renamed_parentId": 2,
                                                                             "categoryId": 2,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 4,
                                                                                     "renamed_index": 4,
-                                                                                    "parentId": 3,
+                                                                                    "renamed_parentId": 3,
                                                                                     "categoryId": 2,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 6,
                                                                                             "renamed_index": 6,
-                                                                                            "parentId": 4,
+                                                                                            "renamed_parentId": 4,
                                                                                             "categoryId": 2,
                                                                                             "children": [
                                                                                                 {
                                                                                                     "_id": 7,
                                                                                                     "renamed_index": 7,
-                                                                                                    "parentId": 6,
+                                                                                                    "renamed_parentId": 6,
                                                                                                     "categoryId": 2
                                                                                                 }
                                                                                             ]
@@ -329,7 +329,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 {
                                                                     "_id": 5,
                                                                     "renamed_index": 5,
-                                                                    "parentId": 1,
+                                                                    "renamed_parentId": 1,
                                                                     "categoryId": 1,
                                                                     "children": []
                                                                 }
@@ -354,37 +354,37 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 {
                                                                     "_id": 1,
                                                                     "renamed_index": 1,
-                                                                    "parentId": null,
+                                                                    "renamed_parentId": null,
                                                                     "categoryId": 1,
                                                                     "children": [
                                                                         {
                                                                             "_id": 2,
                                                                             "renamed_index": 2,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 3,
                                                                                     "renamed_index": 3,
-                                                                                    "parentId": 2,
+                                                                                    "renamed_parentId": 2,
                                                                                     "categoryId": 2,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 4,
                                                                                             "renamed_index": 4,
-                                                                                            "parentId": 3,
+                                                                                            "renamed_parentId": 3,
                                                                                             "categoryId": 2,
                                                                                             "children": [
                                                                                                 {
                                                                                                     "_id": 6,
                                                                                                     "renamed_index": 6,
-                                                                                                    "parentId": 4,
+                                                                                                    "renamed_parentId": 4,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 7,
                                                                                                             "renamed_index": 7,
-                                                                                                            "parentId": 6,
+                                                                                                            "renamed_parentId": 6,
                                                                                                             "categoryId": 2
                                                                                                         }
                                                                                                     ]
@@ -398,7 +398,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                         {
                                                                             "_id": 5,
                                                                             "renamed_index": 5,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": []
                                                                         }
@@ -407,31 +407,31 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 {
                                                                     "_id": 2,
                                                                     "renamed_index": 2,
-                                                                    "parentId": 1,
+                                                                    "renamed_parentId": 1,
                                                                     "categoryId": 1,
                                                                     "children": [
                                                                         {
                                                                             "_id": 3,
                                                                             "renamed_index": 3,
-                                                                            "parentId": 2,
+                                                                            "renamed_parentId": 2,
                                                                             "categoryId": 2,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 4,
                                                                                     "renamed_index": 4,
-                                                                                    "parentId": 3,
+                                                                                    "renamed_parentId": 3,
                                                                                     "categoryId": 2,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 6,
                                                                                             "renamed_index": 6,
-                                                                                            "parentId": 4,
+                                                                                            "renamed_parentId": 4,
                                                                                             "categoryId": 2,
                                                                                             "children": [
                                                                                                 {
                                                                                                     "_id": 7,
                                                                                                     "renamed_index": 7,
-                                                                                                    "parentId": 6,
+                                                                                                    "renamed_parentId": 6,
                                                                                                     "categoryId": 2
                                                                                                 }
                                                                                             ]
@@ -452,9 +452,9 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
             Set.of(1),
             "$expand=treeType2s($levels=5;$filter=index in (1, 2))",
             """
-                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
-                                                     "treeType2s": [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
-                                                     { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 }
+                                                    [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "categoryId": 1,
+                                                     "treeType2s": [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 2, "renamed_index": 2, "renamed_parentId": 1, "categoryId": 1, "treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
@@ -474,25 +474,25 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 {
                                                                     "_id": 1,
                                                                     "renamed_index": 1,
-                                                                    "parentId": null,
+                                                                    "renamed_parentId": null,
                                                                     "categoryId": 1,
                                                                     "children": [
                                                                         {
                                                                             "_id": 2,
                                                                             "renamed_index": 2,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 3,
                                                                                     "renamed_index": 3,
-                                                                                    "parentId": 2,
+                                                                                    "renamed_parentId": 2,
                                                                                     "categoryId": 2,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 4,
                                                                                             "renamed_index": 4,
-                                                                                            "parentId": 3,
+                                                                                            "renamed_parentId": 3,
                                                                                             "categoryId": 2
                                                                                         }
                                                                                     ]
@@ -517,13 +517,13 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                         {
                                                                             "_id": 1,
                                                                             "renamed_index": 1,
-                                                                            "parentId": null,
+                                                                            "renamed_parentId": null,
                                                                             "categoryId": 1,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 2,
                                                                                     "renamed_index": 2,
-                                                                                    "parentId": 1,
+                                                                                    "renamed_parentId": 1,
                                                                                     "categoryId": 1,
                                                                                     "children": []
                                                                                 }
@@ -541,7 +541,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (3, 4))",
             """
-                                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
+                                                                    [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "categoryId": 1,
                                                                      "children": [
                                                                      ]
                                                                     }]
@@ -557,37 +557,37 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 {
                                                                     "_id": 1,
                                                                     "renamed_index": 1,
-                                                                    "parentId": null,
+                                                                    "renamed_parentId": null,
                                                                     "categoryId": 1,
                                                                     "children": [
                                                                         {
                                                                             "_id": 2,
                                                                             "renamed_index": 2,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 3,
                                                                                     "renamed_index": 3,
-                                                                                    "parentId": 2,
+                                                                                    "renamed_parentId": 2,
                                                                                     "categoryId": 2,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 4,
                                                                                             "renamed_index": 4,
-                                                                                            "parentId": 3,
+                                                                                            "renamed_parentId": 3,
                                                                                             "categoryId": 2,
                                                                                             "children": [
                                                                                                 {
                                                                                                     "_id": 6,
                                                                                                     "renamed_index": 6,
-                                                                                                    "parentId": 4,
+                                                                                                    "renamed_parentId": 4,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 7,
                                                                                                             "renamed_index": 7,
-                                                                                                            "parentId": 6,
+                                                                                                            "renamed_parentId": 6,
                                                                                                             "categoryId": 2
                                                                                                         }
                                                                                                     ]
@@ -601,7 +601,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                         {
                                                                             "_id": 5,
                                                                             "renamed_index": 5,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": []
                                                                         }
@@ -620,44 +620,44 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 {
                                                                     "_id": 1,
                                                                     "renamed_index": 1,
-                                                                    "parentId": null,
+                                                                    "renamed_parentId": null,
                                                                     "categoryId": 1,
                                                                     "children": [
                                                                         {
                                                                             "_id": 5,
                                                                             "renamed_index": 5,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": []
                                                                         },
                                                                         {
                                                                             "_id": 2,
                                                                             "renamed_index": 2,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 3,
                                                                                     "renamed_index": 3,
-                                                                                    "parentId": 2,
+                                                                                    "renamed_parentId": 2,
                                                                                     "categoryId": 2,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 4,
                                                                                             "renamed_index": 4,
-                                                                                            "parentId": 3,
+                                                                                            "renamed_parentId": 3,
                                                                                             "categoryId": 2,
                                                                                             "children": [
                                                                                                 {
                                                                                                     "_id": 6,
                                                                                                     "renamed_index": 6,
-                                                                                                    "parentId": 4,
+                                                                                                    "renamed_parentId": 4,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 7,
                                                                                                             "renamed_index": 7,
-                                                                                                            "parentId": 6,
+                                                                                                            "renamed_parentId": 6,
                                                                                                             "categoryId": 2
                                                                                                         }
                                                                                                     ]
@@ -682,46 +682,46 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                 {
                                     "_id": 10,
                                     "renamed_index": 10,
-                                    "parentId": null,
+                                    "renamed_parentId": null,
                                     "categoryId": 1,
                                     "children": [
                                         {
                                             "_id": 11,
                                             "renamed_index": 11,
-                                            "parentId": 10,
+                                            "renamed_parentId": 10,
                                             "categoryId": 1,
                                             "children": [
                                                 {
                                                     "_id": 14,
                                                     "renamed_index": 14,
-                                                    "parentId": 11,
+                                                    "renamed_parentId": 11,
                                                     "categoryId": 1,
                                                     "children": [
                                                         {
                                                             "_id": 21,
                                                             "renamed_index": 21,
-                                                            "parentId": 14,
+                                                            "renamed_parentId": 14,
                                                             "categoryId": 1,
                                                             "children": []
                                                         },
                                                         {
                                                             "_id": 22,
                                                             "renamed_index": 22,
-                                                            "parentId": 14,
+                                                            "renamed_parentId": 14,
                                                             "categoryId": 1,
                                                             "children": []
                                                         },
                                                         {
                                                             "_id": 23,
                                                             "renamed_index": 23,
-                                                            "parentId": 14,
+                                                            "renamed_parentId": 14,
                                                             "categoryId": 1,
                                                             "children": []
                                                         },
                                                         {
                                                             "_id": 24,
                                                             "renamed_index": 24,
-                                                            "parentId": 14,
+                                                            "renamed_parentId": 14,
                                                             "categoryId": 1,
                                                             "children": []
                                                         }
@@ -730,14 +730,14 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                 {
                                                     "_id": 15,
                                                     "renamed_index": 15,
-                                                    "parentId": 11,
+                                                    "renamed_parentId": 11,
                                                     "categoryId": 1,
                                                     "children": []
                                                 },
                                                 {
                                                     "_id": 16,
                                                     "renamed_index": 16,
-                                                    "parentId": 11,
+                                                    "renamed_parentId": 11,
                                                     "categoryId": 1,
                                                     "children": []
                                                 }
@@ -746,27 +746,27 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                         {
                                             "_id": 12,
                                             "renamed_index": 12,
-                                            "parentId": 10,
+                                            "renamed_parentId": 10,
                                             "categoryId": 1,
                                             "children": [
                                                 {
                                                     "_id": 17,
                                                     "renamed_index": 17,
-                                                    "parentId": 12,
+                                                    "renamed_parentId": 12,
                                                     "categoryId": 1,
                                                     "children": []
                                                 },
                                                 {
                                                     "_id": 18,
                                                     "renamed_index": 18,
-                                                    "parentId": 12,
+                                                    "renamed_parentId": 12,
                                                     "categoryId": 1,
                                                     "children": []
                                                 },
                                                 {
                                                     "_id": 19,
                                                     "renamed_index": 19,
-                                                    "parentId": 12,
+                                                    "renamed_parentId": 12,
                                                     "categoryId": 1,
                                                     "children": []
                                                 }
@@ -775,13 +775,13 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                         {
                                             "_id": 13,
                                             "renamed_index": 13,
-                                            "parentId": 10,
+                                            "renamed_parentId": 10,
                                             "categoryId": 1,
                                             "children": [
                                                 {
                                                     "_id": 20,
                                                     "renamed_index": 20,
-                                                    "parentId": 13,
+                                                    "renamed_parentId": 13,
                                                     "categoryId": 1,
                                                     "children": []
                                                 }
@@ -801,32 +801,32 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                 {
                                     "_id": 10,
                                     "renamed_index": 10,
-                                    "parentId": null,
+                                    "renamed_parentId": null,
                                     "categoryId": 1,
                                     "children": [
                                         {
                                             "_id": 11,
                                             "renamed_index": 11,
-                                            "parentId": 10,
+                                            "renamed_parentId": 10,
                                             "categoryId": 1,
                                             "children": [
                                                 {
                                                     "_id": 14,
                                                     "renamed_index": 14,
-                                                    "parentId": 11,
+                                                    "renamed_parentId": 11,
                                                     "categoryId": 1,
                                                     "children": [
                                                         {
                                                             "_id": 21,
                                                             "renamed_index": 21,
-                                                            "parentId": 14,
+                                                            "renamed_parentId": 14,
                                                             "categoryId": 1,
                                                             "children": []
                                                         },
                                                         {
                                                             "_id": 22,
                                                             "renamed_index": 22,
-                                                            "parentId": 14,
+                                                            "renamed_parentId": 14,
                                                             "categoryId": 1,
                                                             "children": []
                                                         }
@@ -835,7 +835,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                 {
                                                     "_id": 15,
                                                     "renamed_index": 15,
-                                                    "parentId": 11,
+                                                    "renamed_parentId": 11,
                                                     "categoryId": 1,
                                                     "children": []
                                                 }
@@ -844,20 +844,20 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                         {
                                             "_id": 12,
                                             "renamed_index": 12,
-                                            "parentId": 10,
+                                            "renamed_parentId": 10,
                                             "categoryId": 1,
                                             "children": [
                                                 {
                                                     "_id": 17,
                                                     "renamed_index": 17,
-                                                    "parentId": 12,
+                                                    "renamed_parentId": 12,
                                                     "categoryId": 1,
                                                     "children": []
                                                 },
                                                 {
                                                     "_id": 18,
                                                     "renamed_index": 18,
-                                                    "parentId": 12,
+                                                    "renamed_parentId": 12,
                                                     "categoryId": 1,
                                                     "children": []
                                                 }
@@ -877,19 +877,19 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                         {
                                             "_id": 10,
                                             "renamed_index": 10,
-                                            "parentId": null,
+                                            "renamed_parentId": null,
                                             "categoryId": 1,
                                             "children": [
                                                 {
                                                     "_id": 13,
                                                     "renamed_index": 13,
-                                                    "parentId": 10,
+                                                    "renamed_parentId": 10,
                                                     "categoryId": 1,
                                                     "children": [
                                                         {
                                                             "_id": 20,
                                                             "renamed_index": 20,
-                                                            "parentId": 13,
+                                                            "renamed_parentId": 13,
                                                             "categoryId": 1,
                                                             "children": []
                                                         }
@@ -898,20 +898,20 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                 {
                                                     "_id": 12,
                                                     "renamed_index": 12,
-                                                    "parentId": 10,
+                                                    "renamed_parentId": 10,
                                                     "categoryId": 1,
                                                     "children": [
                                                         {
                                                             "_id": 19,
                                                             "renamed_index": 19,
-                                                            "parentId": 12,
+                                                            "renamed_parentId": 12,
                                                             "categoryId": 1,
                                                             "children": []
                                                         },
                                                         {
                                                             "_id": 18,
                                                             "renamed_index": 18,
-                                                            "parentId": 12,
+                                                            "renamed_parentId": 12,
                                                             "categoryId": 1,
                                                             "children": []
                                                         }
@@ -931,26 +931,26 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                         {
                                             "_id": 10,
                                             "renamed_index": 10,
-                                            "parentId": null,
+                                            "renamed_parentId": null,
                                             "categoryId": 1,
                                             "children": [
                                                 {
                                                     "_id": 12,
                                                     "renamed_index": 12,
-                                                    "parentId": 10,
+                                                    "renamed_parentId": 10,
                                                     "categoryId": 1,
                                                     "children": [
                                                         {
                                                             "_id": 18,
                                                             "renamed_index": 18,
-                                                            "parentId": 12,
+                                                            "renamed_parentId": 12,
                                                             "categoryId": 1,
                                                             "children": []
                                                         },
                                                         {
                                                             "_id": 19,
                                                             "renamed_index": 19,
-                                                            "parentId": 12,
+                                                            "renamed_parentId": 12,
                                                             "categoryId": 1,
                                                             "children": []
                                                         }
@@ -959,7 +959,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                 {
                                                     "_id": 13,
                                                     "renamed_index": 13,
-                                                    "parentId": 10,
+                                                    "renamed_parentId": 10,
                                                     "categoryId": 1,
                                                     "children": []
                                                 }
@@ -977,7 +977,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                 {
                                                     "_id": 10,
                                                     "renamed_index": 10,
-                                                    "parentId": null,
+                                                    "renamed_parentId": null,
                                                     "categoryId": 1,
                                                     "children": [
                                                         {
@@ -1013,37 +1013,37 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 {
                                                                     "_id": 1,
                                                                     "renamed_index": 1,
-                                                                    "parentId": null,
+                                                                    "renamed_parentId": null,
                                                                     "categoryId": 1,
                                                                     "children": [
                                                                         {
                                                                             "_id": 2,
                                                                             "renamed_index": 2,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 3,
                                                                                     "renamed_index": 3,
-                                                                                    "parentId": 2,
+                                                                                    "renamed_parentId": 2,
                                                                                     "categoryId": 2,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 4,
                                                                                             "renamed_index": 4,
-                                                                                            "parentId": 3,
+                                                                                            "renamed_parentId": 3,
                                                                                             "categoryId": 2,
                                                                                             "children": [
                                                                                                 {
                                                                                                     "_id": 6,
                                                                                                     "renamed_index": 6,
-                                                                                                    "parentId": 4,
+                                                                                                    "renamed_parentId": 4,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 7,
                                                                                                             "renamed_index": 7,
-                                                                                                            "parentId": 6,
+                                                                                                            "renamed_parentId": 6,
                                                                                                             "categoryId": 2
                                                                                                         }
                                                                                                     ]
@@ -1057,21 +1057,21 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                 {
                                                                                     "_id": 4,
                                                                                     "renamed_index": 4,
-                                                                                    "parentId": null,
+                                                                                    "renamed_parentId": null,
                                                                                     "categoryId": 1,
                                                                                     "treeType1Id": 2
                                                                                 },
                                                                                 {
                                                                                     "_id": 5,
                                                                                     "renamed_index": 5,
-                                                                                    "parentId": 4,
+                                                                                    "renamed_parentId": 4,
                                                                                     "categoryId": 1,
                                                                                     "treeType1Id": 2
                                                                                 },
                                                                                 {
                                                                                     "_id": 6,
                                                                                     "renamed_index": 6,
-                                                                                    "parentId": 5,
+                                                                                    "renamed_parentId": 5,
                                                                                     "categoryId": 2,
                                                                                     "treeType1Id": 2
                                                                                 }
@@ -1080,7 +1080,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                         {
                                                                             "_id": 5,
                                                                             "renamed_index": 5,
-                                                                            "parentId": 1,
+                                                                            "renamed_parentId": 1,
                                                                             "categoryId": 1,
                                                                             "children": []
                                                                         }
@@ -1098,37 +1098,37 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                         {
                                                                             "_id": 1,
                                                                             "renamed_index": 1,
-                                                                            "parentId": null,
+                                                                            "renamed_parentId": null,
                                                                             "categoryId": 1,
                                                                             "children": [
                                                                                 {
                                                                                     "_id": 2,
                                                                                     "renamed_index": 2,
-                                                                                    "parentId": 1,
+                                                                                    "renamed_parentId": 1,
                                                                                     "categoryId": 1,
                                                                                     "children": [
                                                                                         {
                                                                                             "_id": 3,
                                                                                             "renamed_index": 3,
-                                                                                            "parentId": 2,
+                                                                                            "renamed_parentId": 2,
                                                                                             "categoryId": 2,
                                                                                             "children": [
                                                                                                 {
                                                                                                     "_id": 4,
                                                                                                     "renamed_index": 4,
-                                                                                                    "parentId": 3,
+                                                                                                    "renamed_parentId": 3,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 6,
                                                                                                             "renamed_index": 6,
-                                                                                                            "parentId": 4,
+                                                                                                            "renamed_parentId": 4,
                                                                                                             "categoryId": 2,
                                                                                                             "children": [
                                                                                                                 {
                                                                                                                     "_id": 7,
                                                                                                                     "renamed_index": 7,
-                                                                                                                    "parentId": 6,
+                                                                                                                    "renamed_parentId": 6,
                                                                                                                     "categoryId": 2
                                                                                                                 }
                                                                                                             ]
@@ -1142,21 +1142,21 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                         {
                                                                                             "_id": 4,
                                                                                             "renamed_index": 4,
-                                                                                            "parentId": null,
+                                                                                            "renamed_parentId": null,
                                                                                             "categoryId": 1,
                                                                                             "treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 5,
                                                                                             "renamed_index": 5,
-                                                                                            "parentId": 4,
+                                                                                            "renamed_parentId": 4,
                                                                                             "categoryId": 1,
                                                                                             "treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 6,
                                                                                             "renamed_index": 6,
-                                                                                            "parentId": 5,
+                                                                                            "renamed_parentId": 5,
                                                                                             "categoryId": 2,
                                                                                             "treeType1Id": 2
                                                                                         }
@@ -1165,7 +1165,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                 {
                                                                                     "_id": 5,
                                                                                     "renamed_index": 5,
-                                                                                    "parentId": 1,
+                                                                                    "renamed_parentId": 1,
                                                                                     "categoryId": 1,
                                                                                     "children": []
                                                                                 }
@@ -1183,24 +1183,24 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                 {
                                                                                     "_id": 5,
                                                                                     "renamed_index": 5,
-                                                                                    "parentId": 1,
+                                                                                    "renamed_parentId": 1,
                                                                                     "categoryId": 1,
                                                                                     "parent": {
                                                                                         "_id": 1,
                                                                                         "renamed_index": 1,
-                                                                                        "parentId": null,
+                                                                                        "renamed_parentId": null,
                                                                                         "categoryId": 1,
                                                                                         "children": [
                                                                                             {
                                                                                                 "_id": 2,
                                                                                                 "renamed_index": 2,
-                                                                                                "parentId": 1,
+                                                                                                "renamed_parentId": 1,
                                                                                                 "categoryId": 1,
                                                                                                 "children": [
                                                                                                     {
                                                                                                         "_id": 3,
                                                                                                         "renamed_index": 3,
-                                                                                                        "parentId": 2,
+                                                                                                        "renamed_parentId": 2,
                                                                                                         "categoryId": 2
                                                                                                     }
                                                                                                 ]
@@ -1208,7 +1208,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                             {
                                                                                                 "_id": 5,
                                                                                                 "renamed_index": 5,
-                                                                                                "parentId": 1,
+                                                                                                "renamed_parentId": 1,
                                                                                                 "categoryId": 1,
                                                                                                 "children": []
                                                                                             }
@@ -1218,29 +1218,29 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                 {
                                                                                     "_id": 7,
                                                                                     "renamed_index": 7,
-                                                                                    "parentId": 6,
+                                                                                    "renamed_parentId": 6,
                                                                                     "categoryId": 2,
                                                                                     "parent": {
                                                                                         "_id": 6,
                                                                                         "renamed_index": 6,
-                                                                                        "parentId": 4,
+                                                                                        "renamed_parentId": 4,
                                                                                         "categoryId": 2,
                                                                                         "parent": {
                                                                                             "_id": 4,
                                                                                             "renamed_index": 4,
-                                                                                            "parentId": 3,
+                                                                                            "renamed_parentId": 3,
                                                                                             "categoryId": 2,
                                                                                             "children": [
                                                                                                 {
                                                                                                     "_id": 6,
                                                                                                     "renamed_index": 6,
-                                                                                                    "parentId": 4,
+                                                                                                    "renamed_parentId": 4,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 7,
                                                                                                             "renamed_index": 7,
-                                                                                                            "parentId": 6,
+                                                                                                            "renamed_parentId": 6,
                                                                                                             "categoryId": 2
                                                                                                         }
                                                                                                     ]
@@ -1251,13 +1251,13 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                             {
                                                                                                 "_id": 7,
                                                                                                 "renamed_index": 7,
-                                                                                                "parentId": 6,
+                                                                                                "renamed_parentId": 6,
                                                                                                 "categoryId": 2,
                                                                                                 "children": [
                                                                                                     {
                                                                                                         "_id": 8,
                                                                                                         "renamed_index": 8,
-                                                                                                        "parentId": 7,
+                                                                                                        "renamed_parentId": 7,
                                                                                                         "categoryId": 2
                                                                                                     }
                                                                                                 ]
@@ -1277,24 +1277,24 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                         {
                                                                                             "_id": 5,
                                                                                             "renamed_index": 5,
-                                                                                            "parentId": 1,
+                                                                                            "renamed_parentId": 1,
                                                                                             "categoryId": 1,
                                                                                             "parent": {
                                                                                                 "_id": 1,
                                                                                                 "renamed_index": 1,
-                                                                                                "parentId": null,
+                                                                                                "renamed_parentId": null,
                                                                                                 "categoryId": 1,
                                                                                                 "children": [
                                                                                                     {
                                                                                                         "_id": 2,
                                                                                                         "renamed_index": 2,
-                                                                                                        "parentId": 1,
+                                                                                                        "renamed_parentId": 1,
                                                                                                         "categoryId": 1,
                                                                                                         "children": [
                                                                                                             {
                                                                                                                 "_id": 3,
                                                                                                                 "renamed_index": 3,
-                                                                                                                "parentId": 2,
+                                                                                                                "renamed_parentId": 2,
                                                                                                                 "categoryId": 2
                                                                                                             }
                                                                                                         ]
@@ -1302,7 +1302,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                                     {
                                                                                                         "_id": 5,
                                                                                                         "renamed_index": 5,
-                                                                                                        "parentId": 1,
+                                                                                                        "renamed_parentId": 1,
                                                                                                         "categoryId": 1,
                                                                                                         "children": []
                                                                                                     }
@@ -1311,21 +1311,21 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                                     {
                                                                                                         "_id": 1,
                                                                                                         "renamed_index": 1,
-                                                                                                        "parentId": null,
+                                                                                                        "renamed_parentId": null,
                                                                                                         "categoryId": 1,
                                                                                                         "treeType1Id": 1
                                                                                                     },
                                                                                                     {
                                                                                                         "_id": 2,
                                                                                                         "renamed_index": 2,
-                                                                                                        "parentId": 1,
+                                                                                                        "renamed_parentId": 1,
                                                                                                         "categoryId": 1,
                                                                                                         "treeType1Id": 1
                                                                                                     },
                                                                                                     {
                                                                                                         "_id": 3,
                                                                                                         "renamed_index": 3,
-                                                                                                        "parentId": 2,
+                                                                                                        "renamed_parentId": 2,
                                                                                                         "categoryId": 2,
                                                                                                         "treeType1Id": 1
                                                                                                     }
@@ -1335,29 +1335,29 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                         {
                                                                                             "_id": 7,
                                                                                             "renamed_index": 7,
-                                                                                            "parentId": 6,
+                                                                                            "renamed_parentId": 6,
                                                                                             "categoryId": 2,
                                                                                             "parent": {
                                                                                                 "_id": 6,
                                                                                                 "renamed_index": 6,
-                                                                                                "parentId": 4,
+                                                                                                "renamed_parentId": 4,
                                                                                                 "categoryId": 2,
                                                                                                 "parent": {
                                                                                                     "_id": 4,
                                                                                                     "renamed_index": 4,
-                                                                                                    "parentId": 3,
+                                                                                                    "renamed_parentId": 3,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 6,
                                                                                                             "renamed_index": 6,
-                                                                                                            "parentId": 4,
+                                                                                                            "renamed_parentId": 4,
                                                                                                             "categoryId": 2,
                                                                                                             "children": [
                                                                                                                 {
                                                                                                                     "_id": 7,
                                                                                                                     "renamed_index": 7,
-                                                                                                                    "parentId": 6,
+                                                                                                                    "renamed_parentId": 6,
                                                                                                                     "categoryId": 2
                                                                                                                 }
                                                                                                             ]
@@ -1369,13 +1369,13 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                                     {
                                                                                                         "_id": 7,
                                                                                                         "renamed_index": 7,
-                                                                                                        "parentId": 6,
+                                                                                                        "renamed_parentId": 6,
                                                                                                         "categoryId": 2,
                                                                                                         "children": [
                                                                                                             {
                                                                                                                 "_id": 8,
                                                                                                                 "renamed_index": 8,
-                                                                                                                "parentId": 7,
+                                                                                                                "renamed_parentId": 7,
                                                                                                                 "categoryId": 2
                                                                                                             }
                                                                                                         ]
@@ -1396,7 +1396,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                     	{
                     		"_id": 5,
                     		"renamed_index": 5,
-                    		"parentId": 1,
+                    		"renamed_parentId": 1,
                     		"categoryId": 1,
                     		"parent": {
                     			"_id": 1,
@@ -1405,13 +1405,13 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                     				{
                     					"_id": 2,
                     					"renamed_index": 2,
-                    					"parentId": 1,
+                    					"renamed_parentId": 1,
                     					"categoryId": 1,
                     					"children": [
                     						{
                     							"_id": 3,
                     							"renamed_index": 3,
-                    							"parentId": 2,
+                    							"renamed_parentId": 2,
                     							"categoryId": 2
                     						}
                     					]
@@ -1419,7 +1419,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                     				{
                     					"_id": 5,
                     					"renamed_index": 5,
-                    					"parentId": 1,
+                    					"renamed_parentId": 1,
                     					"categoryId": 1,
                     					"children": []
                     				}
@@ -1446,7 +1446,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                     	{
                     		"_id": 7,
                     		"renamed_index": 7,
-                    		"parentId": 6,
+                    		"renamed_parentId": 6,
                     		"categoryId": 2,
                     		"parent": {
                     			"_id": 6,
@@ -1458,13 +1458,13 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                     					{
                     						"_id": 6,
                     						"renamed_index": 6,
-                    						"parentId": 4,
+                    						"renamed_parentId": 4,
                     						"categoryId": 2,
                     						"children": [
                     							{
                     								"_id": 7,
                     								"renamed_index": 7,
-                    								"parentId": 6,
+                    								"renamed_parentId": 6,
                     								"categoryId": 2
                     							}
                     						]
@@ -1476,13 +1476,13 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                     				{
                     					"_id": 7,
                     					"renamed_index": 7,
-                    					"parentId": 6,
+                    					"renamed_parentId": 6,
                     					"categoryId": 2,
                     					"children": [
                     						{
                     							"_id": 8,
                     							"renamed_index": 8,
-                    							"parentId": 7,
+                    							"renamed_parentId": 7,
                     							"categoryId": 2
                     						}
                     					]
