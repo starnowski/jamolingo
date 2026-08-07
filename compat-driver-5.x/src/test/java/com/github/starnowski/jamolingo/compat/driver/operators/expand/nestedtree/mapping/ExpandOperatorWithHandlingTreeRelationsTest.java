@@ -216,7 +216,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=category",
             """
-                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                            [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                              "category": { "_id": 1, "name": "Category 1" }
                             }]
                             """,
@@ -226,10 +226,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=category,children",
             """
-                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                      "category": { "_id": 1, "name": "Category 1" },
-                                     "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                      { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 }
+                                     "children": [{ "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1 },
+                                      { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1 }
                                      ]
                                     }]
                                     """,
@@ -239,13 +239,13 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=category,children,treeType2s",
             """
-                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                            [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                              "category": { "_id": 1, "name": "Category 1" },
-                                             "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                              { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 }],
-                                             "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
-                                             { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
-                                             { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
+                                             "children": [{ "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1 },
+                                              { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1 }],
+                                             "treeType2s": [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
+                                             { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
+                                             { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
                                              ]
                                             }]
                                             """,
@@ -256,13 +256,13 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=children($levels=5)",
             """
-                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                             "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                             { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
-                                             { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                             { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-                                             { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-                                             { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 }
+                                            [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
+                                             "children": [{ "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1 },
+                                             { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1 },
+                                             { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2 },
+                                             { "_id": 4, "renamed_index": 4, "parentId": 3, "categoryId": 2 },
+                                             { "_id": 6, "renamed_index": 6, "parentId": 4, "categoryId": 2 },
+                                             { "_id": 7, "renamed_index": 7, "parentId": 6, "categoryId": 2 }
                                              ]
                                             }]
                                             """,
@@ -273,13 +273,13 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=children($levels=max)",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                                     "children": [{ "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                                     { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
-                                                     { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                     { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-                                                     { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-                                                     { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 }
+                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
+                                                     "children": [{ "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1 },
+                                                     { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1 },
+                                                     { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2 },
+                                                     { "_id": 4, "renamed_index": 4, "parentId": 3, "categoryId": 2 },
+                                                     { "_id": 6, "renamed_index": 6, "parentId": 4, "categoryId": 2 },
+                                                     { "_id": 7, "renamed_index": 7, "parentId": 6, "categoryId": 2 }
                                                      ]
                                                     }]
                                                     """,
@@ -296,23 +296,23 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1, 2),
             "$expand=children($levels=max)",
             """
-                                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                            [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                              "children": [
-                                                             { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                                             { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
-                                                             { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                             { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-                                                             { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-                                                             { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 }
+                                                             { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1 },
+                                                             { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1 },
+                                                             { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2 },
+                                                             { "_id": 4, "renamed_index": 4, "parentId": 3, "categoryId": 2 },
+                                                             { "_id": 6, "renamed_index": 6, "parentId": 4, "categoryId": 2 },
+                                                             { "_id": 7, "renamed_index": 7, "parentId": 6, "categoryId": 2 }
                                                              ]
                                                             },
-                                                            { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                            { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1,
                                                              "children": [
-                                                             { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                             { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-                                                             { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-                                                             { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 },
-                                                             { "_id": 8, "index": 8, "parentId": 7, "categoryId": 2 }
+                                                             { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2 },
+                                                             { "_id": 4, "renamed_index": 4, "parentId": 3, "categoryId": 2 },
+                                                             { "_id": 6, "renamed_index": 6, "parentId": 4, "categoryId": 2 },
+                                                             { "_id": 7, "renamed_index": 7, "parentId": 6, "categoryId": 2 },
+                                                             { "_id": 8, "renamed_index": 8, "parentId": 7, "categoryId": 2 }
                                                              ]
                                                             }
                                                             ]
@@ -325,9 +325,9 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=treeType2s($levels=5;$filter=index in (1, 2))",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
-                                                     "treeType2s": [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
-                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 }
+                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
+                                                     "treeType2s": [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
@@ -343,11 +343,11 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (2, 3, 4))",
             """
-                                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                            [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                              "children": [
-                                                             { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-                                                             { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                             { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 }
+                                                             { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1 },
+                                                             { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2 },
+                                                             { "_id": 4, "renamed_index": 4, "parentId": 3, "categoryId": 2 }
                                                              ]
                                                             }]
                                                             """,
@@ -361,9 +361,9 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (2, 4))",
             """
-                                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                                      "children": [
-                                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 }
+                                                                     { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1 }
                                                                      ]
                                                                     }]
                                                                     """,
@@ -377,7 +377,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=children($levels=3;$filter=index in (3, 4))",
             """
-                                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                                      "children": [
                                                                      ]
                                                                     }]
@@ -392,43 +392,43 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                             [
                                                                 {
                                                                     "_id": 1,
-                                                                    "index": 1,
+                                                                    "renamed_index": 1,
                                                                     "parentId": null,
                                                                     "categoryId": 1,
                                                                     "children": [
                                                                         {
                                                                             "_id": 2,
-                                                                            "index": 2,
+                                                                            "renamed_index": 2,
                                                                             "parentId": 1,
                                                                             "categoryId": 1
                                                                         },
                                                                         {
                                                                             "_id": 5,
-                                                                            "index": 5,
+                                                                            "renamed_index": 5,
                                                                             "parentId": 1,
                                                                             "categoryId": 1
                                                                         },
                                                                         {
                                                                             "_id": 3,
-                                                                            "index": 3,
+                                                                            "renamed_index": 3,
                                                                             "parentId": 2,
                                                                             "categoryId": 2
                                                                         },
                                                                         {
                                                                             "_id": 4,
-                                                                            "index": 4,
+                                                                            "renamed_index": 4,
                                                                             "parentId": 3,
                                                                             "categoryId": 2
                                                                         },
                                                                         {
                                                                             "_id": 6,
-                                                                            "index": 6,
+                                                                            "renamed_index": 6,
                                                                             "parentId": 4,
                                                                             "categoryId": 2
                                                                         },
                                                                         {
                                                                             "_id": 7,
-                                                                            "index": 7,
+                                                                            "renamed_index": 7,
                                                                             "parentId": 6,
                                                                             "categoryId": 2
                                                                         }
@@ -446,43 +446,43 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     [
                     	{
                     		"_id": 1,
-                    		"index": 1,
+                    		"renamed_index": 1,
                     		"parentId": null,
                     		"categoryId": 1,
                     		"children": [
                     			{
                     				"_id": 5,
-                    				"index": 5,
+                    				"renamed_index": 5,
                     				"parentId": 1,
                     				"categoryId": 1
                     			},
                     			{
                     				"_id": 2,
-                    				"index": 2,
+                    				"renamed_index": 2,
                     				"parentId": 1,
                     				"categoryId": 1
                     			},
                     			{
                     				"_id": 3,
-                    				"index": 3,
+                    				"renamed_index": 3,
                     				"parentId": 2,
                     				"categoryId": 2
                     			},
                     			{
                     				"_id": 4,
-                    				"index": 4,
+                    				"renamed_index": 4,
                     				"parentId": 3,
                     				"categoryId": 2
                     			},
                     			{
                     				"_id": 6,
-                    				"index": 6,
+                    				"renamed_index": 6,
                     				"parentId": 4,
                     				"categoryId": 2
                     			},
                     			{
                     				"_id": 7,
-                    				"index": 7,
+                    				"renamed_index": 7,
                     				"parentId": 6,
                     				"categoryId": 2
                     			}
@@ -496,11 +496,11 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=treeType2s($orderby=index asc)",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [
-                                                     { "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
-                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
-                                                     { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
+                                                     { "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
@@ -511,11 +511,11 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=treeType2s($orderby=index desc)",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [
-                                                     { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 },
-                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
-                                                     { "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 }
+                                                     { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 },
+                                                     { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1, "treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
@@ -528,91 +528,91 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             [
                             		{
                             			"_id": 10,
-                            			"index": 10,
+                            			"renamed_index": 10,
                             			"parentId": null,
                             			"categoryId": 1,
                             			"children": [
                             				{
                             					"_id": 11,
-                            					"index": 11,
+                            					"renamed_index": 11,
                             					"parentId": 10,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 20,
-                            					"index": 20,
+                            					"renamed_index": 20,
                             					"parentId": 13,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 23,
-                            					"index": 23,
+                            					"renamed_index": 23,
                             					"parentId": 14,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 19,
-                            					"index": 19,
+                            					"renamed_index": 19,
                             					"parentId": 12,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 12,
-                            					"index": 12,
+                            					"renamed_index": 12,
                             					"parentId": 10,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 16,
-                            					"index": 16,
+                            					"renamed_index": 16,
                             					"parentId": 11,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 24,
-                            					"index": 24,
+                            					"renamed_index": 24,
                             					"parentId": 14,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 18,
-                            					"index": 18,
+                            					"renamed_index": 18,
                             					"parentId": 12,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 13,
-                            					"index": 13,
+                            					"renamed_index": 13,
                             					"parentId": 10,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 21,
-                            					"index": 21,
+                            					"renamed_index": 21,
                             					"parentId": 14,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 17,
-                            					"index": 17,
+                            					"renamed_index": 17,
                             					"parentId": 12,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 15,
-                            					"index": 15,
+                            					"renamed_index": 15,
                             					"parentId": 11,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 22,
-                            					"index": 22,
+                            					"renamed_index": 22,
                             					"parentId": 14,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 14,
-                            					"index": 14,
+                            					"renamed_index": 14,
                             					"parentId": 11,
                             					"categoryId": 1
                             				}
@@ -629,55 +629,55 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             [
                             		{
                             			"_id": 10,
-                            			"index": 10,
+                            			"renamed_index": 10,
                             			"parentId": null,
                             			"categoryId": 1,
                             			"children": [
                             				{
                             					"_id": 11,
-                            					"index": 11,
+                            					"renamed_index": 11,
                             					"parentId": 10,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 12,
-                            					"index": 12,
+                            					"renamed_index": 12,
                             					"parentId": 10,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 14,
-                            					"index": 14,
+                            					"renamed_index": 14,
                             					"parentId": 11,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 15,
-                            					"index": 15,
+                            					"renamed_index": 15,
                             					"parentId": 11,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 17,
-                            					"index": 17,
+                            					"renamed_index": 17,
                             					"parentId": 12,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 18,
-                            					"index": 18,
+                            					"renamed_index": 18,
                             					"parentId": 12,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 21,
-                            					"index": 21,
+                            					"renamed_index": 21,
                             					"parentId": 14,
                             					"categoryId": 1
                             				},
                             				{
                             					"_id": 22,
-                            					"index": 22,
+                            					"renamed_index": 22,
                             					"parentId": 14,
                             					"categoryId": 1
                             				}
@@ -694,37 +694,37 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                     [
                                             {
                                                 "_id": 10,
-                                                "index": 10,
+                                                "renamed_index": 10,
                                                 "parentId": null,
                                                 "categoryId": 1,
                                                 "children": [
                                                     {
                                                         "_id": 13,
-                                                        "index": 13,
+                                                        "renamed_index": 13,
                                                         "parentId": 10,
                                                         "categoryId": 1
                                                     },
                                                     {
                                                         "_id": 12,
-                                                        "index": 12,
+                                                        "renamed_index": 12,
                                                         "parentId": 10,
                                                         "categoryId": 1
                                                     },
                                                     {
                                                         "_id": 20,
-                                                        "index": 20,
+                                                        "renamed_index": 20,
                                                         "parentId": 13,
                                                         "categoryId": 1
                                                     },
                                                     {
                                                         "_id": 19,
-                                                        "index": 19,
+                                                        "renamed_index": 19,
                                                         "parentId": 12,
                                                         "categoryId": 1
                                                     },
                                                     {
                                                         "_id": 18,
-                                                        "index": 18,
+                                                        "renamed_index": 18,
                                                         "parentId": 12,
                                                         "categoryId": 1
                                                     }
@@ -741,30 +741,30 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                     [
                                             {
                                                 "_id": 10,
-                                                "index": 10,
+                                                "renamed_index": 10,
                                                 "parentId": null,
                                                 "categoryId": 1,
                                                 "children": [
                                                     {
                                                         "_id": 12,
-                                                        "index": 12,
+                                                        "renamed_index": 12,
                                                         "parentId": 10,
                                                         "categoryId": 1
                                                     },
                                                     {
                                                         "_id": 13,
-                                                        "index": 13,
+                                                        "renamed_index": 13,
                                                         "parentId": 10,
                                                         "categoryId": 1
                                                     },{
                                                         "_id": 18,
-                                                        "index": 18,
+                                                        "renamed_index": 18,
                                                         "parentId": 12,
                                                         "categoryId": 1
                                                     },
                                                     {
                                                         "_id": 19,
-                                                        "index": 19,
+                                                        "renamed_index": 19,
                                                         "parentId": 12,
                                                         "categoryId": 1
                                                     }
@@ -781,20 +781,20 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                             [
                                                     {
                                                         "_id": 10,
-                                                        "index": 10,
+                                                        "renamed_index": 10,
                                                         "parentId": null,
                                                         "categoryId": 1,
                                                         "children": [
                                                             {
-                                                                "index": 12
+                                                                "renamed_index": 12
                                                             },
                                                             {
-                                                                "index": 13
+                                                                "renamed_index": 13
                                                             },{
-                                                                "index": 18
+                                                                "renamed_index": 18
                                                             },
                                                             {
-                                                                "index": 19
+                                                                "renamed_index": 19
                                                             }
                                                         ]
                                                     }
@@ -807,10 +807,10 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=treeType2s($skip=1;$orderby=index asc)",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [
-                                                     { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
-                                                     { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
+                                                     { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1, "treeType1Id": 1 },
+                                                     { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
@@ -821,9 +821,9 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=treeType2s($skip=1;$top=1;$orderby=index asc;$select=index)",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                      "treeType2s": [
-                                                     { "index": 2}
+                                                     { "renamed_index": 2}
                                                      ]
                                                     }]
                                                     """,
@@ -837,21 +837,21 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
         //            Set.of(1),
         //            "$expand=children($expand=treeType2s)",
         //            """
-        //                                            [{ "_id": 1, "index": 1, "parentId": null,
+        //                                            [{ "_id": 1, "renamed_index": 1, "parentId": null,
         // "categoryId": 1,
         //                                             "children": [
-        //                                                { "_id": 2, "index": 2, "parentId": 1,
+        //                                                { "_id": 2, "renamed_index": 2, "parentId": 1,
         // "categoryId": 1,
         //                                                    "treeType2s": [
         //
-        // {"_id":4,"index":4,"categoryId":1},
+        // {"_id":4,"renamed_index":4,"categoryId":1},
         //
-        // {"_id":5,"index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
+        // {"_id":5,"renamed_index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
         //
-        // {"_id":6,"index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
+        // {"_id":6,"renamed_index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
         //                                                    ]
         //                                                },
-        //                                                { "_id": 5, "index": 5, "parentId": 1,
+        //                                                { "_id": 5, "renamed_index": 5, "parentId": 1,
         // "categoryId": 1,
         //                                                    "treeType2s": []
         //                                                 }
@@ -866,16 +866,16 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=children($expand=treeType2s)",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                      "children": [
-                                                        { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                        { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1,
                                                             "treeType2s": [
-                                                                {"_id":4,"index":4,"categoryId":1},
-                                                                {"_id":5,"index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
-                                                                {"_id":6,"index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
+                                                                {"_id":4,"renamed_index":4,"categoryId":1},
+                                                                {"_id":5,"renamed_index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
+                                                                {"_id":6,"renamed_index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
                                                             ]
                                                         },
-                                                        { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1
+                                                        { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1
                                                          }
                                                      ]
                                                     }]
@@ -886,19 +886,19 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(2, 5, 3, 4, 6, 7),
             "$expand=treeType2s",
             """
-                                                            [ { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                            [ { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1,
                                                                     "treeType2s": [
-                                                                        {"_id":4,"index":4,"categoryId":1},
-                                                                        {"_id":5,"index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
-                                                                        {"_id":6,"index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
+                                                                        {"_id":4,"renamed_index":4,"categoryId":1},
+                                                                        {"_id":5,"renamed_index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
+                                                                        {"_id":6,"renamed_index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
                                                                     ]
                                                                 },
-                                                                    { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1
+                                                                    { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1
                                                                      },
-                                                                 { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                                 { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-                                                                 { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-                                                                 { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 }
+                                                                 { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2 },
+                                                                 { "_id": 4, "renamed_index": 4, "parentId": 3, "categoryId": 2 },
+                                                                 { "_id": 6, "renamed_index": 6, "parentId": 4, "categoryId": 2 },
+                                                                 { "_id": 7, "renamed_index": 7, "parentId": 6, "categoryId": 2 }
                                                              ]
                                                             """,
             JSONCompareMode.LENIENT),
@@ -909,21 +909,21 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=children($levels=max;$expand=treeType2s)",
             """
-                                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                            [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                              "children": [
-                                                                { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                                { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1,
                                                                     "treeType2s": [
-                                                                        {"_id":4,"index":4,"categoryId":1},
-                                                                        {"_id":5,"index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
-                                                                        {"_id":6,"index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
+                                                                        {"_id":4,"renamed_index":4,"categoryId":1},
+                                                                        {"_id":5,"renamed_index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
+                                                                        {"_id":6,"renamed_index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
                                                                     ]
                                                                 },
-                                                                    { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1
+                                                                    { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1
                                                                      },
-                                                                 { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-                                                                 { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-                                                                 { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-                                                                 { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 }
+                                                                 { "_id": 3, "renamed_index": 3, "parentId": 2, "categoryId": 2 },
+                                                                 { "_id": 4, "renamed_index": 4, "parentId": 3, "categoryId": 2 },
+                                                                 { "_id": 6, "renamed_index": 6, "parentId": 4, "categoryId": 2 },
+                                                                 { "_id": 7, "renamed_index": 7, "parentId": 6, "categoryId": 2 }
                                                              ]
                                                             }]
                                                             """,
@@ -937,27 +937,27 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             [
                             		{
                             			"_id": 4,
-                            			"index": 4,
+                            			"renamed_index": 4,
                             			"parentId": null,
                             			"categoryId": 1,
                             			"treeType1Id": 2,
                             			"treeType1": {
                             				"_id": 2,
-                            				"index": 2,
+                            				"renamed_index": 2,
                             				"treeType2s": [
                             					{
                             						"_id": 4,
-                            						"index": 4,
+                            						"renamed_index": 4,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 5,
-                            						"index": 5,
+                            						"renamed_index": 5,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 6,
-                            						"index": 6,
+                            						"renamed_index": 6,
                             						"treeType1Id": 2
                             					}
                             				]
@@ -965,27 +965,27 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             		},
                             		{
                             			"_id": 5,
-                            			"index": 5,
+                            			"renamed_index": 5,
                             			"parentId": 4,
                             			"categoryId": 1,
                             			"treeType1Id": 2,
                             			"treeType1": {
                             				"_id": 2,
-                            				"index": 2,
+                            				"renamed_index": 2,
                             				"treeType2s": [
                             					{
                             						"_id": 4,
-                            						"index": 4,
+                            						"renamed_index": 4,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 5,
-                            						"index": 5,
+                            						"renamed_index": 5,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 6,
-                            						"index": 6,
+                            						"renamed_index": 6,
                             						"treeType1Id": 2
                             					}
                             				]
@@ -993,27 +993,27 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                             		},
                             		{
                             			"_id": 6,
-                            			"index": 6,
+                            			"renamed_index": 6,
                             			"parentId": 5,
                             			"categoryId": 2,
                             			"treeType1Id": 2,
                             			"treeType1": {
                             				"_id": 2,
-                            				"index": 2,
+                            				"renamed_index": 2,
                             				"treeType2s": [
                             					{
                             						"_id": 4,
-                            						"index": 4,
+                            						"renamed_index": 4,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 5,
-                            						"index": 5,
+                            						"renamed_index": 5,
                             						"treeType1Id": 2
                             					},
                             					{
                             						"_id": 6,
-                            						"index": 6,
+                            						"renamed_index": 6,
                             						"treeType1Id": 2
                             					}
                             				]
@@ -1028,33 +1028,33 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Set.of(1),
             "$expand=children($expand=treeType2s($expand=treeType1($expand=treeType2s($select=_id,index,treeType1Id);$select=_id,index)))",
             """
-                                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                    [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                      "children": [
-                                                        { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                        { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1,
                                                             "treeType2s": [
                                                                 {
                                                                     "_id": 4,
-                                                                    "index": 4,
+                                                                    "renamed_index": 4,
                                                                     "parentId": null,
                                                                     "categoryId": 1,
                                                                     "treeType1Id": 2,
                                                                     "treeType1": {
                                                                         "_id": 2,
-                                                                        "index": 2,
+                                                                        "renamed_index": 2,
                                                                         "treeType2s": [
                                                                             {
                                                                                 "_id": 4,
-                                                                                "index": 4,
+                                                                                "renamed_index": 4,
                                                                                 "treeType1Id": 2
                                                                             },
                                                                             {
                                                                                 "_id": 5,
-                                                                                "index": 5,
+                                                                                "renamed_index": 5,
                                                                                 "treeType1Id": 2
                                                                             },
                                                                             {
                                                                                 "_id": 6,
-                                                                                "index": 6,
+                                                                                "renamed_index": 6,
                                                                                 "treeType1Id": 2
                                                                             }
                                                                         ]
@@ -1062,27 +1062,27 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                 },
                                                                 {
                                                                     "_id": 5,
-                                                                    "index": 5,
+                                                                    "renamed_index": 5,
                                                                     "parentId": 4,
                                                                     "categoryId": 1,
                                                                     "treeType1Id": 2,
                                                                     "treeType1": {
                                                                         "_id": 2,
-                                                                        "index": 2,
+                                                                        "renamed_index": 2,
                                                                         "treeType2s": [
                                                                             {
                                                                                 "_id": 4,
-                                                                                "index": 4,
+                                                                                "renamed_index": 4,
                                                                                 "treeType1Id": 2
                                                                             },
                                                                             {
                                                                                 "_id": 5,
-                                                                                "index": 5,
+                                                                                "renamed_index": 5,
                                                                                 "treeType1Id": 2
                                                                             },
                                                                             {
                                                                                 "_id": 6,
-                                                                                "index": 6,
+                                                                                "renamed_index": 6,
                                                                                 "treeType1Id": 2
                                                                             }
                                                                         ]
@@ -1090,27 +1090,27 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                 },
                                                                 {
                                                                     "_id": 6,
-                                                                    "index": 6,
+                                                                    "renamed_index": 6,
                                                                     "parentId": 5,
                                                                     "categoryId": 2,
                                                                     "treeType1Id": 2,
                                                                     "treeType1": {
                                                                         "_id": 2,
-                                                                        "index": 2,
+                                                                        "renamed_index": 2,
                                                                         "treeType2s": [
                                                                             {
                                                                                 "_id": 4,
-                                                                                "index": 4,
+                                                                                "renamed_index": 4,
                                                                                 "treeType1Id": 2
                                                                             },
                                                                             {
                                                                                 "_id": 5,
-                                                                                "index": 5,
+                                                                                "renamed_index": 5,
                                                                                 "treeType1Id": 2
                                                                             },
                                                                             {
                                                                                 "_id": 6,
-                                                                                "index": 6,
+                                                                                "renamed_index": 6,
                                                                                 "treeType1Id": 2
                                                                             }
                                                                         ]
@@ -1118,7 +1118,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                 }
                                                             ]
                                                         },
-                                                        { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1,
+                                                        { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1,
                                                             "treeType2s": []
                                                          }
                                                      ]
@@ -1135,47 +1135,47 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                     [
                                                                         {
                                                                         "_id": 1,
-                                                                        "index": 1,
+                                                                        "renamed_index": 1,
                                                                         "parentId": null,
                                                                         "categoryId": 1,
                                                                         "children": [
                                                                             {
                                                                                 "_id": 7,
-                                                                                "index": 7,
+                                                                                "renamed_index": 7,
                                                                                 "parentId": 6,
                                                                                 "categoryId": 2,
                                                                                 "treeType2s": []
                                                                             },
                                                                             {
                                                                                 "_id": 3,
-                                                                                "index": 3,
+                                                                                "renamed_index": 3,
                                                                                 "parentId": 2,
                                                                                 "categoryId": 2,
                                                                                 "treeType2s": []
                                                                             },
                                                                             {
                                                                                 "_id": 2,
-                                                                                "index": 2,
+                                                                                "renamed_index": 2,
                                                                                 "parentId": 1,
                                                                                 "categoryId": 1,
                                                                                 "treeType2s": [
                                                                                     {
                                                                                         "_id": 4,
-                                                                                        "index": 4,
+                                                                                        "renamed_index": 4,
                                                                                         "parentId": null,
                                                                                         "categoryId": 1,
                                                                                         "treeType1Id": 2,
                                                                                         "children": [
                                                                                             {
                                                                                                 "_id": 5,
-                                                                                                "index": 5,
+                                                                                                "renamed_index": 5,
                                                                                                 "parentId": 4,
                                                                                                 "categoryId": 1,
                                                                                                 "treeType1Id": 2
                                                                                             },
                                                                                             {
                                                                                                 "_id": 6,
-                                                                                                "index": 6,
+                                                                                                "renamed_index": 6,
                                                                                                 "parentId": 5,
                                                                                                 "categoryId": 2,
                                                                                                 "treeType1Id": 2
@@ -1184,14 +1184,14 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                     },
                                                                                     {
                                                                                         "_id": 5,
-                                                                                        "index": 5,
+                                                                                        "renamed_index": 5,
                                                                                         "parentId": 4,
                                                                                         "categoryId": 1,
                                                                                         "treeType1Id": 2,
                                                                                         "children": [
                                                                                             {
                                                                                                 "_id": 6,
-                                                                                                "index": 6,
+                                                                                                "renamed_index": 6,
                                                                                                 "parentId": 5,
                                                                                                 "categoryId": 2,
                                                                                                 "treeType1Id": 2
@@ -1200,7 +1200,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                     },
                                                                                     {
                                                                                         "_id": 6,
-                                                                                        "index": 6,
+                                                                                        "renamed_index": 6,
                                                                                         "parentId": 5,
                                                                                         "categoryId": 2,
                                                                                         "treeType1Id": 2,
@@ -1210,21 +1210,21 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                             },
                                                                             {
                                                                                 "_id": 5,
-                                                                                "index": 5,
+                                                                                "renamed_index": 5,
                                                                                 "parentId": 1,
                                                                                 "categoryId": 1,
                                                                                 "treeType2s": []
                                                                             },
                                                                             {
                                                                                 "_id": 4,
-                                                                                "index": 4,
+                                                                                "renamed_index": 4,
                                                                                 "parentId": 3,
                                                                                 "categoryId": 2,
                                                                                 "treeType2s": []
                                                                             },
                                                                             {
                                                                                 "_id": 6,
-                                                                                "index": 6,
+                                                                                "renamed_index": 6,
                                                                                 "parentId": 4,
                                                                                 "categoryId": 2,
                                                                                 "treeType2s": []
@@ -1242,31 +1242,31 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                     [
                                                                                         {
                                                                                             "_id": 5,
-                                                                                            "index": 5,
+                                                                                            "renamed_index": 5,
                                                                                             "parentId": 1,
                                                                                             "categoryId": 1,
                                                                                             "parent": [
                                                                                                 {
                                                                                                     "_id": 1,
-                                                                                                    "index": 1,
+                                                                                                    "renamed_index": 1,
                                                                                                     "parentId": null,
                                                                                                     "categoryId": 1,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 3,
-                                                                                                            "index": 3,
+                                                                                                            "renamed_index": 3,
                                                                                                             "parentId": 2,
                                                                                                             "categoryId": 2
                                                                                                         },
                                                                                                         {
                                                                                                             "_id": 2,
-                                                                                                            "index": 2,
+                                                                                                            "renamed_index": 2,
                                                                                                             "parentId": 1,
                                                                                                             "categoryId": 1
                                                                                                         },
                                                                                                         {
                                                                                                             "_id": 5,
-                                                                                                            "index": 5,
+                                                                                                            "renamed_index": 5,
                                                                                                             "parentId": 1,
                                                                                                             "categoryId": 1
                                                                                                         }
@@ -1276,25 +1276,25 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                         },
                                                                                         {
                                                                                             "_id": 7,
-                                                                                            "index": 7,
+                                                                                            "renamed_index": 7,
                                                                                             "parentId": 6,
                                                                                             "categoryId": 2,
                                                                                             "parent": [
                                                                                                 {
                                                                                                     "_id": 6,
-                                                                                                    "index": 6,
+                                                                                                    "renamed_index": 6,
                                                                                                     "parentId": 4,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 7,
-                                                                                                            "index": 7,
+                                                                                                            "renamed_index": 7,
                                                                                                             "parentId": 6,
                                                                                                             "categoryId": 2
                                                                                                         },
                                                                                                         {
                                                                                                             "_id": 8,
-                                                                                                            "index": 8,
+                                                                                                            "renamed_index": 8,
                                                                                                             "parentId": 7,
                                                                                                             "categoryId": 2
                                                                                                         }
@@ -1302,19 +1302,19 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                                 },
                                                                                                 {
                                                                                                     "_id": 4,
-                                                                                                    "index": 4,
+                                                                                                    "renamed_index": 4,
                                                                                                     "parentId": 3,
                                                                                                     "categoryId": 2,
                                                                                                     "children": [
                                                                                                         {
                                                                                                             "_id": 6,
-                                                                                                            "index": 6,
+                                                                                                            "renamed_index": 6,
                                                                                                             "parentId": 4,
                                                                                                             "categoryId": 2
                                                                                                         },
                                                                                                         {
                                                                                                             "_id": 7,
-                                                                                                            "index": 7,
+                                                                                                            "renamed_index": 7,
                                                                                                             "parentId": 6,
                                                                                                             "categoryId": 2
                                                                                                         }
@@ -1333,31 +1333,31 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                             [
                                                                                                 {
                                                                                                     "_id": 5,
-                                                                                                    "index": 5,
+                                                                                                    "renamed_index": 5,
                                                                                                     "parentId": 1,
                                                                                                     "categoryId": 1,
                                                                                                     "parent": [
                                                                                                         {
                                                                                                             "_id": 1,
-                                                                                                            "index": 1,
+                                                                                                            "renamed_index": 1,
                                                                                                             "parentId": null,
                                                                                                             "categoryId": 1,
                                                                                                             "children": [
                                                                                                                 {
                                                                                                                     "_id": 3,
-                                                                                                                    "index": 3,
+                                                                                                                    "renamed_index": 3,
                                                                                                                     "parentId": 2,
                                                                                                                     "categoryId": 2
                                                                                                                 },
                                                                                                                 {
                                                                                                                     "_id": 5,
-                                                                                                                    "index": 5,
+                                                                                                                    "renamed_index": 5,
                                                                                                                     "parentId": 1,
                                                                                                                     "categoryId": 1
                                                                                                                 },
                                                                                                                 {
                                                                                                                     "_id": 2,
-                                                                                                                    "index": 2,
+                                                                                                                    "renamed_index": 2,
                                                                                                                     "parentId": 1,
                                                                                                                     "categoryId": 1
                                                                                                                 }
@@ -1365,21 +1365,21 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                                             "treeType2s": [
                                                                                                                 {
                                                                                                                     "_id": 1,
-                                                                                                                    "index": 1,
+                                                                                                                    "renamed_index": 1,
                                                                                                                     "parentId": null,
                                                                                                                     "categoryId": 1,
                                                                                                                     "treeType1Id": 1
                                                                                                                 },
                                                                                                                 {
                                                                                                                     "_id": 2,
-                                                                                                                    "index": 2,
+                                                                                                                    "renamed_index": 2,
                                                                                                                     "parentId": 1,
                                                                                                                     "categoryId": 1,
                                                                                                                     "treeType1Id": 1
                                                                                                                 },
                                                                                                                 {
                                                                                                                     "_id": 3,
-                                                                                                                    "index": 3,
+                                                                                                                    "renamed_index": 3,
                                                                                                                     "parentId": 2,
                                                                                                                     "categoryId": 2,
                                                                                                                     "treeType1Id": 1
@@ -1390,25 +1390,25 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                                 },
                                                                                                 {
                                                                                                     "_id": 7,
-                                                                                                    "index": 7,
+                                                                                                    "renamed_index": 7,
                                                                                                     "parentId": 6,
                                                                                                     "categoryId": 2,
                                                                                                     "parent": [
                                                                                                         {
                                                                                                             "_id": 6,
-                                                                                                            "index": 6,
+                                                                                                            "renamed_index": 6,
                                                                                                             "parentId": 4,
                                                                                                             "categoryId": 2,
                                                                                                             "children": [
                                                                                                                 {
                                                                                                                     "_id": 8,
-                                                                                                                    "index": 8,
+                                                                                                                    "renamed_index": 8,
                                                                                                                     "parentId": 7,
                                                                                                                     "categoryId": 2
                                                                                                                 },
                                                                                                                 {
                                                                                                                     "_id": 7,
-                                                                                                                    "index": 7,
+                                                                                                                    "renamed_index": 7,
                                                                                                                     "parentId": 6,
                                                                                                                     "categoryId": 2
                                                                                                                 }
@@ -1416,19 +1416,19 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                                                         },
                                                                                                         {
                                                                                                             "_id": 4,
-                                                                                                            "index": 4,
+                                                                                                            "renamed_index": 4,
                                                                                                             "parentId": 3,
                                                                                                             "categoryId": 2,
                                                                                                             "children": [
                                                                                                                 {
                                                                                                                     "_id": 6,
-                                                                                                                    "index": 6,
+                                                                                                                    "renamed_index": 6,
                                                                                                                     "parentId": 4,
                                                                                                                     "categoryId": 2
                                                                                                                 },
                                                                                                                 {
                                                                                                                     "_id": 7,
-                                                                                                                    "index": 7,
+                                                                                                                    "renamed_index": 7,
                                                                                                                     "parentId": 6,
                                                                                                                     "categoryId": 2
                                                                                                                 }
@@ -1447,41 +1447,41 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     [
                     	{
                     		"_id": 7,
-                    		"index": 7,
+                    		"renamed_index": 7,
                     		"parentId": 6,
                     		"categoryId": 2,
                     		"parent": [
                     			{
-                    				"index": 4,
+                    				"renamed_index": 4,
                     				"_id": 4,
                     				"children": [
                     					{
                     						"_id": 6,
-                    						"index": 6,
+                    						"renamed_index": 6,
                     						"parentId": 4,
                     						"categoryId": 2
                     					},
                     					{
                     						"_id": 7,
-                    						"index": 7,
+                    						"renamed_index": 7,
                     						"parentId": 6,
                     						"categoryId": 2
                     					}
                     				]
                     			},
                     			{
-                    				"index": 6,
+                    				"renamed_index": 6,
                     				"_id": 6,
                     				"children": [
                     					{
                     						"_id": 7,
-                    						"index": 7,
+                    						"renamed_index": 7,
                     						"parentId": 6,
                     						"categoryId": 2
                     					},
                     					{
                     						"_id": 8,
-                    						"index": 8,
+                    						"renamed_index": 8,
                     						"parentId": 7,
                     						"categoryId": 2
                     					}
@@ -1491,29 +1491,29 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     	},
                     	{
                     		"_id": 5,
-                    		"index": 5,
+                    		"renamed_index": 5,
                     		"parentId": 1,
                     		"categoryId": 1,
                     		"parent": [
                     			{
-                    				"index": 1,
+                    				"renamed_index": 1,
                     				"_id": 1,
                     				"children": [
                     					{
                     						"_id": 5,
-                    						"index": 5,
+                    						"renamed_index": 5,
                     						"parentId": 1,
                     						"categoryId": 1
                     					},
                     					{
                     						"_id": 3,
-                    						"index": 3,
+                    						"renamed_index": 3,
                     						"parentId": 2,
                     						"categoryId": 2
                     					},
                     					{
                     						"_id": 2,
-                    						"index": 2,
+                    						"renamed_index": 2,
                     						"parentId": 1,
                     						"categoryId": 1
                     					}
@@ -1521,17 +1521,17 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     				"treeType2s": [
                     					{
                     						"_id": 1,
-                    						"index": 1,
+                    						"renamed_index": 1,
                     						"treeType1Id": 1
                     					},
                     					{
                     						"_id": 2,
-                    						"index": 2,
+                    						"renamed_index": 2,
                     						"treeType1Id": 1
                     					},
                     					{
                     						"_id": 3,
-                    						"index": 3,
+                    						"renamed_index": 3,
                     						"treeType1Id": 1
                     					}
                     				]
@@ -1549,29 +1549,29 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     [
                     	{
                     		"_id": 5,
-                    		"index": 5,
+                    		"renamed_index": 5,
                     		"parentId": 1,
                     		"categoryId": 1,
                     		"parent": [
                     			{
-                    				"index": 1,
+                    				"renamed_index": 1,
                     				"_id": 1,
                     				"children": [
                     					{
                     						"_id": 5,
-                    						"index": 5,
+                    						"renamed_index": 5,
                     						"parentId": 1,
                     						"categoryId": 1
                     					},
                     					{
                     						"_id": 2,
-                    						"index": 2,
+                    						"renamed_index": 2,
                     						"parentId": 1,
                     						"categoryId": 1
                     					},
                     					{
                     						"_id": 3,
-                    						"index": 3,
+                    						"renamed_index": 3,
                     						"parentId": 2,
                     						"categoryId": 2
                     					}
@@ -1579,17 +1579,17 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     				"treeType2s": [
                     					{
                     						"_id": 1,
-                    						"index": 1,
+                    						"renamed_index": 1,
                     						"treeType1Id": 1
                     					},
                     					{
                     						"_id": 2,
-                    						"index": 2,
+                    						"renamed_index": 2,
                     						"treeType1Id": 1
                     					},
                     					{
                     						"_id": 3,
-                    						"index": 3,
+                    						"renamed_index": 3,
                     						"treeType1Id": 1
                     					}
                     				]
@@ -1606,41 +1606,41 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     [
                     	{
                     		"_id": 7,
-                    		"index": 7,
+                    		"renamed_index": 7,
                     		"parentId": 6,
                     		"categoryId": 2,
                     		"parent": [
                     			{
-                    				"index": 6,
+                    				"renamed_index": 6,
                     				"_id": 6,
                     				"children": [
                     					{
                     						"_id": 7,
-                    						"index": 7,
+                    						"renamed_index": 7,
                     						"parentId": 6,
                     						"categoryId": 2
                     					},
                     					{
                     						"_id": 8,
-                    						"index": 8,
+                    						"renamed_index": 8,
                     						"parentId": 7,
                     						"categoryId": 2
                     					}
                     				]
                     			},
                     			{
-                    				"index": 4,
+                    				"renamed_index": 4,
                     				"_id": 4,
                     				"children": [
                     					{
                     						"_id": 6,
-                    						"index": 6,
+                    						"renamed_index": 6,
                     						"parentId": 4,
                     						"categoryId": 2
                     					},
                     					{
                     						"_id": 7,
-                    						"index": 7,
+                    						"renamed_index": 7,
                     						"parentId": 6,
                     						"categoryId": 2
                     					}
@@ -1765,7 +1765,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                 				"pipeline": [
                                 					{
                                 						"$project": {
-                                							"index": 1,
+                                							"renamed_index": 1,
                                 							"_id": 1
                                 						}
                                 					}
@@ -1788,7 +1788,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                 					{
                                 						"$project": {
                                 							"_id": 1,
-                                							"index": 1,
+                                							"renamed_index": 1,
                                 							"treeType1Id": 1
                                 						}
                                 					}
@@ -1892,33 +1892,33 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                 }
                         """,
             """
-                                                                [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                                [{ "_id": 1, "renamed_index": 1, "parentId": null, "categoryId": 1,
                                                                  "children": [
-                                                                    { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                                    { "_id": 2, "renamed_index": 2, "parentId": 1, "categoryId": 1,
                                                                         "treeType2s": [
                                                                             {
                                                                                 "_id": 4,
-                                                                                "index": 4,
+                                                                                "renamed_index": 4,
                                                                                 "parentId": null,
                                                                                 "categoryId": 1,
                                                                                 "treeType1Id": 2,
                                                                                 "treeType1": {
                                                                                     "_id": 2,
-                                                                                    "index": 2,
+                                                                                    "renamed_index": 2,
                                                                                     "treeType2s": [
                                                                                         {
                                                                                             "_id": 4,
-                                                                                            "index": 4,
+                                                                                            "renamed_index": 4,
                                                                                             "treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 5,
-                                                                                            "index": 5,
+                                                                                            "renamed_index": 5,
                                                                                             "treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 6,
-                                                                                            "index": 6,
+                                                                                            "renamed_index": 6,
                                                                                             "treeType1Id": 2
                                                                                         }
                                                                                     ]
@@ -1926,27 +1926,27 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                             },
                                                                             {
                                                                                 "_id": 5,
-                                                                                "index": 5,
+                                                                                "renamed_index": 5,
                                                                                 "parentId": 4,
                                                                                 "categoryId": 1,
                                                                                 "treeType1Id": 2,
                                                                                 "treeType1": {
                                                                                     "_id": 2,
-                                                                                    "index": 2,
+                                                                                    "renamed_index": 2,
                                                                                     "treeType2s": [
                                                                                         {
                                                                                             "_id": 4,
-                                                                                            "index": 4,
+                                                                                            "renamed_index": 4,
                                                                                             "treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 5,
-                                                                                            "index": 5,
+                                                                                            "renamed_index": 5,
                                                                                             "treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 6,
-                                                                                            "index": 6,
+                                                                                            "renamed_index": 6,
                                                                                             "treeType1Id": 2
                                                                                         }
                                                                                     ]
@@ -1954,27 +1954,27 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                             },
                                                                             {
                                                                                 "_id": 6,
-                                                                                "index": 6,
+                                                                                "renamed_index": 6,
                                                                                 "parentId": 5,
                                                                                 "categoryId": 2,
                                                                                 "treeType1Id": 2,
                                                                                 "treeType1": {
                                                                                     "_id": 2,
-                                                                                    "index": 2,
+                                                                                    "renamed_index": 2,
                                                                                     "treeType2s": [
                                                                                         {
                                                                                             "_id": 4,
-                                                                                            "index": 4,
+                                                                                            "renamed_index": 4,
                                                                                             "treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 5,
-                                                                                            "index": 5,
+                                                                                            "renamed_index": 5,
                                                                                             "treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 6,
-                                                                                            "index": 6,
+                                                                                            "renamed_index": 6,
                                                                                             "treeType1Id": 2
                                                                                         }
                                                                                     ]
@@ -1982,7 +1982,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                                             }
                                                                         ]
                                                                     },
-                                                                    { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1,
+                                                                    { "_id": 5, "renamed_index": 5, "parentId": 1, "categoryId": 1,
                                                                         "treeType2s": []
                                                                      }
                                                                  ]
