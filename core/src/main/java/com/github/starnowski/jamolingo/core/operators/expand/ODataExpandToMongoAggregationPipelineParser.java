@@ -2,7 +2,6 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
-import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.DefaultOdataOrderByToMongoSortParserContext;
@@ -160,7 +159,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     EdmEntityType targetEntityType = (EdmEntityType) navProp.getType();
     String targetFullTypeName = targetEntityType.getNamespace() + "." + targetEntityType.getName();
 
-    EdmPropertyMongoPathResolver targetResolver =
+    EdmMongoContextFacade targetResolver =
         expandParserContext.getEDMTypeMapping() != null
             ? expandParserContext.getEDMTypeMapping().get(targetFullTypeName)
             : null;
@@ -202,7 +201,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         currentSourceFullTypeName = parserExpandItemContext.getSourceFullTypeName();
       }
 
-      EdmPropertyMongoPathResolver sourceResolver =
+      EdmMongoContextFacade sourceResolver =
           expandParserContext.getEDMTypeMapping() != null && currentSourceFullTypeName != null
               ? expandParserContext.getEDMTypeMapping().get(currentSourceFullTypeName)
               : null;
@@ -284,9 +283,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
           OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
               new OdataOrderByToMongoSortParser();
           EdmMongoContextFacade facade =
-              DefaultEdmMongoContextFacade.builder()
-                  .withEntityPropertiesMongoPathContext(null)
-                  .build();
+              targetResolver == null
+                  ? DefaultEdmMongoContextFacade.builder()
+                      .withEntityPropertiesMongoPathContext(null)
+                      .build()
+                  : targetResolver;
 
           OrderByOperatorResult orderByResult =
               odataOrderByToMongoSortParser.parse(
