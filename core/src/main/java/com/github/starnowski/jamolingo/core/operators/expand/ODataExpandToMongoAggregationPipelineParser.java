@@ -259,13 +259,19 @@ public class ODataExpandToMongoAggregationPipelineParser {
                         eOption, expandParserContext, navPropertyWithRootPrefix))
                 .append("as", navPropertyWithRootPrefix);
         String depthVariable = navProp.getName() + ODATA_GRAPHLOOKUP_STAGE_DEPTH_VARIABLE_SUFFIX;
+        EdmMongoContextFacade facade =
+            targetResolver == null
+                ? DefaultEdmMongoContextFacade.builder()
+                    .withEntityPropertiesMongoPathContext(null)
+                    .build()
+                : targetResolver;
         if (eOption.getFilterOption() != null) {
           ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
               new ODataFilterToMongoMatchParser();
           graphLookupInnerObject.append(
               "restrictSearchWithMatch",
               oDataFilterToMongoMatchParser
-                  .parseQueryObject(eOption.getFilterOption())
+                  .parseQueryObject(eOption.getFilterOption(), facade)
                   .getQueryObject());
         }
         graphLookupInnerObject.append("depthField", depthVariable);
@@ -282,12 +288,6 @@ public class ODataExpandToMongoAggregationPipelineParser {
         if (eOption.getOrderByOption() != null) {
           OdataOrderByToMongoSortParser odataOrderByToMongoSortParser =
               new OdataOrderByToMongoSortParser();
-          EdmMongoContextFacade facade =
-              targetResolver == null
-                  ? DefaultEdmMongoContextFacade.builder()
-                      .withEntityPropertiesMongoPathContext(null)
-                      .build()
-                  : targetResolver;
 
           OrderByOperatorResult orderByResult =
               odataOrderByToMongoSortParser.parse(
@@ -367,7 +367,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           selectResult =
               odataSelectToMongoProjectParser.computeValueForMapOperator(
                   eOption.getSelectOption(),
-                  DefaultEdmMongoContextFacade.builder().build(),
+                  facade,
                   odataSelectToMongoProjectParserContextBuilder.build());
           // TODO create object that returns select properties for graphLookup
           // TODO It should return the SelectOperatorResult operator that should be applied instead
@@ -438,10 +438,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
               GraphLookUpCleanUpInfo.builder()
                   .withRemoveLocalKeyProperty(
                       !(selectResult.isWildCard()
-                          || selectResult.getRequestedFields().contains(edmStartWith)))
+                          || selectResult.getRequestedFields().contains(mongoStartWith)))
                   .withRemoveForeignKeyProperty(
                       !(selectResult.isWildCard()
-                          || selectResult.getRequestedFields().contains(edmConnectTo)))
+                          || selectResult.getRequestedFields().contains(mongoConnectTo)))
                   .build();
         }
         expandElements.put(
@@ -452,8 +452,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .withFetchType(FetchType.GRAPHLOOKUP)
                 .withLevel(levelValue)
                 .withMaxLevelRequest(maxLevelRequest)
-                .withLocalKeyProperty(edmStartWith)
-                .withForeignKeyProperty(edmConnectTo)
+                .withLocalKeyProperty(mongoStartWith)
+                .withForeignKeyProperty(mongoConnectTo)
                 .withForeignCollection(targetCollection)
                 .withEdmEntityFullName(targetFullTypeName)
                 .withCollection(navProp.isCollection())
@@ -506,7 +506,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   navProp,
                   1,
                   maxDepth + 1,
-                  nestedExpandResult));
+                  nestedExpandResult,
+                  targetResolver));
         } else {
           pipeline.addAll(
               prepareLookUpStage(
@@ -520,7 +521,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   navProp,
                   1,
                   1,
-                  nestedExpandResult));
+                  nestedExpandResult,
+                  targetResolver));
         }
 
         int levelValue = 1;
@@ -540,8 +542,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 .withFetchType(FetchType.LOOKUP)
                 .withLevel(levelValue)
                 .withMaxLevelRequest(maxLevelRequest)
-                .withLocalKeyProperty(edmStartWith)
-                .withForeignKeyProperty(edmConnectTo)
+                .withLocalKeyProperty(mongoStartWith)
+                .withForeignKeyProperty(mongoConnectTo)
                 .withForeignCollection(targetCollection)
                 .withEdmEntityFullName(targetFullTypeName)
                 .withCollection(navProp.isCollection())
@@ -566,7 +568,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
       EdmNavigationProperty navProp,
       int currentLevel,
       int maxLevel,
-      ExpandOperatorResult nestedExpandResult)
+      ExpandOperatorResult nestedExpandResult,
+      EdmMongoContextFacade targetResolver)
       throws ExpressionVisitException, ODataApplicationException {
     // Adding $lookup
     List<Bson> pipeline = new ArrayList<>();
@@ -593,13 +596,19 @@ public class ODataExpandToMongoAggregationPipelineParser {
       OdataSelectToMongoProjectParser odataSelectToMongoProjectParser =
           new OdataSelectToMongoProjectParser();
       EdmMongoContextFacade facade =
-          DefaultEdmMongoContextFacade.builder().withEntityPropertiesMongoPathContext(null).build();
+          targetResolver == null
+              ? DefaultEdmMongoContextFacade.builder()
+                  .withEntityPropertiesMongoPathContext(null)
+                  .build()
+              : targetResolver;
 
       // $lookup with pipeline
       List<Bson> lookupPipeline = new ArrayList<>();
       if (eOption.getFilterOption() != null) {
         lookupPipeline.addAll(
-            oDataFilterToMongoMatchParser.parse(eOption.getFilterOption()).getStageObjects());
+            oDataFilterToMongoMatchParser
+                .parse(eOption.getFilterOption(), facade)
+                .getStageObjects());
       }
       if (eOption.getOrderByOption() != null) {
         lookupPipeline.addAll(
@@ -651,7 +660,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 navProp,
                 currentLevel + 1,
                 maxLevel,
-                nestedExpandResult));
+                nestedExpandResult,
+                targetResolver));
       }
       if (nestedExpandResult != null) {
         lookupPipeline.addAll(nestedExpandResult.getStageObjects());

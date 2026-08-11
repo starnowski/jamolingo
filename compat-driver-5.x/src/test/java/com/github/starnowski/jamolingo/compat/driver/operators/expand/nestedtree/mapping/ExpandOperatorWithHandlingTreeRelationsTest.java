@@ -1845,7 +1845,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                 		{
                                 			"$lookup": {
                                 				"from": "MyService.TreeType1",
-                                				"localField": "children.treeType2s.treeType1Id",
+                                				"localField": "children.treeType2s.renamed_treeType1Id",
                                 				"foreignField": "_id",
                                 				"pipeline": [
                                 					{
