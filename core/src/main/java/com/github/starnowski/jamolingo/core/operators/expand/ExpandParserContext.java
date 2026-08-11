@@ -1,7 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.expand;
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
-import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import java.util.Map;
 
 /** Context for parsing OData $expand system query option. */
@@ -15,7 +15,7 @@ public interface ExpandParserContext {
    *
    * @return mapping of EDM type names to resolvers
    */
-  Map<String, EdmPropertyMongoPathResolver> getEDMTypeMapping();
+  Map<String, EdmMongoContextFacade> getEDMTypeMapping();
 
   /**
    * Returns mapping between EDM entity sets and their MongoDB collection names.

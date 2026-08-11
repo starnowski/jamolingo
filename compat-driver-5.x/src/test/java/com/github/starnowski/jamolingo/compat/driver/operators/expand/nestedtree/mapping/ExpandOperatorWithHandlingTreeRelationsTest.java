@@ -5,6 +5,7 @@ import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nes
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
+import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
@@ -1717,8 +1718,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
 
   private ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder
       createParserContextBuilder() {
-    java.util.Map<String, com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver>
-        edmTypeMapping = new java.util.HashMap<>();
+    java.util.Map<String, EdmMongoContextFacade> edmTypeMapping = new java.util.HashMap<>();
     com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder builder =
         new com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder();
 

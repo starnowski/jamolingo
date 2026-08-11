@@ -1240,7 +1240,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
   /** Default implementation of {@link ExpandParserContext}. */
   public static class DefaultExpandParserContext implements ExpandParserContext {
-    private final Map<String, EdmPropertyMongoPathResolver> edmTypeMapping;
+    private final Map<String, EdmMongoContextFacade> edmTypeMapping;
     private final Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections;
     private final Integer maxLevel;
     private final boolean useLookupForLevelGreaterThanOne;
@@ -1258,7 +1258,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
      * @param maxLevel maximum level of recursion for $expand
      */
     public DefaultExpandParserContext(
-        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<String, EdmMongoContextFacade> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
         Integer maxLevel) {
       this(edmTypeMapping, edmTablesToMongoDBCollections, maxLevel, false);
@@ -1275,7 +1275,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
      *     $level greater than 1
      */
     public DefaultExpandParserContext(
-        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<String, EdmMongoContextFacade> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
         Integer maxLevel,
         boolean useLookupForLevelGreaterThanOne) {
@@ -1300,7 +1300,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
      *     be propagated
      */
     public DefaultExpandParserContext(
-        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<String, EdmMongoContextFacade> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
         Integer maxLevel,
         boolean useLookupForLevelGreaterThanOne,
@@ -1315,7 +1315,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     public DefaultExpandParserContext(
-        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<String, EdmMongoContextFacade> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
         Integer maxLevel,
         boolean useLookupForLevelGreaterThanOne,
@@ -1333,7 +1333,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     public DefaultExpandParserContext(
-        Map<String, EdmPropertyMongoPathResolver> edmTypeMapping,
+        Map<String, EdmMongoContextFacade> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
         Integer maxLevel,
         boolean useLookupForLevelGreaterThanOne,
@@ -1352,7 +1352,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
-    public Map<String, EdmPropertyMongoPathResolver> getEDMTypeMapping() {
+    public Map<String, EdmMongoContextFacade> getEDMTypeMapping() {
       return edmTypeMapping;
     }
 
@@ -1458,7 +1458,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
     /** Builder for {@link DefaultExpandParserContext}. */
     public static class Builder {
-      private Map<String, EdmPropertyMongoPathResolver> edmTypeMapping = new HashMap<>();
+      private Map<String, EdmMongoContextFacade> edmTypeMapping = new HashMap<>();
       private Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections = new HashMap<>();
       private Integer maxLevel = DEFAULT_MAX_LEVEL;
       private boolean useLookupForLevelGreaterThanOne = false;
@@ -1473,7 +1473,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
        * @param edmTypeMapping the type mapping
        * @return the builder instance
        */
-      public Builder withEdmTypeMapping(Map<String, EdmPropertyMongoPathResolver> edmTypeMapping) {
+      public Builder withEdmTypeMapping(Map<String, EdmMongoContextFacade> edmTypeMapping) {
         this.edmTypeMapping = edmTypeMapping;
         return this;
       }
