@@ -1,6 +1,5 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.mapping;
 
-import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
 import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTestProperties.*;
 
 import com.github.starnowski.jamolingo.AbstractItTest;
@@ -32,7 +31,6 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -43,163 +41,163 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
     batchInsertToCollection = true,
     mongoDocuments = {
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = CATEGORY_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/category1.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = CATEGORY_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/category2.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_2.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_3.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_4.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_5.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_6.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_7.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_8.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_10.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_11_p_t1_10.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_12_p_t1_10.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_13_p_t1_10.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_14_p_t1_11.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_15_p_t1_11.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_16_p_t1_11.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_17_p_t1_12.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_18_p_t1_12.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_19_p_t1_12.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_20_p_t1_13.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_21_p_t1_14.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_22_p_t1_14.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_23_p_t1_14.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_24_p_t1_14.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_1.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_2.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_3.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_2_t2_4.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_2_t2_5.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE2_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_2_t2_6.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_1_t3_1.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_1_t3_2.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_1_t3_3.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_2_t2_4_t3_4.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_2_t2_4_t3_5.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE3_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_2_t2_4_t3_6.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE4_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_1_t3_1_t4_1.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE4_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_1_t3_1_t4_2.json"),
       @MongoDocument(
-          database = TEST_DATABASE,
+          database = "testdb_mapping",
           collection = TREETYPE4_COLLECTION,
           bsonFilePath = "bson/expand/tree/mapping/t1_1_t2_1_t3_1_t4_3.json")
     })
@@ -217,7 +215,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             "$expand=category",
             """
                             [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "renamed_categoryId": 1,
-                             "category": { "_id": 1, "name": "Category 1" }
+                             "category": { "_id": 1, "renamed_name": "Category 1" }
                             }]
                             """,
             JSONCompareMode.LENIENT),
@@ -227,7 +225,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             "$expand=category,children",
             """
                                     [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "renamed_categoryId": 1,
-                                     "category": { "_id": 1, "name": "Category 1" },
+                                     "category": { "_id": 1, "renamed_name": "Category 1" },
                                      "children": [{ "_id": 2, "renamed_index": 2, "renamed_parentId": 1, "renamed_categoryId": 1 },
                                       { "_id": 5, "renamed_index": 5, "renamed_parentId": 1, "renamed_categoryId": 1 }
                                      ]
@@ -240,7 +238,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             "$expand=category,children,treeType2s",
             """
                                             [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "renamed_categoryId": 1,
-                                             "category": { "_id": 1, "name": "Category 1" },
+                                             "category": { "_id": 1, "renamed_name": "Category 1" },
                                              "children": [{ "_id": 2, "renamed_index": 2, "renamed_parentId": 1, "renamed_categoryId": 1 },
                                               { "_id": 5, "renamed_index": 5, "renamed_parentId": 1, "renamed_categoryId": 1 }],
                                              "treeType2s": [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "renamed_categoryId": 1, "renamed_treeType1Id": 1 },
@@ -1677,7 +1675,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
           ODataApplicationException,
           JSONException {
     // GIVEN
-    MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
+    MongoDatabase database = mongoClient.getDatabase("testdb_mapping");
     MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
     Edm edm = loadEmdProvider("edm/tree_types.xml");
     UriInfo uriInfo =
@@ -1686,12 +1684,18 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
     ODataExpandToMongoAggregationPipelineParser tested =
         new ODataExpandToMongoAggregationPipelineParser();
 
+    String rootEdmEntityTypeName =
+        ((org.apache.olingo.server.api.uri.UriResourceEntitySet)
+                uriInfo.getUriResourceParts().get(0))
+            .getEntityType()
+            .getFullQualifiedName()
+            .getFullQualifiedNameAsString();
+
     // WHEN
     ExpandOperatorResult result =
         tested.parse(
             uriInfo.getExpandOption(),
-            ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
-                .build());
+            createParserContextBuilder().withRootEdmEntityTypeName(rootEdmEntityTypeName).build());
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
     pipeline.addAll(result.getStageObjects());
@@ -1709,6 +1713,84 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
 
   private Document wrapBsonList(List<Bson> docs) {
     return new Document("value", docs);
+  }
+
+  private ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder
+      createParserContextBuilder() {
+    java.util.Map<String, com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver>
+        edmTypeMapping = new java.util.HashMap<>();
+    com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder builder =
+        new com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder();
+
+    com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory factory =
+        new com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory();
+    Edm edm = null;
+    try {
+      edm = loadEmdProvider("edm/tree_types.xml");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    com.github.starnowski.jamolingo.core.mapping.ODataMongoMapping odataMapping =
+        factory.build(edm.getSchema("MyService"));
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping category =
+        odataMapping.getEntities().get("Category");
+    category.getProperties().get("name").setMongoPath("renamed_name");
+    edmTypeMapping.put(
+        "MyService.Category",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(category))
+            .build());
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping t1 =
+        odataMapping.getEntities().get("TreeType1");
+    t1.getProperties().get("index").setMongoPath("renamed_index");
+    t1.getProperties().get("parentId").setMongoPath("renamed_parentId");
+    t1.getProperties().get("categoryId").setMongoPath("renamed_categoryId");
+    edmTypeMapping.put(
+        "MyService.TreeType1",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(t1))
+            .build());
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping t2 =
+        odataMapping.getEntities().get("TreeType2");
+    t2.getProperties().get("index").setMongoPath("renamed_index");
+    t2.getProperties().get("parentId").setMongoPath("renamed_parentId");
+    t2.getProperties().get("categoryId").setMongoPath("renamed_categoryId");
+    t2.getProperties().get("treeType1Id").setMongoPath("renamed_treeType1Id");
+    edmTypeMapping.put(
+        "MyService.TreeType2",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(t2))
+            .build());
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping t3 =
+        odataMapping.getEntities().get("TreeType3");
+    t3.getProperties().get("index").setMongoPath("renamed_index");
+    t3.getProperties().get("parentId").setMongoPath("renamed_parentId");
+    t3.getProperties().get("categoryId").setMongoPath("renamed_categoryId");
+    t3.getProperties().get("treeType2Id").setMongoPath("renamed_treeType2Id");
+    edmTypeMapping.put(
+        "MyService.TreeType3",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(t3))
+            .build());
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping t4 =
+        odataMapping.getEntities().get("TreeType4");
+    t4.getProperties().get("index").setMongoPath("renamed_index");
+    t4.getProperties().get("parentId").setMongoPath("renamed_parentId");
+    t4.getProperties().get("categoryId").setMongoPath("renamed_categoryId");
+    t4.getProperties().get("treeType3Id").setMongoPath("renamed_treeType3Id");
+    edmTypeMapping.put(
+        "MyService.TreeType4",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(t4))
+            .build());
+
+    return ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+        .withEdmTypeMapping(edmTypeMapping);
   }
 
   private Document wrapDocumentsList(List<Document> docs) {
@@ -1994,7 +2076,6 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             JSONCompareMode.LENIENT));
   }
 
-  @Disabled
   @ParameterizedTest
   @MethodSource("provideRawQueryData")
   public void shouldReturnExpectedDocumentsForRawQuery(
@@ -2004,7 +2085,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
       JSONCompareMode jsonCompareMode)
       throws JSONException {
     // GIVEN
-    MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
+    MongoDatabase database = mongoClient.getDatabase("testdb_mapping");
     MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
 
     // WHEN

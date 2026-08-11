@@ -70,4 +70,13 @@ public interface ExpandParserContext {
   default Integer getMaxAllowedNestedExpandLevel() {
     return null;
   }
+
+  /**
+   * Returns the root EDM entity type name.
+   *
+   * @return the root EDM entity type name
+   */
+  default String getRootEdmEntityTypeName() {
+    return null;
+  }
 }

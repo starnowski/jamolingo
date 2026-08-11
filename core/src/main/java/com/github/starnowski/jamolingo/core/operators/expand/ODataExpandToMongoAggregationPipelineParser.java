@@ -103,7 +103,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
     return prepareStageObjectsForExpandItem(
         eOption,
         expandParserContext,
-        new ParserExpandItemContext(null, null, false),
+        new ParserExpandItemContext(
+            null, null, false, expandParserContext.getRootEdmEntityTypeName()),
         expandElements);
   }
 
@@ -185,9 +186,35 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     if (edmConnectFrom != null && edmConnectTo != null) {
+      String currentSourceFullTypeName;
+      int resourcePartsSize = eOption.getResourcePath().getUriResourceParts().size();
+      if (resourcePartsSize > 1) {
+        UriResource previousResource =
+            eOption.getResourcePath().getUriResourceParts().get(resourcePartsSize - 2);
+        if (previousResource instanceof org.apache.olingo.server.api.uri.UriResourcePartTyped) {
+          org.apache.olingo.commons.api.edm.EdmType previousType =
+              ((org.apache.olingo.server.api.uri.UriResourcePartTyped) previousResource).getType();
+          currentSourceFullTypeName = previousType.getNamespace() + "." + previousType.getName();
+        } else {
+          currentSourceFullTypeName = parserExpandItemContext.getSourceFullTypeName();
+        }
+      } else {
+        currentSourceFullTypeName = parserExpandItemContext.getSourceFullTypeName();
+      }
+
+      EdmPropertyMongoPathResolver sourceResolver =
+          expandParserContext.getEDMTypeMapping() != null && currentSourceFullTypeName != null
+              ? expandParserContext.getEDMTypeMapping().get(currentSourceFullTypeName)
+              : null;
+
       String mongoStartWith = edmStartWith;
       String mongoConnectFrom = edmConnectFrom;
       String mongoConnectTo = edmConnectTo;
+
+      if (sourceResolver != null) {
+        mongoStartWith = sourceResolver.resolveMongoPathForEDMPath(edmStartWith).getMongoPath();
+        mongoConnectFrom = sourceResolver.resolveMongoPathForEDMPath(edmConnectFrom).getMongoPath();
+      }
 
       if (targetResolver != null) {
         mongoConnectTo = targetResolver.resolveMongoPathForEDMPath(edmConnectTo).getMongoPath();
@@ -374,7 +401,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                         true,
                         newAccumulatedLevels,
                         currentLevel + 1,
-                        currentPath));
+                        currentPath,
+                        targetFullTypeName));
           } catch (ExpandLevelExceededException e) {
             String path = e.getEdmPath();
             if (!navProp.getName().equals(path)) {
@@ -443,7 +471,13 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     eOption.getExpandOption(),
                     expandParserContext,
                     new ParserExpandItemContext(
-                        null, null, false, newAccumulatedLevels, currentLevel + 1, currentPath));
+                        null,
+                        null,
+                        false,
+                        newAccumulatedLevels,
+                        currentLevel + 1,
+                        currentPath,
+                        targetFullTypeName));
           } catch (ExpandLevelExceededException e) {
             String path = e.getEdmPath();
             if (!navProp.getName().equals(path)) {
@@ -740,6 +774,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     private final Map<String, Integer> accumulatedLevels;
     private final int currentNestedLevel;
     private final String currentEdmPath;
+    private final String sourceFullTypeName;
 
     public boolean isAddCleanUpEmptyPropertiesStage() {
       return addCleanUpEmptyPropertiesStage;
@@ -747,7 +782,29 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
     public ParserExpandItemContext(
         String root, Set<String> idProperties, boolean addCleanUpEmptyPropertiesStage) {
-      this(root, idProperties, addCleanUpEmptyPropertiesStage, Collections.emptyMap(), 1, null);
+      this(
+          root,
+          idProperties,
+          addCleanUpEmptyPropertiesStage,
+          Collections.emptyMap(),
+          1,
+          null,
+          null);
+    }
+
+    public ParserExpandItemContext(
+        String root,
+        Set<String> idProperties,
+        boolean addCleanUpEmptyPropertiesStage,
+        String sourceFullTypeName) {
+      this(
+          root,
+          idProperties,
+          addCleanUpEmptyPropertiesStage,
+          Collections.emptyMap(),
+          1,
+          null,
+          sourceFullTypeName);
     }
 
     public ParserExpandItemContext(
@@ -755,7 +812,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         Set<String> idProperties,
         boolean addCleanUpEmptyPropertiesStage,
         Map<String, Integer> accumulatedLevels) {
-      this(root, idProperties, addCleanUpEmptyPropertiesStage, accumulatedLevels, 1, null);
+      this(root, idProperties, addCleanUpEmptyPropertiesStage, accumulatedLevels, 1, null, null);
     }
 
     public ParserExpandItemContext(
@@ -764,7 +821,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
         boolean addCleanUpEmptyPropertiesStage,
         Map<String, Integer> accumulatedLevels,
         int currentNestedLevel,
-        String currentEdmPath) {
+        String currentEdmPath,
+        String sourceFullTypeName) {
       this.root = root;
       this.idProperties =
           Collections.unmodifiableSet(idProperties == null ? Collections.emptySet() : idProperties);
@@ -776,6 +834,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   : new HashMap<>(accumulatedLevels));
       this.currentNestedLevel = currentNestedLevel;
       this.currentEdmPath = currentEdmPath;
+      this.sourceFullTypeName = sourceFullTypeName;
+    }
+
+    public String getSourceFullTypeName() {
+      return sourceFullTypeName;
     }
 
     public Map<String, Integer> getAccumulatedLevels() {
@@ -1184,6 +1247,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
     private final boolean propagateGraphLookUpJoinKeys;
     private final boolean throwExceptionOnExpandLevelsExceeded;
     private final Integer maxAllowedNestedExpandLevel;
+    private final String rootEdmEntityTypeName;
 
     /**
      * Constructs a new DefaultExpandParserContext.
@@ -1264,6 +1328,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
           useLookupForLevelGreaterThanOne,
           propagateGraphLookUpJoinKeys,
           throwExceptionOnExpandLevelsExceeded,
+          null,
           null);
     }
 
@@ -1274,7 +1339,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
         boolean useLookupForLevelGreaterThanOne,
         boolean propagateGraphLookUpJoinKeys,
         boolean throwExceptionOnExpandLevelsExceeded,
-        Integer maxAllowedNestedExpandLevel) {
+        Integer maxAllowedNestedExpandLevel,
+        String rootEdmEntityTypeName) {
       this.edmTypeMapping = edmTypeMapping;
       this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
       this.maxLevel = maxLevel;
@@ -1282,6 +1348,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       this.propagateGraphLookUpJoinKeys = propagateGraphLookUpJoinKeys;
       this.throwExceptionOnExpandLevelsExceeded = throwExceptionOnExpandLevelsExceeded;
       this.maxAllowedNestedExpandLevel = maxAllowedNestedExpandLevel;
+      this.rootEdmEntityTypeName = rootEdmEntityTypeName;
     }
 
     @Override
@@ -1320,6 +1387,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
+    public String getRootEdmEntityTypeName() {
+      return rootEdmEntityTypeName;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1330,7 +1402,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           && Objects.equals(edmTypeMapping, that.edmTypeMapping)
           && Objects.equals(edmTablesToMongoDBCollections, that.edmTablesToMongoDBCollections)
           && Objects.equals(maxLevel, that.maxLevel)
-          && Objects.equals(maxAllowedNestedExpandLevel, that.maxAllowedNestedExpandLevel);
+          && Objects.equals(maxAllowedNestedExpandLevel, that.maxAllowedNestedExpandLevel)
+          && Objects.equals(rootEdmEntityTypeName, that.rootEdmEntityTypeName);
     }
 
     @Override
@@ -1342,7 +1415,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           useLookupForLevelGreaterThanOne,
           propagateGraphLookUpJoinKeys,
           throwExceptionOnExpandLevelsExceeded,
-          maxAllowedNestedExpandLevel);
+          maxAllowedNestedExpandLevel,
+          rootEdmEntityTypeName);
     }
 
     @Override
@@ -1362,6 +1436,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
           + throwExceptionOnExpandLevelsExceeded
           + ", maxAllowedNestedExpandLevel="
           + maxAllowedNestedExpandLevel
+          + ", rootEdmEntityTypeName='"
+          + rootEdmEntityTypeName
+          + '\''
           + '}';
     }
 
@@ -1388,6 +1465,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       private boolean propagateGraphLookUpJoinKeys = false;
       private boolean throwExceptionOnExpandLevelsExceeded = false;
       private Integer maxAllowedNestedExpandLevel = null;
+      private String rootEdmEntityTypeName = null;
 
       /**
        * Sets the mapping between EDM type names and their Mongo path resolvers.
@@ -1462,6 +1540,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
         return this;
       }
 
+      public Builder withRootEdmEntityTypeName(String rootEdmEntityTypeName) {
+        this.rootEdmEntityTypeName = rootEdmEntityTypeName;
+        return this;
+      }
+
       /**
        * Initializes the builder with values from an existing context.
        *
@@ -1485,6 +1568,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         this.throwExceptionOnExpandLevelsExceeded =
             defaultExpandParserContext.throwExceptionOnExpandLevelsExceeded;
         this.maxAllowedNestedExpandLevel = defaultExpandParserContext.maxAllowedNestedExpandLevel;
+        this.rootEdmEntityTypeName = defaultExpandParserContext.rootEdmEntityTypeName;
         return this;
       }
 
@@ -1505,7 +1589,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
             useLookupForLevelGreaterThanOne,
             propagateGraphLookUpJoinKeys,
             throwExceptionOnExpandLevelsExceeded,
-            maxAllowedNestedExpandLevel);
+            maxAllowedNestedExpandLevel,
+            rootEdmEntityTypeName);
       }
     }
   }
