@@ -1339,6 +1339,20 @@ public class ODataExpandToMongoAggregationPipelineParser {
           false);
     }
 
+    /**
+     * Constructs a new DefaultExpandParserContext.
+     *
+     * @param edmTypeMapping mapping between EDM type names and their Mongo path resolvers
+     * @param edmTablesToMongoDBCollections mapping between EDM entity sets and their MongoDB
+     *     collection names
+     * @param maxLevel maximum level of recursion for $expand
+     * @param useLookupForLevelGreaterThanOne true if the $lookup stage should be used to handle
+     *     $level greater than 1
+     * @param propagateGraphLookUpJoinKeys true if join keys used for the $graphLookup stage should
+     *     be propagated
+     * @param throwExceptionOnExpandLevelsExceeded true if an exception should be thrown when expand
+     *     levels are exceeded
+     */
     public DefaultExpandParserContext(
         Map<String, EdmMongoContextFacade> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
@@ -1358,6 +1372,22 @@ public class ODataExpandToMongoAggregationPipelineParser {
           null);
     }
 
+    /**
+     * Constructs a new DefaultExpandParserContext.
+     *
+     * @param edmTypeMapping mapping between EDM type names and their Mongo path resolvers
+     * @param edmTablesToMongoDBCollections mapping between EDM entity sets and their MongoDB
+     *     collection names
+     * @param maxLevel maximum level of recursion for $expand
+     * @param useLookupForLevelGreaterThanOne true if the $lookup stage should be used to handle
+     *     $level greater than 1
+     * @param propagateGraphLookUpJoinKeys true if join keys used for the $graphLookup stage should
+     *     be propagated
+     * @param throwExceptionOnExpandLevelsExceeded true if an exception should be thrown when expand
+     *     levels are exceeded
+     * @param maxAllowedNestedExpandLevel the maximum allowed nested expand level
+     * @param rootEdmEntityTypeName the root EDM entity type name
+     */
     public DefaultExpandParserContext(
         Map<String, EdmMongoContextFacade> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
@@ -1379,6 +1409,23 @@ public class ODataExpandToMongoAggregationPipelineParser {
           null);
     }
 
+    /**
+     * Constructs a new DefaultExpandParserContext.
+     *
+     * @param edmTypeMapping mapping between EDM type names and their Mongo path resolvers
+     * @param edmTablesToMongoDBCollections mapping between EDM entity sets and their MongoDB
+     *     collection names
+     * @param maxLevel maximum level of recursion for $expand
+     * @param useLookupForLevelGreaterThanOne true if the $lookup stage should be used to handle
+     *     $level greater than 1
+     * @param propagateGraphLookUpJoinKeys true if join keys used for the $graphLookup stage should
+     *     be propagated
+     * @param throwExceptionOnExpandLevelsExceeded true if an exception should be thrown when expand
+     *     levels are exceeded
+     * @param maxAllowedNestedExpandLevel the maximum allowed nested expand level
+     * @param rootEdmEntityTypeName the root EDM entity type name
+     * @param rootEdmMongoContextFacade the root EDM mongo context facade
+     */
     public DefaultExpandParserContext(
         Map<String, EdmMongoContextFacade> edmTypeMapping,
         Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
@@ -1582,6 +1629,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
         return this;
       }
 
+      /**
+       * Sets whether an exception should be thrown when expand levels are exceeded.
+       *
+       * @param throwExceptionOnExpandLevelsExceeded true if an exception should be thrown
+       * @return the builder instance
+       */
       public Builder withThrowExceptionOnExpandLevelsExceeded(
           boolean throwExceptionOnExpandLevelsExceeded) {
         this.throwExceptionOnExpandLevelsExceeded = throwExceptionOnExpandLevelsExceeded;
@@ -1599,11 +1652,23 @@ public class ODataExpandToMongoAggregationPipelineParser {
         return this;
       }
 
+      /**
+       * Sets the root EDM entity type name.
+       *
+       * @param rootEdmEntityTypeName the root EDM entity type name
+       * @return the builder instance
+       */
       public Builder withRootEdmEntityTypeName(String rootEdmEntityTypeName) {
         this.rootEdmEntityTypeName = rootEdmEntityTypeName;
         return this;
       }
 
+      /**
+       * Sets the root EDM mongo context facade.
+       *
+       * @param rootEdmMongoContextFacade the root EDM mongo context facade
+       * @return the builder instance
+       */
       public Builder withRootEdmMongoContextFacade(
           EdmMongoContextFacade rootEdmMongoContextFacade) {
         this.rootEdmMongoContextFacade = rootEdmMongoContextFacade;
