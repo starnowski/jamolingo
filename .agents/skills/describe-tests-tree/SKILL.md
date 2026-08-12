@@ -1,0 +1,31 @@
+---
+name: describe-tests-tree
+description: Update tree and relation represented by tests data in the compat-driver-5.x module under the bson/expand/tree directory
+---
+Analyze the tests data in the bson/expand/tree directory the compat-driver-5.x module.
+Check also the emd/tree_types.xml file the describe EDM context for OData services.
+Based on your analyzis add markdown file that is going in the same directory as
+the com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTest java tests type.
+The file should have name documents-relations.md.
+<rules>
+- File should contains current date of moficiation/creation with format YYYY-MM-DD:HH:MM:SS
+- File should contains a tree representation for the entity sets like TreeType1, TreeType2, TreeType2, TreeType3
+- A rendered tree representation should always start from the root document
+- File should contains a relation between different enitty types
+</rules>
+
+<example>
+## Date
+Date: {{Date in format YYYY-MM-DD:HH:MM:SS}}
+
+## TreeType1 tree:
+    TreeType1(_id=1)
+    |
+    |------->TreeType1(_id=2)
+    |        |------->TreeType1(_id=3)
+    |        |        |------->TreeType1(_id=4)
+    |------->TreeType1(_id=5)
+
+## TreeType1 to Category
+    TreeType1(_id=1) --category--> Category(_id=1)
+<example>

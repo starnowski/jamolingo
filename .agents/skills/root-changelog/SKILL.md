@@ -1,0 +1,6 @@
+---
+name: root-changelog
+description: Update CHANGELOG.md file in the root module
+---
+Analyze the local main git branch and current one that is currently checkout and check what changes were done.
+Based on your analyzis update GHANGELOG.md file in the root module.

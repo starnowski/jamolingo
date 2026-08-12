@@ -1,0 +1,6 @@
+---
+name: perf-readme
+description: Update README.md file in the perf module
+---
+Analyze the local main git branch and current one that is currently checkout and check what change in code were added.
+Based on your analyzis update README.md file in the perf module and mention what was changed or added.

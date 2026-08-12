@@ -1,7 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.expand;
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
-import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import java.util.Map;
 
 /** Context for parsing OData $expand system query option. */
@@ -15,7 +15,7 @@ public interface ExpandParserContext {
    *
    * @return mapping of EDM type names to resolvers
    */
-  Map<String, EdmPropertyMongoPathResolver> getEDMTypeMapping();
+  Map<String, EdmMongoContextFacade> getEDMTypeMapping();
 
   /**
    * Returns mapping between EDM entity sets and their MongoDB collection names.
@@ -68,6 +68,24 @@ public interface ExpandParserContext {
    * @return maximum nested expand operations limit, or null if no limit
    */
   default Integer getMaxAllowedNestedExpandLevel() {
+    return null;
+  }
+
+  /**
+   * Returns the root EDM entity type name.
+   *
+   * @return the root EDM entity type name
+   */
+  default String getRootEdmEntityTypeName() {
+    return null;
+  }
+
+  /**
+   * Returns the root EDM mongo context facade.
+   *
+   * @return the root EDM mongo context facade
+   */
+  default EdmMongoContextFacade getRootEdmMongoContextFacade() {
     return null;
   }
 }

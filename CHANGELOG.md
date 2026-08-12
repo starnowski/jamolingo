@@ -21,6 +21,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Core Module
+*   Added `getRootEdmEntityTypeName()` method to `com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext` [51](https://github.com/starnowski/jamolingo/issues/51)
+*   Added `getRootEdmMongoContextFacade()` method to `com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext` [51](https://github.com/starnowski/jamolingo/issues/51)
+*   Added `withRootEdmEntityTypeName(String)`, `withRootEdmMongoContextFacade(EdmMongoContextFacade)`, and `withThrowExceptionOnExpandLevelsExceeded(boolean)` methods to `com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder` [51](https://github.com/starnowski/jamolingo/issues/51)
+*   Added new constructors for `com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext` [51](https://github.com/starnowski/jamolingo/issues/51)
+
+### Changed
+
+#### Core Module
+*   Changed return type of `getEDMTypeMapping()` method in `com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext` from `java.util.Map<java.lang.String, com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver>` to `java.util.Map<java.lang.String, com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade>` [51](https://github.com/starnowski/jamolingo/issues/51)
+
 ## [0.9.0] - 2026-08-04
 
 ### Changed

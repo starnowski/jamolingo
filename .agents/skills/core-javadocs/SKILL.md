@@ -1,0 +1,7 @@
+---
+name: core-javadocs
+description: Update javadocs in the core module
+---
+Analyze the local main git branch and current one that is currently checkout and check what changes in core module were added.
+Based on your analyzis update javadocs to public methods in production that were changed.
+Or add javadocs to new public methods and types in production code.
