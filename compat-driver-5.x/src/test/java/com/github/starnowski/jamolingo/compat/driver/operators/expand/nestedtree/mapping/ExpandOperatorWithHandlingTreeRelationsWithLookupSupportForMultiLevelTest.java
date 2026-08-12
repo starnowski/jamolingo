@@ -1678,6 +1678,10 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
             .build());
 
     return ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+        .withRootEdmMongoContextFacade(
+            com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+                .withEntityPropertiesMongoPathContext(builder.build(t1))
+                .build())
         .withEdmTypeMapping(edmTypeMapping);
   }
 

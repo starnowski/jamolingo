@@ -79,4 +79,13 @@ public interface ExpandParserContext {
   default String getRootEdmEntityTypeName() {
     return null;
   }
+
+  /**
+   * Returns the root EDM mongo context facade.
+   *
+   * @return the root EDM mongo context facade
+   */
+  default EdmMongoContextFacade getRootEdmMongoContextFacade() {
+    return null;
+  }
 }
