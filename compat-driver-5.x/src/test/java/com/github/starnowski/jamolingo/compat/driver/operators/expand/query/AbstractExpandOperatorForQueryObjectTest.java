@@ -68,6 +68,7 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
     pipeline.add(new Document("$match", new Document("_id", rootDocumentId)));
     pipeline.addAll(result.getStageObjects());
     List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+    System.out.println(wrapBsonList(pipeline).toJson());
 
     // THEN
     Set<String> actual =
@@ -77,6 +78,10 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
             .map(s -> (String) s)
             .collect(Collectors.toSet());
     Assertions.assertEquals(expectedPlainStrings, actual);
+  }
+
+  protected Document wrapBsonList(List<org.bson.conversions.Bson> docs) {
+    return new Document("value", docs);
   }
 
   protected void shouldReturnExpectedDocumentsBasedOnLookupWithPipelineForFilterOperator(
@@ -119,6 +124,7 @@ public abstract class AbstractExpandOperatorForQueryObjectTest extends AbstractI
     pipeline.add(new Document("$match", new Document("_id", rootDocumentId)));
     pipeline.addAll(result.getStageObjects());
     List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+    System.out.println(wrapBsonList(pipeline).toJson());
 
     // THEN
     Set<String> actual =
