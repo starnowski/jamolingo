@@ -453,8 +453,8 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
             "$expand=treeType2s($levels=5;$filter=index in (1, 2))",
             """
                                                     [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "renamed_categoryId": 1,
-                                                     "treeType2s": [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "renamed_categoryId": 1, "treeType1Id": 1 },
-                                                     { "_id": 2, "renamed_index": 2, "renamed_parentId": 1, "renamed_categoryId": 1, "treeType1Id": 1 }
+                                                     "treeType2s": [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "renamed_categoryId": 1, "renamed_treeType1Id": 1 },
+                                                     { "_id": 2, "renamed_index": 2, "renamed_parentId": 1, "renamed_categoryId": 1, "renamed_treeType1Id": 1 }
                                                      ]
                                                     }]
                                                     """,
@@ -1059,21 +1059,21 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                     "renamed_index": 4,
                                                                                     "renamed_parentId": null,
                                                                                     "renamed_categoryId": 1,
-                                                                                    "treeType1Id": 2
+                                                                                    "renamed_treeType1Id": 2
                                                                                 },
                                                                                 {
                                                                                     "_id": 5,
                                                                                     "renamed_index": 5,
                                                                                     "renamed_parentId": 4,
                                                                                     "renamed_categoryId": 1,
-                                                                                    "treeType1Id": 2
+                                                                                    "renamed_treeType1Id": 2
                                                                                 },
                                                                                 {
                                                                                     "_id": 6,
                                                                                     "renamed_index": 6,
                                                                                     "renamed_parentId": 5,
                                                                                     "renamed_categoryId": 2,
-                                                                                    "treeType1Id": 2
+                                                                                    "renamed_treeType1Id": 2
                                                                                 }
                                                                             ]
                                                                         },
@@ -1144,21 +1144,21 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                             "renamed_index": 4,
                                                                                             "renamed_parentId": null,
                                                                                             "renamed_categoryId": 1,
-                                                                                            "treeType1Id": 2
+                                                                                            "renamed_treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 5,
                                                                                             "renamed_index": 5,
                                                                                             "renamed_parentId": 4,
                                                                                             "renamed_categoryId": 1,
-                                                                                            "treeType1Id": 2
+                                                                                            "renamed_treeType1Id": 2
                                                                                         },
                                                                                         {
                                                                                             "_id": 6,
                                                                                             "renamed_index": 6,
                                                                                             "renamed_parentId": 5,
                                                                                             "renamed_categoryId": 2,
-                                                                                            "treeType1Id": 2
+                                                                                            "renamed_treeType1Id": 2
                                                                                         }
                                                                                     ]
                                                                                 },
@@ -1313,21 +1313,21 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                                                         "renamed_index": 1,
                                                                                                         "renamed_parentId": null,
                                                                                                         "renamed_categoryId": 1,
-                                                                                                        "treeType1Id": 1
+                                                                                                        "renamed_treeType1Id": 1
                                                                                                     },
                                                                                                     {
                                                                                                         "_id": 2,
                                                                                                         "renamed_index": 2,
                                                                                                         "renamed_parentId": 1,
                                                                                                         "renamed_categoryId": 1,
-                                                                                                        "treeType1Id": 1
+                                                                                                        "renamed_treeType1Id": 1
                                                                                                     },
                                                                                                     {
                                                                                                         "_id": 3,
                                                                                                         "renamed_index": 3,
                                                                                                         "renamed_parentId": 2,
                                                                                                         "renamed_categoryId": 2,
-                                                                                                        "treeType1Id": 1
+                                                                                                        "renamed_treeType1Id": 1
                                                                                                     }
                                                                                                 ]
                                                                                             }
@@ -1428,17 +1428,17 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                     				{
                     					"_id": 1,
                     					"renamed_index": 1,
-                    					"treeType1Id": 1
+                    					"renamed_treeType1Id": 1
                     				},
                     				{
                     					"_id": 2,
                     					"renamed_index": 2,
-                    					"treeType1Id": 1
+                    					"renamed_treeType1Id": 1
                     				},
                     				{
                     					"_id": 3,
                     					"renamed_index": 3,
-                    					"treeType1Id": 1
+                    					"renamed_treeType1Id": 1
                     				}
                     			]
                     		}
@@ -1531,9 +1531,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
     ExpandOperatorResult result =
         tested.parse(
             uriInfo.getExpandOption(),
-            ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
-                .withUseLookupForLevelGreaterThanOne(true)
-                .build());
+            createParserContextBuilder().withUseLookupForLevelGreaterThanOne(true).build());
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
     pipeline.addAll(result.getStageObjects());
@@ -1579,7 +1577,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
     ExpandOperatorResult result =
         tested.parse(
             uriInfo.getExpandOption(),
-            ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+            createParserContextBuilder()
                 .withUseLookupForLevelGreaterThanOne(
                     false) // GraphLookUp is suppose to be used to resolve
                 .withPropagateGraphLookUpJoinKeys(true)
@@ -1605,7 +1603,85 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
         jsonCompareMode);
   }
 
-  private Document wrapBsonList(List<Bson> docs) {
+  private ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder
+      createParserContextBuilder() {
+    java.util.Map<String, com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade>
+        edmTypeMapping = new java.util.HashMap<>();
+    com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder builder =
+        new com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder();
+
+    com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory factory =
+        new com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory();
+    org.apache.olingo.commons.api.edm.Edm edm = null;
+    try {
+      edm = loadEmdProvider("edm/tree_types.xml");
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+    com.github.starnowski.jamolingo.core.mapping.ODataMongoMapping odataMapping =
+        factory.build(edm.getSchema("MyService"));
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping category =
+        odataMapping.getEntities().get("Category");
+    category.getProperties().get("name").setMongoPath("renamed_name");
+    edmTypeMapping.put(
+        "MyService.Category",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(category))
+            .build());
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping t1 =
+        odataMapping.getEntities().get("TreeType1");
+    t1.getProperties().get("index").setMongoPath("renamed_index");
+    t1.getProperties().get("parentId").setMongoPath("renamed_parentId");
+    t1.getProperties().get("categoryId").setMongoPath("renamed_categoryId");
+    edmTypeMapping.put(
+        "MyService.TreeType1",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(t1))
+            .build());
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping t2 =
+        odataMapping.getEntities().get("TreeType2");
+    t2.getProperties().get("index").setMongoPath("renamed_index");
+    t2.getProperties().get("parentId").setMongoPath("renamed_parentId");
+    t2.getProperties().get("categoryId").setMongoPath("renamed_categoryId");
+    t2.getProperties().get("treeType1Id").setMongoPath("renamed_treeType1Id");
+    edmTypeMapping.put(
+        "MyService.TreeType2",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(t2))
+            .build());
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping t3 =
+        odataMapping.getEntities().get("TreeType3");
+    t3.getProperties().get("index").setMongoPath("renamed_index");
+    t3.getProperties().get("parentId").setMongoPath("renamed_parentId");
+    t3.getProperties().get("categoryId").setMongoPath("renamed_categoryId");
+    t3.getProperties().get("treeType2Id").setMongoPath("renamed_treeType2Id");
+    edmTypeMapping.put(
+        "MyService.TreeType3",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(t3))
+            .build());
+
+    com.github.starnowski.jamolingo.core.mapping.EntityMapping t4 =
+        odataMapping.getEntities().get("TreeType4");
+    t4.getProperties().get("index").setMongoPath("renamed_index");
+    t4.getProperties().get("parentId").setMongoPath("renamed_parentId");
+    t4.getProperties().get("categoryId").setMongoPath("renamed_categoryId");
+    t4.getProperties().get("treeType3Id").setMongoPath("renamed_treeType3Id");
+    edmTypeMapping.put(
+        "MyService.TreeType4",
+        com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade.builder()
+            .withEntityPropertiesMongoPathContext(builder.build(t4))
+            .build());
+
+    return ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+        .withEdmTypeMapping(edmTypeMapping);
+  }
+
+  private Document wrapBsonList(List<org.bson.conversions.Bson> docs) {
     return new Document("value", docs);
   }
 
