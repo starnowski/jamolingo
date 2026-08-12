@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.starnowski.jamolingo</groupId>
         <artifactId>demos</artifactId>
-        <version>0.9.0</version>
+        <version>0.9.1</version>
     </parent>
 
     <artifactId>spring-boot-webapp</artifactId>
