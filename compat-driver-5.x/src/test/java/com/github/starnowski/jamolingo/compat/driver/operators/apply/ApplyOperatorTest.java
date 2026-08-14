@@ -135,6 +135,14 @@ public class ApplyOperatorTest extends AbstractItTest {
                              """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
+            "orderby(smallInteger desc,plainString)/top(1)",
+            """
+                                     [
+                                       {"smallInteger": -113, "plainString": "Poem"}
+                                     ]
+                                     """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
             "filter(plainString eq 'Mario')/groupby((plainString))",
             "[{\"_id\": {\"plainString\": \"Mario\"}}]",
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT));
