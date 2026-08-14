@@ -52,6 +52,9 @@ public class ODataApplyToMongoAggregationPipelineParser {
     } else if (applyItem.getKind() == ApplyItem.Kind.SEARCH) {
       return new SearchItemParser();
     }
+    // TODO BOTTOM_TOP
+    // TODO CUSTOM_FUNCTION
+    // EXPAND
     return null;
   }
 }
