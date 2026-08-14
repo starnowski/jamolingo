@@ -35,6 +35,22 @@ public class ODataApplyToMongoAggregationPipelineParser {
       return new FilterItemParser();
     } else if (applyItem.getKind() == ApplyItem.Kind.IDENTITY) {
       return new IdentityItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.GROUP_BY) {
+      return new GroupByItemParser(this);
+    } else if (applyItem.getKind() == ApplyItem.Kind.ORDERBY) {
+      return new OrderByItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.TOP) {
+      return new TopItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.SKIP) {
+      return new SkipItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.AGGREGATE) {
+      return new AggregateItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.COMPUTE) {
+      return new ComputeItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.CONCAT) {
+      return new ConcatItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.SEARCH) {
+      return new SearchItemParser();
     }
     return null;
   }

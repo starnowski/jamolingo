@@ -82,9 +82,20 @@ public class ApplyOperatorTest extends AbstractItTest {
     Assertions.assertEquals(expectedPlainStrings.size(), results.size());
     Set<String> actual =
         results.stream()
-            .map(d -> d.get("plainString"))
+            .map(
+                d -> {
+                  if (d.containsKey("plainString")) {
+                    return d.getString("plainString");
+                  }
+                  if (d.containsKey("_id") && d.get("_id") instanceof Document) {
+                    Document idDoc = (Document) d.get("_id");
+                    if (idDoc.containsKey("plainString")) {
+                      return idDoc.getString("plainString");
+                    }
+                  }
+                  return null;
+                })
             .filter(Objects::nonNull)
-            .map(s -> (String) s)
             .collect(Collectors.toSet());
 
     Assertions.assertEquals(expectedPlainStrings, actual);
@@ -94,7 +105,9 @@ public class ApplyOperatorTest extends AbstractItTest {
     return Stream.of(
         Arguments.of("filter(plainString eq 'eOMtThyhVNLWUZNRcBaQKxI')", Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
         Arguments.of("filter(plainString eq 'Some text')", Set.of("Some text")),
-        Arguments.of("identity", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Mario", "Poem"))
+        Arguments.of("identity", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Mario", "Poem")),
+        Arguments.of("groupby((plainString))", Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Mario", "Poem")),
+        Arguments.of("filter(plainString eq 'Mario')/groupby((plainString))", Set.of("Mario"))
     );
   }
 }
