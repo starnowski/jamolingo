@@ -125,6 +125,16 @@ public class ApplyOperatorTest extends AbstractItTest {
                      """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
+            "orderby(smallInteger,plainString)/top(2)",
+            // TODO Document with the "Mario" text does not have the smallInteger property
+            """
+                             [
+                               {"plainString": "Mario"},
+                               {"smallInteger": -1188957731, "plainString": "Some text"}
+                             ]
+                             """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
             "filter(plainString eq 'Mario')/groupby((plainString))",
             "[{\"_id\": {\"plainString\": \"Mario\"}}]",
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT));
