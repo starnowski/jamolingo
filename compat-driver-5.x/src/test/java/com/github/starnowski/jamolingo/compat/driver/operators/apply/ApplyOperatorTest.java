@@ -104,6 +104,7 @@ public class ApplyOperatorTest extends AbstractItTest {
             "[{\"plainString\": \"Some text\"}]",
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
+            // TODO It tests nothing right now
             "identity",
             """
                      [
