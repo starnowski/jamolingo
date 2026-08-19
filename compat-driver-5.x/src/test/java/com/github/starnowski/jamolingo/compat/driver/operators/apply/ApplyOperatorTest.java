@@ -58,10 +58,20 @@ public class ApplyOperatorTest extends AbstractItTest {
       String expectedJson,
       org.skyscreamer.jsonassert.JSONCompareMode jsonCompareMode)
       throws Exception {
+    shouldReturnExpectedDocumentsBasedOnApplyOperator(
+        applyQuery, expectedJson, jsonCompareMode, "edm/edm6_filter_main.xml");
+  }
+
+  private void shouldReturnExpectedDocumentsBasedOnApplyOperator(
+      String applyQuery,
+      String expectedJson,
+      org.skyscreamer.jsonassert.JSONCompareMode jsonCompareMode,
+      String edmContextFile)
+      throws Exception {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
-    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
+    Edm edm = loadEmdProvider(edmContextFile);
 
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
@@ -83,8 +93,8 @@ public class ApplyOperatorTest extends AbstractItTest {
     System.out.println(currentResult);
     org.skyscreamer.jsonassert.JSONAssert.assertEquals(
         """
-            {"value": %s }
-            """.formatted(expectedJson),
+                {"value": %s }
+                """.formatted(expectedJson),
         currentResult,
         jsonCompareMode);
   }
@@ -152,7 +162,6 @@ public class ApplyOperatorTest extends AbstractItTest {
                                              ]
                                              """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
-        // TODO groupby
         Arguments.of(
             "filter(plainString eq 'Mario')/groupby((plainString))",
             "[{\"plainString\": \"Mario\"}]",
