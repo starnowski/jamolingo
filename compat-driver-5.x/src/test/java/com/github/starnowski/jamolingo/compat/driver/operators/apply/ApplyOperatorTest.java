@@ -75,6 +75,7 @@ public class ApplyOperatorTest extends AbstractItTest {
     List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
 
     List<Document> results = new ArrayList<>();
+    System.out.println(wrapDocumentsList(pipeline).toJson());
     collection.aggregate(pipeline).into(results);
 
     // THEN
@@ -88,7 +89,7 @@ public class ApplyOperatorTest extends AbstractItTest {
         jsonCompareMode);
   }
 
-  private Document wrapDocumentsList(List<Document> docs) {
+  private Document wrapDocumentsList(List<? extends Bson> docs) {
     return new Document("value", docs);
   }
 
