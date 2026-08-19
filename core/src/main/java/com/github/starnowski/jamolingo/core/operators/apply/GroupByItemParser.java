@@ -38,9 +38,11 @@ public class GroupByItemParser implements ApplyItemParser {
     }
 
     Document groupStage = new Document("$group", new Document("_id", idDoc));
+    Document replaceRootStage = new Document("$replaceRoot", new Document("newRoot", "$_id"));
 
     List<Bson> stages = new ArrayList<>();
     stages.add(groupStage);
+    stages.add(replaceRootStage);
 
     if (groupBy.getApplyOption() != null) {
       ApplyOperatorResult innerResult =

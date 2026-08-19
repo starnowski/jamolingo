@@ -118,10 +118,10 @@ public class ApplyOperatorTest extends AbstractItTest {
             "groupby((plainString))",
             """
                      [
-                       {"_id": {"plainString": "eOMtThyhVNLWUZNRcBaQKxI"}},
-                       {"_id": {"plainString": "Some text"}},
-                       {"_id": {"plainString": "Mario"}},
-                       {"_id": {"plainString": "Poem"}}
+                       {"plainString": "eOMtThyhVNLWUZNRcBaQKxI"},
+                       {"plainString": "Some text"},
+                       {"plainString": "Mario"},
+                       {"plainString": "Poem"}
                      ]
                      """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
@@ -158,7 +158,7 @@ public class ApplyOperatorTest extends AbstractItTest {
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
             "filter(plainString eq 'Poem')/groupby((plainString,smallInteger))",
-            "[{\"plainString\": \"Poem\", \"smallInteger\": -1188957731}]",
+            "[{\"plainString\": \"Poem\", \"smallInteger\": -113}]",
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT));
   }
 }
