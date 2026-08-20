@@ -3,7 +3,8 @@
     <edmx:DataServices>
         <Schema xmlns="http://docs.oasis-open.org/odata/ns/edm" Namespace="MyService">
             <EntityType Name="Example2">
-                <Property Name="plainString" Type="Edm.String"></Property>
+                <Property Name="plainString1" Type="Edm.String"></Property>
+                <Property Name="plainString2" Type="Edm.String"></Property>
                 <Property Name="genericInteger" Type="Edm.Int64"></Property>
                 <Property Name="genericNumber" Type="Edm.Decimal"></Property>
                 <Property Name="smallInteger1" Type="Edm.Int32"></Property>
