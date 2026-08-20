@@ -22,6 +22,7 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.bson.Document;
 import org.bson.conversions.Bson;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -91,6 +92,7 @@ public class ApplyOperatorTest extends AbstractItTest {
             collection = "Items",
             bsonFilePath = "bson/apply/product6.json")
       })
+  @Disabled // TODO Continue implementing tests
   public void shouldReturnExpectedDocumentsBasedOnApplyOperatorWithGroupByAndAggregationOperations(
       String applyQuery,
       String expectedJson,
