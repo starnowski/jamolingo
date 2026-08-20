@@ -63,7 +63,7 @@ public class ApplyOperatorTest extends AbstractItTest {
   }
 
   @ParameterizedTest
-  @MethodSource("provideApplyTestCases")
+  @MethodSource("provideApplyTestCasesForGroupByAndAggregationOperations")
   @MongoSetup(
       mongoDocuments = {
         @MongoDocument(
@@ -131,8 +131,8 @@ public class ApplyOperatorTest extends AbstractItTest {
     System.out.println(currentResult);
     org.skyscreamer.jsonassert.JSONAssert.assertEquals(
         """
-                {"value": %s }
-                """.formatted(expectedJson),
+                    {"value": %s }
+                    """.formatted(expectedJson),
         currentResult,
         jsonCompareMode);
   }
@@ -155,51 +155,63 @@ public class ApplyOperatorTest extends AbstractItTest {
             // TODO It tests nothing right now
             "identity",
             """
-                     [
-                       {"plainString": "eOMtThyhVNLWUZNRcBaQKxI"},
-                       {"plainString": "Some text"},
-                       {"plainString": "Mario"},
-                       {"plainString": "Poem"}
-                     ]
-                     """,
+                            [
+                              {"plainString": "eOMtThyhVNLWUZNRcBaQKxI"},
+                              {"plainString": "Some text"},
+                              {"plainString": "Mario"},
+                              {"plainString": "Poem"}
+                            ]
+                            """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
             "groupby((plainString))",
             """
-                     [
-                       {"plainString": "eOMtThyhVNLWUZNRcBaQKxI"},
-                       {"plainString": "Some text"},
-                       {"plainString": "Mario"},
-                       {"plainString": "Poem"}
-                     ]
-                     """,
+                            [
+                              {"plainString": "eOMtThyhVNLWUZNRcBaQKxI"},
+                              {"plainString": "Some text"},
+                              {"plainString": "Mario"},
+                              {"plainString": "Poem"}
+                            ]
+                            """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
             "orderby(smallInteger,plainString)/top(2)",
             // TODO Document with the "Mario" text does not have the smallInteger property
             """
-                             [
-                               {"plainString": "Mario"},
-                               {"smallInteger": -1188957731, "plainString": "Some text"}
-                             ]
-                             """,
+                            [
+                              {"plainString": "Mario"},
+                              {"smallInteger": -1188957731, "plainString": "Some text"}
+                            ]
+                            """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
             "orderby(smallInteger desc,plainString)/top(1)",
             """
-                                     [
-                                       {"smallInteger": -113, "plainString": "Poem"}
-                                     ]
-                                     """,
+                            [
+                              {"smallInteger": -113, "plainString": "Poem"}
+                            ]
+                            """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
             "orderby(smallInteger,plainString)/skip(1)/top(1)",
             """
-                                             [
-                                                {"smallInteger": -1188957731, "plainString": "Some text"}
-                                             ]
-                                             """,
+                            [
+                               {"smallInteger": -1188957731, "plainString": "Some text"}
+                            ]
+                            """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
+            "filter(plainString eq 'Mario')/groupby((plainString))",
+            "[{\"plainString\": \"Mario\"}]",
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
+            "filter(plainString eq 'Poem')/groupby((plainString,smallInteger))",
+            "[{\"plainString\": \"Poem\", \"smallInteger\": -113}]",
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT));
+  }
+
+  private static Stream<Arguments> provideApplyTestCasesForGroupByAndAggregationOperations() {
+    return Stream.of(
         Arguments.of(
             "filter(plainString eq 'Mario')/groupby((plainString))",
             "[{\"plainString\": \"Mario\"}]",
