@@ -33,13 +33,18 @@ class GroupByItemParserTest extends Specification {
         def result = parser.parse(groupBy, pathResolver)
 
         then:
-        result.stageObjects.size() == 1
+        result.stageObjects.size() == 2
         def groupStage = result.stageObjects[0] as Document
         groupStage.containsKey('$group')
         def idDoc = groupStage.get('$group') as Document
         def idVal = idDoc.get('_id') as Document
         idVal.containsKey('prop1')
         idVal.get('prop1') == '$prop1'
+        
+        def replaceRootStage = result.stageObjects[1] as Document
+        replaceRootStage.containsKey('$replaceRoot')
+        def newRootDoc = replaceRootStage.get('$replaceRoot') as Document
+        newRootDoc.get('newRoot') == '$_id'
     }
 
     def "should map multiple grouping properties to _id in group stage"() {
@@ -75,7 +80,7 @@ class GroupByItemParserTest extends Specification {
         def result = parser.parse(groupBy, pathResolver)
 
         then:
-        result.stageObjects.size() == 1
+        result.stageObjects.size() == 2
         def groupStage = result.stageObjects[0] as Document
         groupStage.containsKey('$group')
         def idDoc = groupStage.get('$group') as Document
@@ -84,6 +89,11 @@ class GroupByItemParserTest extends Specification {
         idVal.get('prop1') == '$prop1'
         idVal.containsKey('prop2.subProp')
         idVal.get('prop2.subProp') == '$prop2.subProp'
+
+        def replaceRootStage = result.stageObjects[1] as Document
+        replaceRootStage.containsKey('$replaceRoot')
+        def newRootDoc = replaceRootStage.get('$replaceRoot') as Document
+        newRootDoc.get('newRoot') == '$_id'
     }
 
     def "should append stages from inner ApplyOption if nested transformations exist"() {
@@ -117,9 +127,15 @@ class GroupByItemParserTest extends Specification {
         def result = parser.parse(groupBy, pathResolver)
 
         then:
-        result.stageObjects.size() == 2
+        result.stageObjects.size() == 3
         def groupStage = result.stageObjects[0] as Document
         groupStage.containsKey('$group')
-        result.stageObjects[1] == innerStage
+
+        def replaceRootStage = result.stageObjects[1] as Document
+        replaceRootStage.containsKey('$replaceRoot')
+        def newRootDoc = replaceRootStage.get('$replaceRoot') as Document
+        newRootDoc.get('newRoot') == '$_id'
+
+        result.stageObjects[2] == innerStage
     }
 }
