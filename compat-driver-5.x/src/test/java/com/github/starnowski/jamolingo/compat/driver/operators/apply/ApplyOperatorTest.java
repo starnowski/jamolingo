@@ -62,6 +62,44 @@ public class ApplyOperatorTest extends AbstractItTest {
         applyQuery, expectedJson, jsonCompareMode, "edm/edm6_filter_main.xml");
   }
 
+  @ParameterizedTest
+  @MethodSource("provideApplyTestCases")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/apply/product1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/apply/product2.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/apply/product3.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/apply/product4.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/apply/product5.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/apply/product6.json")
+      })
+  public void shouldReturnExpectedDocumentsBasedOnApplyOperatorWithGroupByAndAggregationOperations(
+      String applyQuery,
+      String expectedJson,
+      org.skyscreamer.jsonassert.JSONCompareMode jsonCompareMode)
+      throws Exception {
+    shouldReturnExpectedDocumentsBasedOnApplyOperator(
+        applyQuery, expectedJson, jsonCompareMode, "edm/edm8_apply_aggregate.xml");
+  }
+
   private void shouldReturnExpectedDocumentsBasedOnApplyOperator(
       String applyQuery,
       String expectedJson,
