@@ -22,7 +22,6 @@ import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.bson.Document;
 import org.bson.conversions.Bson;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -221,6 +220,15 @@ public class ApplyOperatorTest extends AbstractItTest {
                       {"plainString2": "Books", "genericIntegerSum": 950}
                     ]
                     """,
+            org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE),
+        Arguments.of(
+            "groupby((plainString2),aggregate(genericInteger with max as genericIntegerMax))",
+            """
+                            [
+                              {"plainString2": "Electronics", "genericIntegerMax": 200},
+                              {"plainString2": "Books", "genericIntegerMax": 500}
+                            ]
+                            """,
             org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE));
   }
 }
