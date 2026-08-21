@@ -239,23 +239,32 @@ public class ApplyOperatorTest extends AbstractItTest {
                                     ]
                                     """,
             org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE),
-            Arguments.of(
-                    "groupby((plainString2),aggregate(genericInteger with average as genericIntegerAvg))",
-                    """
+        Arguments.of(
+            "groupby((plainString2),aggregate(genericInteger with average as genericIntegerAvg))",
+            """
                                             [
                                               {"plainString2": "Electronics", "genericIntegerAvg": 116.66666666666667},
                                               {"plainString2": "Books", "genericIntegerAvg": 316.6666666666667}
                                             ]
                                             """,
-                    org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE),
-            Arguments.of(
-                    "groupby((plainString2),aggregate(smallInteger1 with countdistinct as smallInteger1Countdistinct))",
-                    """
+            org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE),
+        Arguments.of(
+            "groupby((plainString2),aggregate(smallInteger1 with countdistinct as smallInteger1Countdistinct))",
+            """
                                             [
                                               {"plainString2": "Electronics", "smallInteger1Countdistinct": 2},
                                               {"plainString2": "Books", "smallInteger1Countdistinct": 2}
                                             ]
                                             """,
-                    org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE));
+            org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE),
+        Arguments.of(
+            "groupby((plainString2),aggregate(genericInteger with average as genericIntegerAvg,smallInteger1 with countdistinct as smallInteger1Countdistinct))",
+            """
+                                            [
+                                              {"plainString2": "Electronics", "genericIntegerAvg": 116.66666666666667, "smallInteger1Countdistinct": 2},
+                                              {"plainString2": "Books", "genericIntegerAvg": 316.6666666666667, "smallInteger1Countdistinct": 2}
+                                            ]
+                                            """,
+            org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE));
   }
 }
