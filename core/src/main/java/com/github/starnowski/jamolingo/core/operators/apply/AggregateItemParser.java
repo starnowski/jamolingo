@@ -36,9 +36,15 @@ public class AggregateItemParser implements ApplyItemParser {
         method = "avg";
       }
 
-      String mongoOperator = "$" + method;
-      groupStageDoc.put(alias, new org.bson.Document(mongoOperator, "$" + mongoPath));
-      projectStageDoc.put(alias, 1);
+      if ("count_distinct".equals(method)) {
+        String distinctArrayField = alias + "_distinctArray";
+        groupStageDoc.put(distinctArrayField, new org.bson.Document("$addToSet", "$" + mongoPath));
+        projectStageDoc.put(alias, new org.bson.Document("$size", "$" + distinctArrayField));
+      } else {
+        String mongoOperator = "$" + method;
+        groupStageDoc.put(alias, new org.bson.Document(mongoOperator, "$" + mongoPath));
+        projectStageDoc.put(alias, 1);
+      }
     }
 
     org.bson.Document groupStage = new org.bson.Document("$group", groupStageDoc);

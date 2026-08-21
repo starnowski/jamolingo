@@ -252,8 +252,8 @@ public class ApplyOperatorTest extends AbstractItTest {
                     "groupby((plainString2),aggregate(smallInteger1 with countdistinct as smallInteger1Countdistinct))",
                     """
                                             [
-                                              {"plainString2": "Electronics", "smallInteger1Avg": 2},
-                                              {"plainString2": "Books", "smallInteger1Avg": 2}
+                                              {"plainString2": "Electronics", "smallInteger1Countdistinct": 2},
+                                              {"plainString2": "Books", "smallInteger1Countdistinct": 2}
                                             ]
                                             """,
                     org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE));

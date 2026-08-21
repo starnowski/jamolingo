@@ -72,9 +72,15 @@ public class GroupByItemParser implements ApplyItemParser {
             if ("average".equals(method)) {
               method = "avg";
             }
-            String mongoOperator = "$" + method;
-            groupStageDoc.put(alias, new Document(mongoOperator, "$" + mongoPath));
-            projectStageDoc.put(alias, 1);
+            if ("count_distinct".equals(method)) {
+              String distinctArrayField = alias + "_distinctArray";
+              groupStageDoc.put(distinctArrayField, new Document("$addToSet", "$" + mongoPath));
+              projectStageDoc.put(alias, new Document("$size", "$" + distinctArrayField));
+            } else {
+              String mongoOperator = "$" + method;
+              groupStageDoc.put(alias, new Document(mongoOperator, "$" + mongoPath));
+              projectStageDoc.put(alias, 1);
+            }
           }
         } else {
           remainingItems.add(item);
