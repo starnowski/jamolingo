@@ -5,7 +5,7 @@ import org.apache.olingo.server.api.uri.queryoption.ApplyItem
 import spock.lang.Specification
 
 class AggregateItemParserTest extends Specification {
-    def "should throw unsupported exception"() {
+    def "should throw IllegalArgumentException when non-Aggregate item is passed"() {
         given:
         def parser = new AggregateItemParser()
 
@@ -13,6 +13,6 @@ class AggregateItemParserTest extends Specification {
         parser.parse(Mock(ApplyItem), Mock(EdmPropertyMongoPathResolver))
 
         then:
-        thrown(UnsupportedOperationException)
+        thrown(IllegalArgumentException)
     }
 }

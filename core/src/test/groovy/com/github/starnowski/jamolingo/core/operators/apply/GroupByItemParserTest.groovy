@@ -41,10 +41,11 @@ class GroupByItemParserTest extends Specification {
         idVal.containsKey('prop1')
         idVal.get('prop1') == '$prop1'
         
-        def replaceRootStage = result.stageObjects[1] as Document
-        replaceRootStage.containsKey('$replaceRoot')
-        def newRootDoc = replaceRootStage.get('$replaceRoot') as Document
-        newRootDoc.get('newRoot') == '$_id'
+        def projectStage = result.stageObjects[1] as Document
+        projectStage.containsKey('$project')
+        def projectDoc = projectStage.get('$project') as Document
+        projectDoc.get('_id') == 0
+        projectDoc.get('prop1') == '$_id.prop1'
     }
 
     def "should map multiple grouping properties to _id in group stage"() {
@@ -90,10 +91,12 @@ class GroupByItemParserTest extends Specification {
         idVal.containsKey('prop2.subProp')
         idVal.get('prop2.subProp') == '$prop2.subProp'
 
-        def replaceRootStage = result.stageObjects[1] as Document
-        replaceRootStage.containsKey('$replaceRoot')
-        def newRootDoc = replaceRootStage.get('$replaceRoot') as Document
-        newRootDoc.get('newRoot') == '$_id'
+        def projectStage = result.stageObjects[1] as Document
+        projectStage.containsKey('$project')
+        def projectDoc = projectStage.get('$project') as Document
+        projectDoc.get('_id') == 0
+        projectDoc.get('prop1') == '$_id.prop1'
+        projectDoc.get('prop2.subProp') == '$_id.prop2.subProp'
     }
 
     def "should append stages from inner ApplyOption if nested transformations exist"() {
@@ -102,7 +105,7 @@ class GroupByItemParserTest extends Specification {
         def innerStage = new Document('$limit', 5)
         def applyParser = new ODataApplyToMongoAggregationPipelineParser() {
             @Override
-            ApplyOperatorResult parse(ApplyOption applyOption, EdmPropertyMongoPathResolver edmMongoContextFacade) {
+            ApplyOperatorResult parse(List<ApplyItem> applyItems, EdmPropertyMongoPathResolver edmMongoContextFacade) {
                 return DefaultApplyOperatorResult.builder().withStageObjects([innerStage]).build()
             }
         }
@@ -117,6 +120,8 @@ class GroupByItemParserTest extends Specification {
         groupBy.getGroupByItems() >> [groupByItem1]
         
         def innerApplyOption = Mock(ApplyOption)
+        def dummyApplyItem = Mock(ApplyItem) // Some non-aggregate item to trigger recursive parsing
+        innerApplyOption.getApplyItems() >> [dummyApplyItem]
         groupBy.getApplyOption() >> innerApplyOption
         
         def res1 = Mock(MongoPathResolution)
@@ -131,10 +136,11 @@ class GroupByItemParserTest extends Specification {
         def groupStage = result.stageObjects[0] as Document
         groupStage.containsKey('$group')
 
-        def replaceRootStage = result.stageObjects[1] as Document
-        replaceRootStage.containsKey('$replaceRoot')
-        def newRootDoc = replaceRootStage.get('$replaceRoot') as Document
-        newRootDoc.get('newRoot') == '$_id'
+        def projectStage = result.stageObjects[1] as Document
+        projectStage.containsKey('$project')
+        def projectDoc = projectStage.get('$project') as Document
+        projectDoc.get('_id') == 0
+        projectDoc.get('prop1') == '$_id.prop1'
 
         result.stageObjects[2] == innerStage
     }
