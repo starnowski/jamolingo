@@ -15,9 +15,17 @@ public class ODataApplyToMongoAggregationPipelineParser {
         || applyOption.getApplyItems().isEmpty()) {
       return DefaultApplyOperatorResult.builder().withStageObjects(Collections.emptyList()).build();
     }
+    return parse(applyOption.getApplyItems(), edmMongoContextFacade);
+  }
+
+  public ApplyOperatorResult parse(
+      List<ApplyItem> applyItems, EdmPropertyMongoPathResolver edmMongoContextFacade) {
+    if (applyItems == null || applyItems.isEmpty()) {
+      return DefaultApplyOperatorResult.builder().withStageObjects(Collections.emptyList()).build();
+    }
 
     List<org.bson.conversions.Bson> stages = new java.util.ArrayList<>();
-    for (ApplyItem applyItem : applyOption.getApplyItems()) {
+    for (ApplyItem applyItem : applyItems) {
       ApplyItemParser parser = getParser(applyItem);
       if (parser != null) {
         ApplyOperatorResult result = parser.parse(applyItem, edmMongoContextFacade);

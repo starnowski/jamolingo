@@ -214,11 +214,11 @@ public class ApplyOperatorTest extends AbstractItTest {
   private static Stream<Arguments> provideApplyTestCasesForGroupByAndAggregationOperations() {
     return Stream.of(
         Arguments.of(
-            "groupby((plainString1),aggregate(genericInteger with sum as genericIntegerSum))",
+            "groupby((plainString2),aggregate(genericInteger with sum as genericIntegerSum))",
             """
                     [
-                      {"plainString1": "Electronics", "genericIntegerSum": 550},
-                      {"plainString1": "Books", "genericIntegerSum": 950}
+                      {"plainString2": "Electronics", "genericIntegerSum": 350},
+                      {"plainString2": "Books", "genericIntegerSum": 950}
                     ]
                     """,
             org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE));
