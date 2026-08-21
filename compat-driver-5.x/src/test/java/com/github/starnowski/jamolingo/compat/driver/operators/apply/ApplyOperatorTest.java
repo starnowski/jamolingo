@@ -92,7 +92,6 @@ public class ApplyOperatorTest extends AbstractItTest {
             collection = "Items",
             bsonFilePath = "bson/apply/product6.json")
       })
-  @Disabled // TODO Continue implementing tests
   public void shouldReturnExpectedDocumentsBasedOnApplyOperatorWithGroupByAndAggregationOperations(
       String applyQuery,
       String expectedJson,
@@ -215,12 +214,13 @@ public class ApplyOperatorTest extends AbstractItTest {
   private static Stream<Arguments> provideApplyTestCasesForGroupByAndAggregationOperations() {
     return Stream.of(
         Arguments.of(
-            "filter(plainString eq 'Mario')/groupby((plainString))",
-            "[{\"plainString\": \"Mario\"}]",
-            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
-        Arguments.of(
-            "filter(plainString eq 'Poem')/groupby((plainString,smallInteger))",
-            "[{\"plainString\": \"Poem\", \"smallInteger\": -113}]",
-            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT));
+            "groupby((plainString1), aggregate(genericInteger with sum as genericIntegerSum))",
+            """
+                    [
+                      {"plainString1": "Electronics", "genericIntegerSum": 550},
+                      {"plainString1": "Books", "genericIntegerSum": 950}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE));
   }
 }
