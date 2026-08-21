@@ -243,8 +243,8 @@ public class ApplyOperatorTest extends AbstractItTest {
                     "groupby((plainString2),aggregate(genericInteger with average as genericIntegerAvg))",
                     """
                                             [
-                                              {"plainString2": "Electronics", "genericIntegerMin": 167},
-                                              {"plainString2": "Books", "genericIntegerMin": 300}
+                                              {"plainString2": "Electronics", "genericIntegerAvg": 116.66666666666667},
+                                              {"plainString2": "Books", "genericIntegerAvg": 316.6666666666667}
                                             ]
                                             """,
                     org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE));

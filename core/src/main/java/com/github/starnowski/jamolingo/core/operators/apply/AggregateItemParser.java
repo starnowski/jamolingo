@@ -32,6 +32,9 @@ public class AggregateItemParser implements ApplyItemParser {
       }
       String mongoPath = edmMongoContextFacade.resolveMongoPathForEDMPath(path).getMongoPath();
       String method = expr.getStandardMethod().name().toLowerCase();
+      if ("average".equals(method)) {
+        method = "avg";
+      }
 
       String mongoOperator = "$" + method;
       groupStageDoc.put(alias, new org.bson.Document(mongoOperator, "$" + mongoPath));

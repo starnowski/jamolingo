@@ -69,6 +69,9 @@ public class GroupByItemParser implements ApplyItemParser {
             String mongoPath =
                 edmMongoContextFacade.resolveMongoPathForEDMPath(path).getMongoPath();
             String method = expr.getStandardMethod().name().toLowerCase();
+            if ("average".equals(method)) {
+              method = "avg";
+            }
             String mongoOperator = "$" + method;
             groupStageDoc.put(alias, new Document(mongoOperator, "$" + mongoPath));
             projectStageDoc.put(alias, 1);
