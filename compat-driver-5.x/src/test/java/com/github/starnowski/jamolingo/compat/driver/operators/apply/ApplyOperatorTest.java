@@ -214,7 +214,7 @@ public class ApplyOperatorTest extends AbstractItTest {
   private static Stream<Arguments> provideApplyTestCasesForGroupByAndAggregationOperations() {
     return Stream.of(
         Arguments.of(
-            "groupby((plainString1), aggregate(genericInteger with sum as genericIntegerSum))",
+            "groupby((plainString1),aggregate(genericInteger with sum as genericIntegerSum))",
             """
                     [
                       {"plainString1": "Electronics", "genericIntegerSum": 550},
