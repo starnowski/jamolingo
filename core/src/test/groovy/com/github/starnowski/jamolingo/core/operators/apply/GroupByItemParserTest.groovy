@@ -144,4 +144,73 @@ class GroupByItemParserTest extends Specification {
 
         result.stageObjects[2] == innerStage
     }
+
+    def "should correctly parse count_distinct method"() {
+        given:
+        def pathResolver = Mock(EdmPropertyMongoPathResolver)
+        def applyParser = new ODataApplyToMongoAggregationPipelineParser()
+        def parser = new GroupByItemParser(applyParser)
+        
+        def groupBy = Mock(GroupBy)
+        def groupByItem1 = Mock(GroupByItem)
+        def uriResource1 = Mock(UriResource)
+        uriResource1.getSegmentValue() >> "prop1"
+        groupByItem1.getPath() >> [uriResource1]
+        groupBy.getGroupByItems() >> [groupByItem1]
+        
+        def innerApplyOption = Mock(ApplyOption)
+        def aggregateItem = Mock(org.apache.olingo.server.api.uri.queryoption.apply.Aggregate)
+        def aggregateExpr = Mock(org.apache.olingo.server.api.uri.queryoption.apply.AggregateExpression)
+        
+        aggregateItem.getExpressions() >> [aggregateExpr]
+        
+        def member = Mock(org.apache.olingo.server.api.uri.queryoption.expression.Member)
+        def memberUriInfo = Mock(org.apache.olingo.server.api.uri.UriInfoResource)
+        def memberUriResource = Mock(UriResource)
+        
+        aggregateExpr.getExpression() >> member
+        member.getResourcePath() >> memberUriInfo
+        memberUriInfo.getUriResourceParts() >> [memberUriResource]
+        memberUriResource.getSegmentValue() >> "prop2"
+        
+        aggregateExpr.getAlias() >> "countVal"
+        aggregateExpr.getStandardMethod() >> org.apache.olingo.server.api.uri.queryoption.apply.AggregateExpression.StandardMethod.COUNT_DISTINCT
+        
+        innerApplyOption.getApplyItems() >> [aggregateItem]
+        groupBy.getApplyOption() >> innerApplyOption
+        
+        def res1 = Mock(MongoPathResolution)
+        res1.getMongoPath() >> "prop1"
+        pathResolver.resolveMongoPathForEDMPath("prop1") >> res1
+        
+        def res2 = Mock(MongoPathResolution)
+        res2.getMongoPath() >> "prop2"
+        pathResolver.resolveMongoPathForEDMPath("prop2") >> res2
+        
+        when:
+        def result = parser.parse(groupBy, pathResolver)
+
+        then:
+        result.stageObjects.size() == 2
+        def groupStage = result.stageObjects[0] as Document
+        groupStage.containsKey('$group')
+        def groupDoc = groupStage.get('$group') as Document
+        def idVal = groupDoc.get('_id') as Document
+        idVal.containsKey('prop1')
+        idVal.get('prop1') == '$prop1'
+        
+        def countDoc = groupDoc.get('countVal_distinctArray') as Document
+        countDoc.containsKey('$addToSet')
+        countDoc.get('$addToSet') == '$prop2'
+
+        def projectStage = result.stageObjects[1] as Document
+        projectStage.containsKey('$project')
+        def projectDoc = projectStage.get('$project') as Document
+        projectDoc.get('_id') == 0
+        projectDoc.get('prop1') == '$_id.prop1'
+        
+        def countProjectDoc = projectDoc.get('countVal') as Document
+        countProjectDoc.containsKey('$size')
+        countProjectDoc.get('$size') == '$countVal_distinctArray'
+    }
 }
