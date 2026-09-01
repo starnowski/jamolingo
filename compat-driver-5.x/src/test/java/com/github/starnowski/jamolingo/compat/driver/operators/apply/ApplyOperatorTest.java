@@ -249,6 +249,23 @@ public class ApplyOperatorTest extends AbstractItTest {
                     """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
         Arguments.of(
+            "toppercent(50,genericInteger)",
+            """
+                    [
+                      {"plainString1": "Science Fiction Book", "genericInteger": 500}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
+            "bottompercent(15,genericInteger)",
+            """
+                    [
+                      {"plainString1": "Laptop", "genericInteger": 50},
+                      {"plainString1": "Smartphone", "genericInteger": 100}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
             "groupby((plainString2),aggregate(genericInteger with sum as genericIntegerSum))",
             """
                     [

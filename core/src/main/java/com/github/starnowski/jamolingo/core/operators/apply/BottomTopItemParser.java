@@ -25,7 +25,9 @@ public class BottomTopItemParser implements ApplyItemParser {
     if (method != BottomTop.Method.TOP_COUNT
         && method != BottomTop.Method.BOTTOM_COUNT
         && method != BottomTop.Method.TOP_SUM
-        && method != BottomTop.Method.BOTTOM_SUM) {
+        && method != BottomTop.Method.BOTTOM_SUM
+        && method != BottomTop.Method.TOP_PERCENT
+        && method != BottomTop.Method.BOTTOM_PERCENT) {
       throw new UnsupportedOperationException("Unsupported BottomTop method: " + method);
     }
 
@@ -49,7 +51,7 @@ public class BottomTopItemParser implements ApplyItemParser {
       int sortOrder = method == BottomTop.Method.TOP_COUNT ? -1 : 1;
       stages.add(new Document("$sort", new Document(mongoPath, sortOrder)));
       stages.add(new Document("$limit", (int) number));
-    } else { // TOP_SUM or BOTTOM_SUM
+    } else if (method == BottomTop.Method.TOP_SUM || method == BottomTop.Method.BOTTOM_SUM) {
       int sortOrder = method == BottomTop.Method.TOP_SUM ? -1 : 1;
       // Pre-sort before window function
       stages.add(new Document("$sort", new Document(mongoPath, sortOrder)));
@@ -70,6 +72,49 @@ public class BottomTopItemParser implements ApplyItemParser {
       stages.add(
           new Document("$match", new Document("__jamolingo_cumsum", new Document("$lte", number))));
       stages.add(new Document("$unset", "__jamolingo_cumsum"));
+    } else { // TOP_PERCENT or BOTTOM_PERCENT
+      int sortOrder = method == BottomTop.Method.TOP_PERCENT ? -1 : 1;
+      // Pre-sort before window function
+      stages.add(new Document("$sort", new Document(mongoPath, sortOrder)));
+
+      Document windowFields =
+          new Document("sortBy", new Document(mongoPath, sortOrder))
+              .append(
+                  "output",
+                  new Document(
+                          "__jamolingo_totalsum",
+                          new Document("$sum", "$" + mongoPath)
+                              .append(
+                                  "window",
+                                  new Document(
+                                      "documents",
+                                      java.util.Arrays.asList("unbounded", "unbounded"))))
+                      .append(
+                          "__jamolingo_cumsum",
+                          new Document("$sum", "$" + mongoPath)
+                              .append(
+                                  "window",
+                                  new Document(
+                                      "documents",
+                                      java.util.Arrays.asList("unbounded", "current")))));
+
+      stages.add(new Document("$setWindowFields", windowFields));
+      stages.add(
+          new Document(
+              "$match",
+              new Document(
+                  "$expr",
+                  new Document(
+                      "$lte",
+                      java.util.Arrays.asList(
+                          "$__jamolingo_cumsum",
+                          new Document(
+                              "$multiply",
+                              java.util.Arrays.asList(
+                                  "$__jamolingo_totalsum", number / 100.0)))))));
+      stages.add(
+          new Document(
+              "$unset", java.util.Arrays.asList("__jamolingo_totalsum", "__jamolingo_cumsum")));
     }
 
     return DefaultApplyOperatorResult.builder().withStageObjects(stages).build();
