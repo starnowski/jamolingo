@@ -22,7 +22,10 @@ public class BottomTopItemParser implements ApplyItemParser {
     BottomTop bottomTop = (BottomTop) applyItem;
 
     BottomTop.Method method = bottomTop.getMethod();
-    if (method != BottomTop.Method.TOP_COUNT && method != BottomTop.Method.BOTTOM_COUNT) {
+    if (method != BottomTop.Method.TOP_COUNT
+        && method != BottomTop.Method.BOTTOM_COUNT
+        && method != BottomTop.Method.TOP_SUM
+        && method != BottomTop.Method.BOTTOM_SUM) {
       throw new UnsupportedOperationException("Unsupported BottomTop method: " + method);
     }
 
@@ -38,14 +41,36 @@ public class BottomTopItemParser implements ApplyItemParser {
     if (!(numberExpr instanceof Literal)) {
       throw new IllegalArgumentException("Expected Literal for BottomTop number");
     }
-    int number = Integer.parseInt(((Literal) numberExpr).getText());
+    double number = Double.parseDouble(((Literal) numberExpr).getText());
 
     List<Bson> stages = new ArrayList<>();
-    // For topcount, sort descending (-1)
-    // For bottomcount, sort ascending (1)
-    int sortOrder = method == BottomTop.Method.TOP_COUNT ? -1 : 1;
-    stages.add(new Document("$sort", new Document(mongoPath, sortOrder)));
-    stages.add(new Document("$limit", number));
+
+    if (method == BottomTop.Method.TOP_COUNT || method == BottomTop.Method.BOTTOM_COUNT) {
+      int sortOrder = method == BottomTop.Method.TOP_COUNT ? -1 : 1;
+      stages.add(new Document("$sort", new Document(mongoPath, sortOrder)));
+      stages.add(new Document("$limit", (int) number));
+    } else { // TOP_SUM or BOTTOM_SUM
+      int sortOrder = method == BottomTop.Method.TOP_SUM ? -1 : 1;
+      // Pre-sort before window function
+      stages.add(new Document("$sort", new Document(mongoPath, sortOrder)));
+
+      Document windowFields =
+          new Document("sortBy", new Document(mongoPath, sortOrder))
+              .append(
+                  "output",
+                  new Document(
+                      "__jamolingo_cumsum",
+                      new Document("$sum", "$" + mongoPath)
+                          .append(
+                              "window",
+                              new Document(
+                                  "documents", java.util.Arrays.asList("unbounded", "current")))));
+
+      stages.add(new Document("$setWindowFields", windowFields));
+      stages.add(
+          new Document("$match", new Document("__jamolingo_cumsum", new Document("$lte", number))));
+      stages.add(new Document("$unset", "__jamolingo_cumsum"));
+    }
 
     return DefaultApplyOperatorResult.builder().withStageObjects(stages).build();
   }

@@ -231,6 +231,24 @@ public class ApplyOperatorTest extends AbstractItTest {
   private static Stream<Arguments> provideApplyTestCasesForGroupByAndAggregationOperations() {
     return Stream.of(
         Arguments.of(
+            "topsum(800,genericInteger)",
+            """
+                    [
+                      {"plainString1": "Science Fiction Book", "genericInteger": 500},
+                      {"plainString1": "Fantasy Book", "genericInteger": 300}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
+            "bottomsum(160,genericInteger)",
+            """
+                    [
+                      {"plainString1": "Laptop", "genericInteger": 50},
+                      {"plainString1": "Smartphone", "genericInteger": 100}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
             "groupby((plainString2),aggregate(genericInteger with sum as genericIntegerSum))",
             """
                     [
