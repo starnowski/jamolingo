@@ -30,20 +30,26 @@ public class AggregateItemParser implements ApplyItemParser {
       } else {
         throw new IllegalArgumentException("Cannot extract path from AggregateExpression");
       }
-      String mongoPath = edmMongoContextFacade.resolveMongoPathForEDMPath(path).getMongoPath();
-      String method = expr.getStandardMethod().name().toLowerCase();
-      if ("average".equals(method)) {
-        method = "avg";
-      }
-
-      if ("count_distinct".equals(method)) {
-        String distinctArrayField = alias + "_distinctArray";
-        groupStageDoc.put(distinctArrayField, new org.bson.Document("$addToSet", "$" + mongoPath));
-        projectStageDoc.put(alias, new org.bson.Document("$size", "$" + distinctArrayField));
-      } else {
-        String mongoOperator = "$" + method;
-        groupStageDoc.put(alias, new org.bson.Document(mongoOperator, "$" + mongoPath));
+      if (expr.getStandardMethod() == null && "$count".equals(path)) {
+        groupStageDoc.put(alias, new org.bson.Document("$sum", 1));
         projectStageDoc.put(alias, 1);
+      } else {
+        String mongoPath = edmMongoContextFacade.resolveMongoPathForEDMPath(path).getMongoPath();
+        String method = expr.getStandardMethod().name().toLowerCase();
+        if ("average".equals(method)) {
+          method = "avg";
+        }
+
+        if ("count_distinct".equals(method)) {
+          String distinctArrayField = alias + "_distinctArray";
+          groupStageDoc.put(
+              distinctArrayField, new org.bson.Document("$addToSet", "$" + mongoPath));
+          projectStageDoc.put(alias, new org.bson.Document("$size", "$" + distinctArrayField));
+        } else {
+          String mongoOperator = "$" + method;
+          groupStageDoc.put(alias, new org.bson.Document(mongoOperator, "$" + mongoPath));
+          projectStageDoc.put(alias, 1);
+        }
       }
     }
 
