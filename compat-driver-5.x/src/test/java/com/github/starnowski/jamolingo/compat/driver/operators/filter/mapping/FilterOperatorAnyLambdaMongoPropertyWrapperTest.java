@@ -143,6 +143,10 @@ public class FilterOperatorAnyLambdaMongoPropertyWrapperTest
         Arguments.of("tags/any(t:endswith(toupper(t),'TRAP'))", Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
         Arguments.of("tags/any(t:length(t) eq 8)", Set.of("Some text", "Poem", "Oleksa")),
         Arguments.of("numericArray/any(n:n add 2 gt 100)", Set.of("Mario")),
+        Arguments.of("numericArray/any(n:n sub 2 gt 40)", Set.of("Mario", "Oleksa")),
+        Arguments.of("numericArray/any(n:n mul 2 gt 100)", Set.of("Mario", "Oleksa")),
+        Arguments.of("numericArray/any(n:n div 2 eq 10)", Set.of("eOMtThyhVNLWUZNRcBaQKxI")),
+        Arguments.of("numericArray/any(n:n mod 10 eq 5)", Set.of("Some text")),
         Arguments.of(
             List.of("tags/any(t:t ne 'no such text' and t ne 'no such word')"),
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
@@ -176,6 +180,18 @@ public class FilterOperatorAnyLambdaMongoPropertyWrapperTest
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Mario", "Oleksa")),
         Arguments.of(
             List.of("numericArray/any(n:n add 2 gt round(n))"),
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
+        Arguments.of(
+            List.of("numericArray/any(n:n sub 2 lt round(n))"),
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
+        Arguments.of(
+            List.of("numericArray/any(n:n mul 2 gt round(n))"),
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
+        Arguments.of(
+            List.of("numericArray/any(n:n div 2 lt round(n))"),
+            Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
+        Arguments.of(
+            List.of("numericArray/any(n:n mod 2 lt round(n))"),
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa")),
         Arguments.of(
             List.of("numericArray/any(n:n eq 10 or n eq 20 or n eq 30)"),
@@ -237,11 +253,31 @@ public class FilterOperatorAnyLambdaMongoPropertyWrapperTest
         Arguments.of(
             "complexList/any(c:c/someNumber add 5 gt 20)",
             Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of("complexList/any(c:c/someNumber sub 5 gt 20)",
+            Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber mul 2 gt 20)",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of("complexList/any(c:c/someNumber div 2 eq 10)", Set.of("Doc1", "Doc5")),
+        Arguments.of("complexList/any(c:c/someNumber mod 10 eq 5)",
+            java.util.Collections.emptySet()),
         Arguments.of(
             "complexList/any(c:c/someNumber gt floor(5.05))",
             Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
         Arguments.of(
             "complexList/any(c:c/someNumber add 2 gt round(c/someNumber))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber sub 2 lt round(c/someNumber))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber mul 2 gt round(c/someNumber))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber div 2 lt round(c/someNumber))",
+            Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber mod 2 lt round(c/someNumber))",
             Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
         Arguments.of("complexList/any(c:c/someNumber eq 20)", Set.of("Doc1", "Doc5")),
         // Missing nested complex tests
