@@ -335,6 +335,40 @@ public class ApplyOperatorTest extends AbstractItTest {
                                               {"plainString2": "Books", "genericIntegerAvg": 316.6666666666667, "smallInteger1Countdistinct": 2}
                                             ]
                                             """,
-            org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE));
+            org.skyscreamer.jsonassert.JSONCompareMode.NON_EXTENSIBLE),
+        Arguments.of(
+            "compute(genericInteger add 10 as genericIntegerPlus10)",
+            """
+                    [
+                      {"plainString1": "Smartphone", "genericIntegerPlus10": 110},
+                      {"plainString1": "Laptop", "genericIntegerPlus10": 60},
+                      {"plainString1": "Tablet", "genericIntegerPlus10": 210},
+                      {"plainString1": "Science Fiction Book", "genericIntegerPlus10": 510},
+                      {"plainString1": "Fantasy Book", "genericIntegerPlus10": 310},
+                      {"plainString1": "Programming Book", "genericIntegerPlus10": 160}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
+            "compute(genericInteger mul 2 add 5 as calcValue)",
+            """
+                    [
+                      {"plainString1": "Smartphone", "calcValue": 205},
+                      {"plainString1": "Laptop", "calcValue": 105},
+                      {"plainString1": "Tablet", "calcValue": 405},
+                      {"plainString1": "Science Fiction Book", "calcValue": 1005},
+                      {"plainString1": "Fantasy Book", "calcValue": 605},
+                      {"plainString1": "Programming Book", "calcValue": 305}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
+            "filter(plainString2 eq 'Electronics')/compute(genericInteger sub 5 as calcValue)/groupby((plainString2),aggregate(calcValue with sum as calcValueSum))",
+            """
+                    [
+                      {"plainString2": "Electronics", "calcValueSum": 335}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT));
   }
 }
