@@ -253,14 +253,14 @@ public class FilterOperatorAnyLambdaMongoPropertyWrapperTest
         Arguments.of(
             "complexList/any(c:c/someNumber add 5 gt 20)",
             Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
-        Arguments.of("complexList/any(c:c/someNumber sub 5 gt 20)",
-            Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
+        Arguments.of(
+            "complexList/any(c:c/someNumber sub 5 gt 20)", Set.of("Doc2", "Doc3", "Doc4", "Doc6")),
         Arguments.of(
             "complexList/any(c:c/someNumber mul 2 gt 20)",
             Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),
         Arguments.of("complexList/any(c:c/someNumber div 2 eq 10)", Set.of("Doc1", "Doc5")),
-        Arguments.of("complexList/any(c:c/someNumber mod 10 eq 5)",
-            java.util.Collections.emptySet()),
+        Arguments.of(
+            "complexList/any(c:c/someNumber mod 10 eq 5)", java.util.Collections.emptySet()),
         Arguments.of(
             "complexList/any(c:c/someNumber gt floor(5.05))",
             Set.of("Doc1", "Doc2", "Doc3", "Doc4", "Doc5", "Doc6")),

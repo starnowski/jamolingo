@@ -488,7 +488,16 @@ public class FilterTestsCasesAggregator {
         Arguments.of(
             List.of("numericArray/all(n:n div 2 lt round(n))"), allExamplesInResponse, "COLLSCAN"),
         Arguments.of(
-            List.of("numericArray/all(n:n mod 2 lt round(n))"), Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Mario", "Oleksa", "only_id_and_plainString", "example1", "example2"), "COLLSCAN"),
+            List.of("numericArray/all(n:n mod 2 lt round(n))"),
+            Set.of(
+                "eOMtThyhVNLWUZNRcBaQKxI",
+                "Some text",
+                "Mario",
+                "Oleksa",
+                "only_id_and_plainString",
+                "example1",
+                "example2"),
+            "COLLSCAN"),
         Arguments.of(
             List.of("numericArray/all(n:n eq 10 or n eq 20 or n eq 30)"),
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "example1", "example2", "only_id_and_plainString"),
