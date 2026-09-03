@@ -56,7 +56,7 @@ public class ODataApplyToMongoAggregationPipelineParser {
     } else if (applyItem.getKind() == ApplyItem.Kind.COMPUTE) {
       return new ComputeItemParser();
     } else if (applyItem.getKind() == ApplyItem.Kind.CONCAT) {
-      return new ConcatItemParser();
+      return new ConcatItemParser(this);
     } else if (applyItem.getKind() == ApplyItem.Kind.SEARCH) {
       return new SearchItemParser();
     } else if (applyItem.getKind() == ApplyItem.Kind.BOTTOM_TOP) {

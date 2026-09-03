@@ -369,6 +369,25 @@ public class ApplyOperatorTest extends AbstractItTest {
                       {"plainString2": "Electronics", "calcValueSum": 335}
                     ]
                     """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
+            "concat(filter(plainString1 eq 'Laptop'),filter(plainString1 eq 'Tablet'))",
+            """
+                    [
+                      {"plainString1": "Laptop"},
+                      {"plainString1": "Tablet"}
+                    ]
+                    """,
+            org.skyscreamer.jsonassert.JSONCompareMode.LENIENT),
+        Arguments.of(
+            "concat(filter(plainString1 eq 'Laptop'),groupby((plainString2),aggregate(genericInteger with sum as calcValueSum)))",
+            """
+                    [
+                      {"plainString1": "Laptop"},
+                      {"plainString2": "Electronics", "calcValueSum": 350},
+                      {"plainString2": "Books", "calcValueSum": 950}
+                    ]
+                    """,
             org.skyscreamer.jsonassert.JSONCompareMode.LENIENT));
   }
 }
