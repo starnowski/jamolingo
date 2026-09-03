@@ -180,6 +180,11 @@ public class FilterTestsCasesAggregator {
         Arguments.of(
             "tags/any(t:length(t) eq 8)", Set.of("Some text", "Poem", "Oleksa"), "COLLSCAN"),
         Arguments.of("numericArray/any(n:n add 2 gt 100)", Set.of("Mario"), "COLLSCAN"),
+        Arguments.of("numericArray/any(n:n sub 2 gt 40)", Set.of("Mario", "Oleksa"), "COLLSCAN"),
+        Arguments.of("numericArray/any(n:n mul 2 gt 100)", Set.of("Mario", "Oleksa"), "COLLSCAN"),
+        Arguments.of(
+            "numericArray/any(n:n div 2 eq 10)", Set.of("eOMtThyhVNLWUZNRcBaQKxI"), "COLLSCAN"),
+        Arguments.of("numericArray/any(n:n mod 10 eq 5)", Set.of("Some text"), "COLLSCAN"),
         Arguments.of(
             List.of("tags/any(t:t ne 'no such text' and t ne 'no such word')"),
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "Some text", "Poem", "Mario", "Oleksa"),
@@ -476,6 +481,23 @@ public class FilterTestsCasesAggregator {
             "COLLSCAN"),
         Arguments.of(
             List.of("numericArray/all(n:n add 2 gt round(n))"), allExamplesInResponse, "COLLSCAN"),
+        Arguments.of(
+            List.of("numericArray/all(n:n sub 2 lt round(n))"), allExamplesInResponse, "COLLSCAN"),
+        Arguments.of(
+            List.of("numericArray/all(n:n mul 2 gt round(n))"), allExamplesInResponse, "COLLSCAN"),
+        Arguments.of(
+            List.of("numericArray/all(n:n div 2 lt round(n))"), allExamplesInResponse, "COLLSCAN"),
+        Arguments.of(
+            List.of("numericArray/all(n:n mod 2 lt round(n))"),
+            Set.of(
+                "eOMtThyhVNLWUZNRcBaQKxI",
+                "Some text",
+                "Mario",
+                "Oleksa",
+                "only_id_and_plainString",
+                "example1",
+                "example2"),
+            "COLLSCAN"),
         Arguments.of(
             List.of("numericArray/all(n:n eq 10 or n eq 20 or n eq 30)"),
             Set.of("eOMtThyhVNLWUZNRcBaQKxI", "example1", "example2", "only_id_and_plainString"),

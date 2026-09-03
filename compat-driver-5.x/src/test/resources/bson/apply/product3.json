@@ -1,0 +1,14 @@
+{
+  "_id": {
+    "$binary": {
+      "base64": "AAAAAAAAAAAAAAAAAAAAAw==",
+      "subType": "04"
+    }
+  },
+  "plainString1": "Tablet",
+  "plainString2": "Electronics",
+  "genericInteger": { "$numberLong": "200" },
+  "genericNumber": { "$numberDecimal": "399.99" },
+  "smallInteger1": 4,
+  "smallInteger2": 5
+}

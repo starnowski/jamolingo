@@ -1131,9 +1131,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             case LE:
               return combineFieldOp(left, right, Filters::lte);
             case ADD:
-              // TODO
-              return combineFieldOp(
-                  left, right, (s, o) -> new Document("$add", Arrays.asList(s, o)));
+              return combineArithmeticOp(left, right, "$add");
+            case SUB:
+              return combineArithmeticOp(left, right, "$subtract");
+            case MUL:
+              return combineArithmeticOp(left, right, "$multiply");
+            case DIV:
+              return combineArithmeticOp(left, right, "$divide");
+            case MOD:
+              return combineArithmeticOp(left, right, "$mod");
             case AND:
               if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
                   && !this.context.isExprMode()
@@ -1446,6 +1452,29 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   // --- Helpers ---
+  private Object resolveOperandForArithmetic(Bson operand) {
+    String field = resolveMongoField(operand);
+    if (field != null) {
+      return field.startsWith("$") ? field : "$" + field;
+    }
+    Object value = extractValueObj(operand);
+    if (value != null) {
+      String type = extractFieldType(operand);
+      Object converted = tryConvertValueByEdmType(value, type);
+      return converted != null ? converted : value;
+    }
+    return operand;
+  }
+
+  private Bson combineArithmeticOp(Bson left, Bson right, String mongoOperator) {
+    if (!this.context.isExprMode()) {
+      throw new ExpressionOperantRequiredException("Arithmetic operators require expression mode");
+    }
+    Object leftOperand = resolveOperandForArithmetic(left);
+    Object rightOperand = resolveOperandForArithmetic(right);
+    return new Document(mongoOperator, Arrays.asList(leftOperand, rightOperand));
+  }
+
   private Bson combineEq(Bson left, Bson right) {
     String field = extractField(left);
     String rightField = extractField(right);
