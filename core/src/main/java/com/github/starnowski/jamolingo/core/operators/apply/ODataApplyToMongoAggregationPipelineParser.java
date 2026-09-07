@@ -8,6 +8,17 @@ import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 
 public class ODataApplyToMongoAggregationPipelineParser {
 
+  private final ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser;
+
+  public ODataApplyToMongoAggregationPipelineParser() {
+    this(null);
+  }
+
+  public ODataApplyToMongoAggregationPipelineParser(
+      ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser) {
+    this.applySearchToMongoPipelineParser = applySearchToMongoPipelineParser;
+  }
+
   public ApplyOperatorResult parse(
       ApplyOption applyOption, EdmPropertyMongoPathResolver edmMongoContextFacade) {
     if (applyOption == null
@@ -25,8 +36,9 @@ public class ODataApplyToMongoAggregationPipelineParser {
     }
 
     List<org.bson.conversions.Bson> stages = new java.util.ArrayList<>();
-    for (ApplyItem applyItem : applyItems) {
-      ApplyItemParser parser = getParser(applyItem);
+    for (int i = 0; i < applyItems.size(); i++) {
+      ApplyItem applyItem = applyItems.get(i);
+      ApplyItemParser parser = getParser(applyItem, i == 0);
       if (parser != null) {
         ApplyOperatorResult result = parser.parse(applyItem, edmMongoContextFacade);
         stages.addAll(result.getStageObjects());
@@ -38,7 +50,7 @@ public class ODataApplyToMongoAggregationPipelineParser {
     return DefaultApplyOperatorResult.builder().withStageObjects(stages).build();
   }
 
-  private ApplyItemParser getParser(ApplyItem applyItem) {
+  private ApplyItemParser getParser(ApplyItem applyItem, boolean isFirstApplyItem) {
     if (applyItem.getKind() == ApplyItem.Kind.FILTER) {
       return new FilterItemParser();
     } else if (applyItem.getKind() == ApplyItem.Kind.IDENTITY) {
@@ -58,7 +70,7 @@ public class ODataApplyToMongoAggregationPipelineParser {
     } else if (applyItem.getKind() == ApplyItem.Kind.CONCAT) {
       return new ConcatItemParser(this);
     } else if (applyItem.getKind() == ApplyItem.Kind.SEARCH) {
-      return new SearchItemParser();
+      return new SearchItemParser(applySearchToMongoPipelineParser, isFirstApplyItem);
     } else if (applyItem.getKind() == ApplyItem.Kind.BOTTOM_TOP) {
       return new BottomTopItemParser();
     }

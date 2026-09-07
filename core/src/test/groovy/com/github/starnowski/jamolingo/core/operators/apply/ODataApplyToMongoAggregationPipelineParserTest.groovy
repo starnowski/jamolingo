@@ -79,4 +79,66 @@ class ODataApplyToMongoAggregationPipelineParserTest extends Specification {
         def replaceRootDoc = result.stageObjects.get(3).get('$replaceRoot')
         replaceRootDoc.get('newRoot') == '$_combinedResult'
     }
+
+    def "should return delegated stage when applyOption has search item"() {
+        given:
+        def mockSearchDelegate = Mock(ApplySearchToMongoPipelineParser)
+        def parser = new ODataApplyToMongoAggregationPipelineParser(mockSearchDelegate)
+        def mockApplyOption = Mock(ApplyOption)
+        def mockSearchItem = Mock(org.apache.olingo.server.api.uri.queryoption.apply.Search)
+        
+        mockSearchItem.getKind() >> ApplyItem.Kind.SEARCH
+        mockApplyOption.getApplyItems() >> [mockSearchItem]
+        def mockFacade = Mock(EdmPropertyMongoPathResolver)
+
+        def expectedStage = Mock(org.bson.conversions.Bson)
+        def expectedResult = DefaultApplyOperatorResult.builder().withStageObjects([expectedStage]).build()
+
+        when:
+        def result = parser.parse(mockApplyOption, mockFacade)
+
+        then:
+        1 * mockSearchDelegate.parse({ SearchApplyItemContext ctx -> 
+            ctx.isFirstApplyItem() && ctx.getSearch() == mockSearchItem 
+        }) >> expectedResult
+        
+        
+        result != null
+        result.stageObjects.size() == 1
+        result.stageObjects[0] == expectedStage
+    }
+
+    def "should return delegated stage when applyOption has search item nested in groupby"() {
+        given:
+        def mockSearchDelegate = Mock(ApplySearchToMongoPipelineParser)
+        def parser = new ODataApplyToMongoAggregationPipelineParser(mockSearchDelegate)
+        def mockApplyOption = Mock(ApplyOption)
+        def mockGroupByItem = Mock(org.apache.olingo.server.api.uri.queryoption.apply.GroupBy)
+        def mockNestedApplyOption = Mock(ApplyOption)
+        def mockSearchItem = Mock(org.apache.olingo.server.api.uri.queryoption.apply.Search)
+        
+        mockSearchItem.getKind() >> ApplyItem.Kind.SEARCH
+        mockNestedApplyOption.getApplyItems() >> [mockSearchItem]
+        mockGroupByItem.getKind() >> ApplyItem.Kind.GROUP_BY
+        mockGroupByItem.getGroupByItems() >> []
+        mockGroupByItem.getApplyOption() >> mockNestedApplyOption
+        
+        mockApplyOption.getApplyItems() >> [mockGroupByItem]
+        def mockFacade = Mock(EdmPropertyMongoPathResolver)
+
+        def expectedStage = Mock(org.bson.conversions.Bson)
+        def expectedResult = DefaultApplyOperatorResult.builder().withStageObjects([expectedStage]).build()
+
+        when:
+        def result = parser.parse(mockApplyOption, mockFacade)
+
+        then:
+        1 * mockSearchDelegate.parse({ SearchApplyItemContext ctx -> 
+            ctx.isFirstApplyItem() && ctx.getSearch() == mockSearchItem 
+        }) >> expectedResult
+        
+        result != null
+        result.stageObjects.size() == 3 // group, project, and the nested search stage
+        result.stageObjects[2] == expectedStage
+    }
 }
