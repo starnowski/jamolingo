@@ -6,3 +6,9 @@ In standard MongoDB, the $lookup aggregation stage is designed to perform a "lef
 https://www.mongodb.com/docs/manual/reference/operator/aggregation/lookup/#mongodb-pipeline-pipe.-lookup
 
 _Performs a left outer join to a collection in the same database to filter in documents from the foreign collection for processing._ 
+
+#### Lack of built-in support for hierarchical transformations in Olingo 5.0.0
+
+The `42` issue originally included a requirement for supporting hierarchical transformations within the `$apply` query option, specifically for `ancestors`, `descendants`, and `traverse`.
+However, analysis of the bundled Apache Olingo 5.0.0 library (`org.apache.olingo.server.core.uri.parser.ApplyParser` and `UriTokenizer`) revealed that these operators are not supported as built-in tokens or AST nodes.
+Therefore, native support for these transformations is not present, and they have been removed from the plan.
