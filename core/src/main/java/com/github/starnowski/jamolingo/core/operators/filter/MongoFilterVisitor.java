@@ -1459,6 +1459,17 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   // --- Helpers ---
+  /**
+   * Resolves the operand for an arithmetic operation. If the operand is a field reference, it
+   * prepends '$' for MongoDB expression syntax. If it is a literal, it extracts and converts the
+   * value. As a fallback, if it cannot be resolved as a field or literal, the raw Bson operand is
+   * returned. This fallback behavior successfully facilitates nested arithmetic operations (e.g.,
+   * (A + B) * C) by passing the nested Bson document directly into the operator array.
+   *
+   * @param operand the Bson operand to resolve
+   * @return the resolved operand (String for field, Object for literal, or original Bson for nested
+   *     expressions)
+   */
   private Object resolveOperandForArithmetic(Bson operand) {
     String field = resolveMongoField(operand);
     if (field != null) {
@@ -1473,6 +1484,16 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return operand;
   }
 
+  /**
+   * Combines left and right operands into a MongoDB arithmetic operator document. This method
+   * enforces strict $expr mode because MongoDB arithmetic operators ($add, $subtract, $multiply,
+   * $divide, $mod) are only valid inside $expr contexts or aggregation pipelines.
+   *
+   * @param left the left operand
+   * @param right the right operand
+   * @param mongoOperator the MongoDB arithmetic operator (e.g., "$add")
+   * @return the combined Bson document
+   */
   private Bson combineArithmeticOp(Bson left, Bson right, String mongoOperator) {
     if (!this.context.isExprMode()) {
       throw new ExpressionOperantRequiredException("Arithmetic operators require expression mode");
