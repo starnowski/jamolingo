@@ -138,6 +138,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** equals method. */
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -146,11 +147,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** hashCode method. */
     public int hashCode() {
       return Objects.hash(binaryOperator);
     }
 
     @Override
+    /** toString method. */
     public String toString() {
       return "BsonWrapperProperties{" + "binaryOperator=" + binaryOperator + '}';
     }
@@ -1068,18 +1071,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     private final String mongoField;
     private final String mongoFullPath;
 
+    /** getEdmField method. */
     public String getEdmField() {
       return edmField;
     }
 
+    /** getMongoField method. */
     public String getMongoField() {
       return mongoField;
     }
 
+    /** getMongoFullPath method. */
     public String getMongoFullPath() {
       return mongoFullPath;
     }
 
+    /** PropertyContext constructor. */
     public PropertyContext(String edmField, String mongoField, String mongoFullPath) {
       this.edmField = edmField;
       this.mongoField = mongoField;
@@ -1131,9 +1138,15 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
             case LE:
               return combineFieldOp(left, right, Filters::lte);
             case ADD:
-              // TODO
-              return combineFieldOp(
-                  left, right, (s, o) -> new Document("$add", Arrays.asList(s, o)));
+              return combineArithmeticOp(left, right, "$add");
+            case SUB:
+              return combineArithmeticOp(left, right, "$subtract");
+            case MUL:
+              return combineArithmeticOp(left, right, "$multiply");
+            case DIV:
+              return combineArithmeticOp(left, right, "$divide");
+            case MOD:
+              return combineArithmeticOp(left, right, "$mod");
             case AND:
               if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
                   && !this.context.isExprMode()
@@ -1446,6 +1459,50 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   // --- Helpers ---
+  /**
+   * Resolves the operand for an arithmetic operation. If the operand is a field reference, it
+   * prepends '$' for MongoDB expression syntax. If it is a literal, it extracts and converts the
+   * value. As a fallback, if it cannot be resolved as a field or literal, the raw Bson operand is
+   * returned. This fallback behavior successfully facilitates nested arithmetic operations (e.g.,
+   * (A + B) * C) by passing the nested Bson document directly into the operator array.
+   *
+   * @param operand the Bson operand to resolve
+   * @return the resolved operand (String for field, Object for literal, or original Bson for nested
+   *     expressions)
+   */
+  private Object resolveOperandForArithmetic(Bson operand) {
+    String field = resolveMongoField(operand);
+    if (field != null) {
+      return field.startsWith("$") ? field : "$" + field;
+    }
+    Object value = extractValueObj(operand);
+    if (value != null) {
+      String type = extractFieldType(operand);
+      Object converted = tryConvertValueByEdmType(value, type);
+      return converted != null ? converted : value;
+    }
+    return operand;
+  }
+
+  /**
+   * Combines left and right operands into a MongoDB arithmetic operator document. This method
+   * enforces strict $expr mode because MongoDB arithmetic operators ($add, $subtract, $multiply,
+   * $divide, $mod) are only valid inside $expr contexts or aggregation pipelines.
+   *
+   * @param left the left operand
+   * @param right the right operand
+   * @param mongoOperator the MongoDB arithmetic operator (e.g., "$add")
+   * @return the combined Bson document
+   */
+  private Bson combineArithmeticOp(Bson left, Bson right, String mongoOperator) {
+    if (!this.context.isExprMode()) {
+      throw new ExpressionOperantRequiredException("Arithmetic operators require expression mode");
+    }
+    Object leftOperand = resolveOperandForArithmetic(left);
+    Object rightOperand = resolveOperandForArithmetic(right);
+    return new Document(mongoOperator, Arrays.asList(leftOperand, rightOperand));
+  }
+
   private Bson combineEq(Bson left, Bson right) {
     String field = extractField(left);
     String rightField = extractField(right);
@@ -1591,6 +1648,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   @Override
+  /** visitTypeLiteral method. */
   public Bson visitTypeLiteral(EdmType edmType)
       throws ExpressionVisitException, ODataApplicationException {
     return null;
@@ -1610,17 +1668,20 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   @Override
+  /** visitLambdaReference method. */
   public Bson visitLambdaReference(String s) {
     throw new UnsupportedOperationException();
   }
 
   @Override
+  /** visitEnum method. */
   public Bson visitEnum(EdmEnumType edmEnumType, List<String> list)
       throws ExpressionVisitException, ODataApplicationException {
     return null;
   }
 
   @Override
+  /** visitBinaryOperator method. */
   public Bson visitBinaryOperator(BinaryOperatorKind operator, Bson left, List<Bson> list)
       throws ExpressionVisitException, ODataApplicationException {
     switch (operator) {
@@ -1687,6 +1748,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** equals method. */
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1695,11 +1757,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** hashCode method. */
     public int hashCode() {
       return Objects.hash(property, multipleElemMatch);
     }
 
     @Override
+    /** toString method. */
     public String toString() {
       return "ElementMatchContext{"
           + "property='"
@@ -1812,6 +1876,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** equals method. */
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1822,11 +1887,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** hashCode method. */
     public int hashCode() {
       return Objects.hash(bson, lambdaType, elementMatchContext);
     }
 
     @Override
+    /** toString method. */
     public String toString() {
       return "LambdaLeaf{"
           + "bson="
@@ -1986,6 +2053,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** equals method. */
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1999,6 +2067,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** hashCode method. */
     public int hashCode() {
       return Objects.hash(
           isLambdaAnyContext,
@@ -2010,6 +2079,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** toString method. */
     public String toString() {
       return "MongoFilterVisitorContext{"
           + "isLambdaAnyContext="
@@ -2316,10 +2386,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private static class ExpressionOperantRequiredException extends RuntimeException {
+    /** ExpressionOperantRequiredException constructor. */
     public ExpressionOperantRequiredException(String message, Throwable cause) {
       super(message, cause);
     }
 
+    /** ExpressionOperantRequiredException constructor. */
     public ExpressionOperantRequiredException(String message) {
       super(message);
     }
@@ -2327,6 +2399,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private static class ElementMatchOperantRequiredException extends RuntimeException {
 
+    /** ElementMatchOperantRequiredException constructor. */
     public ElementMatchOperantRequiredException(String message) {
       super(message);
     }
@@ -2334,6 +2407,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private static class MultipleElementMatchOperantRequiredException extends RuntimeException {
 
+    /** MultipleElementMatchOperantRequiredException constructor. */
     public MultipleElementMatchOperantRequiredException(String message) {
       super(message);
     }

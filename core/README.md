@@ -49,6 +49,7 @@ The `$filter` operator allows clients to filter a collection of resources. The `
 - Supports a wide range of OData filter expressions, including:
     - **Comparison operators:** `eq`, `ne`, `gt`, `ge`, `lt`, `le`, `in`.
     - **Logical operators:** `and`, `or`, `not`.
+    - **Arithmetic operators:** `add`, `sub`, `mul`, `div`, `mod`.
     - **String functions:** `tolower`, `toupper`, `trim`, `contains`, `startswith`, `endswith`, `length`.
     - **Math functions:** `floor`, `ceiling`, `round`.
     - **Date and time functions:** `year`, `month`, `day`, `hour`, `minute`, `second`.
@@ -319,7 +320,41 @@ List<Bson> stages = result.getStageObjects();
 ```
 
 #### $apply
-TODO
+
+The `$apply` operator specifies a sequence of set transformations, such as grouping, aggregating, and filtering. The `core` module translates this into a sequence of MongoDB aggregation stages.
+
+**Translation Details:**
+- Translates to multiple aggregation stages based on the transformations used, such as `$match`, `$group`, `$sort`, `$limit`, `$skip`, `$set`, `$project`, etc.
+- Supported apply item kinds include: `FILTER`, `IDENTITY`, `GROUP_BY`, `ORDERBY`, `TOP`, `SKIP`, `AGGREGATE`, `COMPUTE`, `CONCAT`, `SEARCH`, `BOTTOM_TOP`.
+- The `SEARCH` item kind requires providing an `ApplySearchToMongoPipelineParser` implementation if it's used.
+
+**Usage:**
+
+The `ODataApplyToMongoAggregationPipelineParser` class is responsible for this translation.
+
+```java
+import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAggregationPipelineParser;
+import com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult;
+import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
+import org.bson.conversions.Bson;
+import java.util.List;
+// ... other imports
+
+// 1. Initialize the parser
+ODataApplyToMongoAggregationPipelineParser parser = new ODataApplyToMongoAggregationPipelineParser();
+
+// 2. Obtain the ApplyOption from the Olingo UriInfo
+ApplyOption applyOption = uriInfo.getApplyOption();
+EdmPropertyMongoPathResolver contextFacade = ...; // Your context facade
+
+// 3. Parse the option
+ApplyOperatorResult result = parser.parse(applyOption, contextFacade);
+
+// 4. Use the result in your MongoDB aggregation pipeline
+List<Bson> stages = result.getStageObjects();
+// e.g. collection.aggregate(stages);
+```
 
 ## Configuration and Mapping
 

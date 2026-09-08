@@ -22,6 +22,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Core Module
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.AggregateItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.ApplyItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPipelineParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.BottomTopItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.ComputeItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.ConcatItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.DefaultApplyOperatorResult` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.FilterItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.GroupByItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.IdentityItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.JoinItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAggregationPipelineParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAtlasSearchPipelineParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.OrderByItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.SearchApplyItemContext` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.SearchItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.SkipItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.TopItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+
 ## [0.9.1] - 2026-08-12
 
 ### Added
