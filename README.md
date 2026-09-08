@@ -81,8 +81,9 @@ The project is organized into several modules, each serving a specific purpose:
 The `core` module contains the primary logic for translating OData concepts and queries into MongoDB-compatible formats. It provides the essential building blocks for mapping OData Entity Data Models (EDM) to MongoDB document structures and parsing OData system query options.
 
 **Key Features:**
+*   Translates `$apply` to a sequence of MongoDB aggregation stages (e.g., `$match`, `$group`, `$sort`), supporting set transformations like `FILTER`, `GROUP_BY`, `ORDERBY`, `AGGREGATE`, `SEARCH`, etc.
 *   Translates `$filter` to MongoDB `$match` stages or standalone query objects (`Bson`), with support for:
-    *   Comparison (`eq`, `ne`, `in`, etc.) and Logical (`and`, `or`, `not`) operators.
+    *   Comparison (`eq`, `ne`, `in`, etc.), Logical (`and`, `or`, `not`), and Arithmetic (`add`, `sub`, `mul`, `div`, `mod`) operators.
     *   String, Math, and Date/Time functions.
     *   Collection operators (`any`, `all`) and `/$count`.
 *   Translates `$search` to MongoDB Atlas Search stages (`$search`, `$set`, `$match`) with support for:
