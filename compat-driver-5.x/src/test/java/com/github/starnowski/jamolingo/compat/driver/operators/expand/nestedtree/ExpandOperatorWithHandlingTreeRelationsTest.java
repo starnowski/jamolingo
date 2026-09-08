@@ -535,7 +535,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                              ]
                                                             }]
                                                             """,
-                    JSONCompareMode.STRICT_ORDER),
+                    JSONCompareMode.NON_EXTENSIBLE),
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),
