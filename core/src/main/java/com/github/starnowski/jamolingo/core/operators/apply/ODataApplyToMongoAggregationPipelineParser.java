@@ -6,10 +6,12 @@ import java.util.List;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 
+/** ODataApplyToMongoAggregationPipelineParser type. */
 public class ODataApplyToMongoAggregationPipelineParser {
 
   private final ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser;
 
+  /** ODataApplyToMongoAggregationPipelineParser constructor. */
   public ODataApplyToMongoAggregationPipelineParser() {
     this(null);
   }

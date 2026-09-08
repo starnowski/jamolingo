@@ -4,6 +4,7 @@ import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoA
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
 import com.github.starnowski.jamolingo.core.operators.search.SearchOperatorResultForAtlasSearch;
 
+/** ODataApplyToMongoAtlasSearchPipelineParser type. */
 public class ODataApplyToMongoAtlasSearchPipelineParser
     implements ApplySearchToMongoPipelineParser {
 
@@ -23,6 +24,7 @@ public class ODataApplyToMongoAtlasSearchPipelineParser
   }
 
   @Override
+  /** parse method. */
   public ApplyOperatorResult parse(SearchApplyItemContext context) {
     if (!context.isFirstApplyItem()) {
       throw new IllegalArgumentException("Atlas $search must be the first stage in the pipeline.");

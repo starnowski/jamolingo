@@ -10,10 +10,12 @@ import org.apache.olingo.server.api.uri.queryoption.apply.Concat;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+/** ConcatItemParser type. */
 public class ConcatItemParser implements ApplyItemParser {
 
   private final ODataApplyToMongoAggregationPipelineParser applyParser;
 
+  /** ConcatItemParser constructor. */
   public ConcatItemParser(ODataApplyToMongoAggregationPipelineParser applyParser) {
     this.applyParser = applyParser;
   }

@@ -11,6 +11,7 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+/** BottomTopItemParser type. */
 public class BottomTopItemParser implements ApplyItemParser {
 
   @Override

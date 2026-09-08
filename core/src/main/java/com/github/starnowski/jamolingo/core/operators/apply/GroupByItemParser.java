@@ -9,10 +9,12 @@ import org.apache.olingo.server.api.uri.queryoption.apply.GroupByItem;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
+/** GroupByItemParser type. */
 public class GroupByItemParser implements ApplyItemParser {
 
   private final ODataApplyToMongoAggregationPipelineParser applyParser;
 
+  /** GroupByItemParser constructor. */
   public GroupByItemParser(ODataApplyToMongoAggregationPipelineParser applyParser) {
     this.applyParser = applyParser;
   }

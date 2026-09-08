@@ -138,6 +138,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** equals method. */
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -146,11 +147,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** hashCode method. */
     public int hashCode() {
       return Objects.hash(binaryOperator);
     }
 
     @Override
+    /** toString method. */
     public String toString() {
       return "BsonWrapperProperties{" + "binaryOperator=" + binaryOperator + '}';
     }
@@ -1068,18 +1071,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     private final String mongoField;
     private final String mongoFullPath;
 
+    /** getEdmField method. */
     public String getEdmField() {
       return edmField;
     }
 
+    /** getMongoField method. */
     public String getMongoField() {
       return mongoField;
     }
 
+    /** getMongoFullPath method. */
     public String getMongoFullPath() {
       return mongoFullPath;
     }
 
+    /** PropertyContext constructor. */
     public PropertyContext(String edmField, String mongoField, String mongoFullPath) {
       this.edmField = edmField;
       this.mongoField = mongoField;
@@ -1620,6 +1627,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   @Override
+  /** visitTypeLiteral method. */
   public Bson visitTypeLiteral(EdmType edmType)
       throws ExpressionVisitException, ODataApplicationException {
     return null;
@@ -1639,17 +1647,20 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   @Override
+  /** visitLambdaReference method. */
   public Bson visitLambdaReference(String s) {
     throw new UnsupportedOperationException();
   }
 
   @Override
+  /** visitEnum method. */
   public Bson visitEnum(EdmEnumType edmEnumType, List<String> list)
       throws ExpressionVisitException, ODataApplicationException {
     return null;
   }
 
   @Override
+  /** visitBinaryOperator method. */
   public Bson visitBinaryOperator(BinaryOperatorKind operator, Bson left, List<Bson> list)
       throws ExpressionVisitException, ODataApplicationException {
     switch (operator) {
@@ -1716,6 +1727,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** equals method. */
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1724,11 +1736,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** hashCode method. */
     public int hashCode() {
       return Objects.hash(property, multipleElemMatch);
     }
 
     @Override
+    /** toString method. */
     public String toString() {
       return "ElementMatchContext{"
           + "property='"
@@ -1841,6 +1855,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** equals method. */
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1851,11 +1866,13 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** hashCode method. */
     public int hashCode() {
       return Objects.hash(bson, lambdaType, elementMatchContext);
     }
 
     @Override
+    /** toString method. */
     public String toString() {
       return "LambdaLeaf{"
           + "bson="
@@ -2015,6 +2032,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** equals method. */
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -2028,6 +2046,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** hashCode method. */
     public int hashCode() {
       return Objects.hash(
           isLambdaAnyContext,
@@ -2039,6 +2058,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     }
 
     @Override
+    /** toString method. */
     public String toString() {
       return "MongoFilterVisitorContext{"
           + "isLambdaAnyContext="
@@ -2345,10 +2365,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private static class ExpressionOperantRequiredException extends RuntimeException {
+    /** ExpressionOperantRequiredException constructor. */
     public ExpressionOperantRequiredException(String message, Throwable cause) {
       super(message, cause);
     }
 
+    /** ExpressionOperantRequiredException constructor. */
     public ExpressionOperantRequiredException(String message) {
       super(message);
     }
@@ -2356,6 +2378,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private static class ElementMatchOperantRequiredException extends RuntimeException {
 
+    /** ElementMatchOperantRequiredException constructor. */
     public ElementMatchOperantRequiredException(String message) {
       super(message);
     }
@@ -2363,6 +2386,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
 
   private static class MultipleElementMatchOperantRequiredException extends RuntimeException {
 
+    /** MultipleElementMatchOperantRequiredException constructor. */
     public MultipleElementMatchOperantRequiredException(String message) {
       super(message);
     }

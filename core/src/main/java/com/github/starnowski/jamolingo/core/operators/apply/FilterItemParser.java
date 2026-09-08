@@ -8,6 +8,7 @@ import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.apply.Filter;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 
+/** FilterItemParser type. */
 public class FilterItemParser implements ApplyItemParser {
 
   private final ODataFilterToMongoMatchParser filterParser = new ODataFilterToMongoMatchParser();

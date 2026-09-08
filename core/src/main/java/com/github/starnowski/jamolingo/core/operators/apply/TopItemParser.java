@@ -6,6 +6,7 @@ import com.github.starnowski.jamolingo.core.operators.top.TopOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.apply.Top;
 
+/** TopItemParser type. */
 public class TopItemParser implements ApplyItemParser {
 
   private final OdataTopToMongoLimitParser topParser = new OdataTopToMongoLimitParser();

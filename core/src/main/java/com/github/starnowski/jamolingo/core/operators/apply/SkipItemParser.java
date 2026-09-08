@@ -6,6 +6,7 @@ import com.github.starnowski.jamolingo.core.operators.skip.SkipOperatorResult;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.apply.Skip;
 
+/** SkipItemParser type. */
 public class SkipItemParser implements ApplyItemParser {
 
   private final OdataSkipToMongoSkipParser skipParser = new OdataSkipToMongoSkipParser();

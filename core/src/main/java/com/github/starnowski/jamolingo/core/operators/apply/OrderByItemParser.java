@@ -7,6 +7,7 @@ import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorRes
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.apply.OrderBy;
 
+/** OrderByItemParser type. */
 public class OrderByItemParser implements ApplyItemParser {
 
   private final OdataOrderByToMongoSortParser orderByParser = new OdataOrderByToMongoSortParser();
