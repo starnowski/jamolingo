@@ -3,6 +3,7 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAggregationPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.DefaultOdataOrderByToMongoSortParserContext;
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
@@ -598,6 +599,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         || eOption.getTopOption() != null
         || eOption.getSkipOption() != null
         || eOption.getSelectOption() != null
+        || eOption.getApplyOption() != null
         || currentLevel != maxLevel
         || eOption.getExpandOption() != null) {
       ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
@@ -617,6 +619,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
       // $lookup with pipeline
       List<Bson> lookupPipeline = new ArrayList<>();
+      if (eOption.getApplyOption() != null) {
+        ODataApplyToMongoAggregationPipelineParser applyParser =
+            new ODataApplyToMongoAggregationPipelineParser();
+        lookupPipeline.addAll(
+            applyParser.parse(eOption.getApplyOption(), facade).getStageObjects());
+      }
       if (eOption.getFilterOption() != null) {
         lookupPipeline.addAll(
             oDataFilterToMongoMatchParser
