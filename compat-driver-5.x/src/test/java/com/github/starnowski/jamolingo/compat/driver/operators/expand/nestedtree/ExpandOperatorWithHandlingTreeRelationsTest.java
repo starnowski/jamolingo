@@ -535,25 +535,21 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                             }]
                                                             """,
             JSONCompareMode.LENIENT),
-        //            // Expand level handle by $lookup stage and use the $apply TODO add ordering
-        // to tests with NON_EXTENSIBLE mode
-        //            Arguments.of(
-        //                    TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-        //                    Set.of(1),
-        //                    "$expand=treeType2s($apply=concat(filter(categoryId eq
-        // 2),groupby((categoryId))))",
-        //                    """
-        //                                                                    [{ "_id": 1, "index":
-        // 1, "parentId": null, "categoryId": 1,
-        //                                                                     "treeType2s": [
-        //                                                                     { "_id": 3, "index":
-        // 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 },
-        //                                                                     { "categoryId": 1},
-        //                                                                     { "categoryId": 2}
-        //                                                                     ]
-        //                                                                    }]
-        //                                                                    """,
-        //                    JSONCompareMode.LENIENT),
+        // Expand level handle by $lookup stage and use the $apply with order so that the NON_EXTENSIBLE mode could be used for comparison
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=treeType2s($apply=concat(filter(categoryId eq 2),groupby((categoryId)));$orderby=categoryId asc,index desc)",
+            """
+                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                            "treeType2s": [
+                                        { "categoryId": 1},
+                                        { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 },
+                                        { "categoryId": 2}
+                                    ]
+                            }]
+         """,
+            JSONCompareMode.NON_EXTENSIBLE),
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),
