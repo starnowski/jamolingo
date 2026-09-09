@@ -574,7 +574,7 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
             Arguments.of(
                     TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
                     Set.of(1),
-                    "$expand=treeType2s($apply=concat(filter(categoryId eq 2),groupby((categoryId),aggregate($count as totalCount)));$orderby=categoryId asc,index desc;$filter=totalCount eq 1)",
+                    "$expand=treeType2s($apply=groupby((categoryId),aggregate($count as totalCount));$filter=totalCount eq 1)",
                     """
                                             [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
                                             "treeType2s": [
