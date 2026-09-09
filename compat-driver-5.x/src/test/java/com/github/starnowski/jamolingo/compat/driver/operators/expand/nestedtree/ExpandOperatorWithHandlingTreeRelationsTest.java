@@ -582,6 +582,25 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                             }]
                          """,
             JSONCompareMode.NON_EXTENSIBLE),
+        // $expand=treeType2s($apply=groupby((categoryId),aggregate($count as
+        // totalCount));$filter=totalCount eq 1)
+        // Olingo does not supports filtering by dynamic properties
+        // https://issues.apache.org/jira/browse/OLINGO-1303
+        //            Arguments.of(
+        //                    TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+        //                    Set.of(1),
+        //                    "$expand=treeType2s($apply=groupby((categoryId),aggregate($count as
+        // totalCount))/filter(totalCount eq 1))",
+        //                    """
+        //                                                    [{ "_id": 1, "index": 1, "parentId":
+        // null, "categoryId": 1,
+        //                                                    "treeType2s": [
+        //                                                                { "categoryId": 2,
+        // "totalCount": 1}
+        //                                                            ]
+        //                                                    }]
+        //                                 """,
+        //                    JSONCompareMode.NON_EXTENSIBLE),
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),
