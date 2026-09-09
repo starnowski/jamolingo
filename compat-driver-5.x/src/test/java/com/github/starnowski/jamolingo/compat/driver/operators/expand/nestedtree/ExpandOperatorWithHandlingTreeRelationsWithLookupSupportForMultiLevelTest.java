@@ -1504,7 +1504,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
   @Inject protected MongoClient mongoClient;
 
   @ParameterizedTest(name = "{2} - {0} - {1}")
-  @MethodSource("provideData")
+  @MethodSource({"provideData", "provideDataWithApplyOperator"})
   public void shouldReturnExpectedDocumentsForExpandOperator(
       KeyValue<String, String> rootMongoCollection,
       Set<Integer> ids,
@@ -1603,6 +1603,62 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                     """.formatted(expectedJson),
         currentResult,
         jsonCompareMode);
+  }
+
+  private static Stream<Arguments> provideDataWithApplyOperator() {
+    return Stream.of(
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=max;$apply=filter(index in (2, 3)))",
+            """
+                                                            [
+                                                                {
+                                                                    "_id": 1,
+                                                                    "index": 1,
+                                                                    "parentId": null,
+                                                                    "categoryId": 1,
+                                                                    "children": [
+                                                                        {
+                                                                            "_id": 2,
+                                                                            "index": 2,
+                                                                            "parentId": 1,
+                                                                            "categoryId": 1,
+                                                                            "children": [
+                                                                                {
+                                                                                    "_id": 3,
+                                                                                    "index": 3,
+                                                                                    "parentId": 2,
+                                                                                    "categoryId": 2,
+                                                                                    "children": []
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                            """,
+            JSONCompareMode.LENIENT),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=max;$apply=aggregate($count as totalCount))",
+            """
+                                                            [
+                                                                {
+                                                                    "_id": 1,
+                                                                    "index": 1,
+                                                                    "parentId": null,
+                                                                    "categoryId": 1,
+                                                                    "children": [
+                                                                        {
+                                                                            "totalCount": 2
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                            """,
+            JSONCompareMode.LENIENT));
   }
 
   private Document wrapBsonList(List<Bson> docs) {
