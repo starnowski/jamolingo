@@ -517,6 +517,21 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractWithMap
                                                     }]
                                                     """,
             JSONCompareMode.STRICT_ORDER),
+        // Expand level handle by $lookup stage and use the $apply
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=treeType2s($apply=concat(filter(categoryId eq 2),groupby((categoryId))))",
+            """
+                                                            [{ "_id": 1, "renamed_index": 1, "renamed_parentId": null, "renamed_categoryId": 1,
+                                                             "treeType2s": [
+                                                             { "_id": 3, "renamed_index": 3, "renamed_parentId": 2, "renamed_categoryId": 2, "renamed_treeType1Id": 1 },
+                                                             { "renamed_categoryId": 1},
+                                                             { "renamed_categoryId": 2}
+                                                             ]
+                                                            }]
+                                                            """,
+            JSONCompareMode.LENIENT),
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(10),

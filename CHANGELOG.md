@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 *   Added `com.github.starnowski.jamolingo.core.operators.apply.SearchItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
 *   Added `com.github.starnowski.jamolingo.core.operators.apply.SkipItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
 *   Added `com.github.starnowski.jamolingo.core.operators.apply.TopItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
+*   Added support for `$apply` option translation inside `$expand` operator to MongoDB `$lookup` aggregation pipeline stages [56](https://github.com/starnowski/jamolingo/issues/56)
 
 ## [0.9.1] - 2026-08-12
 
