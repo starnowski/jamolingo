@@ -157,6 +157,7 @@ The `$expand` operator allows clients to include related resources in the respon
     - `$orderby`: Sorts related resources.
     - `$select`: Projects specific properties of related resources.
     - `$top` and `$skip`: Implements pagination for related resources.
+    - `$apply`: Applies a sequence of transformations (e.g., grouping, aggregating, filtering) to related resources.
 - Handles complex "orphan" removal logic in `$graphLookup` to ensure integrity when `$filter` is used.
 - Allows limiting the maximum number of explicitly nested `$expand` operations to prevent performance issues (throws `NestedExpandLevelExceededException` when exceeded).
 
