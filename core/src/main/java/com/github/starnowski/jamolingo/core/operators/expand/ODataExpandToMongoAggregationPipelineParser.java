@@ -61,6 +61,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
   /**
    * Parses the given OData expand option into expansion operator result using provided context.
+   * This parser supports translating nested system query options such as $filter, $orderby, $top,
+   * $skip, $select, and $apply inside the $expand operator into appropriate MongoDB aggregation
+   * pipeline stages.
    *
    * @param expandOption the expand option to parse
    * @param expandParserContext the expand parser context
