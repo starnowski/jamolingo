@@ -535,7 +535,8 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                                             }]
                                                             """,
             JSONCompareMode.LENIENT),
-        // Expand level handle by $lookup stage and use the $apply with order so that the NON_EXTENSIBLE mode could be used for comparison
+        // Expand level handle by $lookup stage and use the $apply with order so that the
+        // NON_EXTENSIBLE mode could be used for comparison
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
@@ -549,6 +550,22 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                                     ]
                             }]
          """,
+            JSONCompareMode.NON_EXTENSIBLE),
+        // Expand level handle by $lookup stage and use the $apply with order so that the
+        // NON_EXTENSIBLE mode could be used for comparison
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=treeType2s($apply=concat(filter(categoryId eq 2),groupby((categoryId),aggregate($count as totalCount)));$orderby=categoryId asc,index desc)",
+            """
+                                    [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                    "treeType2s": [
+                                                { "categoryId": 1, "totalCount": 2},
+                                                { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "treeType1Id": 1 },
+                                                { "categoryId": 2, "totalCount": 1}
+                                            ]
+                                    }]
+                 """,
             JSONCompareMode.NON_EXTENSIBLE),
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
