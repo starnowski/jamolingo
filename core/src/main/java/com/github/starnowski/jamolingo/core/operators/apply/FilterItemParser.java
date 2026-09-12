@@ -26,6 +26,11 @@ public class FilterItemParser implements ApplyItemParser {
           filterParser.parse(filterItem.getFilterOption(), edmMongoContextFacade);
       return DefaultApplyOperatorResult.builder()
           .withStageObjects(result.getStageObjects())
+          .withUsedMongoDocumentProperties(result.getUsedMongoDocumentProperties())
+          .withWrittenMongoDocumentProperties(result.getWrittenMongoDocumentProperties())
+          .withAddedMongoDocumentProperties(result.getAddedMongoDocumentProperties())
+          .withRemovedMongoDocumentProperties(result.getRemovedMongoDocumentProperties())
+          .withDocumentShapeRedefined(result.isDocumentShapeRedefined())
           .build();
     } catch (ODataApplicationException | ExpressionVisitException e) {
       throw new RuntimeException("Failed to parse filter item", e);

@@ -27,6 +27,7 @@ public class ComputeItemParser implements ApplyItemParser {
                 .DefaultMongoFilterVisitorCommonContext.builder()
                 .build());
 
+    java.util.List<String> addedProperties = new java.util.ArrayList<>();
     try {
       for (org.apache.olingo.server.api.uri.queryoption.apply.ComputeExpression expr :
           compute.getExpressions()) {
@@ -35,6 +36,7 @@ public class ComputeItemParser implements ApplyItemParser {
             com.github.starnowski.jamolingo.core.operators.filter.MongoFilterVisitor
                 .unwrapWrapperIfNeeded(parsedExpression);
         addFieldsDoc.append(expr.getAlias(), unwrapped);
+        addedProperties.add(expr.getAlias());
       }
     } catch (org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException
         | org.apache.olingo.server.api.ODataApplicationException e) {
@@ -44,6 +46,10 @@ public class ComputeItemParser implements ApplyItemParser {
     return DefaultApplyOperatorResult.builder()
         .withStageObjects(
             java.util.Collections.singletonList(new org.bson.Document("$addFields", addFieldsDoc)))
+        .withUsedMongoDocumentProperties(new java.util.ArrayList<>(visitor.getUsedMongoDBProperties()))
+        .withWrittenMongoDocumentProperties(addedProperties)
+        .withAddedMongoDocumentProperties(addedProperties)
+        .withDocumentShapeRedefined(false)
         .build();
   }
 }

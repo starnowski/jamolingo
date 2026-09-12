@@ -47,6 +47,9 @@ public class GroupByItemParser implements ApplyItemParser {
       projectStageDoc.put(mongoPath, "$_id." + mongoPath);
     }
 
+    List<String> usedProperties = new ArrayList<>(groupedMongoPaths);
+    List<String> addedProperties = new ArrayList<>();
+
     List<ApplyItem> remainingItems = new ArrayList<>();
     if (groupBy.getApplyOption() != null) {
       for (ApplyItem item : groupBy.getApplyOption().getApplyItems()) {
@@ -71,6 +74,7 @@ public class GroupByItemParser implements ApplyItemParser {
             if (expr.getStandardMethod() == null && "$count".equals(path)) {
               groupStageDoc.put(alias, new Document("$sum", 1));
               projectStageDoc.put(alias, 1);
+              addedProperties.add(alias);
             } else {
               String mongoPath =
                   edmMongoContextFacade.resolveMongoPathForEDMPath(path).getMongoPath();
@@ -78,6 +82,8 @@ public class GroupByItemParser implements ApplyItemParser {
               if ("average".equals(method)) {
                 method = "avg";
               }
+              usedProperties.add(mongoPath);
+              addedProperties.add(alias);
               if ("count_distinct".equals(method)) {
                 String distinctArrayField = alias + "_distinctArray";
                 groupStageDoc.put(distinctArrayField, new Document("$addToSet", "$" + mongoPath));
@@ -102,11 +108,35 @@ public class GroupByItemParser implements ApplyItemParser {
     stages.add(groupStage);
     stages.add(projectStage);
 
+    List<String> finalUsedProperties = new ArrayList<>(usedProperties);
+    List<String> finalWrittenProperties = new ArrayList<>(addedProperties);
+    List<String> finalAddedProperties = new ArrayList<>(addedProperties);
+    List<String> finalRemovedProperties = new ArrayList<>();
+
     if (!remainingItems.isEmpty()) {
       ApplyOperatorResult innerResult = applyParser.parse(remainingItems, edmMongoContextFacade);
       stages.addAll(innerResult.getStageObjects());
+      if (innerResult.getUsedMongoDocumentProperties() != null) {
+        finalUsedProperties.addAll(innerResult.getUsedMongoDocumentProperties());
+      }
+      if (innerResult.getWrittenMongoDocumentProperties() != null) {
+        finalWrittenProperties.addAll(innerResult.getWrittenMongoDocumentProperties());
+      }
+      if (innerResult.getAddedMongoDocumentProperties() != null) {
+        finalAddedProperties.addAll(innerResult.getAddedMongoDocumentProperties());
+      }
+      if (innerResult.getRemovedMongoDocumentProperties() != null) {
+        finalRemovedProperties.addAll(innerResult.getRemovedMongoDocumentProperties());
+      }
     }
 
-    return DefaultApplyOperatorResult.builder().withStageObjects(stages).build();
+    return DefaultApplyOperatorResult.builder()
+        .withStageObjects(stages)
+        .withUsedMongoDocumentProperties(finalUsedProperties)
+        .withWrittenMongoDocumentProperties(finalWrittenProperties)
+        .withAddedMongoDocumentProperties(finalAddedProperties)
+        .withRemovedMongoDocumentProperties(finalRemovedProperties)
+        .withDocumentShapeRedefined(true)
+        .build();
   }
 }

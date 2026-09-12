@@ -31,6 +31,12 @@ public class ConcatItemParser implements ApplyItemParser {
     Document facetDoc = new Document();
     List<String> facetFields = new ArrayList<>();
 
+    java.util.Set<String> usedProperties = new java.util.LinkedHashSet<>();
+    java.util.Set<String> writtenProperties = new java.util.LinkedHashSet<>();
+    java.util.Set<String> addedProperties = new java.util.LinkedHashSet<>();
+    java.util.Set<String> removedProperties = new java.util.LinkedHashSet<>();
+    boolean shapeRedefined = false;
+
     int index = 0;
     for (ApplyOption applyOption : concat.getApplyOptions()) {
       String facetKey = "concat_" + index++;
@@ -38,6 +44,20 @@ public class ConcatItemParser implements ApplyItemParser {
           applyParser.parse(applyOption.getApplyItems(), edmMongoContextFacade);
       facetDoc.put(facetKey, innerResult.getStageObjects());
       facetFields.add("$" + facetKey);
+      
+      if (innerResult.getUsedMongoDocumentProperties() != null) {
+        usedProperties.addAll(innerResult.getUsedMongoDocumentProperties());
+      }
+      if (innerResult.getWrittenMongoDocumentProperties() != null) {
+        writtenProperties.addAll(innerResult.getWrittenMongoDocumentProperties());
+      }
+      if (innerResult.getAddedMongoDocumentProperties() != null) {
+        addedProperties.addAll(innerResult.getAddedMongoDocumentProperties());
+      }
+      if (innerResult.getRemovedMongoDocumentProperties() != null) {
+        removedProperties.addAll(innerResult.getRemovedMongoDocumentProperties());
+      }
+      shapeRedefined = shapeRedefined || innerResult.isDocumentShapeRedefined();
     }
 
     Document facetStage = new Document("$facet", facetDoc);
@@ -54,6 +74,13 @@ public class ConcatItemParser implements ApplyItemParser {
 
     List<Bson> stages = Arrays.asList(facetStage, projectStage, unwindStage, replaceRootStage);
 
-    return DefaultApplyOperatorResult.builder().withStageObjects(stages).build();
+    return DefaultApplyOperatorResult.builder()
+        .withStageObjects(stages)
+        .withUsedMongoDocumentProperties(new ArrayList<>(usedProperties))
+        .withWrittenMongoDocumentProperties(new ArrayList<>(writtenProperties))
+        .withAddedMongoDocumentProperties(new ArrayList<>(addedProperties))
+        .withRemovedMongoDocumentProperties(new ArrayList<>(removedProperties))
+        .withDocumentShapeRedefined(shapeRedefined)
+        .build();
   }
 }

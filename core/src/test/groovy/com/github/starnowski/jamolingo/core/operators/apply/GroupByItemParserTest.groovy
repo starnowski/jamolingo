@@ -213,4 +213,37 @@ class GroupByItemParserTest extends Specification {
         countProjectDoc.containsKey('$size')
         countProjectDoc.get('$size') == '$countVal_distinctArray'
     }
+
+    def "should track properties correctly and set shape redefined to true"() {
+        given:
+        def parser = new GroupByItemParser(Mock(ODataApplyToMongoAggregationPipelineParser))
+        def mockFacade = Mock(EdmPropertyMongoPathResolver)
+        
+        def mockGroupBy = Mock(org.apache.olingo.server.api.uri.queryoption.apply.GroupBy)
+        mockGroupBy.getKind() >> ApplyItem.Kind.GROUP_BY
+        
+        def mockGroupByItem = Mock(org.apache.olingo.server.api.uri.queryoption.apply.GroupByItem)
+        def mockPathSegment = Mock(org.apache.olingo.server.api.uri.UriResource)
+        mockPathSegment.getSegmentValue() >> "Name"
+        mockGroupByItem.getPath() >> [mockPathSegment]
+        
+        mockGroupBy.getGroupByItems() >> [mockGroupByItem]
+        mockGroupBy.getApplyOption() >> null
+        
+        def mongoPathContext = Mock(com.github.starnowski.jamolingo.core.api.MongoPathContext)
+        mongoPathContext.getMongoPath() >> "name"
+        mockFacade.resolveMongoPathForEDMPath("Name") >> mongoPathContext
+
+        when:
+        def result = parser.parse(mockGroupBy, mockFacade)
+
+        then:
+        result != null
+        result.documentShapeRedefined == true
+        result.usedMongoDocumentProperties == ["name"]
+        result.addedMongoDocumentProperties == []
+        result.writtenMongoDocumentProperties == []
+        result.removedMongoDocumentProperties == []
+    }
+
 }

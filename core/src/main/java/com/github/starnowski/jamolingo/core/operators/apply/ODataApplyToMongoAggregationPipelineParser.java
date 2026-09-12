@@ -38,18 +38,45 @@ public class ODataApplyToMongoAggregationPipelineParser {
     }
 
     List<org.bson.conversions.Bson> stages = new java.util.ArrayList<>();
+    java.util.Set<String> usedProperties = new java.util.LinkedHashSet<>();
+    java.util.Set<String> writtenProperties = new java.util.LinkedHashSet<>();
+    java.util.Set<String> addedProperties = new java.util.LinkedHashSet<>();
+    java.util.Set<String> removedProperties = new java.util.LinkedHashSet<>();
+    boolean shapeRedefined = false;
+
     for (int i = 0; i < applyItems.size(); i++) {
       ApplyItem applyItem = applyItems.get(i);
       ApplyItemParser parser = getParser(applyItem, i == 0);
       if (parser != null) {
         ApplyOperatorResult result = parser.parse(applyItem, edmMongoContextFacade);
         stages.addAll(result.getStageObjects());
+        
+        if (result.getUsedMongoDocumentProperties() != null) {
+          usedProperties.addAll(result.getUsedMongoDocumentProperties());
+        }
+        if (result.getWrittenMongoDocumentProperties() != null) {
+          writtenProperties.addAll(result.getWrittenMongoDocumentProperties());
+        }
+        if (result.getAddedMongoDocumentProperties() != null) {
+          addedProperties.addAll(result.getAddedMongoDocumentProperties());
+        }
+        if (result.getRemovedMongoDocumentProperties() != null) {
+          removedProperties.addAll(result.getRemovedMongoDocumentProperties());
+        }
+        shapeRedefined = shapeRedefined || result.isDocumentShapeRedefined();
       } else {
         throw new UnsupportedOperationException("Unsupported apply item: " + applyItem.getKind());
       }
     }
 
-    return DefaultApplyOperatorResult.builder().withStageObjects(stages).build();
+    return DefaultApplyOperatorResult.builder()
+        .withStageObjects(stages)
+        .withUsedMongoDocumentProperties(new java.util.ArrayList<>(usedProperties))
+        .withWrittenMongoDocumentProperties(new java.util.ArrayList<>(writtenProperties))
+        .withAddedMongoDocumentProperties(new java.util.ArrayList<>(addedProperties))
+        .withRemovedMongoDocumentProperties(new java.util.ArrayList<>(removedProperties))
+        .withDocumentShapeRedefined(shapeRedefined)
+        .build();
   }
 
   private ApplyItemParser getParser(ApplyItem applyItem, boolean isFirstApplyItem) {
