@@ -37,5 +37,11 @@ class OrderByItemParserTest extends Specification {
         then:
         result.stageObjects.size() == 1
         result.stageObjects[0] == new Document('$sort', new Document('myField', -1))
+        
+        result.documentShapeRedefined == false
+        result.usedMongoDocumentProperties == ["myField"]
+        result.addedMongoDocumentProperties == []
+        result.writtenMongoDocumentProperties == []
+        result.removedMongoDocumentProperties == []
     }
 }

@@ -216,7 +216,8 @@ class GroupByItemParserTest extends Specification {
 
     def "should track properties correctly and set shape redefined to true"() {
         given:
-        def parser = new GroupByItemParser(Mock(ODataApplyToMongoAggregationPipelineParser))
+        def applyParser = new ODataApplyToMongoAggregationPipelineParser()
+        def parser = new GroupByItemParser(applyParser)
         def mockFacade = Mock(EdmPropertyMongoPathResolver)
         
         def mockGroupBy = Mock(org.apache.olingo.server.api.uri.queryoption.apply.GroupBy)
@@ -230,7 +231,7 @@ class GroupByItemParserTest extends Specification {
         mockGroupBy.getGroupByItems() >> [mockGroupByItem]
         mockGroupBy.getApplyOption() >> null
         
-        def mongoPathContext = Mock(com.github.starnowski.jamolingo.core.api.MongoPathContext)
+        def mongoPathContext = Mock(MongoPathResolution)
         mongoPathContext.getMongoPath() >> "name"
         mockFacade.resolveMongoPathForEDMPath("Name") >> mongoPathContext
 

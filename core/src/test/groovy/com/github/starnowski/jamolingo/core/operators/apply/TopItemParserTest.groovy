@@ -21,5 +21,11 @@ class TopItemParserTest extends Specification {
         then:
         result.stageObjects.size() == 1
         result.stageObjects[0] == new Document('$limit', 5)
+        
+        result.documentShapeRedefined == false
+        result.usedMongoDocumentProperties == []
+        result.addedMongoDocumentProperties == []
+        result.writtenMongoDocumentProperties == []
+        result.removedMongoDocumentProperties == []
     }
 }
