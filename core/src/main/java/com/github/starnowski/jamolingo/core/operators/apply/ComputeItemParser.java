@@ -46,7 +46,8 @@ public class ComputeItemParser implements ApplyItemParser {
     return DefaultApplyOperatorResult.builder()
         .withStageObjects(
             java.util.Collections.singletonList(new org.bson.Document("$addFields", addFieldsDoc)))
-        .withUsedMongoDocumentProperties(new java.util.ArrayList<>(visitor.getUsedMongoDBProperties()))
+        .withUsedMongoDocumentProperties(
+            new java.util.ArrayList<>(visitor.getUsedMongoDBProperties()))
         .withWrittenMongoDocumentProperties(addedProperties)
         .withAddedMongoDocumentProperties(addedProperties)
         .withDocumentShapeRedefined(false)

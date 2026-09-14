@@ -50,7 +50,7 @@ public class ODataApplyToMongoAggregationPipelineParser {
       if (parser != null) {
         ApplyOperatorResult result = parser.parse(applyItem, edmMongoContextFacade);
         stages.addAll(result.getStageObjects());
-        
+
         if (result.getUsedMongoDocumentProperties() != null) {
           usedProperties.addAll(result.getUsedMongoDocumentProperties());
         }

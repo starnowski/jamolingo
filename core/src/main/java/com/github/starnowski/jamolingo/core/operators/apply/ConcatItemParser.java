@@ -44,7 +44,7 @@ public class ConcatItemParser implements ApplyItemParser {
           applyParser.parse(applyOption.getApplyItems(), edmMongoContextFacade);
       facetDoc.put(facetKey, innerResult.getStageObjects());
       facetFields.add("$" + facetKey);
-      
+
       if (innerResult.getUsedMongoDocumentProperties() != null) {
         usedProperties.addAll(innerResult.getUsedMongoDocumentProperties());
       }

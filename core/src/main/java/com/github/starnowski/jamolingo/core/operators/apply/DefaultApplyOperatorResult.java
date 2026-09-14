@@ -110,12 +110,18 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
   /** toString method. */
   public String toString() {
     return "DefaultApplyOperatorResult{"
-        + "stageObjects=" + stageObjects
-        + ", usedMongoDocumentProperties=" + usedMongoDocumentProperties
-        + ", writtenMongoDocumentProperties=" + writtenMongoDocumentProperties
-        + ", addedMongoDocumentProperties=" + addedMongoDocumentProperties
-        + ", removedMongoDocumentProperties=" + removedMongoDocumentProperties
-        + ", documentShapeRedefined=" + documentShapeRedefined
+        + "stageObjects="
+        + stageObjects
+        + ", usedMongoDocumentProperties="
+        + usedMongoDocumentProperties
+        + ", writtenMongoDocumentProperties="
+        + writtenMongoDocumentProperties
+        + ", addedMongoDocumentProperties="
+        + addedMongoDocumentProperties
+        + ", removedMongoDocumentProperties="
+        + removedMongoDocumentProperties
+        + ", documentShapeRedefined="
+        + documentShapeRedefined
         + '}';
   }
 
