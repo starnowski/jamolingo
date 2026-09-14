@@ -9,25 +9,39 @@ import com.github.starnowski.jamolingo.core.context.MongoPathResolution
 import org.bson.Document
 import org.apache.olingo.server.api.uri.queryoption.ApplyOption
 import spock.lang.Specification
+import spock.lang.Unroll
 
 class GroupByItemParserTest extends Specification {
-    def "should map simple grouping properties to _id in group stage"() {
+
+    @Unroll
+    def "should map grouping properties to _id in group stage - #description"(String description, List<String> edmPaths, List<String> expectedMongoPaths) {
         given:
         def pathResolver = Mock(EdmPropertyMongoPathResolver)
         def applyParser = new ODataApplyToMongoAggregationPipelineParser()
         def parser = new GroupByItemParser(applyParser)
-        
+
         def groupBy = Mock(GroupBy)
-        def groupByItem1 = Mock(GroupByItem)
-        def uriResource1 = Mock(UriResource)
+        def mockGroupByItems = []
+
+        edmPaths.eachWithIndex { edmPath, index ->
+            def mockGroupByItem = Mock(GroupByItem)
+            def mockUriResources = []
+            
+            edmPath.split('/').each { segment ->
+                def mockUriResource = Mock(UriResource)
+                mockUriResource.getSegmentValue() >> segment
+                mockUriResources << mockUriResource
+            }
+            
+            mockGroupByItem.getPath() >> mockUriResources
+            mockGroupByItems << mockGroupByItem
+            
+            def mongoPathRes = Mock(MongoPathResolution)
+            mongoPathRes.getMongoPath() >> expectedMongoPaths[index]
+            pathResolver.resolveMongoPathForEDMPath(edmPath) >> mongoPathRes
+        }
         
-        uriResource1.getSegmentValue() >> "prop1"
-        groupByItem1.getPath() >> [uriResource1]
-        groupBy.getGroupByItems() >> [groupByItem1]
-        
-        def res1 = Mock(MongoPathResolution)
-        res1.getMongoPath() >> "prop1"
-        pathResolver.resolveMongoPathForEDMPath("prop1") >> res1
+        groupBy.getGroupByItems() >> mockGroupByItems
 
         when:
         def result = parser.parse(groupBy, pathResolver)
@@ -38,65 +52,25 @@ class GroupByItemParserTest extends Specification {
         groupStage.containsKey('$group')
         def idDoc = groupStage.get('$group') as Document
         def idVal = idDoc.get('_id') as Document
-        idVal.containsKey('prop1')
-        idVal.get('prop1') == '$prop1'
         
-        def projectStage = result.stageObjects[1] as Document
-        projectStage.containsKey('$project')
-        def projectDoc = projectStage.get('$project') as Document
-        projectDoc.get('_id') == 0
-        projectDoc.get('prop1') == '$_id.prop1'
-    }
-
-    def "should map multiple grouping properties to _id in group stage"() {
-        given:
-        def pathResolver = Mock(EdmPropertyMongoPathResolver)
-        def applyParser = new ODataApplyToMongoAggregationPipelineParser()
-        def parser = new GroupByItemParser(applyParser)
-        
-        def groupBy = Mock(GroupBy)
-        def groupByItem1 = Mock(GroupByItem)
-        def uriResource1 = Mock(UriResource)
-        uriResource1.getSegmentValue() >> "prop1"
-        groupByItem1.getPath() >> [uriResource1]
-        
-        def groupByItem2 = Mock(GroupByItem)
-        def uriResource2 = Mock(UriResource)
-        def uriResource3 = Mock(UriResource)
-        uriResource2.getSegmentValue() >> "prop2"
-        uriResource3.getSegmentValue() >> "subProp"
-        groupByItem2.getPath() >> [uriResource2, uriResource3]
-        
-        groupBy.getGroupByItems() >> [groupByItem1, groupByItem2]
-        
-        def res1 = Mock(MongoPathResolution)
-        res1.getMongoPath() >> "prop1"
-        pathResolver.resolveMongoPathForEDMPath("prop1") >> res1
-        
-        def res2 = Mock(MongoPathResolution)
-        res2.getMongoPath() >> "prop2.subProp"
-        pathResolver.resolveMongoPathForEDMPath("prop2/subProp") >> res2
-
-        when:
-        def result = parser.parse(groupBy, pathResolver)
-
-        then:
-        result.stageObjects.size() == 2
-        def groupStage = result.stageObjects[0] as Document
-        groupStage.containsKey('$group')
-        def idDoc = groupStage.get('$group') as Document
-        def idVal = idDoc.get('_id') as Document
-        idVal.containsKey('prop1')
-        idVal.get('prop1') == '$prop1'
-        idVal.containsKey('prop2.subProp')
-        idVal.get('prop2.subProp') == '$prop2.subProp'
+        expectedMongoPaths.each { mongoPath ->
+            assert idVal.containsKey(mongoPath)
+            assert idVal.get(mongoPath) == '$' + mongoPath
+        }
 
         def projectStage = result.stageObjects[1] as Document
         projectStage.containsKey('$project')
         def projectDoc = projectStage.get('$project') as Document
         projectDoc.get('_id') == 0
-        projectDoc.get('prop1') == '$_id.prop1'
-        projectDoc.get('prop2.subProp') == '$_id.prop2.subProp'
+        
+        expectedMongoPaths.each { mongoPath ->
+            assert projectDoc.get(mongoPath) == '$_id.' + mongoPath
+        }
+
+        where:
+        description                  | edmPaths                     | expectedMongoPaths
+        "simple property"            | ["prop1"]                    | ["prop1"]
+        "multiple nested properties" | ["prop1", "prop2/subProp"]   | ["prop1", "prop2.subProp"]
     }
 
     def "should append stages from inner ApplyOption if nested transformations exist"() {
