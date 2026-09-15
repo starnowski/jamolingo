@@ -217,7 +217,7 @@ class GroupByItemParserTest extends Specification {
         result.documentShapeRedefined == true
         result.usedMongoDocumentProperties == ["name"]
         result.addedMongoDocumentProperties == []
-        result.writtenMongoDocumentProperties == []
+        result.writtenMongoDocumentProperties == ["name"]
         result.removedMongoDocumentProperties == []
     }
 

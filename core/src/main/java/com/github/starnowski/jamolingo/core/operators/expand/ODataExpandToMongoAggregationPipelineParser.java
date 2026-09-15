@@ -91,6 +91,40 @@ public class ODataExpandToMongoAggregationPipelineParser {
     List<Bson> stageObjects = new ArrayList<>();
     Map<String, ExpandElement> expandElements = new HashMap<>();
     for (ExpandItem eOption : expandOption.getExpandItems()) {
+      if (parserExpandItemContext.getParentApplyOperatorResult() != null
+          && parserExpandItemContext.getParentApplyOperatorResult().isDocumentShapeRedefined()) {
+        String navPropName =
+            ((UriResourceNavigation)
+                    eOption
+                        .getResourcePath()
+                        .getUriResourceParts()
+                        .get(eOption.getResourcePath().getUriResourceParts().size() - 1))
+                .getProperty()
+                .getName();
+
+        String currentSourceFullTypeName =
+            getCurrentSourceFullTypeName(eOption, parserExpandItemContext);
+        EdmMongoContextFacade sourceResolver =
+            expandParserContext.getEDMTypeMapping() != null && currentSourceFullTypeName != null
+                ? expandParserContext.getEDMTypeMapping().get(currentSourceFullTypeName)
+                : null;
+        if (sourceResolver == null
+            && (currentSourceFullTypeName == null
+                || currentSourceFullTypeName.equals(
+                    expandParserContext.getRootEdmEntityTypeName()))) {
+          sourceResolver = expandParserContext.getRootEdmMongoContextFacade();
+        }
+        String mongoProperty = navPropName;
+        if (sourceResolver != null) {
+          mongoProperty = sourceResolver.resolveMongoPathForEDMPath(navPropName).getMongoPath();
+        }
+        if (!parserExpandItemContext
+            .getParentApplyOperatorResult()
+            .getWrittenMongoDocumentProperties()
+            .contains(mongoProperty)) {
+          continue;
+        }
+      }
       stageObjects.addAll(
           prepareStageObjectsForExpandItem(
               eOption, expandParserContext, parserExpandItemContext, expandElements));
@@ -221,11 +255,25 @@ public class ODataExpandToMongoAggregationPipelineParser {
               .getEDMTablesToMongoDBCollections()
               .get(new KeyValue<>(targetEntityType.getNamespace(), targetEntityType.getName()));
 
-      // TODO Add property in configuration that allow to specify the collection name
       String targetCollection =
           mongoCollectionName == null
               ? targetEntityType.getFullQualifiedName().getFullQualifiedNameAsString()
               : mongoCollectionName;
+
+      com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult applyOperatorResult =
+          null;
+      if (eOption.getApplyOption() != null) {
+        ODataApplyToMongoAggregationPipelineParser applyParser =
+            new ODataApplyToMongoAggregationPipelineParser();
+        EdmMongoContextFacade facade =
+            targetResolver == null
+                ? DefaultEdmMongoContextFacade.builder()
+                    .withEntityPropertiesMongoPathContext(null)
+                    .build()
+                : targetResolver;
+        applyOperatorResult = applyParser.parse(eOption.getApplyOption(), facade);
+      }
+
       List<Bson> pipeline = new ArrayList<>();
 
       String navPropertyWithRootPrefix =
@@ -400,7 +448,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                         newAccumulatedLevels,
                         currentLevel + 1,
                         currentPath,
-                        targetFullTypeName));
+                        targetFullTypeName,
+                        applyOperatorResult));
           } catch (ExpandLevelExceededException e) {
             String path = e.getEdmPath();
             if (!navProp.getName().equals(path)) {
@@ -475,7 +524,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                         newAccumulatedLevels,
                         currentLevel + 1,
                         currentPath,
-                        targetFullTypeName));
+                        targetFullTypeName,
+                        applyOperatorResult));
           } catch (ExpandLevelExceededException e) {
             String path = e.getEdmPath();
             if (!navProp.getName().equals(path)) {
@@ -504,7 +554,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   1,
                   maxDepth + 1,
                   nestedExpandResult,
-                  targetResolver));
+                  targetResolver,
+                  applyOperatorResult));
         } else {
           pipeline.addAll(
               prepareLookUpStage(
@@ -519,7 +570,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                   1,
                   1,
                   nestedExpandResult,
-                  targetResolver));
+                  targetResolver,
+                  applyOperatorResult));
         }
 
         int levelValue = 1;
@@ -586,7 +638,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
       int currentLevel,
       int maxLevel,
       ExpandOperatorResult nestedExpandResult,
-      EdmMongoContextFacade targetResolver)
+      EdmMongoContextFacade targetResolver,
+      com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult applyOperatorResult)
       throws ExpressionVisitException, ODataApplicationException {
     // Adding $lookup
     List<Bson> pipeline = new ArrayList<>();
@@ -602,7 +655,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
         || eOption.getTopOption() != null
         || eOption.getSkipOption() != null
         || eOption.getSelectOption() != null
-        || eOption.getApplyOption() != null
+        || applyOperatorResult != null
         || currentLevel != maxLevel
         || eOption.getExpandOption() != null) {
       ODataFilterToMongoMatchParser oDataFilterToMongoMatchParser =
@@ -622,11 +675,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
       // $lookup with pipeline
       List<Bson> lookupPipeline = new ArrayList<>();
-      if (eOption.getApplyOption() != null) {
-        ODataApplyToMongoAggregationPipelineParser applyParser =
-            new ODataApplyToMongoAggregationPipelineParser();
-        lookupPipeline.addAll(
-            applyParser.parse(eOption.getApplyOption(), facade).getStageObjects());
+      if (applyOperatorResult != null) {
+        lookupPipeline.addAll(applyOperatorResult.getStageObjects());
       }
       if (eOption.getFilterOption() != null) {
         lookupPipeline.addAll(
@@ -671,7 +721,16 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 facade,
                 odataSelectToMongoProjectParserContextBuilder.build());
       }
-      if (currentLevel != maxLevel) {
+      boolean skipNextLevel = false;
+      if (applyOperatorResult != null && applyOperatorResult.isDocumentShapeRedefined()) {
+        String mongoProperty = lookupMongoStartWith;
+        // In the context of nested lookup, if the local property used to connect
+        // is removed by $apply, we cannot perform the next level of $lookup.
+        if (!applyOperatorResult.getWrittenMongoDocumentProperties().contains(mongoProperty)) {
+          skipNextLevel = true;
+        }
+      }
+      if (currentLevel != maxLevel && !skipNextLevel) {
         lookupPipeline.addAll(
             prepareLookUpStage(
                 targetCollection,
@@ -685,7 +744,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 currentLevel + 1,
                 maxLevel,
                 nestedExpandResult,
-                targetResolver));
+                targetResolver,
+                applyOperatorResult));
       }
       if (nestedExpandResult != null) {
         lookupPipeline.addAll(nestedExpandResult.getStageObjects());
@@ -827,6 +887,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
           null);
     }
 
+    private final com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult
+        parentApplyOperatorResult;
+
     public ParserExpandItemContext(
         String root,
         Set<String> idProperties,
@@ -839,7 +902,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
           Collections.emptyMap(),
           1,
           null,
-          sourceFullTypeName);
+          sourceFullTypeName,
+          null);
     }
 
     public ParserExpandItemContext(
@@ -847,7 +911,15 @@ public class ODataExpandToMongoAggregationPipelineParser {
         Set<String> idProperties,
         boolean addCleanUpEmptyPropertiesStage,
         Map<String, Integer> accumulatedLevels) {
-      this(root, idProperties, addCleanUpEmptyPropertiesStage, accumulatedLevels, 1, null, null);
+      this(
+          root,
+          idProperties,
+          addCleanUpEmptyPropertiesStage,
+          accumulatedLevels,
+          1,
+          null,
+          null,
+          null);
     }
 
     public ParserExpandItemContext(
@@ -858,6 +930,27 @@ public class ODataExpandToMongoAggregationPipelineParser {
         int currentNestedLevel,
         String currentEdmPath,
         String sourceFullTypeName) {
+      this(
+          root,
+          idProperties,
+          addCleanUpEmptyPropertiesStage,
+          accumulatedLevels,
+          currentNestedLevel,
+          currentEdmPath,
+          sourceFullTypeName,
+          null);
+    }
+
+    public ParserExpandItemContext(
+        String root,
+        Set<String> idProperties,
+        boolean addCleanUpEmptyPropertiesStage,
+        Map<String, Integer> accumulatedLevels,
+        int currentNestedLevel,
+        String currentEdmPath,
+        String sourceFullTypeName,
+        com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult
+            parentApplyOperatorResult) {
       this.root = root;
       this.idProperties =
           Collections.unmodifiableSet(idProperties == null ? Collections.emptySet() : idProperties);
@@ -870,6 +963,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
       this.currentNestedLevel = currentNestedLevel;
       this.currentEdmPath = currentEdmPath;
       this.sourceFullTypeName = sourceFullTypeName;
+      this.parentApplyOperatorResult = parentApplyOperatorResult;
+    }
+
+    public com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult
+        getParentApplyOperatorResult() {
+      return parentApplyOperatorResult;
     }
 
     public String getSourceFullTypeName() {

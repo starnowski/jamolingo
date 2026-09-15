@@ -110,6 +110,7 @@ public class GroupByItemParser implements ApplyItemParser {
 
     List<String> finalUsedProperties = new ArrayList<>(usedProperties);
     List<String> finalWrittenProperties = new ArrayList<>(addedProperties);
+    finalWrittenProperties.addAll(groupedMongoPaths);
     List<String> finalAddedProperties = new ArrayList<>(addedProperties);
     List<String> finalRemovedProperties = new ArrayList<>();
 
