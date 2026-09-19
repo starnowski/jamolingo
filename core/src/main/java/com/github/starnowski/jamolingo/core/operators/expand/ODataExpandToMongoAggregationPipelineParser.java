@@ -122,7 +122,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
             .getParentApplyOperatorResult()
             .getWrittenMongoDocumentProperties()
             .contains(mongoProperty)) {
-          continue;
+          throw new RuntimeException("the " + mongoProperty + " property do not exists");
         }
       }
       stageObjects.addAll(
