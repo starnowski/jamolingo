@@ -107,4 +107,22 @@ public interface ExpandParserContext {
   default Set<String> getIgnoreForSpecificExpandElementMissingNavigationProperty() {
     return java.util.Collections.emptySet();
   }
+
+  /**
+   * Determines if missing properties should be globally ignored.
+   *
+   * @return true if they should be ignored, false otherwise
+   */
+  default boolean isIgnoreGloballyMissingProperty() {
+    return false;
+  }
+
+  /**
+   * Returns a set of EDM paths for which missing properties should be ignored.
+   *
+   * @return set of EDM paths to ignore
+   */
+  default Set<String> getIgnoreForSpecificExpandElementMissingProperty() {
+    return java.util.Collections.emptySet();
+  }
 }

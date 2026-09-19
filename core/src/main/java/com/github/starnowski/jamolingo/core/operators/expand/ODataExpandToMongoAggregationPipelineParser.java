@@ -1398,6 +1398,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
     private final EdmMongoContextFacade rootEdmMongoContextFacade;
     private final boolean ignoreGloballyMissingNavigationProperty;
     private final Set<String> ignoreForSpecificExpandElementMissingNavigationProperty;
+    private final boolean ignoreGloballyMissingProperty;
+    private final Set<String> ignoreForSpecificExpandElementMissingProperty;
 
     /**
      * Constructs a new DefaultExpandParserContext.
@@ -1608,6 +1610,60 @@ public class ODataExpandToMongoAggregationPipelineParser {
         EdmMongoContextFacade rootEdmMongoContextFacade,
         boolean ignoreGloballyMissingNavigationProperty,
         Set<String> ignoreForSpecificExpandElementMissingNavigationProperty) {
+      this(
+          edmTypeMapping,
+          edmTablesToMongoDBCollections,
+          maxLevel,
+          useLookupForLevelGreaterThanOne,
+          propagateGraphLookUpJoinKeys,
+          throwExceptionOnExpandLevelsExceeded,
+          maxAllowedNestedExpandLevel,
+          rootEdmEntityTypeName,
+          rootEdmMongoContextFacade,
+          ignoreGloballyMissingNavigationProperty,
+          ignoreForSpecificExpandElementMissingNavigationProperty,
+          false,
+          Collections.emptySet());
+    }
+
+    /**
+     * Constructs a new DefaultExpandParserContext.
+     *
+     * @param edmTypeMapping mapping between EDM type names and their Mongo path resolvers
+     * @param edmTablesToMongoDBCollections mapping between EDM entity sets and their MongoDB
+     *     collection names
+     * @param maxLevel maximum level of recursion for $expand
+     * @param useLookupForLevelGreaterThanOne true if the $lookup stage should be used to handle
+     *     $level greater than 1
+     * @param propagateGraphLookUpJoinKeys true if join keys used for the $graphLookup stage should
+     *     be propagated
+     * @param throwExceptionOnExpandLevelsExceeded true if an exception should be thrown when expand
+     *     levels are exceeded
+     * @param maxAllowedNestedExpandLevel the maximum allowed nested expand level
+     * @param rootEdmEntityTypeName the root EDM entity type name
+     * @param rootEdmMongoContextFacade the root EDM mongo context facade
+     * @param ignoreGloballyMissingNavigationProperty true if missing navigation properties should
+     *     be globally ignored
+     * @param ignoreForSpecificExpandElementMissingNavigationProperty set of EDM paths to ignore
+     *     missing navigation properties
+     * @param ignoreGloballyMissingProperty true if missing properties should be globally ignored
+     * @param ignoreForSpecificExpandElementMissingProperty set of EDM paths to ignore missing
+     *     properties
+     */
+    public DefaultExpandParserContext(
+        Map<String, EdmMongoContextFacade> edmTypeMapping,
+        Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
+        Integer maxLevel,
+        boolean useLookupForLevelGreaterThanOne,
+        boolean propagateGraphLookUpJoinKeys,
+        boolean throwExceptionOnExpandLevelsExceeded,
+        Integer maxAllowedNestedExpandLevel,
+        String rootEdmEntityTypeName,
+        EdmMongoContextFacade rootEdmMongoContextFacade,
+        boolean ignoreGloballyMissingNavigationProperty,
+        Set<String> ignoreForSpecificExpandElementMissingNavigationProperty,
+        boolean ignoreGloballyMissingProperty,
+        Set<String> ignoreForSpecificExpandElementMissingProperty) {
       this.edmTypeMapping = edmTypeMapping;
       this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
       this.maxLevel = maxLevel;
@@ -1620,6 +1676,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       this.ignoreGloballyMissingNavigationProperty = ignoreGloballyMissingNavigationProperty;
       this.ignoreForSpecificExpandElementMissingNavigationProperty =
           ignoreForSpecificExpandElementMissingNavigationProperty;
+      this.ignoreGloballyMissingProperty = ignoreGloballyMissingProperty;
+      this.ignoreForSpecificExpandElementMissingProperty =
+          ignoreForSpecificExpandElementMissingProperty;
     }
 
     @Override
@@ -1678,6 +1737,16 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
+    public boolean isIgnoreGloballyMissingProperty() {
+      return ignoreGloballyMissingProperty;
+    }
+
+    @Override
+    public Set<String> getIgnoreForSpecificExpandElementMissingProperty() {
+      return ignoreForSpecificExpandElementMissingProperty;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1694,7 +1763,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
           && ignoreGloballyMissingNavigationProperty == that.ignoreGloballyMissingNavigationProperty
           && Objects.equals(
               ignoreForSpecificExpandElementMissingNavigationProperty,
-              that.ignoreForSpecificExpandElementMissingNavigationProperty);
+              that.ignoreForSpecificExpandElementMissingNavigationProperty)
+          && ignoreGloballyMissingProperty == that.ignoreGloballyMissingProperty
+          && Objects.equals(
+              ignoreForSpecificExpandElementMissingProperty,
+              that.ignoreForSpecificExpandElementMissingProperty);
     }
 
     @Override
@@ -1710,7 +1783,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
           rootEdmEntityTypeName,
           rootEdmMongoContextFacade,
           ignoreGloballyMissingNavigationProperty,
-          ignoreForSpecificExpandElementMissingNavigationProperty);
+          ignoreForSpecificExpandElementMissingNavigationProperty,
+          ignoreGloballyMissingProperty,
+          ignoreForSpecificExpandElementMissingProperty);
     }
 
     @Override
@@ -1739,6 +1814,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
           + ignoreGloballyMissingNavigationProperty
           + ", ignoreForSpecificExpandElementMissingNavigationProperty="
           + ignoreForSpecificExpandElementMissingNavigationProperty
+          + ", ignoreGloballyMissingProperty="
+          + ignoreGloballyMissingProperty
+          + ", ignoreForSpecificExpandElementMissingProperty="
+          + ignoreForSpecificExpandElementMissingProperty
           + '}';
     }
 
@@ -1769,6 +1848,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
       private EdmMongoContextFacade rootEdmMongoContextFacade = null;
       private boolean ignoreGloballyMissingNavigationProperty = false;
       private Set<String> ignoreForSpecificExpandElementMissingNavigationProperty = new HashSet<>();
+      private boolean ignoreGloballyMissingProperty = false;
+      private Set<String> ignoreForSpecificExpandElementMissingProperty = new HashSet<>();
 
       /**
        * Sets the mapping between EDM type names and their Mongo path resolvers.
@@ -1805,9 +1886,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       /**
-       * Sets whether the $lookup stage should be used to handle $level greater than 1.
+       * Sets whether to use $lookup for $level greater than 1.
        *
-       * @param useLookupForLevelGreaterThanOne true to use $lookup, false to use $graphLookup
+       * @param useLookupForLevelGreaterThanOne true to use $lookup
        * @return the builder instance
        */
       public Builder withUseLookupForLevelGreaterThanOne(boolean useLookupForLevelGreaterThanOne) {
@@ -1816,9 +1897,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       /**
-       * Sets whether join keys used for the $graphLookup stage should be propagated.
+       * Sets whether to propagate join keys used for the $graphLookup stage.
        *
-       * @param propagateGraphLookUpJoinKeys true to propagate, false otherwise
+       * @param propagateGraphLookUpJoinKeys true to propagate join keys
        * @return the builder instance
        */
       public Builder withPropagateGraphLookUpJoinKeys(boolean propagateGraphLookUpJoinKeys) {
@@ -1827,9 +1908,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       /**
-       * Sets whether an exception should be thrown when expand levels are exceeded.
+       * Sets whether to throw an exception when expand levels are exceeded.
        *
-       * @param throwExceptionOnExpandLevelsExceeded true if an exception should be thrown
+       * @param throwExceptionOnExpandLevelsExceeded true to throw an exception
        * @return the builder instance
        */
       public Builder withThrowExceptionOnExpandLevelsExceeded(
@@ -1841,8 +1922,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
       /**
        * Sets the maximum allowed nested expand level.
        *
-       * @param maxAllowedNestedExpandLevel the max level to allow
-       * @return the builder
+       * @param maxAllowedNestedExpandLevel the maximum allowed nested expand level
+       * @return the builder instance
        */
       public Builder withMaxAllowedNestedExpandLevel(Integer maxAllowedNestedExpandLevel) {
         this.maxAllowedNestedExpandLevel = maxAllowedNestedExpandLevel;
@@ -1873,9 +1954,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       /**
-       * Sets whether missing navigation properties should be globally ignored.
+       * Sets whether to globally ignore missing navigation properties.
        *
-       * @param ignoreGloballyMissingNavigationProperty true to ignore
+       * @param ignoreGloballyMissingNavigationProperty true to globally ignore missing navigation
+       *     properties
        * @return the builder instance
        */
       public Builder withIgnoreGloballyMissingNavigationProperty(
@@ -1885,9 +1967,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       /**
-       * Sets the set of EDM paths to ignore when missing navigation properties.
+       * Sets the EDM paths for which missing navigation properties should be ignored.
        *
-       * @param ignoreForSpecificExpandElementMissingNavigationProperty set of EDM paths
+       * @param ignoreForSpecificExpandElementMissingNavigationProperty set of EDM paths to ignore
        * @return the builder instance
        */
       public Builder withIgnoreForSpecificExpandElementMissingNavigationProperty(
@@ -1898,21 +1980,40 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       /**
-       * Initializes the builder with values from an existing context.
+       * Sets whether to globally ignore missing properties.
        *
-       * @param defaultExpandParserContext the context to copy values from
+       * @param ignoreGloballyMissingProperty true to globally ignore missing properties
+       * @return the builder instance
+       */
+      public Builder withIgnoreGloballyMissingProperty(boolean ignoreGloballyMissingProperty) {
+        this.ignoreGloballyMissingProperty = ignoreGloballyMissingProperty;
+        return this;
+      }
+
+      /**
+       * Sets the EDM paths for which missing properties should be ignored.
+       *
+       * @param ignoreForSpecificExpandElementMissingProperty set of EDM paths to ignore
+       * @return the builder instance
+       */
+      public Builder withIgnoreForSpecificExpandElementMissingProperty(
+          Set<String> ignoreForSpecificExpandElementMissingProperty) {
+        this.ignoreForSpecificExpandElementMissingProperty =
+            ignoreForSpecificExpandElementMissingProperty;
+        return this;
+      }
+
+      /**
+       * Copies properties from an existing DefaultExpandParserContext.
+       *
+       * @param defaultExpandParserContext the context to copy from
        * @return the builder instance
        */
       public Builder withDefaultExpandParserContext(
           DefaultExpandParserContext defaultExpandParserContext) {
-        this.edmTypeMapping =
-            defaultExpandParserContext.edmTypeMapping != null
-                ? new HashMap<>(defaultExpandParserContext.edmTypeMapping)
-                : null;
+        this.edmTypeMapping = defaultExpandParserContext.edmTypeMapping;
         this.edmTablesToMongoDBCollections =
-            defaultExpandParserContext.edmTablesToMongoDBCollections != null
-                ? new HashMap<>(defaultExpandParserContext.edmTablesToMongoDBCollections)
-                : null;
+            defaultExpandParserContext.edmTablesToMongoDBCollections;
         this.maxLevel = defaultExpandParserContext.maxLevel;
         this.useLookupForLevelGreaterThanOne =
             defaultExpandParserContext.useLookupForLevelGreaterThanOne;
@@ -1921,32 +2022,27 @@ public class ODataExpandToMongoAggregationPipelineParser {
             defaultExpandParserContext.throwExceptionOnExpandLevelsExceeded;
         this.maxAllowedNestedExpandLevel = defaultExpandParserContext.maxAllowedNestedExpandLevel;
         this.rootEdmEntityTypeName = defaultExpandParserContext.rootEdmEntityTypeName;
-        this.rootEdmMongoContextFacade = defaultExpandParserContext.getRootEdmMongoContextFacade();
+        this.rootEdmMongoContextFacade = defaultExpandParserContext.rootEdmMongoContextFacade;
         this.ignoreGloballyMissingNavigationProperty =
-            defaultExpandParserContext.isIgnoreGloballyMissingNavigationProperty();
+            defaultExpandParserContext.ignoreGloballyMissingNavigationProperty;
         this.ignoreForSpecificExpandElementMissingNavigationProperty =
-            defaultExpandParserContext.getIgnoreForSpecificExpandElementMissingNavigationProperty()
-                    != null
-                ? new HashSet<>(
-                    defaultExpandParserContext
-                        .getIgnoreForSpecificExpandElementMissingNavigationProperty())
-                : new HashSet<>();
+            defaultExpandParserContext.ignoreForSpecificExpandElementMissingNavigationProperty;
+        this.ignoreGloballyMissingProperty =
+            defaultExpandParserContext.ignoreGloballyMissingProperty;
+        this.ignoreForSpecificExpandElementMissingProperty =
+            defaultExpandParserContext.ignoreForSpecificExpandElementMissingProperty;
         return this;
       }
 
       /**
-       * Builds the DefaultExpandParserContext instance.
+       * Builds a new DefaultExpandParserContext.
        *
-       * @return the constructed context
+       * @return a new DefaultExpandParserContext
        */
       public DefaultExpandParserContext build() {
         return new DefaultExpandParserContext(
-            edmTypeMapping != null
-                ? Collections.unmodifiableMap(new HashMap<>(edmTypeMapping))
-                : null,
-            edmTablesToMongoDBCollections != null
-                ? Collections.unmodifiableMap(new HashMap<>(edmTablesToMongoDBCollections))
-                : null,
+            edmTypeMapping,
+            edmTablesToMongoDBCollections,
             maxLevel,
             useLookupForLevelGreaterThanOne,
             propagateGraphLookUpJoinKeys,
@@ -1955,10 +2051,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
             rootEdmEntityTypeName,
             rootEdmMongoContextFacade,
             ignoreGloballyMissingNavigationProperty,
-            ignoreForSpecificExpandElementMissingNavigationProperty != null
-                ? Collections.unmodifiableSet(
-                    new HashSet<>(ignoreForSpecificExpandElementMissingNavigationProperty))
-                : Collections.emptySet());
+            ignoreForSpecificExpandElementMissingNavigationProperty,
+            ignoreGloballyMissingProperty,
+            ignoreForSpecificExpandElementMissingProperty);
       }
     }
   }
