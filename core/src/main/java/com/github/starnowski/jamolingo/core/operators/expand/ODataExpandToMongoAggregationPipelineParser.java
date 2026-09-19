@@ -122,7 +122,20 @@ public class ODataExpandToMongoAggregationPipelineParser {
             .getParentApplyOperatorResult()
             .getWrittenMongoDocumentProperties()
             .contains(mongoProperty)) {
-          throw new RuntimeException("the " + mongoProperty + " property do not exists");
+          String currentPath =
+              parserExpandItemContext.getCurrentEdmPath() == null
+                  ? navPropName
+                  : parserExpandItemContext.getCurrentEdmPath() + "." + navPropName;
+          if (expandParserContext.isIgnoreGloballyMissingNavigationProperty()
+              || expandParserContext
+                  .getIgnoreForSpecificExpandElementMissingNavigationProperty()
+                  .contains(currentPath)) {
+            continue;
+          }
+          throw new MissingNavigationPropertyExpandException(
+              currentPath,
+              navPropName,
+              "the " + mongoProperty + " property does not exist in the reshaped result");
         }
       }
       stageObjects.addAll(
