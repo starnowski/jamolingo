@@ -285,6 +285,56 @@ public class ODataExpandToMongoAggregationPipelineParser {
                     .build()
                 : targetResolver;
         applyOperatorResult = applyParser.parse(eOption.getApplyOption(), facade);
+
+        if (applyOperatorResult != null && applyOperatorResult.isDocumentShapeRedefined()) {
+          if (!expandParserContext.isIgnoreGloballyMissingProperty()
+              && !expandParserContext
+                  .getIgnoreForSpecificExpandElementMissingProperty()
+                  .contains(currentPath)) {
+
+            List<String> writtenProps = applyOperatorResult.getWrittenMongoDocumentProperties();
+
+            if (eOption.getFilterOption() != null) {
+              ODataFilterToMongoMatchParser p = new ODataFilterToMongoMatchParser();
+              com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult r =
+                  p.parse(eOption.getFilterOption(), facade);
+              for (String prop : r.getUsedMongoDocumentProperties()) {
+                if (!writtenProps.contains(prop)) {
+                  throw new MissingPropertyExpandException(
+                      currentPath, prop, "the " + prop + " property does not exist in the reshaped result");
+                }
+              }
+            }
+
+            if (eOption.getOrderByOption() != null) {
+              OdataOrderByToMongoSortParser p = new OdataOrderByToMongoSortParser();
+              OrderByOperatorResult r = p.parse(eOption.getOrderByOption(), facade);
+              for (String prop : r.getUsedMongoDocumentProperties()) {
+                if (!writtenProps.contains(prop)) {
+                  throw new MissingPropertyExpandException(
+                      currentPath, prop, "the " + prop + " property does not exist in the reshaped result");
+                }
+              }
+            }
+
+            if (eOption.getSelectOption() != null) {
+              OdataSelectToMongoProjectParser p = new OdataSelectToMongoProjectParser();
+              SelectOperatorOptionsForMapOperator r =
+                  p.computeValueForMapOperator(
+                      eOption.getSelectOption(),
+                      facade,
+                      DefaultOdataSelectToMongoProjectParserContext.builder().build());
+              if (!r.isWildCard()) {
+                for (String prop : r.getRequestedFields()) {
+                  if (!writtenProps.contains(prop)) {
+                    throw new MissingPropertyExpandException(
+                        currentPath, prop, "the " + prop + " property does not exist in the reshaped result");
+                  }
+                }
+              }
+            }
+          }
+        }
       }
 
       List<Bson> pipeline = new ArrayList<>();
