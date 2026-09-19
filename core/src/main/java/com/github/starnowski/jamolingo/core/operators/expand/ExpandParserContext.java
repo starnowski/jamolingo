@@ -3,6 +3,7 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import java.util.Map;
+import java.util.Set;
 
 /** Context for parsing OData $expand system query option. */
 public interface ExpandParserContext {
@@ -87,5 +88,23 @@ public interface ExpandParserContext {
    */
   default EdmMongoContextFacade getRootEdmMongoContextFacade() {
     return null;
+  }
+
+  /**
+   * Determines if missing navigation properties should be globally ignored.
+   *
+   * @return true if they should be ignored, false otherwise
+   */
+  default boolean isIgnoreGloballyMissingNavigationProperty() {
+    return false;
+  }
+
+  /**
+   * Returns a set of EDM paths for which missing navigation properties should be ignored.
+   *
+   * @return set of EDM paths to ignore
+   */
+  default Set<String> getIgnoreForSpecificExpandElementMissingNavigationProperty() {
+    return java.util.Collections.emptySet();
   }
 }
