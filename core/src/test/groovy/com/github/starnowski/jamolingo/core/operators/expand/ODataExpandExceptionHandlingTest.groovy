@@ -87,4 +87,110 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
         query | expectedEdmPath
         '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$expand=parent)' | 'children.parent'
     }
+
+    @Unroll
+    def "should throw MissingPropertyExpandException when property used in filter is missing due to apply reshaping: #query"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", query, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxLevel(5)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        def e = thrown(MissingPropertyExpandException)
+        e.getEdmPath() == expectedEdmPath
+        e.getMissingProperty() == missingProperty
+
+        where:
+        query | expectedEdmPath | missingProperty
+        '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$filter=index eq 1)' | 'children' | 'index'
+    }
+
+    @Unroll
+    def "should throw MissingPropertyExpandException when property used in orderby is missing due to apply reshaping: #query"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", query, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxLevel(5)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        def e = thrown(MissingPropertyExpandException)
+        e.getEdmPath() == expectedEdmPath
+        e.getMissingProperty() == missingProperty
+
+        where:
+        query | expectedEdmPath | missingProperty
+        '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$orderby=index desc)' | 'children' | 'index'
+    }
+
+    @Unroll
+    def "should throw MissingPropertyExpandException when property used in select is missing due to apply reshaping: #query"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", query, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxLevel(5)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        def e = thrown(MissingPropertyExpandException)
+        e.getEdmPath() == expectedEdmPath
+        e.getMissingProperty() == missingProperty
+
+        where:
+        query | expectedEdmPath | missingProperty
+        '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$select=index)' | 'children' | 'index'
+    }
+
+    @Unroll
+    def "should not throw exception for missing property when ignoreGloballyMissingProperty is true: #query"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", query, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxLevel(5)
+                .withIgnoreGloballyMissingProperty(true)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        def result = parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        noExceptionThrown()
+        result != null
+
+        where:
+        query | _
+        '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$filter=index eq 1)' | _
+        '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$orderby=index desc)' | _
+        '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$select=index)' | _
+    }
 }
