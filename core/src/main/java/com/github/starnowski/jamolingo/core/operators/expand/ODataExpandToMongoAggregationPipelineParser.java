@@ -301,7 +301,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
               for (String prop : r.getUsedMongoDocumentProperties()) {
                 if (!writtenProps.contains(prop)) {
                   throw new MissingPropertyExpandException(
-                      currentPath, prop, "the " + prop + " property does not exist in the reshaped result");
+                      currentPath,
+                      prop,
+                      "the " + prop + " property does not exist in the reshaped result");
                 }
               }
             }
@@ -312,7 +314,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
               for (String prop : r.getUsedMongoDocumentProperties()) {
                 if (!writtenProps.contains(prop)) {
                   throw new MissingPropertyExpandException(
-                      currentPath, prop, "the " + prop + " property does not exist in the reshaped result");
+                      currentPath,
+                      prop,
+                      "the " + prop + " property does not exist in the reshaped result");
                 }
               }
             }
@@ -328,7 +332,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
                 for (String prop : r.getRequestedFields()) {
                   if (!writtenProps.contains(prop)) {
                     throw new MissingPropertyExpandException(
-                        currentPath, prop, "the " + prop + " property does not exist in the reshaped result");
+                        currentPath,
+                        prop,
+                        "the " + prop + " property does not exist in the reshaped result");
                   }
                 }
               }
