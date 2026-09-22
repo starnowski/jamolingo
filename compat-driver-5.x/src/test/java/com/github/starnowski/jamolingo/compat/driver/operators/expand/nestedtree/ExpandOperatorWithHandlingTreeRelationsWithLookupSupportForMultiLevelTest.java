@@ -1977,7 +1977,38 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 }
                                                             ]
                                                             """,
-            JSONCompareMode.STRICT_ORDER));
+            JSONCompareMode.STRICT_ORDER),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=max;$apply=concat(filter(index in (2)),filter(index in (5))))",
+            """
+                                                            [
+                                                                {
+                                                                    "_id": 1,
+                                                                    "index": 1,
+                                                                    "parentId": null,
+                                                                    "categoryId": 1,
+                                                                    "children": [
+                                                                        {
+                                                                            "_id": 2,
+                                                                            "index": 2,
+                                                                            "parentId": 1,
+                                                                            "categoryId": 1,
+                                                                            "children": []
+                                                                        },
+                                                                        {
+                                                                            "_id": 5,
+                                                                            "index": 5,
+                                                                            "parentId": 1,
+                                                                            "categoryId": 1,
+                                                                            "children": []
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            ]
+                                                            """,
+            JSONCompareMode.LENIENT));
   }
 
   private Document wrapBsonList(List<Bson> docs) {
