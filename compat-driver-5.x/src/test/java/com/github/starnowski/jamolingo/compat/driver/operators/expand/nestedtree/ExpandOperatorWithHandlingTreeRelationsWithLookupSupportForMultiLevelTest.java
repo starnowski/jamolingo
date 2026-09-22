@@ -1835,7 +1835,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 }
                                                             ]
                                                             """,
-            JSONCompareMode.LENIENT));
+            JSONCompareMode.STRICT_ORDER));
   }
 
   private Document wrapBsonList(List<Bson> docs) {
