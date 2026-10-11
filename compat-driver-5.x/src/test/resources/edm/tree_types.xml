@@ -25,7 +25,6 @@
                 </NavigationProperty>
                 <NavigationProperty Name="children" Type="Collection(MyService.TreeType1)" Partner="parent"/>
                 <NavigationProperty Name="treeType2s" Type="Collection(MyService.TreeType2)" Partner="treeType1"/>
-                <Property Name="shortDescription" Type="Edm.String" Nullable="true"/>
             </EntityType>
             <EntityType Name="TreeType2">
                 <Key>
