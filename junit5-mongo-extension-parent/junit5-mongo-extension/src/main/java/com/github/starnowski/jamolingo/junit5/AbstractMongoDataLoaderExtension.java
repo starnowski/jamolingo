@@ -10,7 +10,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.bson.BsonType;
 import org.bson.Document;
+import org.bson.codecs.DecoderContext;
+import org.bson.codecs.DocumentCodec;
+import org.bson.json.JsonReader;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
@@ -19,7 +23,9 @@ import org.junit.jupiter.api.extension.ExtensionContext;
  *
  * <p>This extension looks for the {@link MongoSetup} annotation on the test method. If present, it
  * retrieves the {@link MongoClient} from the implementation, clears the specified collections, and
- * inserts the documents defined in the annotation.
+ * inserts the documents defined in the annotation. Files specified in {@link
+ * MongoDocument#bsonFilePath()} may contain either a single BSON document or an array of BSON
+ * documents.
  */
 public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCallback {
 
@@ -110,9 +116,11 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
               MongoCollection<Document> collection = mongoCollectionMap.get(key);
               List<Document> documentsToInsert =
                   docs.stream()
-                      .map(an -> parseBsonDocument(an.bsonFilePath()))
+                      .flatMap(an -> parseBsonDocuments(an.bsonFilePath()).stream())
                       .collect(Collectors.toList());
-              collection.insertMany(documentsToInsert);
+              if (!documentsToInsert.isEmpty()) {
+                collection.insertMany(documentsToInsert);
+              }
             });
       } else {
         groupedDocuments.forEach(
@@ -120,22 +128,42 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
               MongoCollection<Document> collection = mongoCollectionMap.get(key);
               docs.forEach(
                   an -> {
-                    collection.insertOne(parseBsonDocument(an.bsonFilePath()));
+                    List<Document> documents = parseBsonDocuments(an.bsonFilePath());
+                    documents.forEach(collection::insertOne);
                   });
             });
       }
     }
   }
 
-  private Document parseBsonDocument(String bsonFilePath) {
+  private List<Document> parseBsonDocuments(String bsonFilePath) {
     try (InputStream is = getClass().getClassLoader().getResourceAsStream(bsonFilePath)) {
       if (is == null) {
         throw new RuntimeException("Resource not found: " + bsonFilePath);
       }
       String bson = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-      return Document.parse(bson);
+      JsonReader reader = new JsonReader(bson);
+      BsonType bsonType = reader.readBsonType();
+      if (bsonType == BsonType.ARRAY) {
+        reader.readStartArray();
+        List<Document> documents = new ArrayList<>();
+        DocumentCodec codec = new DocumentCodec();
+        DecoderContext decoderContext = DecoderContext.builder().build();
+        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+          documents.add(codec.decode(reader, decoderContext));
+        }
+        reader.readEndArray();
+        return documents;
+      } else {
+        return Collections.singletonList(Document.parse(bson));
+      }
     } catch (IOException e) {
       throw new RuntimeException("Failed to read BSON resource: " + bsonFilePath, e);
     }
+  }
+
+  private Document parseBsonDocument(String bsonFilePath) {
+    List<Document> documents = parseBsonDocuments(bsonFilePath);
+    return documents.isEmpty() ? null : documents.get(0);
   }
 }
