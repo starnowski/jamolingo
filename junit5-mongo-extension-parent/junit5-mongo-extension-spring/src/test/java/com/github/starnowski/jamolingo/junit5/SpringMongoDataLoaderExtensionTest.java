@@ -29,6 +29,7 @@ public class SpringMongoDataLoaderExtensionTest {
   private static final String EXAMPLE_6_FILE_PATH = "bson/example6.json";
   private static final String EXAMPLE_7_FILE_PATH = "bson/example7.json";
   private static final String EXAMPLE_8_FILE_PATH = "bson/example8.json";
+  private static final String MULTI_EXAMPLE_FILE_PATH = "bson/multi_example.json";
 
   private static final String EXAMPLE_1 = "example1";
   private static final String EXAMPLE_2 = "example2";
@@ -146,8 +147,73 @@ public class SpringMongoDataLoaderExtensionTest {
                 new MongoCollectionKey("first", "first"),
                 Set.of(EXAMPLE_1, EXAMPLE_2),
                 new MongoCollectionKey("second", "second"),
-                Set.of(EXAMPLE_5))));
+                Set.of(EXAMPLE_5))),
+        Arguments.of(
+            "insertDataIntoCollectionsMultiBsonNonBatch",
+            Map.of(new MongoCollectionKey("first", "first"), Set.of(EXAMPLE_1, EXAMPLE_8))),
+        Arguments.of(
+            "insertDataIntoCollectionsMultiBsonBatch",
+            Map.of(new MongoCollectionKey("first", "first"), Set.of(EXAMPLE_1, EXAMPLE_8))),
+        Arguments.of(
+            "insertDataIntoCollectionsMultiBsonMixed",
+            Map.of(
+                new MongoCollectionKey("first", "first"),
+                Set.of(EXAMPLE_1, EXAMPLE_2, EXAMPLE_8),
+                new MongoCollectionKey("second", "second"),
+                Set.of(EXAMPLE_1, EXAMPLE_8))),
+        Arguments.of(
+            "insertDataIntoCollectionsMultiBsonMixedBatch",
+            Map.of(
+                new MongoCollectionKey("first", "first"),
+                Set.of(EXAMPLE_1, EXAMPLE_2, EXAMPLE_8))));
   }
+
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = MULTI_EXAMPLE_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsMultiBsonNonBatch() {}
+
+  @MongoSetup(
+      batchInsertToCollection = true,
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = MULTI_EXAMPLE_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsMultiBsonBatch() {}
+
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = MULTI_EXAMPLE_FILE_PATH),
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = EXAMPLE_2_FILE_PATH),
+        @MongoDocument(
+            database = "second",
+            collection = "second",
+            bsonFilePath = MULTI_EXAMPLE_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsMultiBsonMixed() {}
+
+  @MongoSetup(
+      batchInsertToCollection = true,
+      mongoDocuments = {
+        @MongoDocument(
+            database = "first",
+            collection = "first",
+            bsonFilePath = MULTI_EXAMPLE_FILE_PATH),
+        @MongoDocument(database = "first", collection = "first", bsonFilePath = EXAMPLE_2_FILE_PATH)
+      })
+  private void insertDataIntoCollectionsMultiBsonMixedBatch() {}
 
   @MongoSetup(
       batchInsertToCollection = true,
@@ -430,6 +496,14 @@ public class SpringMongoDataLoaderExtensionTest {
 
     // THEN
     for (Map.Entry<MongoCollectionKey, Set<String>> entry : expectedCollectionsContent.entrySet()) {
+      Assertions.assertEquals(
+          entry.getValue().size(),
+          countDocuments(mongoClient, entry.getKey().getDatabase(), entry.getKey().getCollection()),
+          String.format(
+              "Collection %s.%s should have %d documents",
+              entry.getKey().getDatabase(),
+              entry.getKey().getCollection(),
+              entry.getValue().size()));
       assertDocumentsExist(
           mongoClient,
           entry.getKey().getDatabase(),
