@@ -1,6 +1,12 @@
 package com.github.starnowski.jamolingo.junit5;
 
+import static com.github.starnowski.jamolingo.junit5.Awaiter.await;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
+import com.mongodb.MongoCommandException;
 import com.mongodb.WriteConcern;
+import com.mongodb.client.ListSearchIndexesIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
@@ -19,15 +25,43 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
- * A JUnit 5 extension that loads data into MongoDB collections before each test method execution.
+ * A JUnit 5 extension that loads data and configures Atlas Search indexes in MongoDB collections
+ * before each test method execution.
  *
- * <p>This extension looks for the {@link MongoSetup} annotation on the test method. If present, it
- * retrieves the {@link MongoClient} from the implementation, clears the specified collections, and
- * inserts the documents defined in the annotation. Files specified in {@link
- * MongoDocument#bsonFilePath()} may contain either a single BSON document or an array of BSON
- * documents.
+ * <p>This extension looks for the {@link MongoSetup} annotation on the test method or test class.
+ * If present, it retrieves the {@link MongoClient} from the implementation, ensures any configured
+ * Atlas Search indexes exist, clears the specified collections, inserts the documents defined in
+ * the annotation, and executes any configured Atlas Search index synchronization validation
+ * strategies. Files specified in {@link MongoDocument#bsonFilePath()} may contain either a single
+ * BSON document or an array of BSON documents.
  */
 public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCallback {
+
+  private final Map<AtlasSearchIndexKey, CachedAtlasSearchIndexDefinition> cachedSearchIndexes;
+
+  /** Constructs a new AbstractMongoDataLoaderExtension with an empty search index cache. */
+  public AbstractMongoDataLoaderExtension() {
+    this(new HashMap<>());
+  }
+
+  /**
+   * Constructs a new AbstractMongoDataLoaderExtension with the provided search index cache map.
+   *
+   * @param cachedSearchIndexes the map used to cache Atlas Search index definitions
+   */
+  public AbstractMongoDataLoaderExtension(
+      Map<AtlasSearchIndexKey, CachedAtlasSearchIndexDefinition> cachedSearchIndexes) {
+    this.cachedSearchIndexes = cachedSearchIndexes;
+  }
+
+  /**
+   * Returns the map of cached Atlas Search index definitions.
+   *
+   * @return the cache map
+   */
+  protected Map<AtlasSearchIndexKey, CachedAtlasSearchIndexDefinition> getCachedSearchIndexes() {
+    return cachedSearchIndexes;
+  }
 
   /**
    * Resolves the {@link MongoClient} to be used for data loading.
@@ -69,6 +103,13 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
 
       if (mongoClient == null) {
         throw new IllegalStateException("No MongoClient provided by the extension");
+      }
+
+      AtlasSearchIndex[] searchIndexes = annotation.atlasSearchIndexes();
+      if (searchIndexes != null) {
+        for (AtlasSearchIndex searchIndex : searchIndexes) {
+          ensureAtlasSearchIndex(mongoClient, searchIndex);
+        }
       }
 
       Map<String, Set<String>> collections = new HashMap<>();
@@ -133,32 +174,169 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
                   });
             });
       }
+
+      if (searchIndexes != null) {
+        for (AtlasSearchIndex searchIndex : searchIndexes) {
+          validateAtlasSearchIndex(mongoClient, searchIndex);
+        }
+      }
     }
   }
 
-  private List<Document> parseBsonDocuments(String bsonFilePath) {
+  private void ensureAtlasSearchIndex(MongoClient mongoClient, AtlasSearchIndex searchIndex) {
+    String databaseName = searchIndex.database();
+    String collectionName = searchIndex.collection();
+    String indexName = searchIndex.name();
+    String defValue = readResourceAsString(searchIndex.bsonFilePath());
+
+    MongoDatabase database = mongoClient.getDatabase(databaseName);
+    MongoCollection<Document> collection = database.getCollection(collectionName);
+
+    String currentStateValue = findSearchIndexStateValue(collection, indexName);
+    AtlasSearchIndexKey key = new AtlasSearchIndexKey(databaseName, collectionName, indexName);
+    CachedAtlasSearchIndexDefinition cached = cachedSearchIndexes.get(key);
+
+    if (cached != null && Objects.equals(defValue, cached.getDefValue())) {
+      if (currentStateValue != null && Objects.equals(cached.getStateValue(), currentStateValue)) {
+        return;
+      }
+    }
+
+    createOrReplaceSearchIndex(database, collection, indexName, Document.parse(defValue));
+    String newStateValue = findSearchIndexStateValue(collection, indexName);
+    cachedSearchIndexes.put(key, new CachedAtlasSearchIndexDefinition(defValue, newStateValue));
+  }
+
+  private void createOrReplaceSearchIndex(
+      MongoDatabase database,
+      MongoCollection<Document> collection,
+      String indexName,
+      Document indexDefinition) {
+    try {
+      collection.createSearchIndex(indexName, indexDefinition);
+    } catch (MongoCommandException e) {
+      if (e.getErrorCode() == 26) {
+        database.createCollection(collection.getNamespace().getCollectionName());
+        collection.createSearchIndex(indexName, indexDefinition);
+      } else {
+        collection.dropSearchIndex(indexName);
+        await()
+            .atMost(30, SECONDS)
+            .pollInterval(500, MILLISECONDS)
+            .until(() -> findSearchIndexStateValue(collection, indexName) == null);
+        collection.createSearchIndex(indexName, indexDefinition);
+      }
+    }
+  }
+
+  private void validateAtlasSearchIndex(MongoClient mongoClient, AtlasSearchIndex searchIndex) {
+    Class<? extends AtlasSearchIndexSyncValidationStrategy>[] strategyClasses =
+        searchIndex.validationStrategies();
+    if (strategyClasses != null && strategyClasses.length > 0) {
+      AtlasSearchIndexValidationContext validationContext =
+          AtlasSearchIndexValidationContext.builder()
+              .withMongoClient(mongoClient)
+              .withDatabase(searchIndex.database())
+              .withCollection(searchIndex.collection())
+              .withIndexName(searchIndex.name())
+              .withValidationProperty(searchIndex.validationProperty())
+              .build();
+
+      for (Class<? extends AtlasSearchIndexSyncValidationStrategy> strategyClass :
+          strategyClasses) {
+        AtlasSearchIndexSyncValidationStrategy strategy =
+            instantiateValidationStrategy(strategyClass);
+        if (!strategy.isSync(validationContext)) {
+          throw new IllegalStateException(
+              String.format(
+                  "Atlas search index '%s' on '%s.%s' failed synchronization validation using strategy %s",
+                  searchIndex.name(),
+                  searchIndex.database(),
+                  searchIndex.collection(),
+                  strategyClass.getName()));
+        }
+      }
+
+      MongoCollection<Document> collection =
+          mongoClient.getDatabase(searchIndex.database()).getCollection(searchIndex.collection());
+      String latestStateValue = findSearchIndexStateValue(collection, searchIndex.name());
+      if (latestStateValue != null) {
+        AtlasSearchIndexKey key =
+            new AtlasSearchIndexKey(
+                searchIndex.database(), searchIndex.collection(), searchIndex.name());
+        CachedAtlasSearchIndexDefinition existingCached = cachedSearchIndexes.get(key);
+        String defValue =
+            existingCached != null
+                ? existingCached.getDefValue()
+                : readResourceAsString(searchIndex.bsonFilePath());
+        cachedSearchIndexes.put(
+            key, new CachedAtlasSearchIndexDefinition(defValue, latestStateValue));
+      }
+    }
+  }
+
+  /**
+   * Instantiates the given {@link AtlasSearchIndexSyncValidationStrategy} class using its public
+   * no-argument constructor.
+   *
+   * @param strategyClass the strategy class to instantiate
+   * @return the instantiated strategy
+   */
+  protected AtlasSearchIndexSyncValidationStrategy instantiateValidationStrategy(
+      Class<? extends AtlasSearchIndexSyncValidationStrategy> strategyClass) {
+    try {
+      return strategyClass.getDeclaredConstructor().newInstance();
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException(
+          "Failed to instantiate validation strategy: " + strategyClass.getName(), e);
+    }
+  }
+
+  private String findSearchIndexStateValue(MongoCollection<Document> collection, String indexName) {
+    try {
+      ListSearchIndexesIterable<Document> indexes = collection.listSearchIndexes();
+      if (indexes != null) {
+        for (Document index : indexes) {
+          if (Objects.equals(indexName, index.getString("name"))) {
+            return index.toJson();
+          }
+        }
+      }
+    } catch (MongoCommandException e) {
+      if (e.getErrorCode() != 26) {
+        throw e;
+      }
+    }
+    return null;
+  }
+
+  private String readResourceAsString(String bsonFilePath) {
     try (InputStream is = getClass().getClassLoader().getResourceAsStream(bsonFilePath)) {
       if (is == null) {
         throw new RuntimeException("Resource not found: " + bsonFilePath);
       }
-      String bson = new String(is.readAllBytes(), StandardCharsets.UTF_8);
-      JsonReader reader = new JsonReader(bson);
-      BsonType bsonType = reader.readBsonType();
-      if (bsonType == BsonType.ARRAY) {
-        reader.readStartArray();
-        List<Document> documents = new ArrayList<>();
-        DocumentCodec codec = new DocumentCodec();
-        DecoderContext decoderContext = DecoderContext.builder().build();
-        while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
-          documents.add(codec.decode(reader, decoderContext));
-        }
-        reader.readEndArray();
-        return documents;
-      } else {
-        return Collections.singletonList(Document.parse(bson));
-      }
+      return new String(is.readAllBytes(), StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException("Failed to read BSON resource: " + bsonFilePath, e);
+    }
+  }
+
+  private List<Document> parseBsonDocuments(String bsonFilePath) {
+    String bson = readResourceAsString(bsonFilePath);
+    JsonReader reader = new JsonReader(bson);
+    BsonType bsonType = reader.readBsonType();
+    if (bsonType == BsonType.ARRAY) {
+      reader.readStartArray();
+      List<Document> documents = new ArrayList<>();
+      DocumentCodec codec = new DocumentCodec();
+      DecoderContext decoderContext = DecoderContext.builder().build();
+      while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
+        documents.add(codec.decode(reader, decoderContext));
+      }
+      reader.readEndArray();
+      return documents;
+    } else {
+      return Collections.singletonList(Document.parse(bson));
     }
   }
 
