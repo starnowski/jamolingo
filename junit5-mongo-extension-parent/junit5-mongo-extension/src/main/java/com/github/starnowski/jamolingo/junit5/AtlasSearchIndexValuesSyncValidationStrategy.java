@@ -1,9 +1,13 @@
 package com.github.starnowski.jamolingo.junit5;
 
+import static com.github.starnowski.jamolingo.junit5.Awaiter.await;
+import static java.util.concurrent.TimeUnit.SECONDS;
+
 import com.mongodb.client.MongoCollection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 
 /**
@@ -14,8 +18,35 @@ import org.bson.Document;
 public class AtlasSearchIndexValuesSyncValidationStrategy
     implements AtlasSearchIndexSyncValidationStrategy {
 
-  /** Constructs a new AtlasSearchIndexValuesSyncValidationStrategy. */
-  public AtlasSearchIndexValuesSyncValidationStrategy() {}
+  private final long maxWaitDuration;
+  private final TimeUnit maxWaitUnit;
+  private final long pollInterval;
+  private final TimeUnit pollIntervalUnit;
+
+  /**
+   * Constructs a new AtlasSearchIndexValuesSyncValidationStrategy with default wait settings (at
+   * most 30 seconds, polling every 1 second).
+   */
+  public AtlasSearchIndexValuesSyncValidationStrategy() {
+    this(30, SECONDS, 1, SECONDS);
+  }
+
+  /**
+   * Constructs a new AtlasSearchIndexValuesSyncValidationStrategy with custom wait and polling
+   * settings.
+   *
+   * @param maxWaitDuration the maximum duration to wait
+   * @param maxWaitUnit the time unit for the maximum wait duration
+   * @param pollInterval the interval between polls
+   * @param pollIntervalUnit the time unit for the polling interval
+   */
+  public AtlasSearchIndexValuesSyncValidationStrategy(
+      long maxWaitDuration, TimeUnit maxWaitUnit, long pollInterval, TimeUnit pollIntervalUnit) {
+    this.maxWaitDuration = maxWaitDuration;
+    this.maxWaitUnit = maxWaitUnit;
+    this.pollInterval = pollInterval;
+    this.pollIntervalUnit = pollIntervalUnit;
+  }
 
   @Override
   public boolean isSync(AtlasSearchIndexValidationContext context) {
@@ -31,31 +62,38 @@ public class AtlasSearchIndexValuesSyncValidationStrategy
         .find(new Document(validationProperty, new Document("$exists", true)))
         .into(documentsWithProperty);
 
-    for (Document doc : documentsWithProperty) {
-      Object propertyValue = extractPropertyValue(doc, validationProperty);
-      if (propertyValue == null) {
-        continue;
-      }
-      Object expectedId = doc.get("_id");
-      Document searchStage =
-          new Document(
-              "$search",
-              new Document("index", context.getIndexName())
-                  .append(
-                      "text",
-                      new Document("query", propertyValue).append("path", validationProperty)));
+    return await()
+        .atMost(maxWaitDuration, maxWaitUnit)
+        .pollInterval(pollInterval, pollIntervalUnit)
+        .until(
+            () -> {
+              for (Document doc : documentsWithProperty) {
+                Object propertyValue = extractPropertyValue(doc, validationProperty);
+                if (propertyValue == null) {
+                  continue;
+                }
+                Object expectedId = doc.get("_id");
+                Document searchStage =
+                    new Document(
+                        "$search",
+                        new Document("index", context.getIndexName())
+                            .append(
+                                "text",
+                                new Document("query", propertyValue)
+                                    .append("path", validationProperty)));
 
-      List<Document> searchResults = new ArrayList<>();
-      collection.aggregate(List.of(searchStage)).into(searchResults);
+                List<Document> searchResults = new ArrayList<>();
+                collection.aggregate(List.of(searchStage)).into(searchResults);
 
-      boolean found =
-          searchResults.stream()
-              .anyMatch(resultDoc -> Objects.equals(expectedId, resultDoc.get("_id")));
-      if (!found) {
-        return false;
-      }
-    }
-    return true;
+                boolean found =
+                    searchResults.stream()
+                        .anyMatch(resultDoc -> Objects.equals(expectedId, resultDoc.get("_id")));
+                if (!found) {
+                  return false;
+                }
+              }
+              return true;
+            });
   }
 
   private Object extractPropertyValue(Document doc, String validationProperty) {
