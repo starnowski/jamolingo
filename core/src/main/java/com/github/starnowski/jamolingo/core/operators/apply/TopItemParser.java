@@ -21,6 +21,13 @@ public class TopItemParser implements ApplyItemParser {
 
     TopOperatorResult result = topParser.parse(topItem.getTopOption());
 
-    return DefaultApplyOperatorResult.builder().withStageObjects(result.getStageObjects()).build();
+    return DefaultApplyOperatorResult.builder()
+        .withStageObjects(result.getStageObjects())
+        .withUsedMongoDocumentProperties(result.getUsedMongoDocumentProperties())
+        .withWrittenMongoDocumentProperties(result.getWrittenMongoDocumentProperties())
+        .withAddedMongoDocumentProperties(result.getAddedMongoDocumentProperties())
+        .withRemovedMongoDocumentProperties(result.getRemovedMongoDocumentProperties())
+        .withDocumentShapeRedefined(result.isDocumentShapeRedefined())
+        .build();
   }
 }

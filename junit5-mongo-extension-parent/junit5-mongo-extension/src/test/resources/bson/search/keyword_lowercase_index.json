@@ -1,0 +1,32 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "field1": [
+        {
+          "type": "string",
+          "analyzer": "keyword_lowercase"
+        }
+      ],
+      "field2": [
+        {
+          "type": "string",
+          "analyzer": "keyword_lowercase"
+        }
+      ]
+    }
+  },
+  "analyzers": [
+    {
+      "name": "keyword_lowercase",
+      "tokenizer": {
+        "type": "keyword"
+      },
+      "tokenFilters": [
+        {
+          "type": "lowercase"
+        }
+      ]
+    }
+  ]
+}
