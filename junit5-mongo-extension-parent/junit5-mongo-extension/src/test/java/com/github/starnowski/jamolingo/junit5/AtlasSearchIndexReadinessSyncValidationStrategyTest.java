@@ -117,6 +117,33 @@ class AtlasSearchIndexReadinessSyncValidationStrategyTest {
     assertFalse(result);
   }
 
+  @Test
+  void shouldUseProvidedValidationConfigWhenCheckingReadiness() {
+    // GIVEN
+    ListSearchIndexesIterable<Document> buildingIterable =
+        mockSearchIndexesIterable(
+            List.of(new Document("name", "my_index").append("status", "BUILDING")));
+    ListSearchIndexesIterable<Document> readyIterable =
+        mockSearchIndexesIterable(
+            List.of(new Document("name", "my_index").append("status", "READY")));
+    when(mongoCollection.listSearchIndexes()).thenReturn(buildingIterable, readyIterable);
+    AtlasSearchIndexReadinessSyncValidationStrategy tested =
+        new AtlasSearchIndexReadinessSyncValidationStrategy();
+    AtlasSearchIndexValidationConfig config =
+        AtlasSearchIndexValidationConfig.builder()
+            .withMaxWaitDuration(200)
+            .withMaxWaitUnit(MILLISECONDS)
+            .withPollInterval(10)
+            .withPollIntervalUnit(MILLISECONDS)
+            .build();
+
+    // WHEN
+    boolean result = tested.isSync(context, config);
+
+    // THEN
+    assertTrue(result);
+  }
+
   @SuppressWarnings("unchecked")
   private ListSearchIndexesIterable<Document> mockSearchIndexesIterable(List<Document> documents) {
     ListSearchIndexesIterable<Document> iterable = mock(ListSearchIndexesIterable.class);

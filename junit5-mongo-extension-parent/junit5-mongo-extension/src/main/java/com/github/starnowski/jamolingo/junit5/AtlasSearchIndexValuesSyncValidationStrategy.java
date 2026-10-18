@@ -50,6 +50,20 @@ public class AtlasSearchIndexValuesSyncValidationStrategy
 
   @Override
   public boolean isSync(AtlasSearchIndexValidationContext context) {
+    return isSync(
+        context,
+        new AtlasSearchIndexValidationConfig(
+            maxWaitDuration, maxWaitUnit, pollInterval, pollIntervalUnit));
+  }
+
+  @Override
+  public boolean isSync(
+      AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config) {
+    AtlasSearchIndexValidationConfig effectiveConfig =
+        config != null
+            ? config
+            : new AtlasSearchIndexValidationConfig(
+                maxWaitDuration, maxWaitUnit, pollInterval, pollIntervalUnit);
     MongoCollection<Document> collection =
         context
             .getMongoClient()
@@ -63,8 +77,8 @@ public class AtlasSearchIndexValuesSyncValidationStrategy
         .into(documentsWithProperty);
 
     return await()
-        .atMost(maxWaitDuration, maxWaitUnit)
-        .pollInterval(pollInterval, pollIntervalUnit)
+        .atMost(effectiveConfig.getMaxWaitDuration(), effectiveConfig.getMaxWaitUnit())
+        .pollInterval(effectiveConfig.getPollInterval(), effectiveConfig.getPollIntervalUnit())
         .until(
             () -> {
               for (Document doc : documentsWithProperty) {

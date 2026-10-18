@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
   private static final String DOC1_PATH = "bson/search/doc1.json";
 
   private static final List<String> EXECUTION_LOG = new ArrayList<>();
+  private static final List<AtlasSearchIndexValidationConfig> CAPTURED_CONFIGS = new ArrayList<>();
 
   private MongoClient mongoClient;
   private MongoDatabase mongoDatabase;
@@ -46,6 +48,7 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
   @BeforeEach
   void setUp() {
     EXECUTION_LOG.clear();
+    CAPTURED_CONFIGS.clear();
     mongoClient = mock(MongoClient.class);
     mongoDatabase = mock(MongoDatabase.class);
     mongoCollection = mock(MongoCollection.class);
@@ -117,6 +120,43 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
             })
       })
   private void setupWithFailingValidationStrategy() {}
+
+  @AtlasSearchIndexValidation(
+      maxWaitDuration = 60L,
+      maxWaitUnit = TimeUnit.SECONDS,
+      pollInterval = 250L,
+      pollIntervalUnit = TimeUnit.MILLISECONDS)
+  static class ClassAnnotatedTestSample {
+
+    @MongoSetup(
+        atlasSearchIndexes = {
+          @AtlasSearchIndex(
+              name = "idx_test",
+              database = "testdb",
+              collection = "items",
+              bsonFilePath = KEYWORD_INDEX_PATH,
+              validationProperty = "field1",
+              validationStrategies = {FirstRecordingStrategy.class})
+        })
+    void methodInheritingClassValidationConfig() {}
+
+    @AtlasSearchIndexValidation(
+        maxWaitDuration = 12L,
+        maxWaitUnit = TimeUnit.MINUTES,
+        pollInterval = 50L,
+        pollIntervalUnit = TimeUnit.MILLISECONDS)
+    @MongoSetup(
+        atlasSearchIndexes = {
+          @AtlasSearchIndex(
+              name = "idx_test",
+              database = "testdb",
+              collection = "items",
+              bsonFilePath = KEYWORD_INDEX_PATH,
+              validationProperty = "field1",
+              validationStrategies = {FirstRecordingStrategy.class})
+        })
+    void methodOverridingClassValidationConfig() {}
+  }
 
   @Test
   void shouldCreateIndexAndCacheDefinitionOnFirstRun() throws Exception {
@@ -292,10 +332,132 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
     assertEquals(List.of("FirstRecordingStrategy", "FailingValidationStrategy"), EXECUTION_LOG);
   }
 
+  @Test
+  void shouldPassDefaultValidationConfigWhenNoAnnotationPresent() throws Exception {
+    // GIVEN
+    Document createdIndexDoc = new Document("name", "idx_test").append("status", "READY");
+    ListSearchIndexesIterable<Document> emptyIterable = mockSearchIndexesIterable(List.of());
+    ListSearchIndexesIterable<Document> afterCreateIterable =
+        mockSearchIndexesIterable(List.of(createdIndexDoc));
+    when(mongoCollection.listSearchIndexes())
+        .thenReturn(emptyIterable, afterCreateIterable, afterCreateIterable);
+
+    ExtensionContext extensionContext =
+        mockExtensionContext("setupWithOrderedValidationStrategies");
+
+    // WHEN
+    tested.beforeEach(extensionContext);
+
+    // THEN
+    assertEquals(1, CAPTURED_CONFIGS.size());
+    assertEquals(AtlasSearchIndexValidationConfig.builder().build(), CAPTURED_CONFIGS.get(0));
+  }
+
+  @Test
+  void shouldPassClassLevelValidationConfigToStrategy() throws Exception {
+    // GIVEN
+    Document createdIndexDoc = new Document("name", "idx_test").append("status", "READY");
+    ListSearchIndexesIterable<Document> emptyIterable = mockSearchIndexesIterable(List.of());
+    ListSearchIndexesIterable<Document> afterCreateIterable =
+        mockSearchIndexesIterable(List.of(createdIndexDoc));
+    when(mongoCollection.listSearchIndexes())
+        .thenReturn(emptyIterable, afterCreateIterable, afterCreateIterable);
+
+    ExtensionContext extensionContext =
+        mockExtensionContext(
+            ClassAnnotatedTestSample.class, "methodInheritingClassValidationConfig");
+
+    // WHEN
+    tested.beforeEach(extensionContext);
+
+    // THEN
+    assertEquals(1, CAPTURED_CONFIGS.size());
+    AtlasSearchIndexValidationConfig expected =
+        AtlasSearchIndexValidationConfig.builder()
+            .withMaxWaitDuration(60L)
+            .withMaxWaitUnit(TimeUnit.SECONDS)
+            .withPollInterval(250L)
+            .withPollIntervalUnit(TimeUnit.MILLISECONDS)
+            .build();
+    assertEquals(expected, CAPTURED_CONFIGS.get(0));
+  }
+
+  @Test
+  void shouldOverrideClassLevelWithMethodLevelValidationConfig() throws Exception {
+    // GIVEN
+    Document createdIndexDoc = new Document("name", "idx_test").append("status", "READY");
+    ListSearchIndexesIterable<Document> emptyIterable = mockSearchIndexesIterable(List.of());
+    ListSearchIndexesIterable<Document> afterCreateIterable =
+        mockSearchIndexesIterable(List.of(createdIndexDoc));
+    when(mongoCollection.listSearchIndexes())
+        .thenReturn(emptyIterable, afterCreateIterable, afterCreateIterable);
+
+    ExtensionContext extensionContext =
+        mockExtensionContext(
+            ClassAnnotatedTestSample.class, "methodOverridingClassValidationConfig");
+
+    // WHEN
+    tested.beforeEach(extensionContext);
+
+    // THEN
+    assertEquals(1, CAPTURED_CONFIGS.size());
+    AtlasSearchIndexValidationConfig expected =
+        AtlasSearchIndexValidationConfig.builder()
+            .withMaxWaitDuration(12L)
+            .withMaxWaitUnit(TimeUnit.MINUTES)
+            .withPollInterval(50L)
+            .withPollIntervalUnit(TimeUnit.MILLISECONDS)
+            .build();
+    assertEquals(expected, CAPTURED_CONFIGS.get(0));
+  }
+
+  @Test
+  void shouldUseCustomDefaultValidationConfigWhenNoAnnotationPresent() throws Exception {
+    // GIVEN
+    AtlasSearchIndexValidationConfig customDefault =
+        AtlasSearchIndexValidationConfig.builder()
+            .withMaxWaitDuration(45L)
+            .withMaxWaitUnit(TimeUnit.SECONDS)
+            .withPollInterval(500L)
+            .withPollIntervalUnit(TimeUnit.MILLISECONDS)
+            .withProperties(Map.of("env", "ci"))
+            .build();
+    AbstractMongoDataLoaderExtension customTested =
+        new AbstractMongoDataLoaderExtension(cache, customDefault) {
+          @Override
+          protected MongoClient resolveMongoClient() {
+            return mongoClient;
+          }
+        };
+
+    Document createdIndexDoc = new Document("name", "idx_test").append("status", "READY");
+    ListSearchIndexesIterable<Document> emptyIterable = mockSearchIndexesIterable(List.of());
+    ListSearchIndexesIterable<Document> afterCreateIterable =
+        mockSearchIndexesIterable(List.of(createdIndexDoc));
+    when(mongoCollection.listSearchIndexes())
+        .thenReturn(emptyIterable, afterCreateIterable, afterCreateIterable);
+
+    ExtensionContext extensionContext =
+        mockExtensionContext("setupWithOrderedValidationStrategies");
+
+    // WHEN
+    customTested.beforeEach(extensionContext);
+
+    // THEN
+    assertEquals(1, CAPTURED_CONFIGS.size());
+    assertEquals(customDefault, CAPTURED_CONFIGS.get(0));
+  }
+
   private ExtensionContext mockExtensionContext(String methodName) throws NoSuchMethodException {
+    return mockExtensionContext(this.getClass(), methodName);
+  }
+
+  private ExtensionContext mockExtensionContext(Class<?> testClass, String methodName)
+      throws NoSuchMethodException {
     ExtensionContext extensionContext = mock(ExtensionContext.class);
+    when(extensionContext.getTestClass()).thenReturn(Optional.of(testClass));
     when(extensionContext.getTestMethod())
-        .thenReturn(Optional.of(this.getClass().getDeclaredMethod(methodName)));
+        .thenReturn(Optional.of(testClass.getDeclaredMethod(methodName)));
     return extensionContext;
   }
 
@@ -327,11 +489,13 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
     public FirstRecordingStrategy() {}
 
     @Override
-    public boolean isSync(AtlasSearchIndexValidationContext context) {
+    public boolean isSync(
+        AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config) {
       assertEquals("testdb", context.getDatabase());
       assertEquals("items", context.getCollection());
       assertEquals("idx_test", context.getIndexName());
       assertEquals("field1", context.getValidationProperty());
+      CAPTURED_CONFIGS.add(config);
       EXECUTION_LOG.add("FirstRecordingStrategy");
       return true;
     }
@@ -341,7 +505,8 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
     public SecondRecordingStrategy() {}
 
     @Override
-    public boolean isSync(AtlasSearchIndexValidationContext context) {
+    public boolean isSync(
+        AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config) {
       EXECUTION_LOG.add("SecondRecordingStrategy");
       return true;
     }
@@ -351,7 +516,8 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
     public ThirdRecordingStrategy() {}
 
     @Override
-    public boolean isSync(AtlasSearchIndexValidationContext context) {
+    public boolean isSync(
+        AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config) {
       EXECUTION_LOG.add("ThirdRecordingStrategy");
       return true;
     }
@@ -361,7 +527,8 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
     public FailingValidationStrategy() {}
 
     @Override
-    public boolean isSync(AtlasSearchIndexValidationContext context) {
+    public boolean isSync(
+        AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config) {
       EXECUTION_LOG.add("FailingValidationStrategy");
       return false;
     }

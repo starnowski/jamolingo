@@ -145,6 +145,42 @@ class AtlasSearchIndexDocumentCountSyncValidationStrategyTest {
     assertTrue(result);
   }
 
+  @Test
+  void shouldUseProvidedValidationConfigWhenCheckingDocumentCount() {
+    // GIVEN
+    Document expectedCountFilter = new Document("field1", new Document("$exists", true));
+    when(mongoCollection.countDocuments(expectedCountFilter)).thenReturn(2L);
+
+    Document expectedSearchMetaStage =
+        new Document(
+            "$searchMeta",
+            new Document("index", "my_index")
+                .append("exists", new Document("path", "field1"))
+                .append("count", new Document("type", "total")));
+    AggregateIterable<Document> firstPoll =
+        mockAggregateIterable(List.of(new Document("count", new Document("total", 1L))));
+    AggregateIterable<Document> secondPoll =
+        mockAggregateIterable(List.of(new Document("count", new Document("total", 2L))));
+    when(mongoCollection.aggregate(List.of(expectedSearchMetaStage)))
+        .thenReturn(firstPoll, secondPoll);
+
+    AtlasSearchIndexDocumentCountSyncValidationStrategy tested =
+        new AtlasSearchIndexDocumentCountSyncValidationStrategy();
+    AtlasSearchIndexValidationConfig config =
+        AtlasSearchIndexValidationConfig.builder()
+            .withMaxWaitDuration(200)
+            .withMaxWaitUnit(MILLISECONDS)
+            .withPollInterval(10)
+            .withPollIntervalUnit(MILLISECONDS)
+            .build();
+
+    // WHEN
+    boolean result = tested.isSync(context, config);
+
+    // THEN
+    assertTrue(result);
+  }
+
   @SuppressWarnings("unchecked")
   private AggregateIterable<Document> mockAggregateIterable(List<Document> documents) {
     AggregateIterable<Document> iterable = mock(AggregateIterable.class);

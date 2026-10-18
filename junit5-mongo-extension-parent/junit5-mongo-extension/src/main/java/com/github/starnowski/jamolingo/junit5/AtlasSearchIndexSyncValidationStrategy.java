@@ -11,7 +11,21 @@ public interface AtlasSearchIndexSyncValidationStrategy {
    *
    * @param context the validation context containing the MongoDB client, database, collection,
    *     index name, and validation property
+   * @param config the validation configuration containing wait duration and polling interval
    * @return true if the index is synchronized, false otherwise
    */
-  boolean isSync(AtlasSearchIndexValidationContext context);
+  boolean isSync(
+      AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config);
+
+  /**
+   * Checks whether the Atlas Search Index is synchronized according to this validation strategy
+   * using default configuration settings.
+   *
+   * @param context the validation context containing the MongoDB client, database, collection,
+   *     index name, and validation property
+   * @return true if the index is synchronized, false otherwise
+   */
+  default boolean isSync(AtlasSearchIndexValidationContext context) {
+    return isSync(context, AtlasSearchIndexValidationConfig.builder().build());
+  }
 }

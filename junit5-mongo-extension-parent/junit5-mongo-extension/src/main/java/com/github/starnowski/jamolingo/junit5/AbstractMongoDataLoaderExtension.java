@@ -38,10 +38,11 @@ import org.junit.jupiter.api.extension.ExtensionContext;
 public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCallback {
 
   private final Map<AtlasSearchIndexKey, CachedAtlasSearchIndexDefinition> cachedSearchIndexes;
+  private final AtlasSearchIndexValidationConfig defaultValidationConfig;
 
   /** Constructs a new AbstractMongoDataLoaderExtension with an empty search index cache. */
   public AbstractMongoDataLoaderExtension() {
-    this(new HashMap<>());
+    this(new HashMap<>(), AtlasSearchIndexValidationConfig.builder().build());
   }
 
   /**
@@ -51,7 +52,24 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
    */
   public AbstractMongoDataLoaderExtension(
       Map<AtlasSearchIndexKey, CachedAtlasSearchIndexDefinition> cachedSearchIndexes) {
+    this(cachedSearchIndexes, AtlasSearchIndexValidationConfig.builder().build());
+  }
+
+  /**
+   * Constructs a new AbstractMongoDataLoaderExtension with the provided search index cache map and
+   * default validation configuration.
+   *
+   * @param cachedSearchIndexes the map used to cache Atlas Search index definitions
+   * @param defaultValidationConfig the default validation configuration
+   */
+  public AbstractMongoDataLoaderExtension(
+      Map<AtlasSearchIndexKey, CachedAtlasSearchIndexDefinition> cachedSearchIndexes,
+      AtlasSearchIndexValidationConfig defaultValidationConfig) {
     this.cachedSearchIndexes = cachedSearchIndexes;
+    this.defaultValidationConfig =
+        defaultValidationConfig != null
+            ? defaultValidationConfig
+            : AtlasSearchIndexValidationConfig.builder().build();
   }
 
   /**
@@ -61,6 +79,15 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
    */
   protected Map<AtlasSearchIndexKey, CachedAtlasSearchIndexDefinition> getCachedSearchIndexes() {
     return cachedSearchIndexes;
+  }
+
+  /**
+   * Returns the default Atlas Search index validation configuration.
+   *
+   * @return the default validation configuration
+   */
+  protected AtlasSearchIndexValidationConfig getDefaultValidationConfig() {
+    return defaultValidationConfig;
   }
 
   /**
@@ -94,10 +121,50 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
               .findFirst()
               .orElse(null);
     }
-    loadData(annotation);
+    AtlasSearchIndexValidationConfig validationConfig = resolveValidationConfig(context);
+    loadData(annotation, validationConfig);
+  }
+
+  /**
+   * Resolves the {@link AtlasSearchIndexValidationConfig} for the current test execution context.
+   *
+   * @param context the extension context
+   * @return the resolved validation configuration
+   */
+  protected AtlasSearchIndexValidationConfig resolveValidationConfig(ExtensionContext context) {
+    if (context != null) {
+      AtlasSearchIndexValidation validationAnnotation =
+          context.getTestMethod().stream()
+              .map(t -> t.getAnnotation(AtlasSearchIndexValidation.class))
+              .filter(Objects::nonNull)
+              .findFirst()
+              .orElse(null);
+      if (validationAnnotation == null) {
+        validationAnnotation =
+            context.getTestClass().stream()
+                .map(t -> t.getAnnotation(AtlasSearchIndexValidation.class))
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+      }
+      if (validationAnnotation != null) {
+        return AtlasSearchIndexValidationConfig.builder()
+            .withMaxWaitDuration(validationAnnotation.maxWaitDuration())
+            .withMaxWaitUnit(validationAnnotation.maxWaitUnit())
+            .withPollInterval(validationAnnotation.pollInterval())
+            .withPollIntervalUnit(validationAnnotation.pollIntervalUnit())
+            .build();
+      }
+    }
+    return defaultValidationConfig;
   }
 
   protected void loadData(MongoSetup annotation) {
+    loadData(annotation, defaultValidationConfig);
+  }
+
+  protected void loadData(
+      MongoSetup annotation, AtlasSearchIndexValidationConfig validationConfig) {
     if (annotation != null) {
       MongoClient mongoClient = resolveMongoClient();
 
@@ -177,7 +244,7 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
 
       if (searchIndexes != null) {
         for (AtlasSearchIndex searchIndex : searchIndexes) {
-          validateAtlasSearchIndex(mongoClient, searchIndex);
+          validateAtlasSearchIndex(mongoClient, searchIndex, validationConfig);
         }
       }
     }
@@ -229,7 +296,10 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
     }
   }
 
-  private void validateAtlasSearchIndex(MongoClient mongoClient, AtlasSearchIndex searchIndex) {
+  private void validateAtlasSearchIndex(
+      MongoClient mongoClient,
+      AtlasSearchIndex searchIndex,
+      AtlasSearchIndexValidationConfig validationConfig) {
     Class<? extends AtlasSearchIndexSyncValidationStrategy>[] strategyClasses =
         searchIndex.validationStrategies();
     if (strategyClasses != null && strategyClasses.length > 0) {
@@ -241,12 +311,14 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
               .withIndexName(searchIndex.name())
               .withValidationProperty(searchIndex.validationProperty())
               .build();
+      AtlasSearchIndexValidationConfig effectiveConfig =
+          validationConfig != null ? validationConfig : defaultValidationConfig;
 
       for (Class<? extends AtlasSearchIndexSyncValidationStrategy> strategyClass :
           strategyClasses) {
         AtlasSearchIndexSyncValidationStrategy strategy =
             instantiateValidationStrategy(strategyClass);
-        if (!strategy.isSync(validationContext)) {
+        if (!strategy.isSync(validationContext, effectiveConfig)) {
           throw new IllegalStateException(
               String.format(
                   "Atlas search index '%s' on '%s.%s' failed synchronization validation using strategy %s",

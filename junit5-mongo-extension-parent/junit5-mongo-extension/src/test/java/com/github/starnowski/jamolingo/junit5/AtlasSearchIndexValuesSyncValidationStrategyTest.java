@@ -150,6 +150,42 @@ class AtlasSearchIndexValuesSyncValidationStrategyTest {
     assertFalse(result);
   }
 
+  @Test
+  void shouldUseProvidedValidationConfigWhenCheckingValues() {
+    // GIVEN
+    Document doc1 = new Document("_id", "doc_1").append("field1", "val1");
+    FindIterable<Document> findIterable = mockFindIterable(List.of(doc1));
+    when(mongoCollection.find(new Document("field1", new Document("$exists", true))))
+        .thenReturn(findIterable);
+
+    Document searchStage1 =
+        new Document(
+            "$search",
+            new Document("index", "my_index")
+                .append("text", new Document("query", "val1").append("path", "field1")));
+
+    AggregateIterable<Document> emptyResult = mockAggregateIterable(List.of());
+    AggregateIterable<Document> foundResult =
+        mockAggregateIterable(List.of(new Document("_id", "doc_1")));
+    when(mongoCollection.aggregate(List.of(searchStage1))).thenReturn(emptyResult, foundResult);
+
+    AtlasSearchIndexValuesSyncValidationStrategy tested =
+        new AtlasSearchIndexValuesSyncValidationStrategy();
+    AtlasSearchIndexValidationConfig config =
+        AtlasSearchIndexValidationConfig.builder()
+            .withMaxWaitDuration(200)
+            .withMaxWaitUnit(MILLISECONDS)
+            .withPollInterval(10)
+            .withPollIntervalUnit(MILLISECONDS)
+            .build();
+
+    // WHEN
+    boolean result = tested.isSync(context, config);
+
+    // THEN
+    assertTrue(result);
+  }
+
   @SuppressWarnings("unchecked")
   private FindIterable<Document> mockFindIterable(List<Document> documents) {
     FindIterable<Document> iterable = mock(FindIterable.class);
