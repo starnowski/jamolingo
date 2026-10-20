@@ -1,11 +1,11 @@
 [
-  { "_id": 1, "index": 1, "parentId": null, "categoryId": 1 },
-  { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1 },
-  { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2 },
-  { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2 },
-  { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1 },
-  { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2 },
-  { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2 },
-  { "_id": 8, "index": 8, "parentId": 7, "categoryId": 2 },
-  { "_id": 10, "index": 10, "parentId": null, "categoryId": 1 }
+  { "_id": 1, "index": 1, "parentId": null, "categoryId": 1, "name": "Vehicle"},
+  { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1, "name": "Ground Vehicle" },
+  { "_id": 3, "index": 3, "parentId": 2, "categoryId": 2, "name": "Car" },
+  { "_id": 4, "index": 4, "parentId": 3, "categoryId": 2, "name": "Armored Vehicle" },
+  { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1, "name": "Flying Vehicle" },
+  { "_id": 6, "index": 6, "parentId": 4, "categoryId": 2, "name": "Bicycle" },
+  { "_id": 7, "index": 7, "parentId": 6, "categoryId": 2, "name": "MotorBike" },
+  { "_id": 8, "index": 8, "parentId": 7, "categoryId": 2, "name": "Train" },
+  { "_id": 10, "index": 10, "parentId": null, "categoryId": 1, "name": "Water Vehicle" }
 ]
