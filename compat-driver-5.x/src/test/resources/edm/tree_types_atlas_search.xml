@@ -14,6 +14,7 @@
                     <PropertyRef Name="_id" />
                 </Key>
                 <Property Name="_id" Type="Edm.Int32" Nullable="false" />
+                <Property Name="name" Type="Edm.String" />
                 <Property Name="index" Type="Edm.Int32" />
                 <Property Name="parentId" Type="Edm.Int32" />
                 <Property Name="categoryId" Type="Edm.Int32" />
