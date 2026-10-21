@@ -1,19 +1,25 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.search;
 
+import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
+import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTestProperties.*;
+
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.EmbeddedMongoResource;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
-import com.github.starnowski.jamolingo.core.operators.expand.GraphLookUpToLookUpStrategyResultsTransformer;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
-import com.github.starnowski.jamolingo.junit5.MongoDocument;
-import com.github.starnowski.jamolingo.junit5.MongoSetup;
+import com.github.starnowski.jamolingo.junit5.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.common.QuarkusTestResource;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -31,22 +37,27 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONAssert;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import javax.xml.stream.XMLStreamException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
-import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTestProperties.*;
-
+// TODO
 @MongoSetup(
     batchInsertToCollection = true,
     mongoDocuments = {
       @MongoDocument(
           database = TEST_DATABASE,
-          collection = CATEGORY_COLLECTION,
+          collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/search/type1_array.json")
+    },
+    atlasSearchIndexes = {
+      @AtlasSearchIndex(
+          name = "search_idx",
+          database = TEST_DATABASE,
+          collection = TREETYPE1_COLLECTION,
+          bsonFilePath = "bson/expand/tree/search/text_index.json",
+          validationProperty = "name",
+          validationStrategies = {
+            AtlasSearchIndexReadinessSyncValidationStrategy.class,
+            AtlasSearchIndexDocumentCountSyncValidationStrategy.class,
+            AtlasSearchIndexValuesSyncValidationStrategy.class
+          })
     })
 @QuarkusTest
 @QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)

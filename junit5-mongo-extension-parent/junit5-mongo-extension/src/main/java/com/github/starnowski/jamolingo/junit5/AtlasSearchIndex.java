@@ -47,8 +47,8 @@ public @interface AtlasSearchIndex {
   String validationProperty() default "";
 
   /**
-   * The array of validation strategy classes to execute in order to verify that the search index is
-   * synchronized.
+   * //TODO Default value The array of validation strategy classes to execute in order to verify
+   * that the search index is synchronized.
    *
    * @return an array of validation strategy classes
    */
