@@ -4,14 +4,7 @@
     "fields": {
       "name": [
         {
-          "type": "string",
-          "analyzer": "standard"
-        }
-      ],
-      "field2": [
-        {
-          "type": "string",
-          "analyzer": "keyword_lowercase"
+          "type": "string"
         }
       ]
     }
