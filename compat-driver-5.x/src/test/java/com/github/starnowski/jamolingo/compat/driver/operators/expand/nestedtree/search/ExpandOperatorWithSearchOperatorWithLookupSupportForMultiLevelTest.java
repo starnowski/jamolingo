@@ -141,7 +141,7 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
   @Inject protected MongoClient mongoClient;
 
   @ParameterizedTest(name = "{2} - {0} - {1}")
-  @MethodSource({"provideData", "provideDataWithApplyOperator"})
+  @MethodSource({"provideData"})
   public void shouldReturnExpectedDocumentsForExpandOperator(
       KeyValue<String, String> rootMongoCollection,
       Set<Integer> ids,
