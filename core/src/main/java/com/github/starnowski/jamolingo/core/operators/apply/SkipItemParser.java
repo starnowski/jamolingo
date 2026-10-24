@@ -21,6 +21,13 @@ public class SkipItemParser implements ApplyItemParser {
 
     SkipOperatorResult result = skipParser.parse(skipItem.getSkipOption());
 
-    return DefaultApplyOperatorResult.builder().withStageObjects(result.getStageObjects()).build();
+    return DefaultApplyOperatorResult.builder()
+        .withStageObjects(result.getStageObjects())
+        .withUsedMongoDocumentProperties(result.getUsedMongoDocumentProperties())
+        .withWrittenMongoDocumentProperties(result.getWrittenMongoDocumentProperties())
+        .withAddedMongoDocumentProperties(result.getAddedMongoDocumentProperties())
+        .withRemovedMongoDocumentProperties(result.getRemovedMongoDocumentProperties())
+        .withDocumentShapeRedefined(result.isDocumentShapeRedefined())
+        .build();
   }
 }

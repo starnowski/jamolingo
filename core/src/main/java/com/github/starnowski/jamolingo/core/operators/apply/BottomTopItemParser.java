@@ -118,6 +118,10 @@ public class BottomTopItemParser implements ApplyItemParser {
               "$unset", java.util.Arrays.asList("__jamolingo_totalsum", "__jamolingo_cumsum")));
     }
 
-    return DefaultApplyOperatorResult.builder().withStageObjects(stages).build();
+    return DefaultApplyOperatorResult.builder()
+        .withStageObjects(stages)
+        .withUsedMongoDocumentProperties(java.util.Collections.singletonList(mongoPath))
+        .withDocumentShapeRedefined(false)
+        .build();
   }
 }

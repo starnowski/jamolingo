@@ -17,6 +17,9 @@ public class AggregateItemParser implements ApplyItemParser {
     org.bson.Document groupStageDoc = new org.bson.Document("_id", null);
     org.bson.Document projectStageDoc = new org.bson.Document("_id", 0);
 
+    java.util.List<String> usedProperties = new java.util.ArrayList<>();
+    java.util.List<String> addedProperties = new java.util.ArrayList<>();
+
     for (org.apache.olingo.server.api.uri.queryoption.apply.AggregateExpression expr :
         aggregate.getExpressions()) {
       String alias = expr.getAlias();
@@ -34,12 +37,15 @@ public class AggregateItemParser implements ApplyItemParser {
       if (expr.getStandardMethod() == null && "$count".equals(path)) {
         groupStageDoc.put(alias, new org.bson.Document("$sum", 1));
         projectStageDoc.put(alias, 1);
+        addedProperties.add(alias);
       } else {
         String mongoPath = edmMongoContextFacade.resolveMongoPathForEDMPath(path).getMongoPath();
         String method = expr.getStandardMethod().name().toLowerCase();
         if ("average".equals(method)) {
           method = "avg";
         }
+        usedProperties.add(mongoPath);
+        addedProperties.add(alias);
 
         if ("count_distinct".equals(method)) {
           String distinctArrayField = alias + "_distinctArray";
@@ -61,6 +67,12 @@ public class AggregateItemParser implements ApplyItemParser {
     stages.add(groupStage);
     stages.add(projectStage);
 
-    return DefaultApplyOperatorResult.builder().withStageObjects(stages).build();
+    return DefaultApplyOperatorResult.builder()
+        .withStageObjects(stages)
+        .withUsedMongoDocumentProperties(usedProperties)
+        .withWrittenMongoDocumentProperties(addedProperties)
+        .withAddedMongoDocumentProperties(addedProperties)
+        .withDocumentShapeRedefined(true)
+        .build();
   }
 }

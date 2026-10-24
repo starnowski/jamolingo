@@ -1,6 +1,6 @@
 package com.github.starnowski.jamolingo.junit5;
 
-/** Defines a single document to be inserted into a MongoDB collection during test setup. */
+/** Defines documents to be inserted into a MongoDB collection during test setup. */
 public @interface MongoDocument {
   /**
    * The name of the collection where the document should be inserted.
@@ -19,8 +19,8 @@ public @interface MongoDocument {
   /**
    * The path to the file containing the document data.
    *
-   * <p>The file should contain a JSON representation of the document, which may include BSON types
-   * (e.g. Extended JSON).
+   * <p>The file should contain a JSON representation of a document or an array of documents, which
+   * may include BSON types (e.g. Extended JSON).
    *
    * <p>If this property is left as an empty string (the default), the collection will be erased.
    * Note that the collection is erased only once per test setup if multiple {@link MongoDocument}
