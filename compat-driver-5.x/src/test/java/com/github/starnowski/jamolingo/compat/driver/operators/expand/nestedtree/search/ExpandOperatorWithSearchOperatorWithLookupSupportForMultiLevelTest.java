@@ -4,7 +4,7 @@ import static com.github.starnowski.jamolingo.AbstractItTest.TEST_DATABASE;
 import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nestedtree.ExpandOperatorWithHandlingTreeRelationsTestProperties.*;
 
 import com.github.starnowski.jamolingo.AbstractItTest;
-import com.github.starnowski.jamolingo.EmbeddedMongoResource;
+import com.github.starnowski.jamolingo.MongoAtlasResource;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
@@ -60,7 +60,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
           })
     })
 @QuarkusTest
-@QuarkusTestResource(value = EmbeddedMongoResource.class, restrictToAnnotatedClass = true)
+@QuarkusTestResource(value = MongoAtlasResource.class, restrictToAnnotatedClass = true)
 public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
     extends AbstractItTest {
 
