@@ -38,6 +38,7 @@ public @interface AtlasSearchIndex {
    */
   String bsonFilePath();
 
+  // TODO Add validationProperties array in case if more than one field is being indexed
   /**
    * The name of the document property present in the search index to be used for synchronization
    * validation.
