@@ -133,11 +133,6 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
             JSONCompareMode.LENIENT));
   }
 
-  // TODO Add tests that contains the depth level property, that property is rendred with document
-  // and can be used to
-  // create response that compatible with OData specification which is tree structure and not the
-  // flat array.
-
   @Inject protected MongoClient mongoClient;
 
   @ParameterizedTest(name = "{2} - {0} - {1}")
@@ -157,7 +152,7 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
     MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
-    Edm edm = loadEmdProvider("edm/tree_types.xml");
+    Edm edm = loadEmdProvider("edm/tree_types_atlas_search.xml");
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
             .parseUri(rootMongoCollection.getValue(), expandPart, null, null);

@@ -172,13 +172,6 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
         throw new IllegalStateException("No MongoClient provided by the extension");
       }
 
-      AtlasSearchIndex[] searchIndexes = annotation.atlasSearchIndexes();
-      if (searchIndexes != null) {
-        for (AtlasSearchIndex searchIndex : searchIndexes) {
-          ensureAtlasSearchIndex(mongoClient, searchIndex);
-        }
-      }
-
       Map<String, Set<String>> collections = new HashMap<>();
       Arrays.stream(annotation.mongoDocuments())
           .forEach(
@@ -240,6 +233,13 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
                     documents.forEach(collection::insertOne);
                   });
             });
+      }
+
+      AtlasSearchIndex[] searchIndexes = annotation.atlasSearchIndexes();
+      if (searchIndexes != null) {
+        for (AtlasSearchIndex searchIndex : searchIndexes) {
+          ensureAtlasSearchIndex(mongoClient, searchIndex);
+        }
       }
 
       if (searchIndexes != null) {
