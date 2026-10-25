@@ -5,13 +5,16 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.mongodb.client.MongoCollection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 
 /**
  * Validation strategy that checks whether the number of documents in the Atlas Search Index
- * containing the validation property matches the number of documents in the MongoDB collection
+ * containing each validation property matches the number of documents in the MongoDB collection
  * containing that property.
  */
 public class AtlasSearchIndexDocumentCountSyncValidationStrategy
@@ -58,6 +61,18 @@ public class AtlasSearchIndexDocumentCountSyncValidationStrategy
   @Override
   public boolean isSync(
       AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config) {
+    String[] validationPropertiesRaw = context.getValidationProperty();
+    if (validationPropertiesRaw == null || validationPropertiesRaw.length == 0) {
+      return true;
+    }
+    List<String> validationProperties =
+        Arrays.stream(validationPropertiesRaw)
+            .filter(p -> p != null && !p.trim().isEmpty())
+            .toList();
+    if (validationProperties.isEmpty()) {
+      return true;
+    }
+
     AtlasSearchIndexValidationConfig effectiveConfig =
         config != null
             ? config
@@ -68,33 +83,46 @@ public class AtlasSearchIndexDocumentCountSyncValidationStrategy
             .getMongoClient()
             .getDatabase(context.getDatabase())
             .getCollection(context.getCollection());
-    String validationProperty = context.getValidationProperty();
-    long collectionCount =
-        collection.countDocuments(new Document(validationProperty, new Document("$exists", true)));
+
+    Map<String, Long> collectionCounts = new LinkedHashMap<>();
+    for (String validationProperty : validationProperties) {
+      long count =
+          collection.countDocuments(
+              new Document(validationProperty, new Document("$exists", true)));
+      collectionCounts.put(validationProperty, count);
+    }
 
     return await()
         .atMost(effectiveConfig.getMaxWaitDuration(), effectiveConfig.getMaxWaitUnit())
         .pollInterval(effectiveConfig.getPollInterval(), effectiveConfig.getPollIntervalUnit())
         .until(
             () -> {
-              Document searchMetaStage =
-                  new Document(
-                      "$searchMeta",
-                      new Document("index", context.getIndexName())
-                          .append("exists", new Document("path", validationProperty))
-                          .append("count", new Document("type", "total")));
+              for (Map.Entry<String, Long> entry : collectionCounts.entrySet()) {
+                String validationProperty = entry.getKey();
+                long collectionCount = entry.getValue();
 
-              List<Document> results = new ArrayList<>();
-              collection.aggregate(List.of(searchMetaStage)).into(results);
+                Document searchMetaStage =
+                    new Document(
+                        "$searchMeta",
+                        new Document("index", context.getIndexName())
+                            .append("exists", new Document("path", validationProperty))
+                            .append("count", new Document("type", "total")));
 
-              if (!results.isEmpty()) {
-                Document countDoc = results.get(0).get("count", Document.class);
-                if (countDoc != null && countDoc.get("total") instanceof Number total) {
-                  return total.longValue() == collectionCount;
+                List<Document> results = new ArrayList<>();
+                collection.aggregate(List.of(searchMetaStage)).into(results);
+
+                if (!results.isEmpty()) {
+                  Document countDoc = results.get(0).get("count", Document.class);
+                  if (countDoc == null
+                      || !(countDoc.get("total") instanceof Number total)
+                      || total.longValue() != collectionCount) {
+                    return false;
+                  }
+                } else if (collectionCount != 0) {
+                  return false;
                 }
-                return false;
               }
-              return collectionCount == 0;
+              return true;
             });
   }
 }

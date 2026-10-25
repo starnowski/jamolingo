@@ -5,15 +5,18 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.mongodb.client.MongoCollection;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import org.bson.Document;
 
 /**
- * Validation strategy that verifies for every document in the MongoDB collection containing the
- * validation property that an Atlas Search query for that property value returns a result
- * containing the document's identifier.
+ * Validation strategy that verifies for every validation property and every document in the MongoDB
+ * collection containing that property that an Atlas Search query for that property value returns a
+ * result containing the document's identifier.
  */
 public class AtlasSearchIndexValuesSyncValidationStrategy
     implements AtlasSearchIndexSyncValidationStrategy {
@@ -59,6 +62,18 @@ public class AtlasSearchIndexValuesSyncValidationStrategy
   @Override
   public boolean isSync(
       AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config) {
+    String[] validationPropertiesRaw = context.getValidationProperty();
+    if (validationPropertiesRaw == null || validationPropertiesRaw.length == 0) {
+      return true;
+    }
+    List<String> validationProperties =
+        Arrays.stream(validationPropertiesRaw)
+            .filter(p -> p != null && !p.trim().isEmpty())
+            .toList();
+    if (validationProperties.isEmpty()) {
+      return true;
+    }
+
     AtlasSearchIndexValidationConfig effectiveConfig =
         config != null
             ? config
@@ -69,41 +84,49 @@ public class AtlasSearchIndexValuesSyncValidationStrategy
             .getMongoClient()
             .getDatabase(context.getDatabase())
             .getCollection(context.getCollection());
-    String validationProperty = context.getValidationProperty();
 
-    List<Document> documentsWithProperty = new ArrayList<>();
-    collection
-        .find(new Document(validationProperty, new Document("$exists", true)))
-        .into(documentsWithProperty);
+    Map<String, List<Document>> documentsByProperty = new LinkedHashMap<>();
+    for (String validationProperty : validationProperties) {
+      List<Document> documentsWithProperty = new ArrayList<>();
+      collection
+          .find(new Document(validationProperty, new Document("$exists", true)))
+          .into(documentsWithProperty);
+      documentsByProperty.put(validationProperty, documentsWithProperty);
+    }
 
     return await()
         .atMost(effectiveConfig.getMaxWaitDuration(), effectiveConfig.getMaxWaitUnit())
         .pollInterval(effectiveConfig.getPollInterval(), effectiveConfig.getPollIntervalUnit())
         .until(
             () -> {
-              for (Document doc : documentsWithProperty) {
-                Object propertyValue = extractPropertyValue(doc, validationProperty);
-                if (propertyValue == null) {
-                  continue;
-                }
-                Object expectedId = doc.get("_id");
-                Document searchStage =
-                    new Document(
-                        "$search",
-                        new Document("index", context.getIndexName())
-                            .append(
-                                "text",
-                                new Document("query", propertyValue)
-                                    .append("path", validationProperty)));
+              for (Map.Entry<String, List<Document>> entry : documentsByProperty.entrySet()) {
+                String validationProperty = entry.getKey();
+                List<Document> documentsWithProperty = entry.getValue();
 
-                List<Document> searchResults = new ArrayList<>();
-                collection.aggregate(List.of(searchStage)).into(searchResults);
+                for (Document doc : documentsWithProperty) {
+                  Object propertyValue = extractPropertyValue(doc, validationProperty);
+                  if (propertyValue == null) {
+                    continue;
+                  }
+                  Object expectedId = doc.get("_id");
+                  Document searchStage =
+                      new Document(
+                          "$search",
+                          new Document("index", context.getIndexName())
+                              .append(
+                                  "text",
+                                  new Document("query", propertyValue)
+                                      .append("path", validationProperty)));
 
-                boolean found =
-                    searchResults.stream()
-                        .anyMatch(resultDoc -> Objects.equals(expectedId, resultDoc.get("_id")));
-                if (!found) {
-                  return false;
+                  List<Document> searchResults = new ArrayList<>();
+                  collection.aggregate(List.of(searchStage)).into(searchResults);
+
+                  boolean found =
+                      searchResults.stream()
+                          .anyMatch(resultDoc -> Objects.equals(expectedId, resultDoc.get("_id")));
+                  if (!found) {
+                    return false;
+                  }
                 }
               }
               return true;
