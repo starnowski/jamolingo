@@ -38,20 +38,23 @@ public @interface AtlasSearchIndex {
    */
   String bsonFilePath();
 
-  // TODO Add validationProperties array in case if more than one field is being indexed
   /**
-   * The name of the document property present in the search index to be used for synchronization
+   * The array of document property names present in the search index to be used for synchronization
    * validation.
    *
-   * @return the validation property name
+   * @return an array of validation property names
    */
-  String validationProperty() default "";
+  String[] validationProperty() default {};
 
   /**
-   * //TODO Default value The array of validation strategy classes to execute in order to verify
-   * that the search index is synchronized.
+   * The array of validation strategy classes to execute in order to verify that the search index is
+   * synchronized.
    *
    * @return an array of validation strategy classes
    */
-  Class<? extends AtlasSearchIndexSyncValidationStrategy>[] validationStrategies() default {};
+  Class<? extends AtlasSearchIndexSyncValidationStrategy>[] validationStrategies() default {
+    AtlasSearchIndexReadinessSyncValidationStrategy.class,
+    AtlasSearchIndexDocumentCountSyncValidationStrategy.class,
+    AtlasSearchIndexValuesSyncValidationStrategy.class
+  };
 }
