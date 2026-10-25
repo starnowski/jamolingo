@@ -52,12 +52,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
           database = TEST_DATABASE,
           collection = TREETYPE1_COLLECTION,
           bsonFilePath = "bson/expand/tree/search/text_index.json",
-          validationProperty = "name",
-          validationStrategies = {
-            AtlasSearchIndexReadinessSyncValidationStrategy.class,
-            AtlasSearchIndexDocumentCountSyncValidationStrategy.class,
-            AtlasSearchIndexValuesSyncValidationStrategy.class
-          })
+          validationProperty = "name")
     })
 @QuarkusTest
 @QuarkusTestResource(value = MongoAtlasResource.class, restrictToAnnotatedClass = true)
