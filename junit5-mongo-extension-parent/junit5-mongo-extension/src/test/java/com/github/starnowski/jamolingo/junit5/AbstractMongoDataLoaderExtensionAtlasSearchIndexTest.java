@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.junit5;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -96,7 +97,7 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
             database = "testdb",
             collection = "items",
             bsonFilePath = KEYWORD_INDEX_PATH,
-            validationProperty = "field1",
+            validationProperty = {"field1", "field2"},
             validationStrategies = {
               FirstRecordingStrategy.class,
               SecondRecordingStrategy.class,
@@ -179,6 +180,8 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
     String expectedDefValue = readResource(KEYWORD_INDEX_PATH);
     verify(mongoCollection, times(1))
         .createSearchIndex(eq("idx_test"), eq(Document.parse(expectedDefValue)));
+    verify(mongoCollection, never()).countDocuments(any(Document.class));
+    verify(mongoCollection, never()).find(any(Document.class));
 
     AtlasSearchIndexKey expectedKey = new AtlasSearchIndexKey("testdb", "items", "idx_test");
     CachedAtlasSearchIndexDefinition cachedDef = cache.get(expectedKey);
@@ -310,7 +313,7 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
     assertEquals(
         List.of(
             "insertOne",
-            "FirstRecordingStrategy",
+            "FirstRecordingStrategy:[field1, field2]",
             "SecondRecordingStrategy",
             "ThirdRecordingStrategy"),
         EXECUTION_LOG);
@@ -329,7 +332,8 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
 
     // WHEN & THEN
     assertThrows(IllegalStateException.class, () -> tested.beforeEach(extensionContext));
-    assertEquals(List.of("FirstRecordingStrategy", "FailingValidationStrategy"), EXECUTION_LOG);
+    assertEquals(
+        List.of("FirstRecordingStrategy:[field1]", "FailingValidationStrategy"), EXECUTION_LOG);
   }
 
   @Test
@@ -494,9 +498,10 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
       assertEquals("testdb", context.getDatabase());
       assertEquals("items", context.getCollection());
       assertEquals("idx_test", context.getIndexName());
-      assertEquals("field1", context.getValidationProperty());
+      assertNotNull(context.getValidationProperty());
       CAPTURED_CONFIGS.add(config);
-      EXECUTION_LOG.add("FirstRecordingStrategy");
+      EXECUTION_LOG.add(
+          "FirstRecordingStrategy:" + java.util.Arrays.toString(context.getValidationProperty()));
       return true;
     }
   }
@@ -507,6 +512,7 @@ class AbstractMongoDataLoaderExtensionAtlasSearchIndexTest {
     @Override
     public boolean isSync(
         AtlasSearchIndexValidationContext context, AtlasSearchIndexValidationConfig config) {
+      assertArrayEquals(new String[] {"field1", "field2"}, context.getValidationProperty());
       EXECUTION_LOG.add("SecondRecordingStrategy");
       return true;
     }

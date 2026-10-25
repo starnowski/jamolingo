@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.mongodb.client.AggregateIterable;
@@ -44,6 +45,50 @@ class AtlasSearchIndexDocumentCountSyncValidationStrategyTest {
   }
 
   @Test
+  void shouldSkipValidationAndReturnTrueWhenValidationPropertyIsNull() {
+    // GIVEN
+    AtlasSearchIndexValidationContext contextWithoutProperties =
+        AtlasSearchIndexValidationContext.builder()
+            .withMongoClient(mongoClient)
+            .withDatabase("testdb")
+            .withCollection("items")
+            .withIndexName("my_index")
+            .withValidationProperty((String[]) null)
+            .build();
+    AtlasSearchIndexDocumentCountSyncValidationStrategy tested =
+        new AtlasSearchIndexDocumentCountSyncValidationStrategy(30, MILLISECONDS, 10, MILLISECONDS);
+
+    // WHEN
+    boolean result = tested.isSync(contextWithoutProperties);
+
+    // THEN
+    assertTrue(result);
+    verifyNoInteractions(mongoClient, mongoDatabase, mongoCollection);
+  }
+
+  @Test
+  void shouldSkipValidationAndReturnTrueWhenValidationPropertyArrayIsEmpty() {
+    // GIVEN
+    AtlasSearchIndexValidationContext contextWithEmptyProperties =
+        AtlasSearchIndexValidationContext.builder()
+            .withMongoClient(mongoClient)
+            .withDatabase("testdb")
+            .withCollection("items")
+            .withIndexName("my_index")
+            .withValidationProperty()
+            .build();
+    AtlasSearchIndexDocumentCountSyncValidationStrategy tested =
+        new AtlasSearchIndexDocumentCountSyncValidationStrategy(30, MILLISECONDS, 10, MILLISECONDS);
+
+    // WHEN
+    boolean result = tested.isSync(contextWithEmptyProperties);
+
+    // THEN
+    assertTrue(result);
+    verifyNoInteractions(mongoClient, mongoDatabase, mongoCollection);
+  }
+
+  @Test
   void shouldReturnTrueWhenSearchMetaTotalMatchesCollectionCountForValidationProperty() {
     // GIVEN
     Document expectedCountFilter = new Document("field1", new Document("$exists", true));
@@ -68,6 +113,103 @@ class AtlasSearchIndexDocumentCountSyncValidationStrategyTest {
     // THEN
     assertTrue(result);
     verify(mongoCollection).countDocuments(expectedCountFilter);
+  }
+
+  @Test
+  void shouldReturnTrueWhenSearchMetaTotalsMatchCollectionCountsForMultipleValidationProperties() {
+    // GIVEN
+    AtlasSearchIndexValidationContext multiPropertyContext =
+        AtlasSearchIndexValidationContext.builder()
+            .withMongoClient(mongoClient)
+            .withDatabase("testdb")
+            .withCollection("items")
+            .withIndexName("my_index")
+            .withValidationProperty("field1", "field2")
+            .build();
+
+    Document countFilterField1 = new Document("field1", new Document("$exists", true));
+    Document countFilterField2 = new Document("field2", new Document("$exists", true));
+    when(mongoCollection.countDocuments(countFilterField1)).thenReturn(2L);
+    when(mongoCollection.countDocuments(countFilterField2)).thenReturn(3L);
+
+    Document searchMetaStageField1 =
+        new Document(
+            "$searchMeta",
+            new Document("index", "my_index")
+                .append("exists", new Document("path", "field1"))
+                .append("count", new Document("type", "total")));
+    Document searchMetaStageField2 =
+        new Document(
+            "$searchMeta",
+            new Document("index", "my_index")
+                .append("exists", new Document("path", "field2"))
+                .append("count", new Document("type", "total")));
+
+    AggregateIterable<Document> aggregateField1 =
+        mockAggregateIterable(List.of(new Document("count", new Document("total", 2L))));
+    AggregateIterable<Document> aggregateField2 =
+        mockAggregateIterable(List.of(new Document("count", new Document("total", 3L))));
+    when(mongoCollection.aggregate(List.of(searchMetaStageField1))).thenReturn(aggregateField1);
+    when(mongoCollection.aggregate(List.of(searchMetaStageField2))).thenReturn(aggregateField2);
+
+    AtlasSearchIndexDocumentCountSyncValidationStrategy tested =
+        new AtlasSearchIndexDocumentCountSyncValidationStrategy(50, MILLISECONDS, 10, MILLISECONDS);
+
+    // WHEN
+    boolean result = tested.isSync(multiPropertyContext);
+
+    // THEN
+    assertTrue(result);
+    verify(mongoCollection).countDocuments(countFilterField1);
+    verify(mongoCollection).countDocuments(countFilterField2);
+  }
+
+  @Test
+  void shouldReturnFalseWhenAnyValidationPropertyCountDoesNotMatchInMultiPropertyArray() {
+    // GIVEN
+    AtlasSearchIndexValidationContext multiPropertyContext =
+        AtlasSearchIndexValidationContext.builder()
+            .withMongoClient(mongoClient)
+            .withDatabase("testdb")
+            .withCollection("items")
+            .withIndexName("my_index")
+            .withValidationProperty("field1", "field2")
+            .build();
+
+    Document countFilterField1 = new Document("field1", new Document("$exists", true));
+    Document countFilterField2 = new Document("field2", new Document("$exists", true));
+    when(mongoCollection.countDocuments(countFilterField1)).thenReturn(2L);
+    when(mongoCollection.countDocuments(countFilterField2)).thenReturn(3L);
+
+    Document searchMetaStageField1 =
+        new Document(
+            "$searchMeta",
+            new Document("index", "my_index")
+                .append("exists", new Document("path", "field1"))
+                .append("count", new Document("type", "total")));
+    Document searchMetaStageField2 =
+        new Document(
+            "$searchMeta",
+            new Document("index", "my_index")
+                .append("exists", new Document("path", "field2"))
+                .append("count", new Document("type", "total")));
+
+    AggregateIterable<Document> aggregateField1 =
+        mockAggregateIterable(List.of(new Document("count", new Document("total", 2L))));
+    AggregateIterable<Document> aggregateField2Mismatch =
+        mockAggregateIterable(List.of(new Document("count", new Document("total", 1L))));
+    when(mongoCollection.aggregate(List.of(searchMetaStageField1))).thenReturn(aggregateField1);
+    when(mongoCollection.aggregate(List.of(searchMetaStageField2)))
+        .thenReturn(aggregateField2Mismatch);
+
+    AtlasSearchIndexDocumentCountSyncValidationStrategy tested =
+        new AtlasSearchIndexDocumentCountSyncValidationStrategy(30, MILLISECONDS, 10, MILLISECONDS);
+
+    // WHEN
+    boolean result = tested.isSync(multiPropertyContext);
+
+    // THEN
+    assertFalse(result);
   }
 
   @Test

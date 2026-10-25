@@ -105,12 +105,7 @@ class AtlasSearchIndexIntegrationTest {
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
             bsonFilePath = KEYWORD_INDEX_PATH,
-            validationProperty = "field1",
-            validationStrategies = {
-              AtlasSearchIndexReadinessSyncValidationStrategy.class,
-              AtlasSearchIndexDocumentCountSyncValidationStrategy.class,
-              AtlasSearchIndexValuesSyncValidationStrategy.class
-            })
+            validationProperty = {"field1", "field2"})
       })
   private void methodWithKeywordSearchIndex() {}
 
@@ -135,12 +130,7 @@ class AtlasSearchIndexIntegrationTest {
             database = DATABASE_NAME,
             collection = COLLECTION_NAME,
             bsonFilePath = NGRAM_INDEX_PATH,
-            validationProperty = "field1",
-            validationStrategies = {
-              AtlasSearchIndexReadinessSyncValidationStrategy.class,
-              AtlasSearchIndexDocumentCountSyncValidationStrategy.class,
-              AtlasSearchIndexValuesSyncValidationStrategy.class
-            })
+            validationProperty = {"field1", "field2"})
       })
   private void methodWithNgramSearchIndex() {}
 
@@ -169,7 +159,7 @@ class AtlasSearchIndexIntegrationTest {
             .withDatabase(DATABASE_NAME)
             .withCollection(collectionName)
             .withIndexName(indexName)
-            .withValidationProperty("field1")
+            .withValidationProperty("field1", "field2")
             .build();
 
     AtlasSearchIndexReadinessSyncValidationStrategy readinessStrategy =

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import com.mongodb.client.AggregateIterable;
@@ -41,6 +42,50 @@ class AtlasSearchIndexValuesSyncValidationStrategyTest {
             .withIndexName("my_index")
             .withValidationProperty("field1")
             .build();
+  }
+
+  @Test
+  void shouldSkipValidationAndReturnTrueWhenValidationPropertyIsNull() {
+    // GIVEN
+    AtlasSearchIndexValidationContext contextWithoutProperties =
+        AtlasSearchIndexValidationContext.builder()
+            .withMongoClient(mongoClient)
+            .withDatabase("testdb")
+            .withCollection("items")
+            .withIndexName("my_index")
+            .withValidationProperty((String[]) null)
+            .build();
+    AtlasSearchIndexValuesSyncValidationStrategy tested =
+        new AtlasSearchIndexValuesSyncValidationStrategy(30, MILLISECONDS, 10, MILLISECONDS);
+
+    // WHEN
+    boolean result = tested.isSync(contextWithoutProperties);
+
+    // THEN
+    assertTrue(result);
+    verifyNoInteractions(mongoClient, mongoDatabase, mongoCollection);
+  }
+
+  @Test
+  void shouldSkipValidationAndReturnTrueWhenValidationPropertyArrayIsEmpty() {
+    // GIVEN
+    AtlasSearchIndexValidationContext contextWithEmptyProperties =
+        AtlasSearchIndexValidationContext.builder()
+            .withMongoClient(mongoClient)
+            .withDatabase("testdb")
+            .withCollection("items")
+            .withIndexName("my_index")
+            .withValidationProperty()
+            .build();
+    AtlasSearchIndexValuesSyncValidationStrategy tested =
+        new AtlasSearchIndexValuesSyncValidationStrategy(30, MILLISECONDS, 10, MILLISECONDS);
+
+    // WHEN
+    boolean result = tested.isSync(contextWithEmptyProperties);
+
+    // THEN
+    assertTrue(result);
+    verifyNoInteractions(mongoClient, mongoDatabase, mongoCollection);
   }
 
   @Test
@@ -81,6 +126,116 @@ class AtlasSearchIndexValuesSyncValidationStrategyTest {
 
     // THEN
     assertTrue(result);
+  }
+
+  @Test
+  void shouldReturnTrueWhenAllDocumentsForMultipleValidationPropertiesAreFoundInSearchResults() {
+    // GIVEN
+    AtlasSearchIndexValidationContext multiPropertyContext =
+        AtlasSearchIndexValidationContext.builder()
+            .withMongoClient(mongoClient)
+            .withDatabase("testdb")
+            .withCollection("items")
+            .withIndexName("my_index")
+            .withValidationProperty("field1", "field2")
+            .build();
+
+    Document doc1 = new Document("_id", "doc_1").append("field1", "val1").append("field2", "abc");
+    Document doc2 = new Document("_id", "doc_2").append("field2", "def");
+
+    FindIterable<Document> findField1 = mockFindIterable(List.of(doc1));
+    FindIterable<Document> findField2 = mockFindIterable(List.of(doc1, doc2));
+    when(mongoCollection.find(new Document("field1", new Document("$exists", true))))
+        .thenReturn(findField1);
+    when(mongoCollection.find(new Document("field2", new Document("$exists", true))))
+        .thenReturn(findField2);
+
+    Document searchStageField1Doc1 =
+        new Document(
+            "$search",
+            new Document("index", "my_index")
+                .append("text", new Document("query", "val1").append("path", "field1")));
+    Document searchStageField2Doc1 =
+        new Document(
+            "$search",
+            new Document("index", "my_index")
+                .append("text", new Document("query", "abc").append("path", "field2")));
+    Document searchStageField2Doc2 =
+        new Document(
+            "$search",
+            new Document("index", "my_index")
+                .append("text", new Document("query", "def").append("path", "field2")));
+
+    AggregateIterable<Document> resultField1Doc1 =
+        mockAggregateIterable(List.of(new Document("_id", "doc_1")));
+    AggregateIterable<Document> resultField2Doc1 =
+        mockAggregateIterable(List.of(new Document("_id", "doc_1")));
+    AggregateIterable<Document> resultField2Doc2 =
+        mockAggregateIterable(List.of(new Document("_id", "doc_2")));
+
+    when(mongoCollection.aggregate(List.of(searchStageField1Doc1))).thenReturn(resultField1Doc1);
+    when(mongoCollection.aggregate(List.of(searchStageField2Doc1))).thenReturn(resultField2Doc1);
+    when(mongoCollection.aggregate(List.of(searchStageField2Doc2))).thenReturn(resultField2Doc2);
+
+    AtlasSearchIndexValuesSyncValidationStrategy tested =
+        new AtlasSearchIndexValuesSyncValidationStrategy(50, MILLISECONDS, 10, MILLISECONDS);
+
+    // WHEN
+    boolean result = tested.isSync(multiPropertyContext);
+
+    // THEN
+    assertTrue(result);
+  }
+
+  @Test
+  void shouldReturnFalseWhenAnyValidationPropertyDocumentIsMissingInMultiPropertyArray() {
+    // GIVEN
+    AtlasSearchIndexValidationContext multiPropertyContext =
+        AtlasSearchIndexValidationContext.builder()
+            .withMongoClient(mongoClient)
+            .withDatabase("testdb")
+            .withCollection("items")
+            .withIndexName("my_index")
+            .withValidationProperty("field1", "field2")
+            .build();
+
+    Document doc1 = new Document("_id", "doc_1").append("field1", "val1").append("field2", "abc");
+
+    FindIterable<Document> findField1 = mockFindIterable(List.of(doc1));
+    FindIterable<Document> findField2 = mockFindIterable(List.of(doc1));
+    when(mongoCollection.find(new Document("field1", new Document("$exists", true))))
+        .thenReturn(findField1);
+    when(mongoCollection.find(new Document("field2", new Document("$exists", true))))
+        .thenReturn(findField2);
+
+    Document searchStageField1Doc1 =
+        new Document(
+            "$search",
+            new Document("index", "my_index")
+                .append("text", new Document("query", "val1").append("path", "field1")));
+    Document searchStageField2Doc1 =
+        new Document(
+            "$search",
+            new Document("index", "my_index")
+                .append("text", new Document("query", "abc").append("path", "field2")));
+
+    AggregateIterable<Document> resultField1Doc1 =
+        mockAggregateIterable(List.of(new Document("_id", "doc_1")));
+    AggregateIterable<Document> resultField2Doc1Mismatch =
+        mockAggregateIterable(List.of(new Document("_id", "other_doc")));
+
+    when(mongoCollection.aggregate(List.of(searchStageField1Doc1))).thenReturn(resultField1Doc1);
+    when(mongoCollection.aggregate(List.of(searchStageField2Doc1)))
+        .thenReturn(resultField2Doc1Mismatch);
+
+    AtlasSearchIndexValuesSyncValidationStrategy tested =
+        new AtlasSearchIndexValuesSyncValidationStrategy(30, MILLISECONDS, 10, MILLISECONDS);
+
+    // WHEN
+    boolean result = tested.isSync(multiPropertyContext);
+
+    // THEN
+    assertFalse(result);
   }
 
   @Test
