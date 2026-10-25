@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.junit5;
 
 import com.mongodb.client.MongoClient;
+import java.util.Arrays;
 import java.util.Objects;
 
 /** Context holding parameters required to validate if an Atlas Search Index is synchronized. */
@@ -10,7 +11,7 @@ public class AtlasSearchIndexValidationContext {
   private final String database;
   private final String collection;
   private final String indexName;
-  private final String validationProperty;
+  private final String[] validationProperty;
 
   /**
    * Constructs a new AtlasSearchIndexValidationContext.
@@ -19,14 +20,14 @@ public class AtlasSearchIndexValidationContext {
    * @param database the database name
    * @param collection the collection name
    * @param indexName the Atlas Search index name
-   * @param validationProperty the document property name used for validation
+   * @param validationProperty the document property names used for validation
    */
   public AtlasSearchIndexValidationContext(
       MongoClient mongoClient,
       String database,
       String collection,
       String indexName,
-      String validationProperty) {
+      String... validationProperty) {
     this.mongoClient = mongoClient;
     this.database = database;
     this.collection = collection;
@@ -71,11 +72,11 @@ public class AtlasSearchIndexValidationContext {
   }
 
   /**
-   * Returns the document property name used for validation.
+   * Returns the array of document property names used for validation.
    *
-   * @return the validation property name
+   * @return the array of validation property names
    */
-  public String getValidationProperty() {
+  public String[] getValidationProperty() {
     return validationProperty;
   }
 
@@ -88,12 +89,14 @@ public class AtlasSearchIndexValidationContext {
         && Objects.equals(database, that.database)
         && Objects.equals(collection, that.collection)
         && Objects.equals(indexName, that.indexName)
-        && Objects.equals(validationProperty, that.validationProperty);
+        && Arrays.equals(validationProperty, that.validationProperty);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(mongoClient, database, collection, indexName, validationProperty);
+    int result = Objects.hash(mongoClient, database, collection, indexName);
+    result = 31 * result + Arrays.hashCode(validationProperty);
+    return result;
   }
 
   @Override
@@ -110,9 +113,8 @@ public class AtlasSearchIndexValidationContext {
         + ", indexName='"
         + indexName
         + '\''
-        + ", validationProperty='"
-        + validationProperty
-        + '\''
+        + ", validationProperty="
+        + Arrays.toString(validationProperty)
         + '}';
   }
 
@@ -131,7 +133,7 @@ public class AtlasSearchIndexValidationContext {
     private String database;
     private String collection;
     private String indexName;
-    private String validationProperty;
+    private String[] validationProperty;
 
     /**
      * Copies properties from an existing {@link AtlasSearchIndexValidationContext}.
@@ -194,12 +196,12 @@ public class AtlasSearchIndexValidationContext {
     }
 
     /**
-     * Sets the document property name used for validation.
+     * Sets the document property names used for validation.
      *
-     * @param validationProperty the validation property name
+     * @param validationProperty the validation property names
      * @return this builder instance
      */
-    public Builder withValidationProperty(String validationProperty) {
+    public Builder withValidationProperty(String... validationProperty) {
       this.validationProperty = validationProperty;
       return this;
     }
