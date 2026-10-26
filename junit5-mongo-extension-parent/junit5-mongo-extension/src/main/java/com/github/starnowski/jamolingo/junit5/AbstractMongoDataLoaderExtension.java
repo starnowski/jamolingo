@@ -406,9 +406,4 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
       return Collections.singletonList(Document.parse(bson));
     }
   }
-
-  private Document parseBsonDocument(String bsonFilePath) {
-    List<Document> documents = parseBsonDocuments(bsonFilePath);
-    return documents.isEmpty() ? null : documents.get(0);
-  }
 }
