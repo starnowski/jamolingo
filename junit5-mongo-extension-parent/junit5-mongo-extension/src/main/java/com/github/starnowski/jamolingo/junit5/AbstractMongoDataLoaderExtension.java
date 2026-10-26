@@ -10,30 +10,34 @@ import com.mongodb.client.ListSearchIndexesIterable;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.bson.BsonType;
 import org.bson.Document;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.DocumentCodec;
+import org.bson.conversions.Bson;
 import org.bson.json.JsonReader;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
 /**
- * A JUnit 5 extension that loads data and configures Atlas Search indexes in MongoDB collections
- * before each test method execution.
+ * A JUnit 5 extension that loads data, manages MongoDB indexes, and configures Atlas Search indexes
+ * in MongoDB collections before each test method execution.
  *
  * <p>This extension looks for the {@link MongoSetup} annotation on the test method or test class.
- * If present, it retrieves the {@link MongoClient} from the implementation, ensures any configured
- * Atlas Search indexes exist, clears the specified collections, inserts the documents defined in
- * the annotation, and executes any configured Atlas Search index synchronization validation
- * strategies. Files specified in {@link MongoDocument#bsonFilePath()} may contain either a single
- * BSON document or an array of BSON documents.
+ * If present, it retrieves the {@link MongoClient} from the implementation, manages any configured
+ * MongoDB indexes, clears the specified collections, inserts the documents defined in the
+ * annotation, ensures any configured Atlas Search indexes exist, and executes any configured Atlas
+ * Search index synchronization validation strategies. Files specified in {@link
+ * MongoDocument#bsonFilePath()} may contain either a single BSON document or an array of BSON
+ * documents.
  */
 public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCallback {
 
@@ -172,6 +176,37 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
         throw new IllegalStateException("No MongoClient provided by the extension");
       }
 
+      Map<MongoCollectionKey, MongoCollection> mongoCollectionMap = new HashMap<>();
+
+      SearchIndex[] indexes = annotation.indexes();
+      if (indexes != null && indexes.length > 0) {
+        Map<MongoCollectionKey, List<SearchIndex>> groupedIndexes =
+            Arrays.stream(indexes)
+                .collect(
+                    Collectors.groupingBy(
+                        idx -> new MongoCollectionKey(idx.database(), idx.collection()),
+                        LinkedHashMap::new,
+                        Collectors.toList()));
+        groupedIndexes.forEach(
+            (key, collectionIndexes) -> {
+              MongoCollection<Document> collection =
+                  mongoCollectionMap.computeIfAbsent(
+                      key,
+                      k ->
+                          mongoClient
+                              .getDatabase(k.getDatabase())
+                              .getCollection(k.getCollection()));
+              dropCollectionIndexes(collection);
+              for (SearchIndex searchIndex : collectionIndexes) {
+                Bson keys = resolveIndexKeys(searchIndex);
+                if (keys != null) {
+                  IndexOptions indexOptions = resolveIndexOptions(searchIndex);
+                  collection.createIndex(keys, indexOptions);
+                }
+              }
+            });
+      }
+
       Map<String, Set<String>> collections = new HashMap<>();
       Arrays.stream(annotation.mongoDocuments())
           .forEach(
@@ -183,7 +218,6 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
                         Stream.concat(s1.stream(), s2.stream())
                             .collect(Collectors.toUnmodifiableSet()));
               });
-      Map<MongoCollectionKey, MongoCollection> mongoCollectionMap = new HashMap<>();
       collections
           .entrySet()
           .forEach(
@@ -242,6 +276,46 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
           validateAtlasSearchIndex(mongoClient, searchIndex, validationConfig);
         }
       }
+    }
+  }
+
+  private void dropCollectionIndexes(MongoCollection<Document> collection) {
+    try {
+      collection.dropIndexes();
+    } catch (MongoCommandException e) {
+      if (e.getErrorCode() != 26) {
+        throw e;
+      }
+    }
+  }
+
+  private Bson resolveIndexKeys(SearchIndex searchIndex) {
+    if (searchIndex.fieldName() != null && !searchIndex.fieldName().trim().isEmpty()) {
+      return new Document(searchIndex.fieldName(), searchIndex.indexValue());
+    }
+    Supplier<Bson> bsonSupplier = instantiateSupplier(searchIndex.bsonSupplier());
+    return bsonSupplier != null ? bsonSupplier.get() : null;
+  }
+
+  private IndexOptions resolveIndexOptions(SearchIndex searchIndex) {
+    Supplier<IndexOptions> optionsSupplier =
+        instantiateSupplier(searchIndex.indexOptionsSupplier());
+    IndexOptions options = optionsSupplier != null ? optionsSupplier.get() : null;
+    return options != null ? options : new IndexOptions();
+  }
+
+  /**
+   * Instantiates the given {@link Supplier} class using its public no-argument constructor.
+   *
+   * @param <T> the type of results supplied by the supplier
+   * @param supplierClass the supplier class to instantiate
+   * @return the instantiated supplier
+   */
+  protected <T> Supplier<T> instantiateSupplier(Class<? extends Supplier<T>> supplierClass) {
+    try {
+      return supplierClass.getDeclaredConstructor().newInstance();
+    } catch (ReflectiveOperationException e) {
+      throw new RuntimeException("Failed to instantiate supplier: " + supplierClass.getName(), e);
     }
   }
 

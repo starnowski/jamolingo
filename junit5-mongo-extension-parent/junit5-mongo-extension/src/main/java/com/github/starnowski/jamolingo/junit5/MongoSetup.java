@@ -31,6 +31,13 @@ public @interface MongoSetup {
   AtlasSearchIndex[] atlasSearchIndexes() default {};
 
   /**
+   * The list of {@link SearchIndex} configurations defining the MongoDB indexes to be managed.
+   *
+   * @return an array of {@link SearchIndex}
+   */
+  SearchIndex[] indexes() default {};
+
+  /**
    * Flag to indicate if documents should be inserted in batch mode.
    *
    * @return true if batch insertion is enabled, false otherwise
