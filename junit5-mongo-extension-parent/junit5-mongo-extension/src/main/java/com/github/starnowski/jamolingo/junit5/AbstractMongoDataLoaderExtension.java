@@ -239,11 +239,6 @@ public abstract class AbstractMongoDataLoaderExtension implements BeforeEachCall
       if (searchIndexes != null) {
         for (AtlasSearchIndex searchIndex : searchIndexes) {
           ensureAtlasSearchIndex(mongoClient, searchIndex);
-        }
-      }
-
-      if (searchIndexes != null) {
-        for (AtlasSearchIndex searchIndex : searchIndexes) {
           validateAtlasSearchIndex(mongoClient, searchIndex, validationConfig);
         }
       }
