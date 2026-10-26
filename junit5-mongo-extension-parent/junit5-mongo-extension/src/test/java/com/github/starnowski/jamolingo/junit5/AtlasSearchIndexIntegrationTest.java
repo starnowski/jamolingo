@@ -4,6 +4,7 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -13,6 +14,7 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.IndexOptions;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -23,8 +25,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -133,6 +137,26 @@ class AtlasSearchIndexIntegrationTest {
             validationProperty = {"field1", "field2"})
       })
   private void methodWithNgramSearchIndex() {}
+
+  @MongoSetup(
+      indexes = {
+        @SearchIndex(database = DATABASE_NAME, collection = "idx_items", fieldName = "field1"),
+        @SearchIndex(
+            database = DATABASE_NAME,
+            collection = "idx_items",
+            fieldName = "priorityField",
+            indexValue = -1,
+            bsonSupplier = CustomCompoundBsonSupplier.class),
+        @SearchIndex(
+            database = DATABASE_NAME,
+            collection = "idx_items",
+            bsonSupplier = CustomCompoundBsonSupplier.class,
+            indexOptionsSupplier = CustomNamedIndexOptionsSupplier.class)
+      })
+  private void methodWithMongoIndexes() {}
+
+  @MongoSetup(indexes = {@SearchIndex(database = DATABASE_NAME, collection = "idx_items")})
+  private void methodWithDropOnlyMongoIndex() {}
 
   @Test
   void shouldValidateStrategiesUsingAwaitility() throws IOException {
@@ -246,8 +270,60 @@ class AtlasSearchIndexIntegrationTest {
     assertTrue(matchingIds.contains("doc_2"));
   }
 
+  @Test
+  void shouldDropPreExistingMongoIndexesCreateConfiguredIndexesAndSupportDropOnly()
+      throws Exception {
+    // GIVEN
+    AbstractMongoDataLoaderExtension extension =
+        new AbstractMongoDataLoaderExtension() {
+          @Override
+          protected MongoClient resolveMongoClient() {
+            return mongoClient;
+          }
+        };
+    MongoCollection<Document> collection =
+        mongoClient.getDatabase(DATABASE_NAME).getCollection("idx_items");
+    collection.drop();
+    collection.insertOne(new Document("staleField", "val"));
+    collection.createIndex(new Document("staleField", 1), new IndexOptions().name("stale_idx"));
+
+    // WHEN 1: Execute setup with configured @SearchIndex annotations
+    extension.beforeEach(mockExtensionContext("methodWithMongoIndexes"));
+
+    // THEN 1: Pre-existing "stale_idx" is dropped, and configured indexes exist
+    List<Document> indexDocs = new ArrayList<>();
+    collection.listIndexes().into(indexDocs);
+    Map<String, Document> indexByName =
+        indexDocs.stream().collect(Collectors.toMap(d -> d.getString("name"), d -> d));
+
+    assertFalse(indexByName.containsKey("stale_idx"));
+    assertTrue(indexByName.containsKey("_id_"));
+    assertTrue(indexByName.containsKey("field1_1"));
+    assertEquals(new Document("field1", 1), indexByName.get("field1_1").get("key", Document.class));
+    assertTrue(indexByName.containsKey("priorityField_-1"));
+    assertEquals(
+        new Document("priorityField", -1),
+        indexByName.get("priorityField_-1").get("key", Document.class));
+    assertTrue(indexByName.containsKey("custom_compound_idx"));
+    assertEquals(
+        new Document("compoundA", 1).append("compoundB", -1),
+        indexByName.get("custom_compound_idx").get("key", Document.class));
+    assertEquals(Boolean.TRUE, indexByName.get("custom_compound_idx").getBoolean("unique"));
+
+    // WHEN 2: Execute setup with drop-only @SearchIndex (neither fieldName nor bsonSupplier)
+    extension.beforeEach(mockExtensionContext("methodWithDropOnlyMongoIndex"));
+
+    // THEN 2: All non-_id_ indexes are dropped and no new indexes are created
+    List<Document> afterDropIndexDocs = new ArrayList<>();
+    collection.listIndexes().into(afterDropIndexDocs);
+    Set<String> remainingIndexNames =
+        afterDropIndexDocs.stream().map(d -> d.getString("name")).collect(Collectors.toSet());
+    assertEquals(Set.of("_id_"), remainingIndexNames);
+  }
+
   private ExtensionContext mockExtensionContext(String methodName) throws NoSuchMethodException {
     ExtensionContext extensionContext = mock(ExtensionContext.class);
+    when(extensionContext.getTestClass()).thenReturn(Optional.of(this.getClass()));
     when(extensionContext.getTestMethod())
         .thenReturn(Optional.of(this.getClass().getDeclaredMethod(methodName)));
     return extensionContext;
@@ -259,6 +335,24 @@ class AtlasSearchIndexIntegrationTest {
         throw new IllegalArgumentException("Resource not found: " + path);
       }
       return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+    }
+  }
+
+  public static class CustomCompoundBsonSupplier implements Supplier<Bson> {
+    public CustomCompoundBsonSupplier() {}
+
+    @Override
+    public Bson get() {
+      return new Document("compoundA", 1).append("compoundB", -1);
+    }
+  }
+
+  public static class CustomNamedIndexOptionsSupplier implements Supplier<IndexOptions> {
+    public CustomNamedIndexOptionsSupplier() {}
+
+    @Override
+    public IndexOptions get() {
+      return new IndexOptions().name("custom_compound_idx").unique(true);
     }
   }
 }
