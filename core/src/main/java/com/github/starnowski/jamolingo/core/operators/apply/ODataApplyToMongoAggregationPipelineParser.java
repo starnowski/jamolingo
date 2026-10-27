@@ -99,6 +99,7 @@ public class ODataApplyToMongoAggregationPipelineParser {
     } else if (applyItem.getKind() == ApplyItem.Kind.CONCAT) {
       return new ConcatItemParser(this);
     } else if (applyItem.getKind() == ApplyItem.Kind.SEARCH) {
+      // TODO Add support when the search is not the first one
       return new SearchItemParser(applySearchToMongoPipelineParser, isFirstApplyItem);
     } else if (applyItem.getKind() == ApplyItem.Kind.BOTTOM_TOP) {
       return new BottomTopItemParser();
