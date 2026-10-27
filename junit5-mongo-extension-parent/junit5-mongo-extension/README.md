@@ -70,6 +70,65 @@ class MyTest {
 }
 ```
 
+Example content of `search/items_search_index.json` on the classpath:
+
+```json
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "name": [
+        {
+          "type": "string"
+        }
+      ],
+      "description": [
+        {
+          "type": "string"
+        }
+      ]
+    }
+  }
+}
+```
+
+Or with a custom analyzer (e.g., keyword + lowercase):
+
+```json
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "name": [
+        {
+          "type": "string",
+          "analyzer": "keyword_lowercase"
+        }
+      ],
+      "description": [
+        {
+          "type": "string",
+          "analyzer": "keyword_lowercase"
+        }
+      ]
+    }
+  },
+  "analyzers": [
+    {
+      "name": "keyword_lowercase",
+      "tokenizer": {
+        "type": "keyword"
+      },
+      "tokenFilters": [
+        {
+          "type": "lowercase"
+        }
+      ]
+    }
+  ]
+}
+```
+
 ## Annotations
 
 ### `@MongoSetup`
