@@ -125,6 +125,31 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                 }
                                             ]
                                             """,
+            JSONCompareMode.LENIENT),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$search=Vehicle)",
+            """
+                                                    [
+                                                        {
+                                                            "_id": 1,
+                                                            "index": 1,
+                                                            "parentId": null,
+                                                            "categoryId": 1,
+                                                            "children": [
+                                                                {
+                                                                    "_id": 5,
+                                                                    "index": 5,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": [],
+                                                                    "name": "Flying Vehicle"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                    """,
             JSONCompareMode.LENIENT));
   }
 
