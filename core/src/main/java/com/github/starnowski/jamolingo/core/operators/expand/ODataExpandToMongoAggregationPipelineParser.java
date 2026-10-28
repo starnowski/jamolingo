@@ -9,6 +9,7 @@ import com.github.starnowski.jamolingo.core.operators.orderby.DefaultOdataOrderB
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.orderby.SortProperty;
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
 import com.github.starnowski.jamolingo.core.operators.select.*;
 import com.github.starnowski.jamolingo.core.operators.skip.OdataSkipToMongoSkipParser;
 import com.github.starnowski.jamolingo.core.operators.top.OdataTopToMongoLimitParser;
@@ -1456,6 +1457,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
     private final Set<String> ignoreForSpecificExpandElementMissingNavigationProperty;
     private final boolean ignoreGloballyMissingProperty;
     private final Set<String> ignoreForSpecificExpandElementMissingProperty;
+    private final ODataSearchToMongoAtlasSearchParser globalSearchParser;
+    private final Map<String, ODataSearchToMongoAtlasSearchParser> navigationPropertySearchParsers;
+    private final Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchParser>
+        edmTablesToSearchParsers;
 
     /**
      * Constructs a new DefaultExpandParserContext.
@@ -1720,6 +1725,72 @@ public class ODataExpandToMongoAggregationPipelineParser {
         Set<String> ignoreForSpecificExpandElementMissingNavigationProperty,
         boolean ignoreGloballyMissingProperty,
         Set<String> ignoreForSpecificExpandElementMissingProperty) {
+      this(
+          edmTypeMapping,
+          edmTablesToMongoDBCollections,
+          maxLevel,
+          useLookupForLevelGreaterThanOne,
+          propagateGraphLookUpJoinKeys,
+          throwExceptionOnExpandLevelsExceeded,
+          maxAllowedNestedExpandLevel,
+          rootEdmEntityTypeName,
+          rootEdmMongoContextFacade,
+          ignoreGloballyMissingNavigationProperty,
+          ignoreForSpecificExpandElementMissingNavigationProperty,
+          ignoreGloballyMissingProperty,
+          ignoreForSpecificExpandElementMissingProperty,
+          null,
+          Collections.emptyMap(),
+          Collections.emptyMap());
+    }
+
+    /**
+     * Constructs a new DefaultExpandParserContext.
+     *
+     * @param edmTypeMapping mapping between EDM type names and their Mongo path resolvers
+     * @param edmTablesToMongoDBCollections mapping between EDM entity sets and their MongoDB
+     *     collection names
+     * @param maxLevel maximum level of recursion for $expand
+     * @param useLookupForLevelGreaterThanOne true if the $lookup stage should be used to handle
+     *     $level greater than 1
+     * @param propagateGraphLookUpJoinKeys true if join keys used for the $graphLookup stage should
+     *     be propagated
+     * @param throwExceptionOnExpandLevelsExceeded true if an exception should be thrown when expand
+     *     levels are exceeded
+     * @param maxAllowedNestedExpandLevel the maximum allowed nested expand level
+     * @param rootEdmEntityTypeName the root EDM entity type name
+     * @param rootEdmMongoContextFacade the root EDM mongo context facade
+     * @param ignoreGloballyMissingNavigationProperty true if missing navigation properties should
+     *     be globally ignored
+     * @param ignoreForSpecificExpandElementMissingNavigationProperty set of EDM paths to ignore
+     *     missing navigation properties
+     * @param ignoreGloballyMissingProperty true if missing properties should be globally ignored
+     * @param ignoreForSpecificExpandElementMissingProperty set of EDM paths to ignore missing
+     *     properties
+     * @param globalSearchParser the global ODataSearchToMongoAtlasSearchParser
+     * @param navigationPropertySearchParsers mapping between navigation property EDM paths and
+     *     their dedicated ODataSearchToMongoAtlasSearchParser instances
+     * @param edmTablesToSearchParsers mapping between EDM entity type keys and their dedicated
+     *     ODataSearchToMongoAtlasSearchParser instances
+     */
+    public DefaultExpandParserContext(
+        Map<String, EdmMongoContextFacade> edmTypeMapping,
+        Map<KeyValue<String, String>, String> edmTablesToMongoDBCollections,
+        Integer maxLevel,
+        boolean useLookupForLevelGreaterThanOne,
+        boolean propagateGraphLookUpJoinKeys,
+        boolean throwExceptionOnExpandLevelsExceeded,
+        Integer maxAllowedNestedExpandLevel,
+        String rootEdmEntityTypeName,
+        EdmMongoContextFacade rootEdmMongoContextFacade,
+        boolean ignoreGloballyMissingNavigationProperty,
+        Set<String> ignoreForSpecificExpandElementMissingNavigationProperty,
+        boolean ignoreGloballyMissingProperty,
+        Set<String> ignoreForSpecificExpandElementMissingProperty,
+        ODataSearchToMongoAtlasSearchParser globalSearchParser,
+        Map<String, ODataSearchToMongoAtlasSearchParser> navigationPropertySearchParsers,
+        Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchParser>
+            edmTablesToSearchParsers) {
       this.edmTypeMapping = edmTypeMapping;
       this.edmTablesToMongoDBCollections = edmTablesToMongoDBCollections;
       this.maxLevel = maxLevel;
@@ -1735,6 +1806,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       this.ignoreGloballyMissingProperty = ignoreGloballyMissingProperty;
       this.ignoreForSpecificExpandElementMissingProperty =
           ignoreForSpecificExpandElementMissingProperty;
+      this.globalSearchParser = globalSearchParser;
+      this.navigationPropertySearchParsers = navigationPropertySearchParsers;
+      this.edmTablesToSearchParsers = edmTablesToSearchParsers;
     }
 
     @Override
@@ -1803,6 +1877,22 @@ public class ODataExpandToMongoAggregationPipelineParser {
     }
 
     @Override
+    public ODataSearchToMongoAtlasSearchParser getGlobalSearchParser() {
+      return globalSearchParser;
+    }
+
+    @Override
+    public Map<String, ODataSearchToMongoAtlasSearchParser> getNavigationPropertySearchParsers() {
+      return navigationPropertySearchParsers;
+    }
+
+    @Override
+    public Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchParser>
+        getEdmTablesToSearchParsers() {
+      return edmTablesToSearchParsers;
+    }
+
+    @Override
     public boolean equals(Object o) {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
@@ -1823,7 +1913,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
           && ignoreGloballyMissingProperty == that.ignoreGloballyMissingProperty
           && Objects.equals(
               ignoreForSpecificExpandElementMissingProperty,
-              that.ignoreForSpecificExpandElementMissingProperty);
+              that.ignoreForSpecificExpandElementMissingProperty)
+          && Objects.equals(globalSearchParser, that.globalSearchParser)
+          && Objects.equals(navigationPropertySearchParsers, that.navigationPropertySearchParsers)
+          && Objects.equals(edmTablesToSearchParsers, that.edmTablesToSearchParsers);
     }
 
     @Override
@@ -1841,7 +1934,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
           ignoreGloballyMissingNavigationProperty,
           ignoreForSpecificExpandElementMissingNavigationProperty,
           ignoreGloballyMissingProperty,
-          ignoreForSpecificExpandElementMissingProperty);
+          ignoreForSpecificExpandElementMissingProperty,
+          globalSearchParser,
+          navigationPropertySearchParsers,
+          edmTablesToSearchParsers);
     }
 
     @Override
@@ -1874,6 +1970,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
           + ignoreGloballyMissingProperty
           + ", ignoreForSpecificExpandElementMissingProperty="
           + ignoreForSpecificExpandElementMissingProperty
+          + ", globalSearchParser="
+          + globalSearchParser
+          + ", navigationPropertySearchParsers="
+          + navigationPropertySearchParsers
+          + ", edmTablesToSearchParsers="
+          + edmTablesToSearchParsers
           + '}';
     }
 
@@ -1906,6 +2008,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
       private Set<String> ignoreForSpecificExpandElementMissingNavigationProperty = new HashSet<>();
       private boolean ignoreGloballyMissingProperty = false;
       private Set<String> ignoreForSpecificExpandElementMissingProperty = new HashSet<>();
+      private ODataSearchToMongoAtlasSearchParser globalSearchParser = null;
+      private Map<String, ODataSearchToMongoAtlasSearchParser> navigationPropertySearchParsers =
+          new HashMap<>();
+      private Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchParser>
+          edmTablesToSearchParsers = new HashMap<>();
 
       /**
        * Sets the mapping between EDM type names and their Mongo path resolvers.
@@ -2060,6 +2167,46 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
 
       /**
+       * Sets the global ODataSearchToMongoAtlasSearchParser.
+       *
+       * @param globalSearchParser the global search parser
+       * @return the builder instance
+       */
+      public Builder withGlobalSearchParser(
+          ODataSearchToMongoAtlasSearchParser globalSearchParser) {
+        this.globalSearchParser = globalSearchParser;
+        return this;
+      }
+
+      /**
+       * Sets the mapping between navigation property EDM paths and their dedicated
+       * ODataSearchToMongoAtlasSearchParser instances.
+       *
+       * @param navigationPropertySearchParsers mapping of navigation property EDM paths to search
+       *     parsers
+       * @return the builder instance
+       */
+      public Builder withNavigationPropertySearchParsers(
+          Map<String, ODataSearchToMongoAtlasSearchParser> navigationPropertySearchParsers) {
+        this.navigationPropertySearchParsers = navigationPropertySearchParsers;
+        return this;
+      }
+
+      /**
+       * Sets the mapping between EDM entity type keys and their dedicated
+       * ODataSearchToMongoAtlasSearchParser instances.
+       *
+       * @param edmTablesToSearchParsers mapping of EDM entity type keys to search parsers
+       * @return the builder instance
+       */
+      public Builder withEdmTablesToSearchParsers(
+          Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchParser>
+              edmTablesToSearchParsers) {
+        this.edmTablesToSearchParsers = edmTablesToSearchParsers;
+        return this;
+      }
+
+      /**
        * Copies properties from an existing DefaultExpandParserContext.
        *
        * @param defaultExpandParserContext the context to copy from
@@ -2087,6 +2234,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
             defaultExpandParserContext.ignoreGloballyMissingProperty;
         this.ignoreForSpecificExpandElementMissingProperty =
             defaultExpandParserContext.ignoreForSpecificExpandElementMissingProperty;
+        this.globalSearchParser = defaultExpandParserContext.globalSearchParser;
+        this.navigationPropertySearchParsers =
+            defaultExpandParserContext.navigationPropertySearchParsers;
+        this.edmTablesToSearchParsers = defaultExpandParserContext.edmTablesToSearchParsers;
         return this;
       }
 
@@ -2109,7 +2260,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
             ignoreGloballyMissingNavigationProperty,
             ignoreForSpecificExpandElementMissingNavigationProperty,
             ignoreGloballyMissingProperty,
-            ignoreForSpecificExpandElementMissingProperty);
+            ignoreForSpecificExpandElementMissingProperty,
+            globalSearchParser,
+            navigationPropertySearchParsers,
+            edmTablesToSearchParsers);
       }
     }
   }
