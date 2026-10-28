@@ -696,6 +696,22 @@ public class ODataExpandToMongoAggregationPipelineParser {
     return currentSourceFullTypeName;
   }
 
+  private ODataSearchToMongoAtlasSearchParser resolveSearchParser(
+      ExpandParserContext expandParserContext, String currentPath, EdmEntityType targetEntityType) {
+    if (expandParserContext.getNavigationPropertySearchParsers() != null
+        && expandParserContext.getNavigationPropertySearchParsers().containsKey(currentPath)) {
+      return expandParserContext.getNavigationPropertySearchParsers().get(currentPath);
+    }
+    if (expandParserContext.getEdmTablesToSearchParsers() != null && targetEntityType != null) {
+      KeyValue<String, String> typeKey =
+          new KeyValue<>(targetEntityType.getNamespace(), targetEntityType.getName());
+      if (expandParserContext.getEdmTablesToSearchParsers().containsKey(typeKey)) {
+        return expandParserContext.getEdmTablesToSearchParsers().get(typeKey);
+      }
+    }
+    return expandParserContext.getGlobalSearchParser();
+  }
+
   private List<Bson> prepareLookUpStage(
       String targetCollection,
       String lookupMongoStartWith,
@@ -720,11 +736,22 @@ public class ODataExpandToMongoAggregationPipelineParser {
             .append("localField", lookupMongoStartWith)
             .append("foreignField", mongoConnectTo);
 
+    ODataSearchToMongoAtlasSearchParser searchParser =
+        eOption.getSearchOption() != null
+            ? resolveSearchParser(
+                expandParserContext,
+                parserExpandItemContext.getCurrentEdmPath() == null
+                    ? navProp.getName()
+                    : parserExpandItemContext.getCurrentEdmPath() + "." + navProp.getName(),
+                (EdmEntityType) navProp.getType())
+            : null;
+
     if (eOption.getFilterOption() != null
         || eOption.getOrderByOption() != null
         || eOption.getTopOption() != null
         || eOption.getSkipOption() != null
         || eOption.getSelectOption() != null
+        || (eOption.getSearchOption() != null && searchParser != null)
         || applyOperatorResult != null
         || currentLevel != maxLevel
         || eOption.getExpandOption() != null) {
@@ -747,6 +774,12 @@ public class ODataExpandToMongoAggregationPipelineParser {
       List<Bson> lookupPipeline = new ArrayList<>();
       if (applyOperatorResult != null) {
         lookupPipeline.addAll(applyOperatorResult.getStageObjects());
+      }
+      // TODO In MongoDB Atlas Search, the $search stage must be the first stage in the aggregation
+      // pipeline (including $lookup sub-pipelines), whereas the OData specification evaluates
+      // $apply before $search. Handle combining $apply and $search later.
+      if (eOption.getSearchOption() != null && searchParser != null) {
+        lookupPipeline.addAll(searchParser.parse(eOption.getSearchOption()).getStageObjects());
       }
       if (eOption.getFilterOption() != null) {
         lookupPipeline.addAll(
