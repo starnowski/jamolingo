@@ -8,6 +8,10 @@ import com.github.starnowski.jamolingo.MongoAtlasResource;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchOptions;
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
+import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory;
+import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory.QueryStringParsingResult;
 import com.github.starnowski.jamolingo.junit5.*;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -17,7 +21,9 @@ import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
@@ -25,6 +31,7 @@ import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
 import org.apache.olingo.server.api.uri.UriInfo;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
+import org.apache.olingo.server.api.uri.queryoption.search.SearchExpression;
 import org.apache.olingo.server.core.uri.parser.Parser;
 import org.apache.olingo.server.core.uri.parser.UriParserException;
 import org.apache.olingo.server.core.uri.validator.UriValidationException;
@@ -59,7 +66,56 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
     extends AbstractItTest {
 
+  private static ODataSearchToMongoAtlasSearchParser createSearchParser(String defaultPath) {
+    return new ODataSearchToMongoAtlasSearchParser(
+        new SearchDocumentForQueryStringFactory() {
+          @Override
+          public Bson build(
+              SearchExpression searchExpression,
+              QueryStringParsingResult queryStringParsingResult,
+              ODataSearchToMongoAtlasSearchOptions options) {
+            return new Document("index", "search_idx")
+                .append(
+                    "queryString",
+                    new Document("query", queryStringParsingResult.getQuery())
+                        .append("defaultPath", defaultPath));
+          }
+        });
+  }
+
   private static Stream<Arguments> provideData() {
+    ODataSearchToMongoAtlasSearchParser validSearchParser = createSearchParser("name");
+    ODataSearchToMongoAtlasSearchParser invalidFieldSearchParser =
+        createSearchParser("nonExistentField");
+    String expectedVehicleSearchJson =
+        """
+                                                    [
+                                                        {
+                                                            "_id": 1,
+                                                            "index": 1,
+                                                            "parentId": null,
+                                                            "categoryId": 1,
+                                                            "children": [
+                                                                {
+                                                                    "_id": 2,
+                                                                    "index": 2,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": [],
+                                                                    "name": "Ground Vehicle"
+                                                                },
+                                                                {
+                                                                    "_id": 5,
+                                                                    "index": 5,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": [],
+                                                                    "name": "Flying Vehicle"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                    """;
     // TODO Check in for category (that is single property and not collection) we can specify the
     // $levels > 1
     return Stream.of(
@@ -125,32 +181,50 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                 }
                                             ]
                                             """,
-            JSONCompareMode.LENIENT),
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b -> b.withGlobalSearchParser(validSearchParser)),
+        // Global search parser
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=5;$search=Vehicle)",
-            """
-                                                    [
-                                                        {
-                                                            "_id": 1,
-                                                            "index": 1,
-                                                            "parentId": null,
-                                                            "categoryId": 1,
-                                                            "children": [
-                                                                {
-                                                                    "_id": 5,
-                                                                    "index": 5,
-                                                                    "parentId": 1,
-                                                                    "categoryId": 1,
-                                                                    "children": [],
-                                                                    "name": "Flying Vehicle"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                    """,
-            JSONCompareMode.LENIENT));
+            expectedVehicleSearchJson,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b -> b.withGlobalSearchParser(validSearchParser)),
+        // Entity-type-specific search parser (takes precedence over global parser)
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$search=Vehicle)",
+            expectedVehicleSearchJson,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b ->
+                    b.withGlobalSearchParser(invalidFieldSearchParser)
+                        .withEdmTablesToSearchParsers(
+                            Map.of(new KeyValue<>("MyService", "TreeType1"), validSearchParser))),
+        // Navigation-property-specific search parser (takes precedence over entity-type and global
+        // parsers)
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$search=Vehicle)",
+            expectedVehicleSearchJson,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b ->
+                    b.withGlobalSearchParser(invalidFieldSearchParser)
+                        .withEdmTablesToSearchParsers(
+                            Map.of(
+                                new KeyValue<>("MyService", "TreeType1"), invalidFieldSearchParser))
+                        .withNavigationPropertySearchParsers(
+                            Map.of("children", validSearchParser))));
   }
 
   @Inject protected MongoClient mongoClient;
@@ -162,7 +236,9 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
       Set<Integer> ids,
       String expandPart,
       String expectedJson,
-      JSONCompareMode jsonCompareMode)
+      JSONCompareMode jsonCompareMode,
+      Consumer<ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>
+          contextConfigurer)
       throws UriValidationException,
           UriParserException,
           XMLStreamException,
@@ -178,14 +254,13 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
             .parseUri(rootMongoCollection.getValue(), expandPart, null, null);
     ODataExpandToMongoAggregationPipelineParser tested =
         new ODataExpandToMongoAggregationPipelineParser();
+    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder contextBuilder =
+        ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+            .withUseLookupForLevelGreaterThanOne(true);
+    contextConfigurer.accept(contextBuilder);
 
     // WHEN
-    ExpandOperatorResult result =
-        tested.parse(
-            uriInfo.getExpandOption(),
-            ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
-                .withUseLookupForLevelGreaterThanOne(true)
-                .build());
+    ExpandOperatorResult result = tested.parse(uriInfo.getExpandOption(), contextBuilder.build());
     List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
     pipeline.addAll(result.getStageObjects());
