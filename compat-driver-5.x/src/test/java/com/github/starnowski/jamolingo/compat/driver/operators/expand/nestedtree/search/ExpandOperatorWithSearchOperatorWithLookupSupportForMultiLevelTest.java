@@ -82,6 +82,22 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
           }
         });
   }
+//  private static ODataSearchToMongoAtlasSearchParser createSearchParserWithRawQuery(String defaultPath) {
+//    return new ODataSearchToMongoAtlasSearchParser(
+//            new SearchDocumentForQueryStringFactory() {
+//              @Override
+//              public Bson build(
+//                      SearchExpression searchExpression,
+//                      QueryStringParsingResult queryStringParsingResult,
+//                      ODataSearchToMongoAtlasSearchOptions options) {
+//                return new Document("index", "search_idx")
+//                        .append(
+//                                "queryString",
+//                                new Document("query", searchExpression.asSearchTerm().getSearchTerm())
+//                                        .append("defaultPath", defaultPath));
+//              }
+//            });
+//  }
 
   private static Stream<Arguments> provideData() {
     ODataSearchToMongoAtlasSearchParser validSearchParser = createSearchParser("name");
@@ -224,7 +240,60 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                             Map.of(
                                 new KeyValue<>("MyService", "TreeType1"), invalidFieldSearchParser))
                         .withNavigationPropertySearchParsers(
-                            Map.of("children", validSearchParser))));
+                            Map.of("children", validSearchParser))),
+            // TODO $search with more complex query
+            Arguments.of(
+                    TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+                    Set.of(1),
+                    "$expand=children($levels=5;$search=Vehicle OR Car)",
+                    """
+                                                    [
+                                                        {
+                                                            "_id": 1,
+                                                            "index": 1,
+                                                            "parentId": null,
+                                                            "categoryId": 1,
+                                                            "children": [
+                                                                {
+                                                                    "_id": 2,
+                                                                    "index": 2,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": [
+                                                                        {
+                                                                            "_id": 3,
+                                                                            "index": 3,
+                                                                            "parentId": 2,
+                                                                            "categoryId": 2,
+                                                                            "children": [
+                                                                                {
+                                                                                    "_id": 4,
+                                                                                    "index": 4,
+                                                                                    "parentId": 3,
+                                                                                    "categoryId": 2,
+                                                                                    "children": []
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "_id": 5,
+                                                                    "index": 5,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                    """,
+                    JSONCompareMode.LENIENT,
+                    (Consumer<
+                            ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                            b -> b.withGlobalSearchParser(validSearchParser))
+
+    );
   }
 
   @Inject protected MongoClient mongoClient;
