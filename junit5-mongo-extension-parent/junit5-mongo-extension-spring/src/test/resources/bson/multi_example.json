@@ -1,0 +1,20 @@
+[
+  {
+    "_id": {
+      "$binary": {
+        "base64": "zhJHGT+jS4uJzYurBrA+3A==",
+        "subType": "04"
+      }
+    },
+    "stringKey": "example1"
+  },
+  {
+    "_id": {
+      "$binary": {
+        "base64": "qAmMGvhuEdq9QwBQVsAACDx=",
+        "subType": "04"
+      }
+    },
+    "stringKey": "example8"
+  }
+]

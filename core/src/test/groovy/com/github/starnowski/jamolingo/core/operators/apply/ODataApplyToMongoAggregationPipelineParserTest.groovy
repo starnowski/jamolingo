@@ -141,4 +141,60 @@ class ODataApplyToMongoAggregationPipelineParserTest extends Specification {
         result.stageObjects.size() == 3 // group, project, and the nested search stage
         result.stageObjects[2] == expectedStage
     }
+
+    def "should accumulate used properties and shape redefinition across multiple apply items"() {
+        given:
+        def parser = new ODataApplyToMongoAggregationPipelineParser()
+        def mockApplyOption = Mock(ApplyOption)
+        def mockFacade = Mock(EdmPropertyMongoPathResolver)
+
+        def mockFilterItem = Mock(ApplyItem)
+        mockFilterItem.getKind() >> ApplyItem.Kind.IDENTITY
+        // We will just use Identity and then maybe mock one of them? Actually, IdentityItemParser returns empty properties.
+        // Let's just test with a mock pipeline parser. Wait, ODataApplyToMongoAggregationPipelineParser instantiates concrete item parsers based on kind.
+        // So we can't easily mock the returned properties of the internal parsers unless we use one that produces them (like GroupBy or Search).
+        // Let's test with a Search item because we can mock the ApplySearchToMongoPipelineParser!
+
+        def mockSearchDelegate = Mock(ApplySearchToMongoPipelineParser)
+        def parserWithSearch = new ODataApplyToMongoAggregationPipelineParser(mockSearchDelegate)
+        
+        def mockSearchItem1 = Mock(org.apache.olingo.server.api.uri.queryoption.apply.Search)
+        mockSearchItem1.getKind() >> ApplyItem.Kind.SEARCH
+        
+        def mockSearchItem2 = Mock(org.apache.olingo.server.api.uri.queryoption.apply.Search)
+        mockSearchItem2.getKind() >> ApplyItem.Kind.SEARCH
+        
+        mockApplyOption.getApplyItems() >> [mockSearchItem1, mockSearchItem2]
+
+        def expectedStage1 = Mock(org.bson.conversions.Bson)
+        def expectedResult1 = DefaultApplyOperatorResult.builder()
+            .withStageObjects([expectedStage1])
+            .withUsedMongoDocumentProperties(["prop1", "prop2"])
+            .withDocumentShapeRedefined(false)
+            .build()
+            
+        def expectedStage2 = Mock(org.bson.conversions.Bson)
+        def expectedResult2 = DefaultApplyOperatorResult.builder()
+            .withStageObjects([expectedStage2])
+            .withUsedMongoDocumentProperties(["prop2", "prop3"])
+            .withAddedMongoDocumentProperties(["newProp"])
+            .withDocumentShapeRedefined(true)
+            .build()
+
+        when:
+        def result = parserWithSearch.parse(mockApplyOption, mockFacade)
+
+        then:
+        1 * mockSearchDelegate.parse({ SearchApplyItemContext ctx -> ctx.getSearch() == mockSearchItem1 }) >> expectedResult1
+        1 * mockSearchDelegate.parse({ SearchApplyItemContext ctx -> ctx.getSearch() == mockSearchItem2 }) >> expectedResult2
+        
+        result != null
+        result.stageObjects.size() == 2
+        result.stageObjects[0] == expectedStage1
+        result.stageObjects[1] == expectedStage2
+        result.usedMongoDocumentProperties == ["prop1", "prop2", "prop3"]
+        result.addedMongoDocumentProperties == ["newProp"]
+        result.documentShapeRedefined == true
+    }
+
 }
