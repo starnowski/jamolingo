@@ -162,6 +162,7 @@ Next, we removed `localField` and `foreignField` from `$lookup` so that `$search
 
 * **Result**: The pipeline executed without error, but always returned `0` documents (`metaResult.count.total` was `0`).
 * **Root Cause**: Atlas Search stages (`$search` and `$searchMeta`) are executed by the external `mongot` (Apache Lucene) process, which operates outside MongoDB's standard Aggregation Framework expression evaluator (`$expr`). Consequently, Atlas Search operators (`equals`, `in`, `text`, `queryString`, etc.) **do not evaluate `$lookup` `let` variables (`$$targetId`)**. Instead, `mongot` treats `"$$targetId"` as a literal string value rather than substituting the outer document's `_id`, matching `0` documents in Lucene.
+* **Note**: See MongoDB Jira ticket [SERVER-71036](https://jira.mongodb.org/browse/SERVER-71036) regarding support for `let` variables (`$$`) inside `$search` / `$searchMeta` stages within `$lookup` sub-pipelines.
 
 ##### 2. How to properly use `$lookup` with `$search` mid-pipeline
 
