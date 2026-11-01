@@ -63,7 +63,7 @@ public class SearchOperatorTest extends AbstractItTest {
             database = TEST_DATABASE,
             collection = "Items",
             bsonFilePath = "bson/search/default_dynamic_index.json",
-            validationProperty = "name")
+            validationProperty = "plainString")
       })
   public void shouldReturnExpectedDocumentsBasedOnSearchOperator(
       String search, Set<String> expectedPlainStrings)
@@ -141,7 +141,7 @@ public class SearchOperatorTest extends AbstractItTest {
             database = TEST_DATABASE,
             collection = "Items",
             bsonFilePath = "bson/search/default_dynamic_index.json",
-            validationProperty = "name")
+            validationProperty = "plainString")
       })
   public void shouldReturnExpectedDocumentsBasedOnSearchOperatorWithDefaultScore()
       throws UriValidationException,
@@ -206,7 +206,7 @@ public class SearchOperatorTest extends AbstractItTest {
             database = TEST_DATABASE,
             collection = "Items",
             bsonFilePath = "bson/search/default_dynamic_index.json",
-            validationProperty = "name")
+            validationProperty = "plainString")
       })
   public void shouldReturnExpectedDocumentsBasedOnLookupSearchOperatorWhenNotFirstStage(
       String search, Set<String> expectedPlainStrings)
