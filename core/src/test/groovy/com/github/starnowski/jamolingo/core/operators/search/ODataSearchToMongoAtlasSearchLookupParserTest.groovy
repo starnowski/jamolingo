@@ -69,7 +69,7 @@ class ODataSearchToMongoAtlasSearchLookupParserTest extends AbstractSpecificatio
         "\"required keyword\""      || """{ "\$searchMeta": { "index": "your_search_index", "count": { "type": "total" }, "compound": { "filter": [{ "equals": { "path": "_id", "value": "\$\$targetId" } }], "must": [{ "queryString": { "query": "\\"required keyword\\"", "defaultPath": "content" } }] } } }"""
     }
 
-    def "should generate exact two-stage lookup and match pipeline matching SEARCH_HELPER specification"() {
+    def "should generate exact two-stage lookup and match pipeline matching Option 1 specification"() {
         given:
         Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
         JsonWriterSettings settings = JsonWriterSettings.builder().build()
@@ -86,18 +86,14 @@ class ODataSearchToMongoAtlasSearchLookupParserTest extends AbstractSpecificatio
             @Override
             Bson build(SearchExpression searchExpression, ODataSearchToMongoAtlasSearchOptions options) {
                 return new Document("index", "your_search_index")
-                        .append("count", new Document("type", "total"))
-                        .append("compound", new Document()
-                                .append("filter", List.of(new Document("equals", new Document("path", "_id").append("value", "\$\$targetId"))))
-                                .append("must", List.of(new Document("text", new Document("query", searchExpression.asSearchTerm().getSearchTerm()).append("path", "content"))))
-                        )
+                        .append("text", new Document("query", searchExpression.asSearchTerm().getSearchTerm()).append("path", "content"))
             }
         }
 
         ODataSearchToMongoAtlasSearchLookupParser tested = new ODataSearchToMongoAtlasSearchLookupParser(
                 "targetCollection",
                 "metaResult",
-                new ODataSearchToMongoAtlasSearchMetaParser(factory)
+                new ODataSearchToMongoAtlasSearchParser(factory)
         )
 
         Bson expectedLookupStage = Document.parse("""
@@ -106,17 +102,15 @@ class ODataSearchToMongoAtlasSearchLookupParserTest extends AbstractSpecificatio
                 "from": "targetCollection",
                 "localField": "_id",
                 "foreignField": "_id",
-                "let": { "targetId": "\$_id" },
                 "pipeline": [
                   {
-                    "\$searchMeta": {
+                    "\$search": {
                       "index": "your_search_index",
-                      "count": { "type": "total" },
-                      "compound": {
-                        "filter": [{ "equals": { "path": "_id", "value": "\$\$targetId" } }],
-                        "must": [{ "text": { "query": "required keyword", "path": "content" } }]
-                      }
+                      "text": { "query": "required keyword", "path": "content" }
                     }
+                  },
+                  {
+                    "\$project": { "_id": 1 }
                   }
                 ],
                 "as": "metaResult"
@@ -126,7 +120,7 @@ class ODataSearchToMongoAtlasSearchLookupParserTest extends AbstractSpecificatio
         Bson expectedMatchStage = Document.parse("""
             {
               "\$match": {
-                "metaResult.count.total": { "\$gt": 0 }
+                "metaResult.0": { "\$exists": true }
               }
             }
         """)
@@ -147,6 +141,88 @@ class ODataSearchToMongoAtlasSearchLookupParserTest extends AbstractSpecificatio
         !result.isDocumentShapeRedefined()
     }
 
+    def "should include score filter stages in lookup pipeline before project when defaultTextScore is configured"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm6_filter_main.xml")
+        JsonWriterSettings settings = JsonWriterSettings.builder().build()
+        CodecRegistry registry = CodecRegistries.fromRegistries(
+                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                MongoClientSettings.getDefaultCodecRegistry()
+        )
+        DocumentCodec codec = new DocumentCodec(registry)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2", "\$search=\"required keyword\"", null, null)
+
+        SearchDocumentFactory factory = new SearchDocumentFactory() {
+            @Override
+            Bson build(SearchExpression searchExpression, ODataSearchToMongoAtlasSearchOptions options) {
+                return new Document("index", "your_search_index")
+                        .append("text", new Document("query", searchExpression.asSearchTerm().getSearchTerm()).append("path", "content"))
+            }
+        }
+
+        ODataSearchToMongoAtlasSearchLookupParser tested = new ODataSearchToMongoAtlasSearchLookupParser(
+                "targetCollection",
+                "metaResult",
+                factory
+        )
+
+        ODataSearchToMongoAtlasSearchOptions options = DefaultODataSearchToMongoAtlasSearchOptions.builder()
+                .withDefaultTextScore(1.5d)
+                .build()
+
+        Bson expectedLookupStage = Document.parse("""
+            {
+              "\$lookup": {
+                "from": "targetCollection",
+                "localField": "_id",
+                "foreignField": "_id",
+                "pipeline": [
+                  {
+                    "\$search": {
+                      "index": "your_search_index",
+                      "text": { "query": "required keyword", "path": "content" },
+                      "scoreDetails": true
+                    }
+                  },
+                  {
+                    "\$set": {
+                      "jamolingo_search_score": { "\$meta": "searchScore" }
+                    }
+                  },
+                  {
+                    "\$match": {
+                      "jamolingo_search_score": { "\$gte": 1.5 }
+                    }
+                  },
+                  {
+                    "\$project": { "_id": 1 }
+                  }
+                ],
+                "as": "metaResult"
+              }
+            }
+        """)
+        Bson expectedMatchStage = Document.parse("""
+            {
+              "\$match": {
+                "metaResult.0": { "\$exists": true }
+              }
+            }
+        """)
+
+        when:
+        def result = tested.parse(uriInfo.getSearchOption(), options)
+
+        then:
+        result.getStageObjects().size() == 2
+        result.getSearchStages().size() == 2
+        result.getScoreFilterStages().isEmpty()
+        [((Document) result.getStageObjects().get(0)).toJson(settings, codec)] == [expectedLookupStage.toJson(settings, codec)]
+        [((Document) result.getStageObjects().get(1)).toJson(settings, codec)] == [expectedMatchStage.toJson(settings, codec)]
+    }
+
     @Unroll
     def "should support custom collectionName '#collectionName' and asPropertyName '#asPropertyName' (expected '#expectedAs')"() {
         given:
@@ -158,11 +234,7 @@ class ODataSearchToMongoAtlasSearchLookupParserTest extends AbstractSpecificatio
             @Override
             Bson build(SearchExpression searchExpression, SearchDocumentForQueryStringFactory.QueryStringParsingResult queryStringParsingResult, ODataSearchToMongoAtlasSearchOptions options) {
                 return new Document("index", "idx")
-                        .append("count", new Document("type", "total"))
-                        .append("compound", new Document()
-                                .append("filter", List.of(new Document("equals", new Document("path", "_id").append("value", "\$\$" + ODataSearchToMongoAtlasSearchLookupParser.TARGET_ID_VARIABLE_NAME))))
-                                .append("must", List.of(new Document("queryString", new Document("query", queryStringParsingResult.getQuery()).append("defaultPath", "description"))))
-                        )
+                        .append("queryString", new Document("query", queryStringParsingResult.getQuery()).append("defaultPath", "description"))
             }
         }
 
@@ -178,16 +250,18 @@ class ODataSearchToMongoAtlasSearchLookupParserTest extends AbstractSpecificatio
         then:
         tested.getCollectionName() == collectionName
         tested.getAsPropertyName() == expectedAs
-        tested.getSearchMetaParser() != null
+        tested.getSearchParser() != null
         result.getStageObjects().size() == 2
         Document lookupDoc = ((Document) result.getStageObjects().get(0)).get("\$lookup", Document.class)
         lookupDoc.getString("from") == collectionName
         lookupDoc.getString("localField") == "_id"
         lookupDoc.getString("foreignField") == "_id"
-        lookupDoc.get("let", Document.class) == new Document("targetId", "\$_id")
+        !lookupDoc.containsKey("let")
+        lookupDoc.getList("pipeline", Document.class).size() == 2
+        lookupDoc.getList("pipeline", Document.class).get(1) == new Document("\$project", new Document("_id", 1))
         lookupDoc.getString("as") == expectedAs
         Document matchDoc = ((Document) result.getStageObjects().get(1)).get("\$match", Document.class)
-        matchDoc.get(expectedAs + ".count.total", Document.class) == new Document("\$gt", 0)
+        matchDoc.get(expectedAs + ".0", Document.class) == new Document("\$exists", true)
         result.getUsedMongoDocumentProperties() == ["_id"]
         result.getAddedMongoDocumentProperties() == [expectedAs]
         result.getWrittenMongoDocumentProperties() == [expectedAs]
@@ -205,27 +279,27 @@ class ODataSearchToMongoAtlasSearchLookupParserTest extends AbstractSpecificatio
         UriInfo uriInfo = new Parser(edm, OData.newInstance())
                 .parseUri("examples2", "\$search=test", null, null)
         SearchDocumentFactory factory = { SearchExpression exp, ODataSearchToMongoAtlasSearchOptions opts ->
-            new Document("index", "default").append("count", new Document("type", "total"))
+            new Document("index", "default").append("text", new Document("query", "test").append("path", "content"))
         } as SearchDocumentFactory
 
         when:
         def parserFromFactory = new ODataSearchToMongoAtlasSearchLookupParser("MyCollection", factory)
         def parserFromCustomAsAndFactory = new ODataSearchToMongoAtlasSearchLookupParser("MyCollection", "myMeta", factory)
-        def parserFromMetaParser = new ODataSearchToMongoAtlasSearchLookupParser("MyCollection", new ODataSearchToMongoAtlasSearchMetaParser(factory))
-        def builderWithMetaParser = ODataSearchToMongoAtlasSearchLookupParser.builder()
+        def parserFromSearchParser = new ODataSearchToMongoAtlasSearchLookupParser("MyCollection", new ODataSearchToMongoAtlasSearchParser(factory))
+        def builderWithSearchParser = ODataSearchToMongoAtlasSearchLookupParser.builder()
                 .withCollectionName("MyCollection")
-                .withSearchMetaParser(new ODataSearchToMongoAtlasSearchMetaParser(factory))
+                .withSearchParser(new ODataSearchToMongoAtlasSearchParser(factory))
                 .build()
 
         then:
         parserFromFactory.getCollectionName() == "MyCollection"
         parserFromFactory.getAsPropertyName() == ODataSearchToMongoAtlasSearchLookupParser.DEFAULT_AS_PROPERTY_NAME
         parserFromCustomAsAndFactory.getAsPropertyName() == "myMeta"
-        parserFromMetaParser.getAsPropertyName() == ODataSearchToMongoAtlasSearchLookupParser.DEFAULT_AS_PROPERTY_NAME
-        builderWithMetaParser.getAsPropertyName() == ODataSearchToMongoAtlasSearchLookupParser.DEFAULT_AS_PROPERTY_NAME
+        parserFromSearchParser.getAsPropertyName() == ODataSearchToMongoAtlasSearchLookupParser.DEFAULT_AS_PROPERTY_NAME
+        builderWithSearchParser.getAsPropertyName() == ODataSearchToMongoAtlasSearchLookupParser.DEFAULT_AS_PROPERTY_NAME
         parserFromFactory.parse(uriInfo.getSearchOption()).getStageObjects().size() == 2
         parserFromCustomAsAndFactory.parse(uriInfo.getSearchOption()).getStageObjects().size() == 2
-        parserFromMetaParser.parse(uriInfo.getSearchOption()).getStageObjects().size() == 2
-        builderWithMetaParser.parse(uriInfo.getSearchOption()).getStageObjects().size() == 2
+        parserFromSearchParser.parse(uriInfo.getSearchOption()).getStageObjects().size() == 2
+        builderWithSearchParser.parse(uriInfo.getSearchOption()).getStageObjects().size() == 2
     }
 }
