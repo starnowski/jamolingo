@@ -81,3 +81,155 @@ It grabs the root elements, groups them into { categoryId: 1, categoryCount: 2 }
 
 To be strictly OData compliant, the library should either throw a validation exception when $levels>1 is combined with a structural grouping  
 operation that eliminates the navigation property, or it should correctly resolve the $expand as empty for subsequent levels.
+
+
+#### Using `$lookup` with `$search` and `$searchMeta` when `$search` is not the first stage in the pipeline
+
+In MongoDB Atlas Search, both `$search` and `$searchMeta` must be the very first stage of any aggregation pipeline in which they appear. When OData `$search` criteria need to be evaluated mid-pipeline (after other stages such as `$match` have already executed), we investigated offloading the search check into a `$lookup` sub-pipeline in `SearchOperatorTest` and `ODataSearchToMongoAtlasSearchLookupParser`.
+
+##### 1. What was tested and why `$searchMeta` inside `$lookup` failed
+
+###### Test Case A: `$lookup` with `localField` / `foreignField`, `let: { targetId: "$_id" }`, and `$searchMeta`
+We tested the following pipeline structure:
+
+```json
+[
+  { "$match": { "active": true } },
+  {
+    "$lookup": {
+      "from": "Items",
+      "localField": "_id",
+      "foreignField": "_id",
+      "let": { "targetId": "$_id" },
+      "pipeline": [
+        {
+          "$searchMeta": {
+            "index": "atlas_search_index",
+            "count": { "type": "total" },
+            "compound": {
+              "filter": [{ "equals": { "path": "_id", "value": "$$targetId" } }],
+              "must": [{ "queryString": { "query": "database AND search", "defaultPath": "plainString" } }]
+            }
+          }
+        }
+      ],
+      "as": "metaResult"
+    }
+  },
+  {
+    "$match": {
+      "metaResult.count.total": { "$gt": 0 }
+    }
+  }
+]
+```
+
+* **Result**: MongoDB failed with error `40602 (Location40602): '$searchMeta is only valid as the first stage in a pipeline'`.
+* **Root Cause**: Unlike `$search` (which returns actual collection documents containing `_id` so MongoDB can correlate `localField` and `foreignField` *after* `$search` executes), `$searchMeta` returns only a metadata summary document (`{ "count": { "total": N } }`) with no `_id` field. When `localField` and `foreignField` are specified on `$lookup` alongside `$searchMeta`, MongoDB rewrites the `$lookup` sub-pipeline by prepending an implicit `$match` stage on `foreignField == localField` *before* the `pipeline` stages. This pushes `$searchMeta` to the second position in the sub-pipeline and triggers error `40602`.
+
+###### Test Case B: `$lookup` without `localField` / `foreignField`, using `let: { targetId: "$_id" }` and `$$targetId` inside `$searchMeta`
+Next, we removed `localField` and `foreignField` from `$lookup` so that `$searchMeta` remained the first stage in the sub-pipeline:
+
+```json
+[
+  { "$match": { "active": true } },
+  {
+    "$lookup": {
+      "from": "Items",
+      "let": { "targetId": "$_id" },
+      "pipeline": [
+        {
+          "$searchMeta": {
+            "index": "atlas_search_index",
+            "count": { "type": "total" },
+            "compound": {
+              "filter": [{ "equals": { "path": "_id", "value": "$$targetId" } }],
+              "must": [{ "queryString": { "query": "database AND search", "defaultPath": "plainString" } }]
+            }
+          }
+        }
+      ],
+      "as": "metaResult"
+    }
+  },
+  {
+    "$match": {
+      "metaResult.count.total": { "$gt": 0 }
+    }
+  }
+]
+```
+
+* **Result**: The pipeline executed without error, but always returned `0` documents (`metaResult.count.total` was `0`).
+* **Root Cause**: Atlas Search stages (`$search` and `$searchMeta`) are executed by the external `mongot` (Apache Lucene) process, which operates outside MongoDB's standard Aggregation Framework expression evaluator (`$expr`). Consequently, Atlas Search operators (`equals`, `in`, `text`, `queryString`, etc.) **do not evaluate `$lookup` `let` variables (`$$targetId`)**. Instead, `mongot` treats `"$$targetId"` as a literal string value rather than substituting the outer document's `_id`, matching `0` documents in Lucene.
+
+##### 2. How to properly use `$lookup` with `$search` mid-pipeline
+
+Because `mongot` cannot resolve `$$` aggregation variables inside `$search` or `$searchMeta`, the correlation by `_id` (or foreign key) must happen in `mongod` **after** a `$search` stage (which returns matching documents and their `_id`s), rather than inside `$searchMeta`:
+
+###### Option 1: `$lookup` with `localField` / `foreignField` and `$search` (followed by `$count` or `$project`)
+For `$search` (unlike `$searchMeta`), MongoDB allows `localField` and `foreignField` on `$lookup` and evaluates the equality join condition on the documents returned by `$search`:
+
+```json
+[
+  { "$match": { "active": true } },
+  {
+    "$lookup": {
+      "from": "Items",
+      "localField": "_id",
+      "foreignField": "_id",
+      "pipeline": [
+        {
+          "$search": {
+            "index": "atlas_search_index",
+            "queryString": { "query": "database AND search", "defaultPath": "plainString" }
+          }
+        },
+        { "$count": "total" }
+      ],
+      "as": "metaResult"
+    }
+  },
+  {
+    "$match": {
+      "metaResult.total": { "$gt": 0 }
+    }
+  }
+]
+```
+*(Alternatively, `{ "$project": { "_id": 1 } }` can be used instead of `{ "$count": "total" }` inside the `$lookup` pipeline, followed by `{ "$match": { "metaResult.0": { "$exists": true } } }`.)*
+
+###### Option 2: `$lookup` with `let: { targetId: "$_id" }`, `$search`, and `$match` using `$expr`
+If `let` variables are used instead of `localField` / `foreignField`, the `$$targetId` variable must be evaluated in a downstream `$match` stage with `$expr` after `$search`:
+
+```json
+[
+  { "$match": { "active": true } },
+  {
+    "$lookup": {
+      "from": "Items",
+      "let": { "targetId": "$_id" },
+      "pipeline": [
+        {
+          "$search": {
+            "index": "atlas_search_index",
+            "queryString": { "query": "database AND search", "defaultPath": "plainString" }
+          }
+        },
+        {
+          "$match": {
+            "$expr": { "$eq": ["$_id", "$$targetId"] }
+          }
+        },
+        { "$count": "total" }
+      ],
+      "as": "metaResult"
+    }
+  },
+  {
+    "$match": {
+      "metaResult.total": { "$gt": 0 }
+    }
+  }
+]
+```
