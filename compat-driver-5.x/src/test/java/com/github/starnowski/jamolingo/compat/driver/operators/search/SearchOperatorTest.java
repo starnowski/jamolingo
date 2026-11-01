@@ -137,7 +137,7 @@ public class SearchOperatorTest extends AbstractItTest {
       },
       atlasSearchIndexes = {
         @AtlasSearchIndex(
-            name = "search_idx",
+            name = "atlas_search_index",
             database = TEST_DATABASE,
             collection = "Items",
             bsonFilePath = "bson/search/default_dynamic_index.json",
@@ -153,7 +153,6 @@ public class SearchOperatorTest extends AbstractItTest {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
-    //    ensureSearchIndex(collection);
 
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
     UriInfo uriInfo =
@@ -203,7 +202,7 @@ public class SearchOperatorTest extends AbstractItTest {
       },
       atlasSearchIndexes = {
         @AtlasSearchIndex(
-            name = "search_idx",
+            name = "atlas_search_index",
             database = TEST_DATABASE,
             collection = "Items",
             bsonFilePath = "bson/search/default_dynamic_index.json",
@@ -285,28 +284,6 @@ public class SearchOperatorTest extends AbstractItTest {
             .map(s -> (String) s)
             .collect(Collectors.toSet());
     Assertions.assertEquals(expectedPlainStrings, actual);
-  }
-
-  private void ensureSearchIndex(MongoCollection<Document> collection) {
-    try {
-      collection.createSearchIndex(
-          "atlas_search_index", new Document("mappings", new Document("dynamic", true)));
-      // Wait for index to be ready
-      while (true) {
-        boolean ready = false;
-        for (Document index : collection.listSearchIndexes()) {
-          if ("atlas_search_index".equals(index.getString("name"))
-              && "READY".equals(index.getString("status"))) {
-            ready = true;
-            break;
-          }
-        }
-        if (ready) break;
-        Thread.sleep(500);
-      }
-    } catch (Exception e) {
-      // Index might already exist
-    }
   }
 
   private static java.util.stream.Stream<Arguments> provideSearchTests() {
