@@ -8,16 +8,14 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 /**
- * Helper parser that creates a two-stage aggregation pipeline ($lookup with an inner $searchMeta
- * stage followed by a $match stage checking if the total count is greater than 0) to evaluate OData
- * $search criteria when $search cannot be the first stage in the main aggregation pipeline.
+ * Helper parser that creates a two-stage aggregation pipeline ($lookup with an inner $search
+ * pipeline followed by a $match stage checking if at least one matching document exists) to
+ * evaluate OData $search criteria when $search cannot be the first stage in the main aggregation
+ * pipeline.
  */
 public class ODataSearchToMongoAtlasSearchLookupParser extends ODataSearchToMongoAtlasSearchParser {
 
-  /** Variable name defined in the $lookup let clause referencing the document _id. */
-  public static final String TARGET_ID_VARIABLE_NAME = "targetId";
-
-  /** MongoDB document identifier field name used for localField, foreignField, and let variable. */
+  /** MongoDB document identifier field name used for localField, foreignField, and $project. */
   public static final String ID_FIELD_NAME = "_id";
 
   /** Default property name under which the $lookup stage stores its result array. */
@@ -27,20 +25,20 @@ public class ODataSearchToMongoAtlasSearchLookupParser extends ODataSearchToMong
   private final String asPropertyName;
   private final ODataSearchToMongoTextSearchParser<
           ODataSearchToMongoAtlasSearchOptions, ? extends SearchOperatorResult>
-      searchMetaParser;
+      searchParser;
 
   /**
    * Constructs a new ODataSearchToMongoAtlasSearchLookupParser using the default asPropertyName.
    *
    * @param collectionName the target collection name for the $lookup.from property
-   * @param searchMetaParser the parser component that generates the $searchMeta stage
+   * @param searchParser the parser component that generates the inner $search stages
    */
   public ODataSearchToMongoAtlasSearchLookupParser(
       String collectionName,
       ODataSearchToMongoTextSearchParser<
               ODataSearchToMongoAtlasSearchOptions, ? extends SearchOperatorResult>
-          searchMetaParser) {
-    this(collectionName, DEFAULT_AS_PROPERTY_NAME, searchMetaParser);
+          searchParser) {
+    this(collectionName, DEFAULT_AS_PROPERTY_NAME, searchParser);
   }
 
   /**
@@ -48,52 +46,52 @@ public class ODataSearchToMongoAtlasSearchLookupParser extends ODataSearchToMong
    *
    * @param collectionName the target collection name for the $lookup.from property
    * @param asPropertyName the property name to store $lookup results (for $lookup.as)
-   * @param searchMetaParser the parser component that generates the $searchMeta stage
+   * @param searchParser the parser component that generates the inner $search stages
    */
   public ODataSearchToMongoAtlasSearchLookupParser(
       String collectionName,
       String asPropertyName,
       ODataSearchToMongoTextSearchParser<
               ODataSearchToMongoAtlasSearchOptions, ? extends SearchOperatorResult>
-          searchMetaParser) {
+          searchParser) {
     super(null);
     this.collectionName = collectionName;
     this.asPropertyName =
         asPropertyName != null && !asPropertyName.isEmpty()
             ? asPropertyName
             : DEFAULT_AS_PROPERTY_NAME;
-    this.searchMetaParser = searchMetaParser;
+    this.searchParser = searchParser;
   }
 
   /**
    * Constructs a new ODataSearchToMongoAtlasSearchLookupParser using the default asPropertyName and
-   * wrapping the provided SearchDocumentFactory in an ODataSearchToMongoAtlasSearchMetaParser.
+   * wrapping the provided SearchDocumentFactory in an ODataSearchToMongoAtlasSearchParser.
    *
    * @param collectionName the target collection name for the $lookup.from property
-   * @param searchDocumentFactory the factory used to build the inner $searchMeta document
+   * @param searchDocumentFactory the factory used to build the inner $search document
    */
   public ODataSearchToMongoAtlasSearchLookupParser(
       String collectionName, SearchDocumentFactory searchDocumentFactory) {
     this(
         collectionName,
         DEFAULT_AS_PROPERTY_NAME,
-        new ODataSearchToMongoAtlasSearchMetaParser(searchDocumentFactory));
+        new ODataSearchToMongoAtlasSearchParser(searchDocumentFactory));
   }
 
   /**
    * Constructs a new ODataSearchToMongoAtlasSearchLookupParser wrapping the provided
-   * SearchDocumentFactory in an ODataSearchToMongoAtlasSearchMetaParser.
+   * SearchDocumentFactory in an ODataSearchToMongoAtlasSearchParser.
    *
    * @param collectionName the target collection name for the $lookup.from property
    * @param asPropertyName the property name to store $lookup results (for $lookup.as)
-   * @param searchDocumentFactory the factory used to build the inner $searchMeta document
+   * @param searchDocumentFactory the factory used to build the inner $search document
    */
   public ODataSearchToMongoAtlasSearchLookupParser(
       String collectionName, String asPropertyName, SearchDocumentFactory searchDocumentFactory) {
     this(
         collectionName,
         asPropertyName,
-        new ODataSearchToMongoAtlasSearchMetaParser(searchDocumentFactory));
+        new ODataSearchToMongoAtlasSearchParser(searchDocumentFactory));
   }
 
   /**
@@ -115,14 +113,14 @@ public class ODataSearchToMongoAtlasSearchLookupParser extends ODataSearchToMong
   }
 
   /**
-   * Gets the parser component that generates the $searchMeta stage.
+   * Gets the parser component that generates the inner $search stages.
    *
-   * @return the searchMeta parser
+   * @return the search parser
    */
   public ODataSearchToMongoTextSearchParser<
           ODataSearchToMongoAtlasSearchOptions, ? extends SearchOperatorResult>
-      getSearchMetaParser() {
-    return searchMetaParser;
+      getSearchParser() {
+    return searchParser;
   }
 
   @Override
@@ -133,25 +131,24 @@ public class ODataSearchToMongoAtlasSearchLookupParser extends ODataSearchToMong
   @Override
   public SearchOperatorResultForAtlasSearch parse(
       SearchOption searchOption, ODataSearchToMongoAtlasSearchOptions options) {
-    SearchOperatorResult searchMetaResult =
+    SearchOperatorResult searchResult =
         options != null
-            ? searchMetaParser.parse(searchOption, options)
-            : searchMetaParser.parse(searchOption);
+            ? searchParser.parse(searchOption, options)
+            : searchParser.parse(searchOption);
 
-    List<Bson> lookupPipeline = new ArrayList<>(searchMetaResult.getStageObjects());
+    List<Bson> lookupPipeline = new ArrayList<>(searchResult.getStageObjects());
+    lookupPipeline.add(new Document("$project", new Document(ID_FIELD_NAME, 1)));
 
     Document lookupInner =
         new Document("from", collectionName)
             .append("localField", ID_FIELD_NAME)
             .append("foreignField", ID_FIELD_NAME)
-            .append("let", new Document(TARGET_ID_VARIABLE_NAME, "$" + ID_FIELD_NAME))
             .append("pipeline", lookupPipeline)
             .append("as", asPropertyName);
 
     Document lookupStage = new Document("$lookup", lookupInner);
     Document matchStage =
-        new Document(
-            "$match", new Document(asPropertyName + ".count.total", new Document("$gt", 0)));
+        new Document("$match", new Document(asPropertyName + ".0", new Document("$exists", true)));
 
     List<Bson> stages = List.of(lookupStage, matchStage);
     return new DefaultLookupSearchOperatorResult(stages, asPropertyName);
@@ -173,7 +170,7 @@ public class ODataSearchToMongoAtlasSearchLookupParser extends ODataSearchToMong
     private String asPropertyName = DEFAULT_AS_PROPERTY_NAME;
     private ODataSearchToMongoTextSearchParser<
             ODataSearchToMongoAtlasSearchOptions, ? extends SearchOperatorResult>
-        searchMetaParser;
+        searchParser;
 
     /**
      * Sets the target collection name for the $lookup.from property.
@@ -198,27 +195,27 @@ public class ODataSearchToMongoAtlasSearchLookupParser extends ODataSearchToMong
     }
 
     /**
-     * Sets the parser component that generates the $searchMeta stage.
+     * Sets the parser component that generates the inner $search stages.
      *
-     * @param searchMetaParser the searchMeta parser
+     * @param searchParser the search parser
      * @return the builder instance
      */
-    public Builder withSearchMetaParser(
+    public Builder withSearchParser(
         ODataSearchToMongoTextSearchParser<
                 ODataSearchToMongoAtlasSearchOptions, ? extends SearchOperatorResult>
-            searchMetaParser) {
-      this.searchMetaParser = searchMetaParser;
+            searchParser) {
+      this.searchParser = searchParser;
       return this;
     }
 
     /**
-     * Sets the SearchDocumentFactory by wrapping it in an ODataSearchToMongoAtlasSearchMetaParser.
+     * Sets the SearchDocumentFactory by wrapping it in an ODataSearchToMongoAtlasSearchParser.
      *
-     * @param searchDocumentFactory the factory used to build the inner $searchMeta document
+     * @param searchDocumentFactory the factory used to build the inner $search document
      * @return the builder instance
      */
     public Builder withSearchDocumentFactory(SearchDocumentFactory searchDocumentFactory) {
-      this.searchMetaParser = new ODataSearchToMongoAtlasSearchMetaParser(searchDocumentFactory);
+      this.searchParser = new ODataSearchToMongoAtlasSearchParser(searchDocumentFactory);
       return this;
     }
 
@@ -229,7 +226,7 @@ public class ODataSearchToMongoAtlasSearchLookupParser extends ODataSearchToMong
      */
     public ODataSearchToMongoAtlasSearchLookupParser build() {
       return new ODataSearchToMongoAtlasSearchLookupParser(
-          collectionName, asPropertyName, searchMetaParser);
+          collectionName, asPropertyName, searchParser);
     }
   }
 
