@@ -293,24 +293,28 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                             {
                                                                 "_id": 1,
                                                                 "index": 1,
+                                                                "indexPlus10": 11,
                                                                 "parentId": null,
                                                                 "categoryId": 1,
                                                                 "children": [
                                                                     {
                                                                         "_id": 2,
                                                                         "index": 2,
+                                                                        "indexPlus10": 12,
                                                                         "parentId": 1,
                                                                         "categoryId": 1,
                                                                         "children": [
                                                                             {
                                                                                 "_id": 3,
                                                                                 "index": 3,
+                                                                                "indexPlus10": 13,
                                                                                 "parentId": 2,
                                                                                 "categoryId": 2,
                                                                                 "children": [
                                                                                     {
                                                                                         "_id": 4,
                                                                                         "index": 4,
+                                                                                        "indexPlus10": 14,
                                                                                         "parentId": 3,
                                                                                         "categoryId": 2,
                                                                                         "children": []
@@ -322,6 +326,7 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                                     {
                                                                         "_id": 5,
                                                                         "index": 5,
+                                                                        "indexPlus10": 15,
                                                                         "parentId": 1,
                                                                         "categoryId": 1,
                                                                         "children": []
@@ -382,6 +387,54 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
         """
             {"value": %s }
             """.formatted(expectedJson),
+        currentResult,
+        jsonCompareMode);
+  }
+
+  @ParameterizedTest(name = "{2} - {0} - {1}")
+  @MethodSource({"provideDataWithSearchQueryParameterAsNotFirstInUrl"})
+  public void shouldReturnExpectedDocumentsForExpandOperatorWithSearchQueryParameterAsNotFirstOne(
+      KeyValue<String, String> rootMongoCollection,
+      Set<Integer> ids,
+      String expandPart,
+      String expectedJson,
+      JSONCompareMode jsonCompareMode,
+      Consumer<ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>
+          contextConfigurer)
+      throws UriValidationException,
+          UriParserException,
+          XMLStreamException,
+          ExpressionVisitException,
+          ODataApplicationException,
+          JSONException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase(TEST_DATABASE);
+    MongoCollection<Document> collection = database.getCollection(rootMongoCollection.getKey());
+    Edm edm = loadEmdProvider("edm/tree_types_atlas_search.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance())
+            .parseUri(rootMongoCollection.getValue(), expandPart, null, null);
+    ODataExpandToMongoAggregationPipelineParser tested =
+        new ODataExpandToMongoAggregationPipelineParser();
+    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder contextBuilder =
+        ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.builder()
+            .withUseLookupForLevelGreaterThanOne(true);
+    contextConfigurer.accept(contextBuilder);
+
+    // WHEN
+    ExpandOperatorResult result = tested.parse(uriInfo.getExpandOption(), contextBuilder.build());
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
+    pipeline.addAll(result.getStageObjects());
+    pipeline.add(new Document("$sort", new Document("index", 1)));
+    System.out.println(wrapBsonList(pipeline).toJson());
+    List<Document> results = collection.aggregate(pipeline).into(new ArrayList<>());
+    String currentResult = wrapDocumentsList(results).toJson();
+    System.out.println(currentResult);
+    JSONAssert.assertEquals(
+        """
+                {"value": %s }
+                """.formatted(expectedJson),
         currentResult,
         jsonCompareMode);
   }
