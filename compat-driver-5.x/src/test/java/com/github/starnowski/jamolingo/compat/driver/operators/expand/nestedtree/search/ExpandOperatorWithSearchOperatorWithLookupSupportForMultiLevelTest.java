@@ -83,25 +83,6 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
         });
   }
 
-  //  private static ODataSearchToMongoAtlasSearchParser createSearchParserWithRawQuery(String
-  // defaultPath) {
-  //    return new ODataSearchToMongoAtlasSearchParser(
-  //            new SearchDocumentForQueryStringFactory() {
-  //              @Override
-  //              public Bson build(
-  //                      SearchExpression searchExpression,
-  //                      QueryStringParsingResult queryStringParsingResult,
-  //                      ODataSearchToMongoAtlasSearchOptions options) {
-  //                return new Document("index", "search_idx")
-  //                        .append(
-  //                                "queryString",
-  //                                new Document("query",
-  // searchExpression.asSearchTerm().getSearchTerm())
-  //                                        .append("defaultPath", defaultPath));
-  //              }
-  //            });
-  //  }
-
   private static Stream<Arguments> provideData() {
     ODataSearchToMongoAtlasSearchParser validSearchParser = createSearchParser("name");
     ODataSearchToMongoAtlasSearchParser invalidFieldSearchParser =
@@ -291,6 +272,52 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                         }
                                                     ]
                                                     """,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b -> b.withGlobalSearchParser(validSearchParser)));
+  }
+
+  private static Stream<Arguments> provideDataWithSearchQueryParameterAsNotFirstInUrl() {
+    ODataSearchToMongoAtlasSearchParser validSearchParser = createSearchParser("name");
+    String expectedVehicleSearchJson =
+        """
+                                                        [
+                                                            {
+                                                                "_id": 1,
+                                                                "index": 1,
+                                                                "parentId": null,
+                                                                "categoryId": 1,
+                                                                "children": [
+                                                                    {
+                                                                        "_id": 2,
+                                                                        "index": 2,
+                                                                        "parentId": 1,
+                                                                        "categoryId": 1,
+                                                                        "children": [],
+                                                                        "name": "Ground Vehicle"
+                                                                    },
+                                                                    {
+                                                                        "_id": 5,
+                                                                        "index": 5,
+                                                                        "parentId": 1,
+                                                                        "categoryId": 1,
+                                                                        "children": [],
+                                                                        "name": "Flying Vehicle"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                        """;
+    // TODO Check in for category (that is single property and not collection) we can specify the
+    // $levels > 1
+    return Stream.of(
+        // Global search parser
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$search=Vehicle)",
+            expectedVehicleSearchJson,
             JSONCompareMode.LENIENT,
             (Consumer<
                     ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
