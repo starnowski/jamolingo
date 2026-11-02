@@ -280,8 +280,15 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
 
   private static Stream<Arguments> provideDataWithSearchQueryParameterAsNotFirstInUrl() {
     ODataSearchToMongoAtlasSearchParser validSearchParser = createSearchParser("name");
-    String expectedVehicleSearchJson =
-        """
+    // TODO Check in for category (that is single property and not collection) we can specify the
+    // $levels > 1
+    return Stream.of(
+        // Global search parser
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10);$search=Vehicle OR Car)",
+            """
                                                         [
                                                             {
                                                                 "_id": 1,
@@ -294,30 +301,35 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                                         "index": 2,
                                                                         "parentId": 1,
                                                                         "categoryId": 1,
-                                                                        "children": [],
-                                                                        "name": "Ground Vehicle"
+                                                                        "children": [
+                                                                            {
+                                                                                "_id": 3,
+                                                                                "index": 3,
+                                                                                "parentId": 2,
+                                                                                "categoryId": 2,
+                                                                                "children": [
+                                                                                    {
+                                                                                        "_id": 4,
+                                                                                        "index": 4,
+                                                                                        "parentId": 3,
+                                                                                        "categoryId": 2,
+                                                                                        "children": []
+                                                                                    }
+                                                                                ]
+                                                                            }
+                                                                        ]
                                                                     },
                                                                     {
                                                                         "_id": 5,
                                                                         "index": 5,
                                                                         "parentId": 1,
                                                                         "categoryId": 1,
-                                                                        "children": [],
-                                                                        "name": "Flying Vehicle"
+                                                                        "children": []
                                                                     }
                                                                 ]
                                                             }
                                                         ]
-                                                        """;
-    // TODO Check in for category (that is single property and not collection) we can specify the
-    // $levels > 1
-    return Stream.of(
-        // Global search parser
-        Arguments.of(
-            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-            Set.of(1),
-            "$expand=children($levels=5;$search=Vehicle)",
-            expectedVehicleSearchJson,
+                                                        """,
             JSONCompareMode.LENIENT,
             (Consumer<
                     ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
