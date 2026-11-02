@@ -231,29 +231,10 @@ public class SearchOperatorTest extends AbstractItTest {
                       QueryStringParsingResult queryStringParsingResult,
                       ODataSearchToMongoAtlasSearchOptions options) {
                     return new Document("index", "atlas_search_index")
-                        .append("count", new Document("type", "total"))
                         .append(
-                            "compound",
-                            new Document()
-                                .append(
-                                    "filter",
-                                    List.of(
-                                        new Document(
-                                            "equals",
-                                            new Document("path", "_id")
-                                                .append(
-                                                    "value",
-                                                    "$$"
-                                                        + ODataSearchToMongoAtlasSearchLookupParser
-                                                            .TARGET_ID_VARIABLE_NAME))))
-                                .append(
-                                    "must",
-                                    List.of(
-                                        new Document(
-                                            "queryString",
-                                            new Document(
-                                                    "query", queryStringParsingResult.getQuery())
-                                                .append("defaultPath", "plainString")))));
+                            "queryString",
+                            new Document("query", queryStringParsingResult.getQuery())
+                                .append("defaultPath", "plainString"));
                   }
                 })
             .build();
@@ -284,6 +265,72 @@ public class SearchOperatorTest extends AbstractItTest {
             .map(s -> (String) s)
             .collect(Collectors.toSet());
     Assertions.assertEquals(expectedPlainStrings, actual);
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/search/search1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/search/search2.json")
+      },
+      atlasSearchIndexes = {
+        @AtlasSearchIndex(
+            name = "atlas_search_index",
+            database = TEST_DATABASE,
+            collection = "Items",
+            bsonFilePath = "bson/search/default_dynamic_index.json",
+            validationProperty = "plainString")
+      })
+  public void
+      shouldReturnExpectedDocumentsBasedOnLookupSearchOperatorWithDefaultScoreWhenNotFirstStage()
+          throws UriValidationException, UriParserException, XMLStreamException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("Items");
+
+    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance()).parseUri("examples2", "$search=search", null, null);
+    ODataSearchToMongoAtlasSearchLookupParser tested =
+        ODataSearchToMongoAtlasSearchLookupParser.builder()
+            .withCollectionName("Items")
+            .withAsPropertyName("metaResult")
+            .withSearchDocumentFactory(
+                new SearchDocumentForQueryStringFactory() {
+                  @Override
+                  public Bson build(
+                      SearchExpression searchExpression,
+                      QueryStringParsingResult queryStringParsingResult,
+                      ODataSearchToMongoAtlasSearchOptions options) {
+                    return new Document("index", "atlas_search_index")
+                        .append(
+                            "queryString",
+                            new Document("query", queryStringParsingResult.getQuery())
+                                .append("defaultPath", "plainString"));
+                  }
+                })
+            .build();
+    ODataSearchToMongoAtlasSearchOptions options =
+        new DefaultODataSearchToMongoAtlasSearchOptions();
+    options.setDefaultTextScore(0.01d);
+
+    // WHEN
+    SearchOperatorResult result = tested.parse(uriInfo.getSearchOption(), options);
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(new Document("$match", new Document("active", true)));
+    pipeline.addAll(result.getStageObjects());
+    System.out.println(new Document("pipeline", pipeline).toJson());
+
+    // THEN
+    List<Document> results = new ArrayList<>();
+    collection.aggregate(pipeline).into(results);
+    Assertions.assertFalse(results.isEmpty());
   }
 
   private static java.util.stream.Stream<Arguments> provideSearchTests() {
