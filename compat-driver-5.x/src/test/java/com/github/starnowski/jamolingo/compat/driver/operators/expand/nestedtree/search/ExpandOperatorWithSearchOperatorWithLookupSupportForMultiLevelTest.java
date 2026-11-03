@@ -283,7 +283,7 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
-            "$expand=children($levels=5;$apply(search=Vehicle OR Car))",
+            "$expand=children($levels=5;$apply=search(Vehicle OR Car))",
             complexSearchQueryExpandResult,
             JSONCompareMode.LENIENT,
             (Consumer<
@@ -358,7 +358,7 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
-            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10),search=Vehicle OR Car)",
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10),search(Vehicle OR Car))",
             expectedResults,
             JSONCompareMode.LENIENT,
             (Consumer<
