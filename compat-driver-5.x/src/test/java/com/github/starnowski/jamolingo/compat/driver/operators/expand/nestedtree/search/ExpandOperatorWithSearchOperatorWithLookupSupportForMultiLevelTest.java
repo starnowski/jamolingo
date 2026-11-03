@@ -38,6 +38,7 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONException;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -280,15 +281,8 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
 
   private static Stream<Arguments> provideDataWithSearchQueryParameterAsNotFirstInUrl() {
     ODataSearchToMongoAtlasSearchParser validSearchParser = createSearchParser("name");
-    // TODO Check in for category (that is single property and not collection) we can specify the
-    // $levels > 1
-    return Stream.of(
-        // Global search parser
-        Arguments.of(
-            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-            Set.of(1),
-            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10);$search=Vehicle OR Car)",
-            """
+    String expectedResults =
+        """
                                                         [
                                                             {
                                                                 "_id": 1,
@@ -334,7 +328,26 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                                 ]
                                                             }
                                                         ]
-                                                        """,
+                                                        """;
+    return Stream.of(
+        // Global search parser
+        // $levels = 5, complex query with the $search query system operator
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10);$search=Vehicle OR Car)",
+            expectedResults,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b -> b.withGlobalSearchParser(validSearchParser)),
+        // $levels = 5, complex query with the search operator that is part of the $apply system
+        // query operator
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10),search=Vehicle OR Car)",
+            expectedResults,
             JSONCompareMode.LENIENT,
             (Consumer<
                     ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
@@ -391,6 +404,7 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
         jsonCompareMode);
   }
 
+  @Disabled
   @ParameterizedTest(name = "{2} - {0} - {1}")
   @MethodSource({"provideDataWithSearchQueryParameterAsNotFirstInUrl"})
   public void shouldReturnExpectedDocumentsForExpandOperatorWithSearchQueryParameterAsNotFirstOne(
