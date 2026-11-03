@@ -117,6 +117,49 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                         }
                                                     ]
                                                     """;
+    String complexSearchQueryExpandResult =
+        """
+                                                    [
+                                                        {
+                                                            "_id": 1,
+                                                            "index": 1,
+                                                            "parentId": null,
+                                                            "categoryId": 1,
+                                                            "children": [
+                                                                {
+                                                                    "_id": 2,
+                                                                    "index": 2,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": [
+                                                                        {
+                                                                            "_id": 3,
+                                                                            "index": 3,
+                                                                            "parentId": 2,
+                                                                            "categoryId": 2,
+                                                                            "children": [
+                                                                                {
+                                                                                    "_id": 4,
+                                                                                    "index": 4,
+                                                                                    "parentId": 3,
+                                                                                    "categoryId": 2,
+                                                                                    "children": []
+                                                                                }
+                                                                            ]
+                                                                        }
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    "_id": 5,
+                                                                    "index": 5,
+                                                                    "parentId": 1,
+                                                                    "categoryId": 1,
+                                                                    "children": []
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                    """;
     // TODO Check in for category (that is single property and not collection) we can specify the
     // $levels > 1
     return Stream.of(
@@ -226,53 +269,22 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                 new KeyValue<>("MyService", "TreeType1"), invalidFieldSearchParser))
                         .withNavigationPropertySearchParsers(
                             Map.of("children", validSearchParser))),
-        // TODO $search with more complex query
+        // $search with more complex query
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
             "$expand=children($levels=5;$search=Vehicle OR Car)",
-            """
-                                                    [
-                                                        {
-                                                            "_id": 1,
-                                                            "index": 1,
-                                                            "parentId": null,
-                                                            "categoryId": 1,
-                                                            "children": [
-                                                                {
-                                                                    "_id": 2,
-                                                                    "index": 2,
-                                                                    "parentId": 1,
-                                                                    "categoryId": 1,
-                                                                    "children": [
-                                                                        {
-                                                                            "_id": 3,
-                                                                            "index": 3,
-                                                                            "parentId": 2,
-                                                                            "categoryId": 2,
-                                                                            "children": [
-                                                                                {
-                                                                                    "_id": 4,
-                                                                                    "index": 4,
-                                                                                    "parentId": 3,
-                                                                                    "categoryId": 2,
-                                                                                    "children": []
-                                                                                }
-                                                                            ]
-                                                                        }
-                                                                    ]
-                                                                },
-                                                                {
-                                                                    "_id": 5,
-                                                                    "index": 5,
-                                                                    "parentId": 1,
-                                                                    "categoryId": 1,
-                                                                    "children": []
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                    """,
+            complexSearchQueryExpandResult,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b -> b.withGlobalSearchParser(validSearchParser)),
+        // search for $apply system query parameter with more complex query
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply(search=Vehicle OR Car))",
+            complexSearchQueryExpandResult,
             JSONCompareMode.LENIENT,
             (Consumer<
                     ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
