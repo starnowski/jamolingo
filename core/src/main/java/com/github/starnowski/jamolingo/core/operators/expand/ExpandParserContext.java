@@ -3,6 +3,7 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPipelineParser;
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchLookupParser;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
 import java.util.Map;
 import java.util.Set;
@@ -185,6 +186,38 @@ public interface ExpandParserContext {
    */
   default Map<KeyValue<String, String>, ApplySearchToMongoPipelineParser>
       getEdmTablesToApplySearchParsers() {
+    return java.util.Collections.emptyMap();
+  }
+
+  /**
+   * Returns the global ODataSearchToMongoAtlasSearchLookupParser used across expand levels and
+   * entities when $search is not the first stage in execution.
+   *
+   * @return the global lookup search parser, or null if not configured
+   */
+  default ODataSearchToMongoAtlasSearchLookupParser getGlobalLookupSearchParser() {
+    return null;
+  }
+
+  /**
+   * Returns mapping between specific navigation property EDM paths and their dedicated
+   * ODataSearchToMongoAtlasSearchLookupParser instances.
+   *
+   * @return mapping of navigation property EDM paths to lookup search parsers
+   */
+  default Map<String, ODataSearchToMongoAtlasSearchLookupParser>
+      getNavigationPropertyLookupSearchParsers() {
+    return java.util.Collections.emptyMap();
+  }
+
+  /**
+   * Returns mapping between EDM entity type keys and their dedicated
+   * ODataSearchToMongoAtlasSearchLookupParser instances.
+   *
+   * @return mapping of EDM entity type keys to lookup search parsers
+   */
+  default Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchLookupParser>
+      getEdmTablesToLookupSearchParsers() {
     return java.util.Collections.emptyMap();
   }
 }
