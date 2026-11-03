@@ -278,8 +278,10 @@ public class ODataExpandToMongoAggregationPipelineParser {
       com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult applyOperatorResult =
           null;
       if (eOption.getApplyOption() != null) {
+        ApplySearchToMongoPipelineParser applySearchParser =
+            resolveApplySearchParser(expandParserContext, currentPath, targetEntityType);
         ODataApplyToMongoAggregationPipelineParser applyParser =
-            new ODataApplyToMongoAggregationPipelineParser();
+            new ODataApplyToMongoAggregationPipelineParser(applySearchParser);
         EdmMongoContextFacade facade =
             targetResolver == null
                 ? DefaultEdmMongoContextFacade.builder()
@@ -711,6 +713,23 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
     }
     return expandParserContext.getGlobalSearchParser();
+  }
+
+  private ApplySearchToMongoPipelineParser resolveApplySearchParser(
+      ExpandParserContext expandParserContext, String currentPath, EdmEntityType targetEntityType) {
+    if (expandParserContext.getNavigationPropertyApplySearchParsers() != null
+        && expandParserContext.getNavigationPropertyApplySearchParsers().containsKey(currentPath)) {
+      return expandParserContext.getNavigationPropertyApplySearchParsers().get(currentPath);
+    }
+    if (expandParserContext.getEdmTablesToApplySearchParsers() != null
+        && targetEntityType != null) {
+      KeyValue<String, String> typeKey =
+          new KeyValue<>(targetEntityType.getNamespace(), targetEntityType.getName());
+      if (expandParserContext.getEdmTablesToApplySearchParsers().containsKey(typeKey)) {
+        return expandParserContext.getEdmTablesToApplySearchParsers().get(typeKey);
+      }
+    }
+    return expandParserContext.getGlobalApplySearchParser();
   }
 
   private List<Bson> prepareLookUpStage(
