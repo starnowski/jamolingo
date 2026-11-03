@@ -193,4 +193,47 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
         '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$orderby=index desc)' | _
         '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount));$select=index)' | _
     }
+
+    @Unroll
+    def "should throw SearchNotEnabledForNavigationPathExpandException when search parser is not configured for navigation path: #query (useLookupForLevelGreaterThanOne=#useLookup)"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", query, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(useLookup)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        def e = thrown(SearchNotEnabledForNavigationPathExpandException)
+        e.getEdmPath() == expectedEdmPath
+        e.getMessage().contains(expectedEdmPath)
+
+        where:
+        query                                                                                           | useLookup | expectedEdmPath
+        '$expand=children($search=Vehicle)'                                                             | false     | 'children'
+        '$expand=treeType2s($expand=treeType3s($search=Vehicle))'                                       | false     | 'treeType2s.treeType3s'
+        '$expand=children($levels=2;$search=Vehicle)'                                                   | false     | 'children'
+        '$expand=children($levels=2;$search=Vehicle)'                                                   | true      | 'children'
+        '$expand=children($apply=compute(index add 10 as indexPlus10);$search=Vehicle)'                 | true      | 'children'
+        '$expand=children($apply=search(Vehicle))'                                                      | true      | 'children'
+        '$expand=children($apply=compute(index add 10 as indexPlus10)/search(Vehicle))'                 | true      | 'children'
+        '$expand=treeType2s($expand=treeType3s($apply=compute(index add 10 as indexPlus10);$search=A))' | true      | 'treeType2s.treeType3s'
+    }
+
+    def "should construct SearchNotEnabledForNavigationPathExpandException with custom message"() {
+        when:
+        def exception = new SearchNotEnabledForNavigationPathExpandException("children.treeType2s", "Custom message")
+
+        then:
+        exception.getEdmPath() == "children.treeType2s"
+        exception.getMessage() == "Custom message"
+    }
 }

@@ -10,6 +10,7 @@ import com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPi
 import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAtlasSearchPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchLookupParser;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchOptions;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
 import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory;
@@ -40,7 +41,6 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.json.JSONException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -332,14 +332,18 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
   }
 
   private static Stream<Arguments> provideDataWithSearchQueryParameterAsNotFirstInUrl() {
-    ODataSearchToMongoAtlasSearchParser validSearchParser = createSearchParser("name");
+    ODataSearchToMongoAtlasSearchLookupParser validLookupSearchParser =
+        new ODataSearchToMongoAtlasSearchLookupParser(
+            TREETYPE1_COLLECTION, createSearchParser("name"));
+    ODataSearchToMongoAtlasSearchLookupParser invalidFieldLookupSearchParser =
+        new ODataSearchToMongoAtlasSearchLookupParser(
+            TREETYPE1_COLLECTION, createSearchParser("nonExistentField"));
     String expectedResults =
         """
                                                         [
                                                             {
                                                                 "_id": 1,
                                                                 "index": 1,
-                                                                "indexPlus10": 11,
                                                                 "parentId": null,
                                                                 "categoryId": 1,
                                                                 "children": [
@@ -382,7 +386,7 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
                                                         ]
                                                         """;
     return Stream.of(
-        // Global search parser
+        // Global lookup search parser
         // $levels = 5, complex query with the $search query system operator
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
@@ -392,18 +396,86 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
             JSONCompareMode.LENIENT,
             (Consumer<
                     ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
-                b -> b.withGlobalSearchParser(validSearchParser)),
-        // $levels = 5, complex query with the search operator that is part of the $apply system
-        // query operator
+                b -> b.withGlobalLookupSearchParser(validLookupSearchParser)),
+        // Entity-type-specific lookup search parser (takes precedence over global lookup search
+        // parser)
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
-            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10),search(Vehicle OR Car))",
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10);$search=Vehicle OR Car)",
             expectedResults,
             JSONCompareMode.LENIENT,
             (Consumer<
                     ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
-                b -> b.withGlobalSearchParser(validSearchParser)));
+                b ->
+                    b.withGlobalLookupSearchParser(invalidFieldLookupSearchParser)
+                        .withEdmTablesToLookupSearchParsers(
+                            Map.of(
+                                new KeyValue<>("MyService", "TreeType1"),
+                                validLookupSearchParser))),
+        // Navigation-property-specific lookup search parser (takes precedence over entity-type and
+        // global lookup search parsers)
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10);$search=Vehicle OR Car)",
+            expectedResults,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b ->
+                    b.withGlobalLookupSearchParser(invalidFieldLookupSearchParser)
+                        .withEdmTablesToLookupSearchParsers(
+                            Map.of(
+                                new KeyValue<>("MyService", "TreeType1"),
+                                invalidFieldLookupSearchParser))
+                        .withNavigationPropertyLookupSearchParsers(
+                            Map.of("children", validLookupSearchParser))),
+        // $levels = 5, complex query with the search operator that is part of the $apply system
+        // query operator (global lookup search parser)
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10)/search(Vehicle OR Car))",
+            expectedResults,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b -> b.withGlobalLookupSearchParser(validLookupSearchParser)),
+        // $levels = 5, complex query with the search operator inside $apply (entity-type-specific
+        // lookup search parser)
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10)/search(Vehicle OR Car))",
+            expectedResults,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b ->
+                    b.withGlobalLookupSearchParser(invalidFieldLookupSearchParser)
+                        .withEdmTablesToLookupSearchParsers(
+                            Map.of(
+                                new KeyValue<>("MyService", "TreeType1"),
+                                validLookupSearchParser))),
+        // $levels = 5, complex query with the search operator inside $apply
+        // (navigation-property-specific lookup search parser)
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=compute(index add 10 as indexPlus10)/search(Vehicle OR Car))",
+            expectedResults,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b ->
+                    b.withGlobalLookupSearchParser(invalidFieldLookupSearchParser)
+                        .withEdmTablesToLookupSearchParsers(
+                            Map.of(
+                                new KeyValue<>("MyService", "TreeType1"),
+                                invalidFieldLookupSearchParser))
+                        .withNavigationPropertyLookupSearchParsers(
+                            Map.of("children", validLookupSearchParser))));
   }
 
   @Inject protected MongoClient mongoClient;
