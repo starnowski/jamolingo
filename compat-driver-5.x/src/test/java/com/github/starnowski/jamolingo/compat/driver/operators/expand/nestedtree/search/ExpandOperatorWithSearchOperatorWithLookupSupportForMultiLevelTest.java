@@ -456,7 +456,6 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
         jsonCompareMode);
   }
 
-  @Disabled
   @ParameterizedTest(name = "{2} - {0} - {1}")
   @MethodSource({"provideDataWithSearchQueryParameterAsNotFirstInUrl"})
   public void shouldReturnExpectedDocumentsForExpandOperatorWithSearchQueryParameterAsNotFirstOne(
