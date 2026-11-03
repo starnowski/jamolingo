@@ -2,6 +2,7 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
 import java.util.Map;
 import java.util.Set;
@@ -154,6 +155,36 @@ public interface ExpandParserContext {
    */
   default Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchParser>
       getEdmTablesToSearchParsers() {
+    return java.util.Collections.emptyMap();
+  }
+
+  /**
+   * Returns the global ApplySearchToMongoPipelineParser used across expand levels and entities.
+   *
+   * @return the global apply search parser, or null if not configured
+   */
+  default ApplySearchToMongoPipelineParser getGlobalApplySearchParser() {
+    return null;
+  }
+
+  /**
+   * Returns mapping between specific navigation property EDM paths and their dedicated
+   * ApplySearchToMongoPipelineParser instances.
+   *
+   * @return mapping of navigation property EDM paths to apply search parsers
+   */
+  default Map<String, ApplySearchToMongoPipelineParser> getNavigationPropertyApplySearchParsers() {
+    return java.util.Collections.emptyMap();
+  }
+
+  /**
+   * Returns mapping between EDM entity type keys and their dedicated
+   * ApplySearchToMongoPipelineParser instances.
+   *
+   * @return mapping of EDM entity type keys to apply search parsers
+   */
+  default Map<KeyValue<String, String>, ApplySearchToMongoPipelineParser>
+      getEdmTablesToApplySearchParsers() {
     return java.util.Collections.emptyMap();
   }
 }
