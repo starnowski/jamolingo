@@ -6,6 +6,8 @@ import static com.github.starnowski.jamolingo.compat.driver.operators.expand.nes
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.MongoAtlasResource;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
+import com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPipelineParser;
+import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAtlasSearchPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchOptions;
@@ -88,6 +90,10 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
     ODataSearchToMongoAtlasSearchParser validSearchParser = createSearchParser("name");
     ODataSearchToMongoAtlasSearchParser invalidFieldSearchParser =
         createSearchParser("nonExistentField");
+    ApplySearchToMongoPipelineParser validApplySearchParser =
+        new ODataApplyToMongoAtlasSearchPipelineParser(validSearchParser);
+    ApplySearchToMongoPipelineParser invalidFieldApplySearchParser =
+        new ODataApplyToMongoAtlasSearchPipelineParser(invalidFieldSearchParser);
     String expectedVehicleSearchJson =
         """
                                                     [
@@ -279,7 +285,8 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
             (Consumer<
                     ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
                 b -> b.withGlobalSearchParser(validSearchParser)),
-        // search for $apply system query parameter with more complex query
+        // search for $apply system query parameter with more complex query (global apply search
+        // parser)
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
@@ -288,7 +295,40 @@ public class ExpandOperatorWithSearchOperatorWithLookupSupportForMultiLevelTest
             JSONCompareMode.LENIENT,
             (Consumer<
                     ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
-                b -> b.withGlobalSearchParser(validSearchParser)));
+                b -> b.withGlobalApplySearchParser(validApplySearchParser)),
+        // Entity-type-specific apply search parser (takes precedence over global apply search
+        // parser)
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=search(Vehicle OR Car))",
+            complexSearchQueryExpandResult,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b ->
+                    b.withGlobalApplySearchParser(invalidFieldApplySearchParser)
+                        .withEdmTablesToApplySearchParsers(
+                            Map.of(
+                                new KeyValue<>("MyService", "TreeType1"), validApplySearchParser))),
+        // Navigation-property-specific apply search parser (takes precedence over entity-type and
+        // global apply search parsers)
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=5;$apply=search(Vehicle OR Car))",
+            complexSearchQueryExpandResult,
+            JSONCompareMode.LENIENT,
+            (Consumer<
+                    ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder>)
+                b ->
+                    b.withGlobalApplySearchParser(invalidFieldApplySearchParser)
+                        .withEdmTablesToApplySearchParsers(
+                            Map.of(
+                                new KeyValue<>("MyService", "TreeType1"),
+                                invalidFieldApplySearchParser))
+                        .withNavigationPropertyApplySearchParsers(
+                            Map.of("children", validApplySearchParser))));
   }
 
   private static Stream<Arguments> provideDataWithSearchQueryParameterAsNotFirstInUrl() {
