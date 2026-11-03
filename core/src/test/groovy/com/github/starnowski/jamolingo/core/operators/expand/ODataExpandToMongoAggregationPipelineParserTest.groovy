@@ -2,6 +2,8 @@ package com.github.starnowski.jamolingo.core.operators.expand
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue
 import com.github.starnowski.jamolingo.core.AbstractSpecification
+import com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPipelineParser
+import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAtlasSearchPipelineParser
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext
 import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser
@@ -518,6 +520,168 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
         Document nestedTreeType2sLookup = (Document) level2Pipeline.get(1).get("\$lookup")
         nestedTreeType2sLookup.getList("pipeline", Document.class).get(0) ==
                 Document.parse("""{ "\$search": { "index": "nested_nav_idx", "queryString": { "query": "SubItem", "path": ["title"] } } }""")
+    }
+
+    def "should return default values for apply search parser methods in ExpandParserContext interface"() {
+        given:
+        ExpandParserContext context = new ExpandParserContext() {
+            @Override
+            Map getEDMTypeMapping() { return null }
+
+            @Override
+            Map getEDMTablesToMongoDBCollections() { return null }
+
+            @Override
+            Integer getMaxLevel() { return null }
+        }
+
+        expect:
+        context.getGlobalApplySearchParser() == null
+        context.getNavigationPropertyApplySearchParsers() == [:]
+        context.getEdmTablesToApplySearchParsers() == [:]
+    }
+
+    def "should configure and copy apply search parser properties in DefaultExpandParserContext and verify equals, hashCode, and toString"() {
+        given:
+        def globalParser = createApplySearchParser("global_idx", ["name"])
+        def navParser = createApplySearchParser("nav_idx", ["title"])
+        def typeParser = createApplySearchParser("type_idx", ["desc"])
+        def navMap = ["children": navParser]
+        def typeMap = [(new KeyValue<>("MyService", "Example2")): typeParser]
+
+        when:
+        def context1 = DefaultExpandParserContext.builder()
+                .withGlobalApplySearchParser(globalParser)
+                .withNavigationPropertyApplySearchParsers(navMap)
+                .withEdmTablesToApplySearchParsers(typeMap)
+                .build()
+        def contextCopy = DefaultExpandParserContext.builder()
+                .withDefaultExpandParserContext(context1)
+                .build()
+        def contextDifferent = DefaultExpandParserContext.builder()
+                .withGlobalApplySearchParser(navParser)
+                .build()
+
+        then:
+        context1.getGlobalApplySearchParser().is(globalParser)
+        context1.getNavigationPropertyApplySearchParsers() == navMap
+        context1.getEdmTablesToApplySearchParsers() == typeMap
+        contextCopy == context1
+        contextCopy.hashCode() == context1.hashCode()
+        contextCopy != contextDifferent
+        contextCopy.hashCode() != contextDifferent.hashCode()
+        context1.toString().contains("globalApplySearchParser=")
+        context1.toString().contains("navigationPropertyApplySearchParsers=")
+        context1.toString().contains("edmTablesToApplySearchParsers=")
+    }
+
+    def 'should parse $expand with $apply=search(...) using global ApplySearchToMongoPipelineParser'() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_expand.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("examples2", "\$expand=children(\$apply=search(Vehicle))", null, null)
+
+        def globalParser = createApplySearchParser("global_idx", ["name"])
+        def context = DefaultExpandParserContext.builder()
+                .withGlobalApplySearchParser(globalParser)
+                .build()
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        def result = parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        result.getStageObjects().size() == 1
+        Document lookup = (Document) ((Document) result.getStageObjects().get(0)).get("\$lookup")
+        List<Document> pipeline = lookup.getList("pipeline", Document.class)
+        pipeline.size() == 1
+        pipeline.get(0) == Document.parse("""{ "\$search": { "index": "global_idx", "queryString": { "query": "Vehicle", "path": ["name"] } } }""")
+    }
+
+    def 'should resolve ApplySearchToMongoPipelineParser according to priority: navigation property > entity type > global'() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", "\$expand=children(\$apply=search(TermOne)),treeType2s(\$apply=search(TermTwo);\$expand=treeType3s(\$apply=search(TermThree)))", null, null)
+
+        def globalParser = createApplySearchParser("global_idx", ["global_field"])
+        def typeParser = createApplySearchParser("type_idx", ["type_field"])
+        def navParser = createApplySearchParser("nav_idx", ["nav_field"])
+
+        def context = DefaultExpandParserContext.builder()
+                .withGlobalApplySearchParser(globalParser)
+                .withEdmTablesToApplySearchParsers([
+                        (new KeyValue<>("MyService", "TreeType1")): typeParser,
+                        (new KeyValue<>("MyService", "TreeType2")): typeParser
+                ])
+                .withNavigationPropertyApplySearchParsers([
+                        "children": navParser
+                ])
+                .build()
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        def result = parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        // 1. "children" matches navigation property map (highest priority -> nav_idx, overriding MyService.TreeType1 and global)
+        Document childrenLookup = (Document) ((Document) result.getStageObjects().get(0)).get("\$lookup")
+        childrenLookup.getList("pipeline", Document.class).get(0) ==
+                Document.parse("""{ "\$search": { "index": "nav_idx", "queryString": { "query": "TermOne", "path": ["nav_field"] } } }""")
+
+        // 2. "treeType2s" has no nav-prop entry, matches entity type MyService.TreeType2 (second priority -> type_idx, overriding global)
+        Document treeType2sLookup = (Document) ((Document) result.getStageObjects().get(1)).get("\$lookup")
+        List<Document> treeType2sPipeline = treeType2sLookup.getList("pipeline", Document.class)
+        treeType2sPipeline.get(0) ==
+                Document.parse("""{ "\$search": { "index": "type_idx", "queryString": { "query": "TermTwo", "path": ["type_field"] } } }""")
+
+        // 3. "treeType2s.treeType3s" has no nav-prop or entity-type entry, falls back to global parser (lowest priority -> global_idx)
+        Document treeType3sLookup = (Document) treeType2sPipeline.get(1).get("\$lookup")
+        treeType3sLookup.getList("pipeline", Document.class).get(0) ==
+                Document.parse("""{ "\$search": { "index": "global_idx", "queryString": { "query": "TermThree", "path": ["global_field"] } } }""")
+    }
+
+    def 'should parse multi-level $expand with $levels > 1 and nested $expand with $apply=search(...) using $lookup'() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", "\$expand=children(\$levels=2;\$apply=search(Vehicle);\$expand=treeType2s(\$apply=search(SubItem)))", null, null)
+
+        def globalParser = createApplySearchParser("global_idx", ["name"])
+        def nestedNavParser = createApplySearchParser("nested_nav_idx", ["title"])
+        def context = DefaultExpandParserContext.builder()
+                .withUseLookupForLevelGreaterThanOne(true)
+                .withGlobalApplySearchParser(globalParser)
+                .withNavigationPropertyApplySearchParsers([
+                        "children.treeType2s": nestedNavParser
+                ])
+                .build()
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        def result = parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        result.getStageObjects().size() == 1
+        Document level1Lookup = (Document) ((Document) result.getStageObjects().get(0)).get("\$lookup")
+        List<Document> level1Pipeline = level1Lookup.getList("pipeline", Document.class)
+        // Level 1 pipeline has: $search (for children), nested $lookup (level 2 for children), nested $lookup (for treeType2s)
+        level1Pipeline.size() == 3
+        level1Pipeline.get(0) == Document.parse("""{ "\$search": { "index": "global_idx", "queryString": { "query": "Vehicle", "path": ["name"] } } }""")
+
+        Document level2Lookup = (Document) level1Pipeline.get(1).get("\$lookup")
+        List<Document> level2Pipeline = level2Lookup.getList("pipeline", Document.class)
+        // Level 2 pipeline has: $search (for children) and nested $lookup (for treeType2s)
+        level2Pipeline.size() == 2
+        level2Pipeline.get(0) == Document.parse("""{ "\$search": { "index": "global_idx", "queryString": { "query": "Vehicle", "path": ["name"] } } }""")
+
+        Document nestedTreeType2sLookup = (Document) level2Pipeline.get(1).get("\$lookup")
+        nestedTreeType2sLookup.getList("pipeline", Document.class).get(0) ==
+                Document.parse("""{ "\$search": { "index": "nested_nav_idx", "queryString": { "query": "SubItem", "path": ["title"] } } }""")
+    }
+
+    private static ApplySearchToMongoPipelineParser createApplySearchParser(String indexName, List<String> paths) {
+        return new ODataApplyToMongoAtlasSearchPipelineParser(createSearchParser(indexName, paths))
     }
 
     private static ODataSearchToMongoAtlasSearchParser createSearchParser(String indexName, List<String> paths) {
