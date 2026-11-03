@@ -5,6 +5,7 @@ import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAggregationPipelineParser;
+import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAtlasSearchPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.core.operators.orderby.DefaultOdataOrderByToMongoSortParserContext;
 import com.github.starnowski.jamolingo.core.operators.orderby.OdataOrderByToMongoSortParser;
@@ -279,8 +280,44 @@ public class ODataExpandToMongoAggregationPipelineParser {
       com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult applyOperatorResult =
           null;
       if (eOption.getApplyOption() != null) {
-        ApplySearchToMongoPipelineParser applySearchParser =
+        ApplySearchToMongoPipelineParser resolvedApplySearchParser =
             resolveApplySearchParser(expandParserContext, currentPath, targetEntityType);
+        ApplySearchToMongoPipelineParser applySearchParser =
+            context -> {
+              if (resolvedApplySearchParser != null) {
+                try {
+                  return resolvedApplySearchParser.parse(context);
+                } catch (IllegalArgumentException ex) {
+                  if (!context.isFirstApplyItem()) {
+                    ODataSearchToMongoAtlasSearchLookupParser lookupSearchParser =
+                        resolveLookupSearchParser(
+                            expandParserContext, currentPath, targetEntityType);
+                    if (lookupSearchParser != null) {
+                      return new ODataApplyToMongoAtlasSearchPipelineParser(
+                              null, lookupSearchParser)
+                          .parse(context);
+                    }
+                  }
+                  throw new SearchNotEnabledForNavigationPathExpandException(currentPath);
+                }
+              }
+              if (context.isFirstApplyItem()) {
+                ODataSearchToMongoAtlasSearchParser searchParser =
+                    resolveSearchParser(expandParserContext, currentPath, targetEntityType);
+                if (searchParser == null) {
+                  throw new SearchNotEnabledForNavigationPathExpandException(currentPath);
+                }
+                return new ODataApplyToMongoAtlasSearchPipelineParser(searchParser).parse(context);
+              } else {
+                ODataSearchToMongoAtlasSearchLookupParser lookupSearchParser =
+                    resolveLookupSearchParser(expandParserContext, currentPath, targetEntityType);
+                if (lookupSearchParser == null) {
+                  throw new SearchNotEnabledForNavigationPathExpandException(currentPath);
+                }
+                return new ODataApplyToMongoAtlasSearchPipelineParser(null, lookupSearchParser)
+                    .parse(context);
+              }
+            };
         ODataApplyToMongoAggregationPipelineParser applyParser =
             new ODataApplyToMongoAggregationPipelineParser(applySearchParser);
         EdmMongoContextFacade facade =
@@ -361,6 +398,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
       if (eOption.getLevelsOption() != null
           && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)
           && !expandParserContext.isUseLookupForLevelGreaterThanOne()) {
+        if (eOption.getSearchOption() != null) {
+          throw new SearchNotEnabledForNavigationPathExpandException(currentPath);
+        }
         // TODO Add default behaviour when $level value is larger than max then thrown an exception
         // TODO Add custom behaviour when $level value is larger than max then set the $level value
         // with the max value, required setting in the ExpandParserContext option
@@ -733,6 +773,25 @@ public class ODataExpandToMongoAggregationPipelineParser {
     return expandParserContext.getGlobalApplySearchParser();
   }
 
+  private ODataSearchToMongoAtlasSearchLookupParser resolveLookupSearchParser(
+      ExpandParserContext expandParserContext, String currentPath, EdmEntityType targetEntityType) {
+    if (expandParserContext.getNavigationPropertyLookupSearchParsers() != null
+        && expandParserContext
+            .getNavigationPropertyLookupSearchParsers()
+            .containsKey(currentPath)) {
+      return expandParserContext.getNavigationPropertyLookupSearchParsers().get(currentPath);
+    }
+    if (expandParserContext.getEdmTablesToLookupSearchParsers() != null
+        && targetEntityType != null) {
+      KeyValue<String, String> typeKey =
+          new KeyValue<>(targetEntityType.getNamespace(), targetEntityType.getName());
+      if (expandParserContext.getEdmTablesToLookupSearchParsers().containsKey(typeKey)) {
+        return expandParserContext.getEdmTablesToLookupSearchParsers().get(typeKey);
+      }
+    }
+    return expandParserContext.getGlobalLookupSearchParser();
+  }
+
   private List<Bson> prepareLookUpStage(
       String targetCollection,
       String lookupMongoStartWith,
@@ -757,22 +816,17 @@ public class ODataExpandToMongoAggregationPipelineParser {
             .append("localField", lookupMongoStartWith)
             .append("foreignField", mongoConnectTo);
 
-    ODataSearchToMongoAtlasSearchParser searchParser =
-        eOption.getSearchOption() != null
-            ? resolveSearchParser(
-                expandParserContext,
-                parserExpandItemContext.getCurrentEdmPath() == null
-                    ? navProp.getName()
-                    : parserExpandItemContext.getCurrentEdmPath() + "." + navProp.getName(),
-                (EdmEntityType) navProp.getType())
-            : null;
+    String currentPath =
+        parserExpandItemContext.getCurrentEdmPath() == null
+            ? navProp.getName()
+            : parserExpandItemContext.getCurrentEdmPath() + "." + navProp.getName();
 
     if (eOption.getFilterOption() != null
         || eOption.getOrderByOption() != null
         || eOption.getTopOption() != null
         || eOption.getSkipOption() != null
         || eOption.getSelectOption() != null
-        || (eOption.getSearchOption() != null && searchParser != null)
+        || eOption.getSearchOption() != null
         || applyOperatorResult != null
         || currentLevel != maxLevel
         || eOption.getExpandOption() != null) {
@@ -796,10 +850,16 @@ public class ODataExpandToMongoAggregationPipelineParser {
       if (applyOperatorResult != null) {
         lookupPipeline.addAll(applyOperatorResult.getStageObjects());
       }
-      // TODO In MongoDB Atlas Search, the $search stage must be the first stage in the aggregation
-      // pipeline (including $lookup sub-pipelines), whereas the OData specification evaluates
-      // $apply before $search. Handle combining $apply and $search later.
-      if (eOption.getSearchOption() != null && searchParser != null) {
+      if (eOption.getSearchOption() != null) {
+        ODataSearchToMongoAtlasSearchParser searchParser =
+            lookupPipeline.isEmpty()
+                ? resolveSearchParser(
+                    expandParserContext, currentPath, (EdmEntityType) navProp.getType())
+                : resolveLookupSearchParser(
+                    expandParserContext, currentPath, (EdmEntityType) navProp.getType());
+        if (searchParser == null) {
+          throw new SearchNotEnabledForNavigationPathExpandException(currentPath);
+        }
         lookupPipeline.addAll(searchParser.parse(eOption.getSearchOption()).getStageObjects());
       }
       if (eOption.getFilterOption() != null) {
