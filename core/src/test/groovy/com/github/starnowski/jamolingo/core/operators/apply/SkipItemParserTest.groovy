@@ -21,5 +21,11 @@ class SkipItemParserTest extends Specification {
         then:
         result.stageObjects.size() == 1
         result.stageObjects[0] == new Document('$skip', 10)
+        
+        result.documentShapeRedefined == false
+        result.usedMongoDocumentProperties == []
+        result.addedMongoDocumentProperties == []
+        result.writtenMongoDocumentProperties == []
+        result.removedMongoDocumentProperties == []
     }
 }

@@ -1,0 +1,34 @@
+{
+  "mappings": {
+    "dynamic": false,
+    "fields": {
+      "field1": [
+        {
+          "type": "string",
+          "analyzer": "custom_ngram"
+        }
+      ],
+      "field2": [
+        {
+          "type": "string",
+          "analyzer": "custom_ngram"
+        }
+      ]
+    }
+  },
+  "analyzers": [
+    {
+      "name": "custom_ngram",
+      "tokenizer": {
+        "type": "nGram",
+        "minGram": 3,
+        "maxGram": 10
+      },
+      "tokenFilters": [
+        {
+          "type": "lowercase"
+        }
+      ]
+    }
+  ]
+}

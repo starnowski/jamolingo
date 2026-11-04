@@ -35,6 +35,13 @@ public class OrderByItemParser implements ApplyItemParser {
         orderByParser.parse(
             orderByItem.getOrderByOption(), (EdmMongoContextFacade) edmMongoContextFacade);
 
-    return DefaultApplyOperatorResult.builder().withStageObjects(result.getStageObjects()).build();
+    return DefaultApplyOperatorResult.builder()
+        .withStageObjects(result.getStageObjects())
+        .withUsedMongoDocumentProperties(result.getUsedMongoDocumentProperties())
+        .withWrittenMongoDocumentProperties(result.getWrittenMongoDocumentProperties())
+        .withAddedMongoDocumentProperties(result.getAddedMongoDocumentProperties())
+        .withRemovedMongoDocumentProperties(result.getRemovedMongoDocumentProperties())
+        .withDocumentShapeRedefined(result.isDocumentShapeRedefined())
+        .build();
   }
 }

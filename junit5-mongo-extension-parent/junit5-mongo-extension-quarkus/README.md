@@ -1,11 +1,12 @@
 # JUnit 5 Mongo Extension Quarkus
 
-This module provides a specialized JUnit 5 extension for **Quarkus** applications. It builds upon the [Generic Core Extension](../junit5-mongo-extension/README.md) to provide automatic `MongoClient` resolution.
+This module provides a specialized JUnit 5 extension for **Quarkus** applications. It builds upon the [Generic Core Extension](../junit5-mongo-extension) to provide automatic `MongoClient` resolution.
 
 ## Features
 
 *   **Quarkus Integration**: Automatically retrieves the `MongoClient` from the Quarkus `Arc` (CDI) container.
-*   **Declarative Data Setup**: Use the `@MongoSetup` annotation to specify BSON files for test data.
+*   **Declarative Data Setup**: Use the `@MongoSetup` and `@MongoDocument` annotations to specify BSON/JSON files (single document or array of documents) for test data.
+*   **Index & Atlas Search Management**: Supports `@SearchIndex`, `@AtlasSearchIndex`, and `@AtlasSearchIndexValidation` from the [Generic Core Extension](../junit5-mongo-extension).
 *   **Automatic Cleanup**: Clears target collections before each test.
 
 ## Installation
@@ -25,12 +26,17 @@ Add the following dependency to your `pom.xml`:
 
 Annotate your Quarkus integration test with `@QuarkusTest` and use the `@MongoSetup` annotation. You must also register the extension using `@ExtendWith`.
 
+### Single and Multi-Document `bsonFilePath` Support
+The file referenced by `bsonFilePath` can contain either a single JSON/BSON object (`{...}`) or a JSON array of objects (`[{...}, {...}]`).
+
 ### Empty `bsonFilePath` Behavior
 If you leave `bsonFilePath` as an empty string (the default), the extension will simply erase the specified collection. This is useful for ensuring a collection is empty before a test.
 * If multiple `@MongoDocument` entries are provided for the same collection, the collection is erased **only once** at the start of the setup.
 * If any entry for that collection provides a file path, the collection is cleared and then all files are inserted.
 
 ### Example
+
+```java
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.github.starnowski.jamolingo.junit5.QuarkusMongoDataLoaderExtension;

@@ -3,11 +3,13 @@ package com.github.starnowski.jamolingo.compat.driver.operators.search;
 import com.github.starnowski.jamolingo.AbstractItTest;
 import com.github.starnowski.jamolingo.MongoAtlasResource;
 import com.github.starnowski.jamolingo.core.operators.search.DefaultODataSearchToMongoAtlasSearchOptions;
+import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchLookupParser;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchOptions;
 import com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchParser;
 import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory;
 import com.github.starnowski.jamolingo.core.operators.search.SearchDocumentForQueryStringFactory.QueryStringParsingResult;
 import com.github.starnowski.jamolingo.core.operators.search.SearchOperatorResult;
+import com.github.starnowski.jamolingo.junit5.AtlasSearchIndex;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoClient;
@@ -54,6 +56,14 @@ public class SearchOperatorTest extends AbstractItTest {
             database = "testdb",
             collection = "Items",
             bsonFilePath = "bson/search/search2.json")
+      },
+      atlasSearchIndexes = {
+        @AtlasSearchIndex(
+            name = "atlas_search_index",
+            database = TEST_DATABASE,
+            collection = "Items",
+            bsonFilePath = "bson/search/default_dynamic_index.json",
+            validationProperty = "plainString")
       })
   public void shouldReturnExpectedDocumentsBasedOnSearchOperator(
       String search, Set<String> expectedPlainStrings)
@@ -66,7 +76,7 @@ public class SearchOperatorTest extends AbstractItTest {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
-    ensureSearchIndex(collection);
+    //    ensureSearchIndex(collection);
 
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
     UriInfo uriInfo =
@@ -124,6 +134,14 @@ public class SearchOperatorTest extends AbstractItTest {
             database = "testdb",
             collection = "Items",
             bsonFilePath = "bson/search/search2.json")
+      },
+      atlasSearchIndexes = {
+        @AtlasSearchIndex(
+            name = "atlas_search_index",
+            database = TEST_DATABASE,
+            collection = "Items",
+            bsonFilePath = "bson/search/default_dynamic_index.json",
+            validationProperty = "plainString")
       })
   public void shouldReturnExpectedDocumentsBasedOnSearchOperatorWithDefaultScore()
       throws UriValidationException,
@@ -135,7 +153,6 @@ public class SearchOperatorTest extends AbstractItTest {
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
-    ensureSearchIndex(collection);
 
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
     UriInfo uriInfo =
@@ -170,26 +187,150 @@ public class SearchOperatorTest extends AbstractItTest {
     Assertions.assertFalse(results.isEmpty());
   }
 
-  private void ensureSearchIndex(MongoCollection<Document> collection) {
-    try {
-      collection.createSearchIndex(
-          "atlas_search_index", new Document("mappings", new Document("dynamic", true)));
-      // Wait for index to be ready
-      while (true) {
-        boolean ready = false;
-        for (Document index : collection.listSearchIndexes()) {
-          if ("atlas_search_index".equals(index.getString("name"))
-              && "READY".equals(index.getString("status"))) {
-            ready = true;
-            break;
-          }
-        }
-        if (ready) break;
-        Thread.sleep(500);
+  @ParameterizedTest
+  @MethodSource("provideSearchTests")
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/search/search1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/search/search2.json")
+      },
+      atlasSearchIndexes = {
+        @AtlasSearchIndex(
+            name = "atlas_search_index",
+            database = TEST_DATABASE,
+            collection = "Items",
+            bsonFilePath = "bson/search/default_dynamic_index.json",
+            validationProperty = "plainString")
+      })
+  public void shouldReturnExpectedDocumentsBasedOnLookupSearchOperatorWhenNotFirstStage(
+      String search, Set<String> expectedPlainStrings)
+      throws UriValidationException, UriParserException, XMLStreamException, InterruptedException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("Items");
+    //    ensureSearchIndex(collection);
+
+    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance()).parseUri("examples2", "$search=" + search, null, null);
+    ODataSearchToMongoAtlasSearchLookupParser tested =
+        ODataSearchToMongoAtlasSearchLookupParser.builder()
+            .withCollectionName("Items")
+            .withAsPropertyName("metaResult")
+            .withSearchDocumentFactory(
+                new SearchDocumentForQueryStringFactory() {
+                  @Override
+                  public Bson build(
+                      SearchExpression searchExpression,
+                      QueryStringParsingResult queryStringParsingResult,
+                      ODataSearchToMongoAtlasSearchOptions options) {
+                    return new Document("index", "atlas_search_index")
+                        .append(
+                            "queryString",
+                            new Document("query", queryStringParsingResult.getQuery())
+                                .append("defaultPath", "plainString"));
+                  }
+                })
+            .build();
+
+    // WHEN
+    SearchOperatorResult result = tested.parse(uriInfo.getSearchOption());
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(new Document("$match", new Document("active", true)));
+    pipeline.addAll(result.getStageObjects());
+    System.out.println(new Document("pipeline", pipeline).toJson());
+
+    // THEN
+    List<Document> results = new ArrayList<>();
+    for (int i = 0; i < 10; i++) {
+      results.clear();
+      collection.aggregate(pipeline).into(results);
+      if (results.size() == expectedPlainStrings.size()) {
+        break;
       }
-    } catch (Exception e) {
-      // Index might already exist
+      Thread.sleep(500);
     }
+
+    Assertions.assertEquals(expectedPlainStrings.size(), results.size());
+    Set<String> actual =
+        results.stream()
+            .map(d -> d.get("plainString"))
+            .filter(Objects::nonNull)
+            .map(s -> (String) s)
+            .collect(Collectors.toSet());
+    Assertions.assertEquals(expectedPlainStrings, actual);
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/search/search1.json"),
+        @MongoDocument(
+            database = "testdb",
+            collection = "Items",
+            bsonFilePath = "bson/search/search2.json")
+      },
+      atlasSearchIndexes = {
+        @AtlasSearchIndex(
+            name = "atlas_search_index",
+            database = TEST_DATABASE,
+            collection = "Items",
+            bsonFilePath = "bson/search/default_dynamic_index.json",
+            validationProperty = "plainString")
+      })
+  public void
+      shouldReturnExpectedDocumentsBasedOnLookupSearchOperatorWithDefaultScoreWhenNotFirstStage()
+          throws UriValidationException, UriParserException, XMLStreamException {
+    // GIVEN
+    MongoDatabase database = mongoClient.getDatabase("testdb");
+    MongoCollection<Document> collection = database.getCollection("Items");
+
+    Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
+    UriInfo uriInfo =
+        new Parser(edm, OData.newInstance()).parseUri("examples2", "$search=search", null, null);
+    ODataSearchToMongoAtlasSearchLookupParser tested =
+        ODataSearchToMongoAtlasSearchLookupParser.builder()
+            .withCollectionName("Items")
+            .withAsPropertyName("metaResult")
+            .withSearchDocumentFactory(
+                new SearchDocumentForQueryStringFactory() {
+                  @Override
+                  public Bson build(
+                      SearchExpression searchExpression,
+                      QueryStringParsingResult queryStringParsingResult,
+                      ODataSearchToMongoAtlasSearchOptions options) {
+                    return new Document("index", "atlas_search_index")
+                        .append(
+                            "queryString",
+                            new Document("query", queryStringParsingResult.getQuery())
+                                .append("defaultPath", "plainString"));
+                  }
+                })
+            .build();
+    ODataSearchToMongoAtlasSearchOptions options =
+        new DefaultODataSearchToMongoAtlasSearchOptions();
+    options.setDefaultTextScore(0.01d);
+
+    // WHEN
+    SearchOperatorResult result = tested.parse(uriInfo.getSearchOption(), options);
+    List<Bson> pipeline = new ArrayList<>();
+    pipeline.add(new Document("$match", new Document("active", true)));
+    pipeline.addAll(result.getStageObjects());
+    System.out.println(new Document("pipeline", pipeline).toJson());
+
+    // THEN
+    List<Document> results = new ArrayList<>();
+    collection.aggregate(pipeline).into(results);
+    Assertions.assertFalse(results.isEmpty());
   }
 
   private static java.util.stream.Stream<Arguments> provideSearchTests() {

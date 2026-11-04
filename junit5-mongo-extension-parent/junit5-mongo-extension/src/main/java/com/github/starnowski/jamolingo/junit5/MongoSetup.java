@@ -20,7 +20,22 @@ public @interface MongoSetup {
    *
    * @return an array of {@link MongoDocument}
    */
-  MongoDocument[] mongoDocuments();
+  MongoDocument[] mongoDocuments() default {};
+
+  /**
+   * The list of {@link AtlasSearchIndex} configurations defining the Atlas Search indexes to be
+   * created and validated.
+   *
+   * @return an array of {@link AtlasSearchIndex}
+   */
+  AtlasSearchIndex[] atlasSearchIndexes() default {};
+
+  /**
+   * The list of {@link SearchIndex} configurations defining the MongoDB indexes to be managed.
+   *
+   * @return an array of {@link SearchIndex}
+   */
+  SearchIndex[] indexes() default {};
 
   /**
    * Flag to indicate if documents should be inserted in batch mode.

@@ -64,5 +64,11 @@ class AggregateItemParserTest extends Specification {
         def countProjectDoc = projectDoc.get('countVal') as org.bson.Document
         countProjectDoc.containsKey('$size')
         countProjectDoc.get('$size') == '$countVal_distinctArray'
+        
+        result.documentShapeRedefined == true
+        result.usedMongoDocumentProperties == ["prop1"]
+        result.addedMongoDocumentProperties == ["countVal"]
+        result.writtenMongoDocumentProperties == ["countVal"]
+        result.removedMongoDocumentProperties == []
     }
 }

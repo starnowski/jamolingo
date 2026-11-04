@@ -8,6 +8,6 @@ public class IdentityItemParser implements ApplyItemParser {
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {
-    return DefaultApplyOperatorResult.builder().build();
+    return DefaultApplyOperatorResult.builder().withDocumentShapeRedefined(false).build();
   }
 }
