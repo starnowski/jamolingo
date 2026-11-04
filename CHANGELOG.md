@@ -45,6 +45,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 *   Added `com.github.starnowski.jamolingo.core.operators.apply.SkipItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
 *   Added `com.github.starnowski.jamolingo.core.operators.apply.TopItemParser` type [42](https://github.com/starnowski/jamolingo/issues/42)
 *   Added support for `$apply` option translation inside `$expand` operator to MongoDB `$lookup` aggregation pipeline stages [56](https://github.com/starnowski/jamolingo/issues/56)
+*   Added `com.github.starnowski.jamolingo.core.operators.expand.MissingPropertyExpandException` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.core.operators.expand.MissingNavigationPropertyExpandException` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.core.operators.expand.SearchNotEnabledForNavigationPathExpandException` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchLookupParser` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchMetaParser` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `isIgnoreGloballyMissingNavigationProperty()`, `getIgnoreForSpecificExpandElementMissingNavigationProperty()`, `isIgnoreGloballyMissingProperty()`, `getIgnoreForSpecificExpandElementMissingProperty()`, `getGlobalSearchParser()`, `getNavigationPropertySearchParsers()`, `getEdmTablesToSearchParsers()`, `getGlobalApplySearchParser()`, `getNavigationPropertyApplySearchParsers()`, `getEdmTablesToApplySearchParsers()`, `getGlobalLookupSearchParser()`, `getNavigationPropertyLookupSearchParsers()`, and `getEdmTablesToLookupSearchParsers()` methods to `com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext` [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `withIgnoreGloballyMissingNavigationProperty(boolean)`, `withIgnoreForSpecificExpandElementMissingNavigationProperty(Set<String>)`, `withIgnoreGloballyMissingProperty(boolean)`, `withIgnoreForSpecificExpandElementMissingProperty(Set<String>)`, `withGlobalSearchParser(ODataSearchToMongoAtlasSearchParser)`, `withNavigationPropertySearchParsers(Map<String, ODataSearchToMongoAtlasSearchParser>)`, `withEdmTablesToSearchParsers(Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchParser>)`, `withGlobalApplySearchParser(ApplySearchToMongoPipelineParser)`, `withNavigationPropertyApplySearchParsers(Map<String, ApplySearchToMongoPipelineParser>)`, `withEdmTablesToApplySearchParsers(Map<KeyValue<String, String>, ApplySearchToMongoPipelineParser>)`, `withGlobalLookupSearchParser(ODataSearchToMongoAtlasSearchLookupParser)`, `withNavigationPropertyLookupSearchParsers(Map<String, ODataSearchToMongoAtlasSearchLookupParser>)`, and `withEdmTablesToLookupSearchParsers(Map<KeyValue<String, String>, ODataSearchToMongoAtlasSearchLookupParser>)` methods to `com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext.Builder` [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added new constructors for `com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser.DefaultExpandParserContext` [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added new constructors for `com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAtlasSearchPipelineParser` accepting `com.github.starnowski.jamolingo.core.operators.search.ODataSearchToMongoAtlasSearchLookupParser` [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `withUsedMongoDocumentProperties(List<String>)`, `withWrittenMongoDocumentProperties(List<String>)`, `withAddedMongoDocumentProperties(List<String>)`, `withRemovedMongoDocumentProperties(List<String>)`, and `withDocumentShapeRedefined(boolean)` methods to `com.github.starnowski.jamolingo.core.operators.apply.DefaultApplyOperatorResult.Builder` [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added support for `$search` option translation inside `$expand` operator (including nested `$apply/search(...)`) [54](https://github.com/starnowski/jamolingo/issues/54)
+
+#### JUnit 5 Mongo Extension Module
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndex` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndexDocumentCountSyncValidationStrategy` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndexKey` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndexReadinessSyncValidationStrategy` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndexSyncValidationStrategy` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndexValidation` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndexValidationConfig` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndexValidationContext` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.AtlasSearchIndexValuesSyncValidationStrategy` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.Awaiter` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.CachedAtlasSearchIndexDefinition` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `com.github.starnowski.jamolingo.junit5.SearchIndex` type [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added `atlasSearchIndexes()` and `indexes()` properties to `com.github.starnowski.jamolingo.junit5.MongoSetup` [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added new constructors for `com.github.starnowski.jamolingo.junit5.AbstractMongoDataLoaderExtension` accepting cached search index definitions and validation configuration [54](https://github.com/starnowski/jamolingo/issues/54)
+*   Added support for loading an array of BSON documents from a single file in `com.github.starnowski.jamolingo.junit5.AbstractMongoDataLoaderExtension` [54](https://github.com/starnowski/jamolingo/issues/54)
+
+### Changed
+
+#### Core Module
+*   Changed constructor signature of `com.github.starnowski.jamolingo.core.operators.apply.DefaultApplyOperatorResult` to include used, written, added, and removed MongoDB document properties and document shape redefinition flag [54](https://github.com/starnowski/jamolingo/issues/54)
+
+#### JUnit 5 Mongo Extension Module
+*   Changed `mongoDocuments()` property in `com.github.starnowski.jamolingo.junit5.MongoSetup` to have an empty array default value [54](https://github.com/starnowski/jamolingo/issues/54)
 
 ## [0.9.1] - 2026-08-12
 
