@@ -150,10 +150,6 @@ class ODataApplyToMongoAggregationPipelineParserTest extends Specification {
 
         def mockFilterItem = Mock(ApplyItem)
         mockFilterItem.getKind() >> ApplyItem.Kind.IDENTITY
-        // We will just use Identity and then maybe mock one of them? Actually, IdentityItemParser returns empty properties.
-        // Let's just test with a mock pipeline parser. Wait, ODataApplyToMongoAggregationPipelineParser instantiates concrete item parsers based on kind.
-        // So we can't easily mock the returned properties of the internal parsers unless we use one that produces them (like GroupBy or Search).
-        // Let's test with a Search item because we can mock the ApplySearchToMongoPipelineParser!
 
         def mockSearchDelegate = Mock(ApplySearchToMongoPipelineParser)
         def parserWithSearch = new ODataApplyToMongoAggregationPipelineParser(mockSearchDelegate)
