@@ -1551,7 +1551,7 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
   }
 
   @ParameterizedTest(name = "{2} - {0} - {1}")
-//  @MethodSource({"provideData", "provideDataWithApplyOperator"})
+  //  @MethodSource({"provideData", "provideDataWithApplyOperator"})
   @MethodSource({"provideData"})
   public void
       shouldReturnExpectedDocumentsForExpandOperatorWithGraphLookUpStrategyThenMapResultsToLookUpStrategy(
@@ -1660,7 +1660,6 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                             ]
                                                             """,
             JSONCompareMode.LENIENT),
-        // TODO Check if this case is correct
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
@@ -1723,7 +1722,6 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                             ]
                                                             """,
             JSONCompareMode.LENIENT),
-        // TODO Check if this case is correct
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
@@ -2009,6 +2007,345 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                                 }
                                                             ]
                                                             """,
+            JSONCompareMode.LENIENT),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(10),
+            "$expand=children($levels=max;$apply=filter(index in (11, 12, 15, 21, 22)))",
+            """
+                [
+                  {
+                    "_id": 10,
+                    "index": 10,
+                    "parentId": null,
+                    "categoryId": 1,
+                    "children": [
+                      {
+                        "_id": 11,
+                        "index": 11,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": [
+                          {
+                            "_id": 15,
+                            "index": 15,
+                            "parentId": 11,
+                            "categoryId": 1,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "_id": 12,
+                        "index": 12,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+                """,
+            JSONCompareMode.LENIENT),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(10),
+            "$expand=children($levels=max;$apply=orderby(index desc)/top(2))",
+            """
+                [
+                  {
+                    "_id": 10,
+                    "index": 10,
+                    "parentId": null,
+                    "categoryId": 1,
+                    "children": [
+                      {
+                        "_id": 13,
+                        "index": 13,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": [
+                          {
+                            "_id": 20,
+                            "index": 20,
+                            "parentId": 13,
+                            "categoryId": 1,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "_id": 12,
+                        "index": 12,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": [
+                          {
+                            "_id": 19,
+                            "index": 19,
+                            "parentId": 12,
+                            "categoryId": 1,
+                            "children": []
+                          },
+                          {
+                            "_id": 18,
+                            "index": 18,
+                            "parentId": 12,
+                            "categoryId": 1,
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+                """,
+            JSONCompareMode.STRICT_ORDER),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(10),
+            "$expand=children($levels=max;$apply=orderby(index asc)/skip(1))",
+            """
+                [
+                  {
+                    "_id": 10,
+                    "index": 10,
+                    "parentId": null,
+                    "categoryId": 1,
+                    "children": [
+                      {
+                        "_id": 12,
+                        "index": 12,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": [
+                          {
+                            "_id": 18,
+                            "index": 18,
+                            "parentId": 12,
+                            "categoryId": 1,
+                            "children": []
+                          },
+                          {
+                            "_id": 19,
+                            "index": 19,
+                            "parentId": 12,
+                            "categoryId": 1,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "_id": 13,
+                        "index": 13,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": []
+                      }
+                    ]
+                  }
+                ]
+                """,
+            JSONCompareMode.STRICT_ORDER),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(10),
+            "$expand=children($levels=max;$apply=bottomcount(2,index))",
+            """
+                [
+                  {
+                    "_id": 10,
+                    "index": 10,
+                    "parentId": null,
+                    "categoryId": 1,
+                    "children": [
+                      {
+                        "_id": 11,
+                        "index": 11,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": [
+                          {
+                            "_id": 14,
+                            "index": 14,
+                            "parentId": 11,
+                            "categoryId": 1,
+                            "children": [
+                              {
+                                "_id": 21,
+                                "index": 21,
+                                "parentId": 14,
+                                "categoryId": 1,
+                                "children": []
+                              },
+                              {
+                                "_id": 22,
+                                "index": 22,
+                                "parentId": 14,
+                                "categoryId": 1,
+                                "children": []
+                              }
+                            ]
+                          },
+                          {
+                            "_id": 15,
+                            "index": 15,
+                            "parentId": 11,
+                            "categoryId": 1,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "_id": 12,
+                        "index": 12,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": [
+                          {
+                            "_id": 17,
+                            "index": 17,
+                            "parentId": 12,
+                            "categoryId": 1,
+                            "children": []
+                          },
+                          {
+                            "_id": 18,
+                            "index": 18,
+                            "parentId": 12,
+                            "categoryId": 1,
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+                """,
+            JSONCompareMode.STRICT_ORDER),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(10),
+            "$expand=children($levels=max;$apply=topcount(2,index))",
+            """
+                [
+                  {
+                    "_id": 10,
+                    "index": 10,
+                    "parentId": null,
+                    "categoryId": 1,
+                    "children": [
+                      {
+                        "_id": 13,
+                        "index": 13,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": [
+                          {
+                            "_id": 20,
+                            "index": 20,
+                            "parentId": 13,
+                            "categoryId": 1,
+                            "children": []
+                          }
+                        ]
+                      },
+                      {
+                        "_id": 12,
+                        "index": 12,
+                        "parentId": 10,
+                        "categoryId": 1,
+                        "children": [
+                          {
+                            "_id": 19,
+                            "index": 19,
+                            "parentId": 12,
+                            "categoryId": 1,
+                            "children": []
+                          },
+                          {
+                            "_id": 18,
+                            "index": 18,
+                            "parentId": 12,
+                            "categoryId": 1,
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+                """,
+            JSONCompareMode.STRICT_ORDER),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($levels=max;$apply=compute(index add 10 as indexPlus10);$filter=index in (2, 3, 5);$orderby=index desc)",
+            """
+                [
+                  {
+                    "_id": 1,
+                    "index": 1,
+                    "parentId": null,
+                    "categoryId": 1,
+                    "children": [
+                      {
+                        "_id": 5,
+                        "index": 5,
+                        "parentId": 1,
+                        "categoryId": 1,
+                        "indexPlus10": 15,
+                        "children": []
+                      },
+                      {
+                        "_id": 2,
+                        "index": 2,
+                        "parentId": 1,
+                        "categoryId": 1,
+                        "indexPlus10": 12,
+                        "children": [
+                          {
+                            "_id": 3,
+                            "index": 3,
+                            "parentId": 2,
+                            "categoryId": 2,
+                            "indexPlus10": 13,
+                            "children": []
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+                """,
+            JSONCompareMode.STRICT_ORDER),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1, 2),
+            "$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount))/filter(categoryCount eq 1))",
+            """
+                [
+                  {
+                    "_id": 1,
+                    "index": 1,
+                    "parentId": null,
+                    "categoryId": 1,
+                    "children": []
+                  },
+                  {
+                    "_id": 2,
+                    "index": 2,
+                    "parentId": 1,
+                    "categoryId": 1,
+                    "children": [
+                      {
+                        "categoryCount": 1,
+                        "categoryId": 2
+                      }
+                    ]
+                  }
+                ]
+                """,
             JSONCompareMode.LENIENT));
   }
 
