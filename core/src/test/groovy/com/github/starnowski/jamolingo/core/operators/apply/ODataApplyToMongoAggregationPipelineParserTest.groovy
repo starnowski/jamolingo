@@ -1,11 +1,25 @@
 package com.github.starnowski.jamolingo.core.operators.apply
 
+import com.github.starnowski.jamolingo.core.AbstractSpecification
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver
+import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
+import com.mongodb.MongoClientSettings
+import org.apache.olingo.commons.api.edm.Edm
+import org.apache.olingo.server.api.OData
+import org.apache.olingo.server.api.uri.UriInfo
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem
 import org.apache.olingo.server.api.uri.queryoption.ApplyOption
-import spock.lang.Specification
+import org.apache.olingo.server.core.uri.parser.Parser
+import org.bson.Document
+import org.bson.UuidRepresentation
+import org.bson.codecs.DocumentCodec
+import org.bson.codecs.UuidCodecProvider
+import org.bson.codecs.configuration.CodecRegistries
+import org.bson.codecs.configuration.CodecRegistry
+import org.bson.json.JsonWriterSettings
+import spock.lang.Unroll
 
-class ODataApplyToMongoAggregationPipelineParserTest extends Specification {
+class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecification {
 
     def "should return empty stage list when applyOption is null"() {
         given:
