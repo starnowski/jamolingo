@@ -23,14 +23,6 @@ public class ConcatItemParser implements ApplyItemParser {
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {
-    return parse(applyItem, edmMongoContextFacade, null);
-  }
-
-  @Override
-  public ApplyOperatorResult parse(
-      ApplyItem applyItem,
-      EdmPropertyMongoPathResolver edmMongoContextFacade,
-      ApplyParserContext context) {
     if (!(applyItem instanceof Concat)) {
       throw new IllegalArgumentException("Expected Concat item");
     }
@@ -49,9 +41,7 @@ public class ConcatItemParser implements ApplyItemParser {
     for (ApplyOption applyOption : concat.getApplyOptions()) {
       String facetKey = "concat_" + index++;
       ApplyOperatorResult innerResult =
-          context == null
-              ? applyParser.parse(applyOption.getApplyItems(), edmMongoContextFacade)
-              : applyParser.parse(applyOption.getApplyItems(), edmMongoContextFacade, context);
+          applyParser.parse(applyOption.getApplyItems(), edmMongoContextFacade);
       facetDoc.put(facetKey, innerResult.getStageObjects());
       facetFields.add("$" + facetKey);
 
