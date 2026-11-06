@@ -1551,7 +1551,8 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
   }
 
   @ParameterizedTest(name = "{2} - {0} - {1}")
-  @MethodSource("provideData")
+  //    @MethodSource({"provideData", "provideDataWithApplyOperator"})
+  @MethodSource({"provideData"})
   public void
       shouldReturnExpectedDocumentsForExpandOperatorWithGraphLookUpStrategyThenMapResultsToLookUpStrategy(
           KeyValue<String, String> rootMongoCollection,
@@ -1659,7 +1660,6 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                             ]
                                                             """,
             JSONCompareMode.LENIENT),
-        // TODO Check if this case is correct
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
@@ -1722,7 +1722,6 @@ public class ExpandOperatorWithHandlingTreeRelationsWithLookupSupportForMultiLev
                                                             ]
                                                             """,
             JSONCompareMode.LENIENT),
-        // TODO Check if this case is correct
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
             Set.of(1),
