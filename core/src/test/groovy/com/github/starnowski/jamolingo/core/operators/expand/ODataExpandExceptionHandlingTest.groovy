@@ -19,6 +19,7 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
 
         def context = DefaultExpandParserContext.builder()
                 .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .build()
 
         def parser = new ODataExpandToMongoAggregationPipelineParser()
@@ -45,6 +46,7 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
 
         def context = DefaultExpandParserContext.builder()
                 .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .withIgnoreGloballyMissingNavigationProperty(true)
                 .build()
 
@@ -71,6 +73,7 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
 
         def context = DefaultExpandParserContext.builder()
                 .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .withIgnoreForSpecificExpandElementMissingNavigationProperty(Set.of(expectedEdmPath))
                 .build()
 
@@ -97,6 +100,7 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
 
         def context = DefaultExpandParserContext.builder()
                 .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .build()
 
         def parser = new ODataExpandToMongoAggregationPipelineParser()
@@ -123,6 +127,7 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
 
         def context = DefaultExpandParserContext.builder()
                 .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .build()
 
         def parser = new ODataExpandToMongoAggregationPipelineParser()
@@ -149,6 +154,7 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
 
         def context = DefaultExpandParserContext.builder()
                 .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .build()
 
         def parser = new ODataExpandToMongoAggregationPipelineParser()
@@ -175,6 +181,7 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
 
         def context = DefaultExpandParserContext.builder()
                 .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(true)
                 .withIgnoreGloballyMissingProperty(true)
                 .build()
 
@@ -235,5 +242,89 @@ class ODataExpandExceptionHandlingTest extends AbstractSpecification {
         then:
         exception.getEdmPath() == "children.treeType2s"
         exception.getMessage() == "Custom message"
+    }
+
+    @Unroll
+    def "should throw CannotHandleExpandWithApplyByGraphLookupException when apply is used with graphLookup stage: #query"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", query, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(false)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        def e = thrown(CannotHandleExpandWithApplyByGraphLookupException)
+        e.getEdmPath() == expectedEdmPath
+        e.getMessage().contains(expectedEdmPath)
+        e.getMessage().contains('$graphLookup')
+        e.getMessage().contains('$expand')
+
+        where:
+        query                                                                                                               | expectedEdmPath
+        '$expand=children($levels=max;$apply=groupby((categoryId),aggregate($count as categoryCount)))'                     | 'children'
+        '$expand=children($levels=2;$apply=compute(index add 10 as indexPlus10))'                                          | 'children'
+        '$expand=children($levels=max;$apply=filter(index eq 1))'                                                           | 'children'
+        '$expand=children($levels=3;$apply=aggregate($count as totalCount))'                                               | 'children'
+        '$expand=treeType2s($expand=treeType3s($levels=max;$apply=groupby((categoryId),aggregate($count as totalCount))))' | 'treeType2s.treeType3s'
+        '$expand=treeType2s($levels=max;$apply=filter(index eq 1))'                                                         | 'treeType2s'
+    }
+
+    @Unroll
+    def "should not throw CannotHandleExpandWithApplyByGraphLookupException when apply is handled by lookup stage or single level: #query (useLookupForLevelGreaterThanOne=#useLookup)"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", query, null, null)
+
+        def context = DefaultExpandParserContext.builder()
+                .withMaxLevel(5)
+                .withUseLookupForLevelGreaterThanOne(useLookup)
+                .build()
+
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        def result = parser.parse(uriInfo.getExpandOption(), context)
+
+        then:
+        noExceptionThrown()
+        result != null
+
+        where:
+        query                                                                                           | useLookup
+        '$expand=children($levels=max;$apply=compute(index add 10 as indexPlus10))'                     | true
+        '$expand=children($levels=2;$apply=filter(index eq 1))'                                         | true
+        '$expand=children($levels=1;$apply=compute(index add 10 as indexPlus10))'                      | false
+        '$expand=children($apply=compute(index add 10 as indexPlus10))'                                 | false
+        '$expand=treeType2s($expand=treeType3s($apply=compute(index add 10 as indexPlus10)))'           | false
+        '$expand=treeType2s($expand=treeType3s($levels=max;$apply=compute(index add 10 as indexPlus10)))' | true
+    }
+
+    def "should construct CannotHandleExpandWithApplyByGraphLookupException with default and custom message"() {
+        when:
+        def exceptionWithDefaultMsg = new CannotHandleExpandWithApplyByGraphLookupException("children")
+
+        then:
+        exceptionWithDefaultMsg.getEdmPath() == "children"
+        exceptionWithDefaultMsg.getMessage() != null
+        exceptionWithDefaultMsg.getMessage().contains("children")
+        exceptionWithDefaultMsg.getMessage().contains('$graphLookup')
+        exceptionWithDefaultMsg.getMessage().contains('$expand')
+
+        when:
+        def exceptionWithCustomMsg = new CannotHandleExpandWithApplyByGraphLookupException("children.treeType2s", "Custom graphLookup error")
+
+        then:
+        exceptionWithCustomMsg.getEdmPath() == "children.treeType2s"
+        exceptionWithCustomMsg.getMessage() == "Custom graphLookup error"
     }
 }
