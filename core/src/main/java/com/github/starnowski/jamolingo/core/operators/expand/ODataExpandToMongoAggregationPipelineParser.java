@@ -277,6 +277,14 @@ public class ODataExpandToMongoAggregationPipelineParser {
               ? targetEntityType.getFullQualifiedName().getFullQualifiedNameAsString()
               : mongoCollectionName;
 
+      boolean isGraphLookupStage =
+          eOption.getLevelsOption() != null
+              && (eOption.getLevelsOption().isMax() || eOption.getLevelsOption().getValue() > 1)
+              && !expandParserContext.isUseLookupForLevelGreaterThanOne();
+      if (isGraphLookupStage && eOption.getApplyOption() != null) {
+        throw new CannotHandleExpandWithApplyByGraphLookupException(currentPath);
+      }
+
       com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult applyOperatorResult =
           null;
       if (eOption.getApplyOption() != null) {
@@ -400,6 +408,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
           && !expandParserContext.isUseLookupForLevelGreaterThanOne()) {
         if (eOption.getSearchOption() != null) {
           throw new SearchNotEnabledForNavigationPathExpandException(currentPath);
+        }
+        if (eOption.getApplyOption() != null) {
+          throw new CannotHandleExpandWithApplyByGraphLookupException(currentPath);
         }
         // TODO Add default behaviour when $level value is larger than max then thrown an exception
         // TODO Add custom behaviour when $level value is larger than max then set the $level value
