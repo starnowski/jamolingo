@@ -89,7 +89,7 @@ The `core` module contains the primary logic for translating OData concepts and 
 *   Translates `$search` to MongoDB Atlas Search stages (`$search`, `$set`, `$match`) with support for:
     *   Full-text search with logical operators (`AND`, `OR`, `NOT`).
     *   Search score filtering and custom score field names.
-*   Translates `$expand` to MongoDB `$lookup` or `$graphLookup` stages with support for related entity filtering, ordering, pagination, and configurable nested limits.
+*   Translates `$expand` to MongoDB `$lookup` or `$graphLookup` stages with support for related entity filtering, ordering, pagination, transformations (`$apply`), configurable nested limits, and handling unsupported `$apply` operations under `$graphLookup` via `CannotHandleExpandWithApplyByGraphLookupException`.
 *   Translates `$select` to MongoDB `$project` stages.
 *   Translates `$orderby`, `$top`, `$skip`, and `$count` to corresponding MongoDB stages (`$sort`, `$limit`, `$skip`, `$count`).
 *   Handles OData-to-MongoDB mapping configuration and supports customizing mappings via overrides.
