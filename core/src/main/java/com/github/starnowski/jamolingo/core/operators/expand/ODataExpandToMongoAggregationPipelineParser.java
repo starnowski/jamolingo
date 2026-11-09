@@ -57,6 +57,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
    * @return the expansion operator result
    * @throws ExpressionVisitException if an error occurs during expression visiting
    * @throws ODataApplicationException if an error occurs during parsing
+   * @throws CannotHandleExpandWithApplyByGraphLookupException if an expand item contains an inner
+   *     $apply option and is configured to be handled by the $graphLookup stage
    */
   public ExpandOperatorResult parse(ExpandOption expandOption)
       throws ExpressionVisitException, ODataApplicationException {
@@ -74,6 +76,8 @@ public class ODataExpandToMongoAggregationPipelineParser {
    * @return the expansion operator result
    * @throws ExpressionVisitException if an error occurs during expression visiting
    * @throws ODataApplicationException if an error occurs during parsing
+   * @throws CannotHandleExpandWithApplyByGraphLookupException if an expand item contains an inner
+   *     $apply option and is configured to be handled by the $graphLookup stage
    */
   public ExpandOperatorResult parse(
       ExpandOption expandOption, ExpandParserContext expandParserContext)
