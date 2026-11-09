@@ -160,6 +160,7 @@ The `$expand` operator allows clients to include related resources in the respon
     - `$apply`: Applies a sequence of transformations (e.g., grouping, aggregating, filtering) to related resources.
 - Handles complex "orphan" removal logic in `$graphLookup` to ensure integrity when `$filter` is used.
 - Allows limiting the maximum number of explicitly nested `$expand` operations to prevent performance issues (throws `NestedExpandLevelExceededException` when exceeded).
+- Throws `CannotHandleExpandWithApplyByGraphLookupException` when an `$expand` operator contains an inner `$apply` option and is configured to be handled by the `$graphLookup` stage (e.g., when `$levels` > 1 or `$levels=max` and `useLookupForLevelGreaterThanOne` is `false`), as `$graphLookup` does not support inner pipeline transformations. To translate inner `$apply` operations for multi-level expansions, configure `useLookupForLevelGreaterThanOne(true)` on `ExpandParserContext`.
 
 **Usage:**
 
