@@ -220,7 +220,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
         DocumentCodec codec = new DocumentCodec(registry)
 
         UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                .parseUri("examples2", "\$apply=" + applyQuery, null, null)
+                .parseUri(entitySet, "\$apply=" + applyQuery, null, null)
         ODataApplyToMongoAggregationPipelineParser tested = new ODataApplyToMongoAggregationPipelineParser()
 
         when:
@@ -231,7 +231,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 expectedStages.collect { Document.parse(it).toJson(settings, codec) }
 
         where:
-        [edmFile, applyQuery, expectedStages, expectedFields] << applyTestCases()
+        [edmFile, entitySet, applyQuery, expectedStages, expectedFields] << applyTestCases()
     }
 
     @Unroll
@@ -240,7 +240,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
         System.out.println("Testing apply: " + applyQuery)
         Edm edm = loadEmdProvider(edmFile)
         UriInfo uriInfo = new Parser(edm, OData.newInstance())
-                .parseUri("examples2", "\$apply=" + applyQuery, null, null)
+                .parseUri(entitySet, "\$apply=" + applyQuery, null, null)
         ODataApplyToMongoAggregationPipelineParser tested = new ODataApplyToMongoAggregationPipelineParser()
 
         when:
@@ -250,31 +250,35 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
         new HashSet<>(result.getUsedMongoDocumentProperties()) == new HashSet<>(expectedFields as List)
 
         where:
-        [edmFile, applyQuery, expectedStages, expectedFields] << applyTestCases()
+        [edmFile, entitySet, applyQuery, expectedStages, expectedFields] << applyTestCases()
     }
 
     static applyTestCases() {
         [
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "filter(plainString eq 'eOMtThyhVNLWUZNRcBaQKxI')",
                         ["""{"\$match": {"\$and": [{"plainString": "eOMtThyhVNLWUZNRcBaQKxI"}]}}"""],
                         ["plainString"]
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "filter(plainString eq 'Some text')",
                         ["""{"\$match": {"\$and": [{"plainString": "Some text"}]}}"""],
                         ["plainString"]
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "identity",
                         [],
                         []
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "groupby((plainString))",
                         [
                                 """{"\$group": {"_id": {"plainString": "\$plainString"}}}""",
@@ -284,6 +288,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "orderby(smallInteger,plainString)/top(2)",
                         [
                                 """{"\$sort": {"smallInteger": 1, "plainString": 1}}""",
@@ -293,6 +298,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "orderby(smallInteger desc,plainString)/top(1)",
                         [
                                 """{"\$sort": {"smallInteger": -1, "plainString": 1}}""",
@@ -302,6 +308,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "orderby(smallInteger,plainString)/skip(1)/top(1)",
                         [
                                 """{"\$sort": {"smallInteger": 1, "plainString": 1}}""",
@@ -312,6 +319,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "filter(plainString eq 'Mario')/groupby((plainString))",
                         [
                                 """{"\$match": {"\$and": [{"plainString": "Mario"}]}}""",
@@ -322,6 +330,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "filter(plainString eq 'Poem')/groupby((plainString,smallInteger))",
                         [
                                 """{"\$match": {"\$and": [{"plainString": "Poem"}]}}""",
@@ -332,6 +341,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "topcount(2,smallInteger)",
                         [
                                 """{"\$sort": {"smallInteger": -1}}""",
@@ -341,6 +351,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm6_filter_main.xml",
+                        "examples2",
                         "bottomcount(2,smallInteger)",
                         [
                                 """{"\$sort": {"smallInteger": 1}}""",
@@ -350,6 +361,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "topsum(800,genericInteger)",
                         [
                                 """{"\$sort": {"genericInteger": -1}}""",
@@ -361,6 +373,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "bottomsum(160,genericInteger)",
                         [
                                 """{"\$sort": {"genericInteger": 1}}""",
@@ -372,6 +385,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "toppercent(50,genericInteger)",
                         [
                                 """{"\$sort": {"genericInteger": -1}}""",
@@ -383,6 +397,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "bottompercent(15,genericInteger)",
                         [
                                 """{"\$sort": {"genericInteger": 1}}""",
@@ -394,6 +409,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "aggregate(\$count as totalCount)",
                         [
                                 """{"\$group": {"_id": null, "totalCount": {"\$sum": 1}}}""",
@@ -403,6 +419,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "groupby((plainString2),aggregate(genericInteger with sum as genericIntegerSum))",
                         [
                                 """{"\$group": {"_id": {"plainString2": "\$plainString2"}, "genericIntegerSum": {"\$sum": "\$genericInteger"}}}""",
@@ -412,6 +429,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "groupby((plainString2),aggregate(genericInteger with max as genericIntegerMax))",
                         [
                                 """{"\$group": {"_id": {"plainString2": "\$plainString2"}, "genericIntegerMax": {"\$max": "\$genericInteger"}}}""",
@@ -421,6 +439,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "groupby((plainString2),aggregate(genericInteger with min as genericIntegerMin))",
                         [
                                 """{"\$group": {"_id": {"plainString2": "\$plainString2"}, "genericIntegerMin": {"\$min": "\$genericInteger"}}}""",
@@ -430,6 +449,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "groupby((plainString2),aggregate(genericInteger with average as genericIntegerAvg))",
                         [
                                 """{"\$group": {"_id": {"plainString2": "\$plainString2"}, "genericIntegerAvg": {"\$avg": "\$genericInteger"}}}""",
@@ -439,6 +459,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "groupby((plainString2),aggregate(smallInteger1 with countdistinct as smallInteger1Countdistinct))",
                         [
                                 """{"\$group": {"_id": {"plainString2": "\$plainString2"}, "smallInteger1Countdistinct_distinctArray": {"\$addToSet": "\$smallInteger1"}}}""",
@@ -448,6 +469,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "groupby((plainString2),aggregate(\$count as plainString2Count))",
                         [
                                 """{"\$group": {"_id": {"plainString2": "\$plainString2"}, "plainString2Count": {"\$sum": 1}}}""",
@@ -457,6 +479,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "groupby((plainString2),aggregate(genericInteger with average as genericIntegerAvg,smallInteger1 with countdistinct as smallInteger1Countdistinct))",
                         [
                                 """{"\$group": {"_id": {"plainString2": "\$plainString2"}, "genericIntegerAvg": {"\$avg": "\$genericInteger"}, "smallInteger1Countdistinct_distinctArray": {"\$addToSet": "\$smallInteger1"}}}""",
@@ -466,6 +489,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "compute(genericInteger add 10 as genericIntegerPlus10)",
                         [
                                 """{"\$addFields": {"genericIntegerPlus10": {"\$add": ["\$genericInteger", 10]}}}"""
@@ -474,6 +498,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "compute(genericInteger mul 2 add 5 as calcValue)",
                         [
                                 """{"\$addFields": {"calcValue": {"\$add": [{"\$multiply": ["\$genericInteger", 2]}, 5]}}}"""
@@ -482,6 +507,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "filter(plainString2 eq 'Electronics')/compute(genericInteger sub 5 as calcValue)/groupby((plainString2),aggregate(calcValue with sum as calcValueSum))",
                         [
                                 """{"\$match": {"\$and": [{"plainString2": "Electronics"}]}}""",
@@ -493,6 +519,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "concat(filter(plainString1 eq 'Laptop'),filter(plainString1 eq 'Tablet'))",
                         [
                                 """{"\$facet": {"concat_0": [{"\$match": {"\$and": [{"plainString1": "Laptop"}]}}], "concat_1": [{"\$match": {"\$and": [{"plainString1": "Tablet"}]}}]}}""",
@@ -504,6 +531,7 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                 ],
                 [
                         "edm/edm8_apply_aggregate.xml",
+                        "examples2",
                         "concat(filter(plainString1 eq 'Laptop'),groupby((plainString2),aggregate(genericInteger with sum as calcValueSum)))",
                         [
                                 """{"\$facet": {"concat_0": [{"\$match": {"\$and": [{"plainString1": "Laptop"}]}}], "concat_1": [{"\$group": {"_id": {"plainString2": "\$plainString2"}, "calcValueSum": {"\$sum": "\$genericInteger"}}}, {"\$project": {"_id": 0, "plainString2": "\$_id.plainString2", "calcValueSum": 1}}]}}""",
@@ -512,7 +540,35 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                                 """{"\$replaceRoot": {"newRoot": "\$_combinedResult"}}"""
                         ],
                         ["plainString1", "plainString2", "genericInteger"]
+                ],
+                [
+                        "edm/edm_tree.xml",
+                        "treeType1s",
+                        "expand(children,expand(treeType2s))",
+                        [
+                                """{"\$lookup": {"from": "MyService.TreeType1", "localField": "_id", "foreignField": "parentId", "pipeline": [{"\$lookup": {"from": "MyService.TreeType2", "localField": "_id", "foreignField": "treeType1Id", "as": "treeType2s"}}], "as": "children"}}"""
+                        ],
+                        ["_id"]
+                ],
+                [
+                        "edm/edm_tree.xml",
+                        "treeType1s",
+                        "expand(treeType2s)",
+                        [
+                                """{"\$lookup": {"from": "MyService.TreeType2", "localField": "_id", "foreignField": "treeType1Id", "as": "treeType2s"}}"""
+                        ],
+                        ["_id"]
+                ],
+                [
+                        "edm/edm_tree.xml",
+                        "treeType1s",
+                        "expand(treeType2s,filter(index gt 5))",
+                        [
+                                """{"\$lookup": {"from": "MyService.TreeType2", "localField": "_id", "foreignField": "treeType1Id", "pipeline": [{"\$match": {"\$and": [{"index": {"\$gt": 5}}]}}], "as": "treeType2s"}}"""
+                        ],
+                        ["_id"]
                 ]
+
         ]
     }
 
