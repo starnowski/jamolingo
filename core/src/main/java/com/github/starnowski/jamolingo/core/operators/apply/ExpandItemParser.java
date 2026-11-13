@@ -35,6 +35,13 @@ public class ExpandItemParser implements ApplyItemParser {
         expandParser != null ? expandParser : new ODataExpandToMongoAggregationPipelineParser();
   }
 
+  /**
+   * Parses the expand apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the expand apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {
