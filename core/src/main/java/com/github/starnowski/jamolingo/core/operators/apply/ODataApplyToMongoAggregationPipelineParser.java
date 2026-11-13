@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.apply;
 
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import java.util.Collections;
 import java.util.List;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
@@ -10,15 +11,29 @@ import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 public class ODataApplyToMongoAggregationPipelineParser {
 
   private final ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser;
+  private final ODataExpandToMongoAggregationPipelineParser expandParser;
 
   /** ODataApplyToMongoAggregationPipelineParser constructor. */
   public ODataApplyToMongoAggregationPipelineParser() {
-    this(null);
+    this(null, null);
   }
 
   public ODataApplyToMongoAggregationPipelineParser(
       ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser) {
+    this(applySearchToMongoPipelineParser, null);
+  }
+
+  public ODataApplyToMongoAggregationPipelineParser(
+      ODataExpandToMongoAggregationPipelineParser expandParser) {
+    this(null, expandParser);
+  }
+
+  public ODataApplyToMongoAggregationPipelineParser(
+      ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser,
+      ODataExpandToMongoAggregationPipelineParser expandParser) {
     this.applySearchToMongoPipelineParser = applySearchToMongoPipelineParser;
+    this.expandParser =
+        expandParser != null ? expandParser : new ODataExpandToMongoAggregationPipelineParser();
   }
 
   public ApplyOperatorResult parse(
@@ -103,9 +118,10 @@ public class ODataApplyToMongoAggregationPipelineParser {
       return new SearchItemParser(applySearchToMongoPipelineParser, isFirstApplyItem);
     } else if (applyItem.getKind() == ApplyItem.Kind.BOTTOM_TOP) {
       return new BottomTopItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.EXPAND) {
+      return new ExpandItemParser(expandParser);
     }
     // TODO CUSTOM_FUNCTION
-    // EXPAND
     return null;
   }
 }
