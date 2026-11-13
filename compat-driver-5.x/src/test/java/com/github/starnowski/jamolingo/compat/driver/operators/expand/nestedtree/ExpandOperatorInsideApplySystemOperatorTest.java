@@ -286,6 +286,38 @@ public class ExpandOperatorInsideApplySystemOperatorTest extends AbstractItTest 
          "parentId": 6, "categoryId": 2 }
                                                                      ]
         """,
+            JSONCompareMode.LENIENT),
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(2, 5),
+            "$apply=expand(parent)",
+            """
+                    [{
+                                    			"_id": 2,
+                                    			"index": 2,
+                                    			"parentId": 1,
+                                    			"categoryId": 1,
+                                    			"parent": {
+                                    				"_id": 1,
+                                    				"index": 1,
+                                    				"parentId": null,
+                                    				"categoryId": 1
+                                    			}
+                                    		},
+                                    		{
+                                    			"_id": 5,
+                                    			"index": 5,
+                                    			"parentId": 1,
+                                    			"categoryId": 1,
+                                    			"parent": {
+                                    				"_id": 1,
+                                    				"index": 1,
+                                    				"parentId": null,
+                                    				"categoryId": 1
+                                    			}
+                                    		}
+             ]
+             """,
             JSONCompareMode.LENIENT));
   }
 
