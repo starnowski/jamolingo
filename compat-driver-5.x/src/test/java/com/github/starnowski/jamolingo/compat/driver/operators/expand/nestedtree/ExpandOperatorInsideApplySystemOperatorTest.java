@@ -9,7 +9,6 @@ import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.operators.apply.ApplyOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAggregationPipelineParser;
-import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
 import com.mongodb.client.MongoClient;
@@ -268,7 +267,7 @@ public class ExpandOperatorInsideApplySystemOperatorTest extends AbstractItTest 
             JSONCompareMode.LENIENT),
         Arguments.of(
             TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
-            Set.of(2, 5, 3, 4, 6, 7),
+            Set.of(2, 5, 6, 7),
             "$apply=expand(treeType2s,filter(index gt 5))",
             """
                                                                     [ { "_id": 2, "index": 2,
@@ -313,17 +312,13 @@ public class ExpandOperatorInsideApplySystemOperatorTest extends AbstractItTest 
     UriInfo uriInfo =
         new Parser(edm, OData.newInstance())
             .parseUri(rootMongoCollection.getValue(), expandPart, null, null);
-    ODataExpandToMongoAggregationPipelineParser tested =
-        new ODataExpandToMongoAggregationPipelineParser();
 
     // WHEN
     ODataApplyToMongoAggregationPipelineParser parser =
         new ODataApplyToMongoAggregationPipelineParser();
-
-    // WHEN
     ApplyOperatorResult result =
         parser.parse(uriInfo.getApplyOption(), DefaultEdmMongoContextFacade.builder().build());
-    List<Bson> pipeline = new ArrayList<>(result.getStageObjects());
+    List<Bson> pipeline = new ArrayList<>();
     pipeline.add(new Document("$match", new Document("_id", new Document("$in", ids))));
     pipeline.addAll(result.getStageObjects());
     System.out.println(wrapBsonList(pipeline).toJson());
