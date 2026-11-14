@@ -568,7 +568,17 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
                         ],
                         ["_id"]
                 ]
-
+                ,
+                [
+                        "edm/edm_tree.xml",
+                        "treeType1s",
+                        "expand(parent)",
+                        [
+                                """{"\$lookup":{"from":"MyService.TreeType1","localField":"parentId","foreignField":"_id","as":"parent"}}""",
+                                """{"\$unwind":{"path":"\$parent","preserveNullAndEmptyArrays":true}}"""
+                        ],
+                        ["parentId"]
+                ]
         ]
     }
 
