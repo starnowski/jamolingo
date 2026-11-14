@@ -23,6 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Core Module
+*   Added `com.github.starnowski.jamolingo.core.operators.apply.ExpandItemParser` type [58](https://github.com/starnowski/jamolingo/issues/58)
+*   Added support for `expand` transformation inside `$apply` system query option to MongoDB `$lookup` aggregation pipeline stages [58](https://github.com/starnowski/jamolingo/issues/58)
+*   Added new constructors for `com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAggregationPipelineParser` accepting `com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser` [58](https://github.com/starnowski/jamolingo/issues/58)
+
 ## [0.10.0] - 2026-11-09
 
 ### Added

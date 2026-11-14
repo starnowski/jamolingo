@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.apply;
 
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.operators.expand.ODataExpandToMongoAggregationPipelineParser;
 import java.util.Collections;
 import java.util.List;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
@@ -10,17 +11,56 @@ import org.apache.olingo.server.api.uri.queryoption.ApplyOption;
 public class ODataApplyToMongoAggregationPipelineParser {
 
   private final ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser;
+  private final ODataExpandToMongoAggregationPipelineParser expandParser;
 
   /** ODataApplyToMongoAggregationPipelineParser constructor. */
   public ODataApplyToMongoAggregationPipelineParser() {
-    this(null);
+    this(null, null);
   }
 
+  /**
+   * ODataApplyToMongoAggregationPipelineParser constructor with search delegate parser.
+   *
+   * @param applySearchToMongoPipelineParser the search delegate parser
+   */
   public ODataApplyToMongoAggregationPipelineParser(
       ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser) {
-    this.applySearchToMongoPipelineParser = applySearchToMongoPipelineParser;
+    this(applySearchToMongoPipelineParser, null);
   }
 
+  /**
+   * ODataApplyToMongoAggregationPipelineParser constructor with expand parser.
+   *
+   * @param expandParser the expand parser
+   */
+  public ODataApplyToMongoAggregationPipelineParser(
+      ODataExpandToMongoAggregationPipelineParser expandParser) {
+    this(null, expandParser);
+  }
+
+  /**
+   * ODataApplyToMongoAggregationPipelineParser constructor with search delegate parser and expand
+   * parser.
+   *
+   * @param applySearchToMongoPipelineParser the search delegate parser
+   * @param expandParser the expand parser
+   */
+  public ODataApplyToMongoAggregationPipelineParser(
+      ApplySearchToMongoPipelineParser applySearchToMongoPipelineParser,
+      ODataExpandToMongoAggregationPipelineParser expandParser) {
+    this.applySearchToMongoPipelineParser = applySearchToMongoPipelineParser;
+    this.expandParser =
+        expandParser != null ? expandParser : new ODataExpandToMongoAggregationPipelineParser();
+  }
+
+  /**
+   * Parses the apply option into an ApplyOperatorResult containing MongoDB aggregation pipeline
+   * stages.
+   *
+   * @param applyOption the apply query option
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   public ApplyOperatorResult parse(
       ApplyOption applyOption, EdmPropertyMongoPathResolver edmMongoContextFacade) {
     if (applyOption == null
@@ -103,9 +143,10 @@ public class ODataApplyToMongoAggregationPipelineParser {
       return new SearchItemParser(applySearchToMongoPipelineParser, isFirstApplyItem);
     } else if (applyItem.getKind() == ApplyItem.Kind.BOTTOM_TOP) {
       return new BottomTopItemParser();
+    } else if (applyItem.getKind() == ApplyItem.Kind.EXPAND) {
+      return new ExpandItemParser(expandParser);
     }
     // TODO CUSTOM_FUNCTION
-    // EXPAND
     return null;
   }
 }

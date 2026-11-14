@@ -1730,7 +1730,30 @@ public class ExpandOperatorWithHandlingTreeRelationsTest extends AbstractItTest 
                     		]
                     	}
                     ]""",
-            JSONCompareMode.STRICT_ORDER));
+            JSONCompareMode.STRICT_ORDER),
+
+        // Similar as "$expand=children($expand=treeType2s)" but with apply + expand for inner
+        // navigation property
+        Arguments.of(
+            TREETYPE1_MONGO_COLLECTION_USAGE_INFO,
+            Set.of(1),
+            "$expand=children($apply=expand(treeType2s))",
+            """
+                                                            [{ "_id": 1, "index": 1, "parentId": null, "categoryId": 1,
+                                                             "children": [
+                                                                { "_id": 2, "index": 2, "parentId": 1, "categoryId": 1,
+                                                                    "treeType2s": [
+                                                                        {"_id":4,"index":4,"categoryId":1},
+                                                                        {"_id":5,"index":5,"parentId":4,"categoryId":1,"treeType1Id":2},
+                                                                        {"_id":6,"index":6,"parentId":5,"categoryId":2,"treeType1Id":2}
+                                                                    ]
+                                                                },
+                                                                { "_id": 5, "index": 5, "parentId": 1, "categoryId": 1
+                                                                 }
+                                                             ]
+                                                            }]
+                                                            """,
+            JSONCompareMode.LENIENT));
   }
 
   // TODO Add tests that contains the depth level property, that property is rendred with document

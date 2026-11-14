@@ -326,9 +326,10 @@ List<Bson> stages = result.getStageObjects();
 The `$apply` operator specifies a sequence of set transformations, such as grouping, aggregating, and filtering. The `core` module translates this into a sequence of MongoDB aggregation stages.
 
 **Translation Details:**
-- Translates to multiple aggregation stages based on the transformations used, such as `$match`, `$group`, `$sort`, `$limit`, `$skip`, `$set`, `$project`, etc.
-- Supported apply item kinds include: `FILTER`, `IDENTITY`, `GROUP_BY`, `ORDERBY`, `TOP`, `SKIP`, `AGGREGATE`, `COMPUTE`, `CONCAT`, `SEARCH`, `BOTTOM_TOP`.
+- Translates to multiple aggregation stages based on the transformations used, such as `$match`, `$group`, `$sort`, `$limit`, `$skip`, `$set`, `$project`, `$lookup`, etc.
+- Supported apply item kinds include: `FILTER`, `IDENTITY`, `GROUP_BY`, `ORDERBY`, `TOP`, `SKIP`, `AGGREGATE`, `COMPUTE`, `CONCAT`, `SEARCH`, `BOTTOM_TOP`, `EXPAND`.
 - The `SEARCH` item kind requires providing an `ApplySearchToMongoPipelineParser` implementation if it's used.
+- The `EXPAND` item kind optionally accepts an `ODataExpandToMongoAggregationPipelineParser` implementation (a default parser is used if not provided).
 
 **Usage:**
 
