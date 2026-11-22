@@ -3,6 +3,7 @@ package com.github.starnowski.jamolingo.core.operators.apply
 import com.github.starnowski.jamolingo.core.AbstractSpecification
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty
 import com.mongodb.MongoClientSettings
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
@@ -582,4 +583,227 @@ class ODataApplyToMongoAggregationPipelineParserTest extends AbstractSpecificati
         ]
     }
 
+    @Unroll
+    def "should return expected stages, used properties, and used navigation properties for apply query with navigation properties: #applyQuery"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        JsonWriterSettings settings = JsonWriterSettings.builder().build()
+        CodecRegistry registry = CodecRegistries.fromRegistries(
+                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                MongoClientSettings.getDefaultCodecRegistry()
+        )
+        DocumentCodec codec = new DocumentCodec(registry)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri(entitySet, "\$apply=" + applyQuery, null, null)
+        ODataApplyToMongoAggregationPipelineParser tested = new ODataApplyToMongoAggregationPipelineParser()
+
+        when:
+        def result = tested.parse(uriInfo.getApplyOption(), DefaultEdmMongoContextFacade.builder().build())
+
+        then:
+        result.getStageObjects().collect { Document.parse(it.toBsonDocument(Document.class, registry).toJson(settings)).toJson(settings, codec) } ==
+                expectedStages.collect { Document.parse(it).toJson(settings, codec) }
+        new HashSet<>(result.getUsedMongoDocumentProperties()) == new HashSet<>(expectedFields as List)
+        result.getUsedNavigationProperties() == expectedNavProps
+
+        where:
+        [entitySet, applyQuery, expectedStages, expectedFields, expectedNavProps] << applyNavigationTestCases()
+    }
+
+    static applyNavigationTestCases() {
+        def categoryNav = UsedNavigationProperty.builder()
+                .withEdmPath("category")
+                .withMongoPath("category")
+                .withEdmPropertyName("category")
+                .withEdmEntityFullName("MyService.Category")
+                .withCollection(false)
+                .withLocalKeyProperty("categoryId")
+                .withForeignKeyProperty("_id")
+                .build()
+        def parentNav = UsedNavigationProperty.builder()
+                .withEdmPath("parent")
+                .withMongoPath("parent")
+                .withEdmPropertyName("parent")
+                .withEdmEntityFullName("MyService.TreeType1")
+                .withCollection(false)
+                .withLocalKeyProperty("parentId")
+                .withForeignKeyProperty("_id")
+                .build()
+        def parentCategoryNav = UsedNavigationProperty.builder()
+                .withEdmPath("parent/category")
+                .withMongoPath("parent.category")
+                .withEdmPropertyName("category")
+                .withEdmEntityFullName("MyService.Category")
+                .withCollection(false)
+                .withLocalKeyProperty("categoryId")
+                .withForeignKeyProperty("_id")
+                .build()
+        def childrenNav = UsedNavigationProperty.builder()
+                .withEdmPath("children")
+                .withMongoPath("children")
+                .withEdmPropertyName("children")
+                .withEdmEntityFullName("MyService.TreeType1")
+                .withCollection(true)
+                .withLocalKeyProperty("_id")
+                .withForeignKeyProperty("parentId")
+                .build()
+        def childrenCategoryNav = UsedNavigationProperty.builder()
+                .withEdmPath("children/category")
+                .withMongoPath("children.category")
+                .withEdmPropertyName("category")
+                .withEdmEntityFullName("MyService.Category")
+                .withCollection(false)
+                .withLocalKeyProperty("categoryId")
+                .withForeignKeyProperty("_id")
+                .build()
+        def treeType2sNav = UsedNavigationProperty.builder()
+                .withEdmPath("treeType2s")
+                .withMongoPath("treeType2s")
+                .withEdmPropertyName("treeType2s")
+                .withEdmEntityFullName("MyService.TreeType2")
+                .withCollection(true)
+                .withLocalKeyProperty("_id")
+                .withForeignKeyProperty("treeType1Id")
+                .build()
+        def childrenTreeType2sNav = UsedNavigationProperty.builder()
+                .withEdmPath("children/treeType2s")
+                .withMongoPath("children.treeType2s")
+                .withEdmPropertyName("treeType2s")
+                .withEdmEntityFullName("MyService.TreeType2")
+                .withCollection(true)
+                .withLocalKeyProperty("_id")
+                .withForeignKeyProperty("treeType1Id")
+                .build()
+
+        [
+                [
+                        "treeType1s",
+                        "filter(category/name eq 'Electronics')",
+                        ["""{"\$match": {"\$and": [{"category.name": "Electronics"}]}}"""],
+                        ["category.name"],
+                        [categoryNav]
+                ],
+                [
+                        "treeType1s",
+                        "filter(children/any(c:c/category/name eq 'Books'))",
+                        ["""{"\$match": {"\$and": [{"children": {"\$elemMatch": {"category.name": "Books"}}}]}}"""],
+                        ["children.category.name"],
+                        [childrenNav, childrenCategoryNav]
+                ],
+                [
+                        "treeType1s",
+                        "groupby((parent/category/name),aggregate(category/name with countdistinct as distinctCat))",
+                        [
+                                """{"\$group": {"_id": {"parent.category.name": "\$parent.category.name"}, "distinctCat_distinctArray": {"\$addToSet": "\$category.name"}}}""",
+                                """{"\$project": {"_id": 0, "parent.category.name": "\$_id.parent.category.name", "distinctCat": {"\$size": "\$distinctCat_distinctArray"}}}"""
+                        ],
+                        ["parent.category.name", "category.name"],
+                        [parentNav, parentCategoryNav, categoryNav]
+                ],
+                [
+                        "treeType1s",
+                        "aggregate(parent/index with sum as parentIndexSum)",
+                        [
+                                """{"\$group": {"_id": null, "parentIndexSum": {"\$sum": "\$parent.index"}}}""",
+                                """{"\$project": {"_id": 0, "parentIndexSum": 1}}"""
+                        ],
+                        ["parent.index"],
+                        [parentNav]
+                ],
+                [
+                        "treeType1s",
+                        "aggregate(children(index with sum as totalChildIndex))",
+                        [
+                                """{"\$group": {"_id": null, "totalChildIndex": {"\$sum": "\$children.index"}}}""",
+                                """{"\$project": {"_id": 0, "totalChildIndex": 1}}"""
+                        ],
+                        ["children.index"],
+                        [childrenNav]
+                ],
+                [
+                        "treeType1s",
+                        "aggregate(children/\$count as childrenCount)",
+                        [
+                                """{"\$group": {"_id": null, "childrenCount": {"\$sum": {"\$size": {"\$ifNull": ["\$children", []]}}}}}""",
+                                """{"\$project": {"_id": 0, "childrenCount": 1}}"""
+                        ],
+                        ["children"],
+                        [childrenNav]
+                ],
+                [
+                        "treeType1s",
+                        "compute(parent/index add index as combinedIndex)",
+                        [
+                                """{"\$addFields": {"combinedIndex": {"\$add": ["\$parent.index", "\$index"]}}}"""
+                        ],
+                        ["parent.index", "index"],
+                        [parentNav]
+                ],
+                [
+                        "treeType1s",
+                        "orderby(category/name asc,parent/index desc)",
+                        [
+                                """{"\$sort": {"category.name": 1, "parent.index": -1}}"""
+                        ],
+                        ["category.name", "parent.index"],
+                        [categoryNav, parentNav]
+                ],
+                [
+                        "treeType1s",
+                        "topcount(2,parent/index)",
+                        [
+                                """{"\$sort": {"parent.index": -1}}""",
+                                """{"\$limit": 2}"""
+                        ],
+                        ["parent.index"],
+                        [parentNav]
+                ],
+                [
+                        "treeType1s",
+                        "bottomsum(100,parent/index)",
+                        [
+                                """{"\$sort": {"parent.index": 1}}""",
+                                """{"\$setWindowFields": {"sortBy": {"parent.index": 1}, "output": {"__jamolingo_cumsum": {"\$sum": "\$parent.index", "window": {"documents": ["unbounded", "current"]}}}}}""",
+                                """{"\$match": {"__jamolingo_cumsum": {"\$lte": 100.0}}}""",
+                                """{"\$unset": "__jamolingo_cumsum"}"""
+                        ],
+                        ["parent.index"],
+                        [parentNav]
+                ],
+                [
+                        "treeType1s",
+                        "toppercent(50,parent/index)",
+                        [
+                                """{"\$sort": {"parent.index": -1}}""",
+                                """{"\$setWindowFields": {"sortBy": {"parent.index": -1}, "output": {"__jamolingo_totalsum": {"\$sum": "\$parent.index", "window": {"documents": ["unbounded", "unbounded"]}}, "__jamolingo_cumsum": {"\$sum": "\$parent.index", "window": {"documents": ["unbounded", "current"]}}}}}""",
+                                """{"\$match": {"\$expr": {"\$lte": ["\$__jamolingo_cumsum", {"\$multiply": ["\$__jamolingo_totalsum", 0.5]}]}}}""",
+                                """{"\$unset": ["__jamolingo_totalsum", "__jamolingo_cumsum"]}"""
+                        ],
+                        ["parent.index"],
+                        [parentNav]
+                ],
+                [
+                        "treeType1s",
+                        "expand(children,expand(treeType2s))",
+                        [
+                                """{"\$lookup": {"from": "MyService.TreeType1", "localField": "_id", "foreignField": "parentId", "pipeline": [{"\$lookup": {"from": "MyService.TreeType2", "localField": "_id", "foreignField": "treeType1Id", "as": "treeType2s"}}], "as": "children"}}"""
+                        ],
+                        ["_id"],
+                        [childrenNav, childrenTreeType2sNav]
+                ],
+                [
+                        "treeType1s",
+                        "concat(filter(category/name eq 'A'),filter(parent/index gt 1))",
+                        [
+                                """{"\$facet": {"concat_0": [{"\$match": {"\$and": [{"category.name": "A"}]}}], "concat_1": [{"\$match": {"\$and": [{"parent.index": {"\$gt": 1}}]}}]}}""",
+                                """{"\$project": {"_combinedResult": {"\$concatArrays": ["\$concat_0", "\$concat_1"]}}}""",
+                                """{"\$unwind": "\$_combinedResult"}""",
+                                """{"\$replaceRoot": {"newRoot": "\$_combinedResult"}}"""
+                        ],
+                        ["category.name", "parent.index"],
+                        [categoryNav, parentNav]
+                ]
+        ]
+    }
 }

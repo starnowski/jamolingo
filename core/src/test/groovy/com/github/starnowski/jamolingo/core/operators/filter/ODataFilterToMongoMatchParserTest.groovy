@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.filter
 
 import com.github.starnowski.jamolingo.core.AbstractSpecification
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty
 import com.mongodb.MongoClientSettings
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
@@ -262,6 +263,185 @@ class ODataFilterToMongoMatchParserTest extends AbstractSpecification {
                 [ "tags/any(t:startswith(t,'spider') and t ne 'spiderweb')", """{"\$match": {"\$and": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}]}}""", ["tags"]],
                 [ "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderweb')", """{"\$match": {"\$and": [{"\$or": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qweb\\\\E\$", "\$ne": "spiderweb"}}}]}]}}""", ["tags"]],
                 [ "tags/any(t:startswith(t,'spider') and t ne 'spiderweb' or endswith(t,'web') and t ne 'spiderweb' or contains(t,'wide') and t ne 'word wide')", """{"\$match": {"\$and": [{"\$or": [{"tags": {"\$elemMatch": {"\$regex": "^\\\\Qspider\\\\E", "\$ne": "spiderweb"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qweb\\\\E\$", "\$ne": "spiderweb"}}}, {"tags": {"\$elemMatch": {"\$regex": "\\\\Qwide\\\\E", "\$ne": "word wide"}}}]}]}}""", ["tags"]]
+        ]
+    }
+
+    @Unroll
+    def "should parse filter with navigation properties and return expected stage, used properties, and used navigation properties for #filter"() {
+        given:
+        Bson expectedBson = Document.parse(bson)
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        JsonWriterSettings settings = JsonWriterSettings.builder().build()
+        CodecRegistry registry = CodecRegistries.fromRegistries(
+                CodecRegistries.fromProviders(new UuidCodecProvider(UuidRepresentation.STANDARD)),
+                MongoClientSettings.getDefaultCodecRegistry()
+        )
+        DocumentCodec codec = new DocumentCodec(registry)
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri(entitySet, "\$filter=" + filter, null, null)
+        ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser()
+
+        when:
+        def result = tested.parse(uriInfo.getFilterOption())
+
+        then:
+        [((Document) result.getStageObjects().get(0)).toJson(settings, codec)] == [((Document) expectedBson).toJson(settings, codec)]
+        new HashSet<>(result.getUsedMongoDocumentProperties()) == new HashSet<>(expectedFields as List)
+        result.getUsedNavigationProperties() == expectedNavProps
+
+        where:
+        [entitySet, filter, bson, expectedFields, expectedNavProps] << navigationPropertiesFilterTestCases()
+    }
+
+    static navigationPropertiesFilterTestCases() {
+        [
+                [
+                        "treeType1s",
+                        "category/name eq 'Electronics'",
+                        """{"\$match": {"\$and": [{"category.name": "Electronics"}]}}""",
+                        ["category.name"],
+                        [
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("category")
+                                        .withMongoPath("category")
+                                        .withEdmPropertyName("category")
+                                        .withEdmEntityFullName("MyService.Category")
+                                        .withCollection(false)
+                                        .withLocalKeyProperty("categoryId")
+                                        .withForeignKeyProperty("_id")
+                                        .build()
+                        ]
+                ],
+                [
+                        "treeType3s",
+                        "treeType2/treeType1/category/name eq 'Root'",
+                        """{"\$match": {"\$and": [{"treeType2.treeType1.category.name": "Root"}]}}""",
+                        ["treeType2.treeType1.category.name"],
+                        [
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("treeType2")
+                                        .withMongoPath("treeType2")
+                                        .withEdmPropertyName("treeType2")
+                                        .withEdmEntityFullName("MyService.TreeType2")
+                                        .withCollection(false)
+                                        .withLocalKeyProperty("treeType2Id")
+                                        .withForeignKeyProperty("_id")
+                                        .build(),
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("treeType2/treeType1")
+                                        .withMongoPath("treeType2.treeType1")
+                                        .withEdmPropertyName("treeType1")
+                                        .withEdmEntityFullName("MyService.TreeType1")
+                                        .withCollection(false)
+                                        .withLocalKeyProperty("treeType1Id")
+                                        .withForeignKeyProperty("_id")
+                                        .build(),
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("treeType2/treeType1/category")
+                                        .withMongoPath("treeType2.treeType1.category")
+                                        .withEdmPropertyName("category")
+                                        .withEdmEntityFullName("MyService.Category")
+                                        .withCollection(false)
+                                        .withLocalKeyProperty("categoryId")
+                                        .withForeignKeyProperty("_id")
+                                        .build()
+                        ]
+                ],
+                [
+                        "treeType1s",
+                        "parent eq null",
+                        """{"\$match": {"\$and": [{"parent": null}]}}""",
+                        ["parent"],
+                        [
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("parent")
+                                        .withMongoPath("parent")
+                                        .withEdmPropertyName("parent")
+                                        .withEdmEntityFullName("MyService.TreeType1")
+                                        .withCollection(false)
+                                        .withLocalKeyProperty("parentId")
+                                        .withForeignKeyProperty("_id")
+                                        .build()
+                        ]
+                ],
+                [
+                        "treeType1s",
+                        "children/\$count ge 2",
+                        """{"\$match": {"\$and": [{"\$expr": {"\$gte": [{"\$size": {"\$ifNull": ["\$children", []]}}, 2]}}]}}""",
+                        ["children"],
+                        [
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("children")
+                                        .withMongoPath("children")
+                                        .withEdmPropertyName("children")
+                                        .withEdmEntityFullName("MyService.TreeType1")
+                                        .withCollection(true)
+                                        .withLocalKeyProperty("_id")
+                                        .withForeignKeyProperty("parentId")
+                                        .build()
+                        ]
+                ],
+                [
+                        "treeType1s",
+                        "children/any()",
+                        """{"\$match": {"\$and": [{"\$expr": {"\$gt": [{"\$size": {"\$ifNull": ["\$children", []]}}, 0]}}]}}""",
+                        ["children"],
+                        [
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("children")
+                                        .withMongoPath("children")
+                                        .withEdmPropertyName("children")
+                                        .withEdmEntityFullName("MyService.TreeType1")
+                                        .withCollection(true)
+                                        .withLocalKeyProperty("_id")
+                                        .withForeignKeyProperty("parentId")
+                                        .build()
+                        ]
+                ],
+                [
+                        "treeType1s",
+                        "children/all(c:c/index gt 5)",
+                        """{"\$match": {"\$and": [{"children": {"\$not": {"\$elemMatch": {"index": {"\$not": {"\$gt": 5}}}}}}]}}""",
+                        ["children.index"],
+                        [
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("children")
+                                        .withMongoPath("children")
+                                        .withEdmPropertyName("children")
+                                        .withEdmEntityFullName("MyService.TreeType1")
+                                        .withCollection(true)
+                                        .withLocalKeyProperty("_id")
+                                        .withForeignKeyProperty("parentId")
+                                        .build()
+                        ]
+                ],
+                [
+                        "treeType1s",
+                        "children/any(c:c/category/name eq 'A')",
+                        """{"\$match": {"\$and": [{"children": {"\$elemMatch": {"category.name": "A"}}}]}}""",
+                        ["children.category.name"],
+                        [
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("children")
+                                        .withMongoPath("children")
+                                        .withEdmPropertyName("children")
+                                        .withEdmEntityFullName("MyService.TreeType1")
+                                        .withCollection(true)
+                                        .withLocalKeyProperty("_id")
+                                        .withForeignKeyProperty("parentId")
+                                        .build(),
+                                UsedNavigationProperty.builder()
+                                        .withEdmPath("children/category")
+                                        .withMongoPath("children.category")
+                                        .withEdmPropertyName("category")
+                                        .withEdmEntityFullName("MyService.Category")
+                                        .withCollection(false)
+                                        .withLocalKeyProperty("categoryId")
+                                        .withForeignKeyProperty("_id")
+                                        .build()
+                        ]
+                ]
         ]
     }
 }
