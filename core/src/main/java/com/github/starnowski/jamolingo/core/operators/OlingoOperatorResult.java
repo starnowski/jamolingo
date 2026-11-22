@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.core.operators;
 
+import java.util.Collections;
 import java.util.List;
 import org.bson.conversions.Bson;
 
@@ -52,4 +53,13 @@ public interface OlingoOperatorResult {
    * @return true if the document shape is redefined, false otherwise
    */
   boolean isDocumentShapeRedefined();
+
+  /**
+   * Navigation properties referenced by this operator.
+   *
+   * @return list of used navigation properties
+   */
+  default List<UsedNavigationProperty> getUsedNavigationProperties() {
+    return Collections.emptyList();
+  }
 }
