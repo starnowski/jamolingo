@@ -2,9 +2,11 @@ package com.github.starnowski.jamolingo.core.operators.select;
 
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.operators.NavigationPropertyExtractor;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.*;
-import java.util.stream.Collectors;
 import org.apache.olingo.server.api.uri.UriResource;
+import org.apache.olingo.server.api.uri.UriResourceNavigation;
 import org.apache.olingo.server.api.uri.UriResourceProperty;
 import org.apache.olingo.server.api.uri.queryoption.SelectItem;
 import org.apache.olingo.server.api.uri.queryoption.SelectOption;
@@ -64,10 +66,12 @@ public class OdataSelectToMongoProjectParser {
           nonNullContext.getAdditionalFields(),
           true,
           true,
-          edmMongoContextFacade.getRootMongoPath());
+          edmMongoContextFacade.getRootMongoPath(),
+          Collections.emptyList());
     }
 
     List<String> fields = new ArrayList<>();
+    Set<UsedNavigationProperty> usedNavigationProperties = new LinkedHashSet<>();
     for (SelectItem item : selectOption.getSelectItems()) {
       if (item.isStar()) {
         // TODO check if _id is part of available register property
@@ -76,15 +80,18 @@ public class OdataSelectToMongoProjectParser {
             nonNullContext.getAdditionalFields(),
             true,
             true,
-            edmMongoContextFacade.getRootMongoPath());
+            edmMongoContextFacade.getRootMongoPath(),
+            Collections.emptyList());
       }
       if (!item.getResourcePath().getUriResourceParts().stream()
-          .allMatch(p -> p instanceof UriResourceProperty)) {
+          .allMatch(p -> p instanceof UriResourceProperty || p instanceof UriResourceNavigation)) {
         throw new RuntimeException("Invalid select parameter " + item.getResourcePath());
       }
       String propertyName =
           edmMongoContextFacade.resolveMongoPathForEDMPath(item.getResourcePath()).getMongoPath();
       fields.add(propertyName);
+      usedNavigationProperties.addAll(
+          NavigationPropertyExtractor.extract(item.getResourcePath(), edmMongoContextFacade));
     }
     // TODO check if _id is part of available register property
     return new DefaultSelectOperatorResult(
@@ -92,7 +99,8 @@ public class OdataSelectToMongoProjectParser {
         nonNullContext.getAdditionalFields(),
         true,
         false,
-        edmMongoContextFacade.getRootMongoPath());
+        edmMongoContextFacade.getRootMongoPath(),
+        new ArrayList<>(usedNavigationProperties));
   }
 
   /**
@@ -106,9 +114,7 @@ public class OdataSelectToMongoProjectParser {
   }
 
   private String prepareEDMPath(List<UriResource> parts) {
-    return parts.stream()
-        .map(p -> ((UriResourceProperty) p).getProperty().getName())
-        .collect(Collectors.joining("/"));
+    return NavigationPropertyExtractor.extractPath(parts, "/");
   }
 
   /**
@@ -150,7 +156,9 @@ public class OdataSelectToMongoProjectParser {
         for (int i = 0; i < parts.size(); i++) {
           final int index = i;
           UriResource part = parts.get(index);
-          if (part instanceof UriResourceProperty && ((UriResourceProperty) part).isCollection()) {
+          if ((part instanceof UriResourceProperty && ((UriResourceProperty) part).isCollection())
+              || (part instanceof UriResourceNavigation
+                  && ((UriResourceNavigation) part).isCollection())) {
             arrayFields.add(
                 edmMongoContextFacade
                     .resolveMongoPathForEDMPath(prepareEDMPath(parts.subList(0, i + 1)))
@@ -224,13 +232,15 @@ public class OdataSelectToMongoProjectParser {
     private final boolean removeIdPropertyIfNotSpecified;
     private final boolean wildCard;
     private final String rootMongoPath;
+    private final List<UsedNavigationProperty> usedNavigationProperties;
 
     private DefaultSelectOperatorResult(
         Set<String> requestedFields,
         Set<String> additionalFields,
         boolean removeIdPropertyIfNotSpecified,
         boolean wildCard,
-        String rootMongoPath) {
+        String rootMongoPath,
+        List<UsedNavigationProperty> usedNavigationProperties) {
       this.requestedFields =
           requestedFields != null
               ? Collections.unmodifiableSet(requestedFields)
@@ -245,6 +255,10 @@ public class OdataSelectToMongoProjectParser {
       this.removeIdPropertyIfNotSpecified = removeIdPropertyIfNotSpecified;
       this.wildCard = wildCard;
       this.rootMongoPath = rootMongoPath;
+      this.usedNavigationProperties =
+          usedNavigationProperties != null
+              ? Collections.unmodifiableList(usedNavigationProperties)
+              : Collections.emptyList();
     }
 
     @Override
@@ -301,6 +315,11 @@ public class OdataSelectToMongoProjectParser {
     @Override
     public List<String> getUsedMongoDocumentProperties() {
       return new ArrayList<>(selectedFields);
+    }
+
+    @Override
+    public List<UsedNavigationProperty> getUsedNavigationProperties() {
+      return usedNavigationProperties;
     }
 
     @Override

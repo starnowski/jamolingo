@@ -3,6 +3,8 @@ package com.github.starnowski.jamolingo.core.operators.expand;
 import com.github.starnowski.jamolingo.common.beans.KeyValue;
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.operators.NavigationPropertyExtractor;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAggregationPipelineParser;
 import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAtlasSearchPipelineParser;
@@ -84,11 +86,14 @@ public class ODataExpandToMongoAggregationPipelineParser {
       throws ExpressionVisitException, ODataApplicationException {
     List<Bson> stageObjects = new ArrayList<>();
     Map<String, ExpandElement> expandElements = new HashMap<>();
+    Set<UsedNavigationProperty> usedNavigationProperties = new LinkedHashSet<>();
     for (ExpandItem eOption : expandOption.getExpandItems()) {
       stageObjects.addAll(
-          prepareStageObjectsForExpandItem(eOption, expandParserContext, expandElements));
+          prepareStageObjectsForExpandItem(
+              eOption, expandParserContext, expandElements, usedNavigationProperties));
     }
-    return new DefaultExpandOperatorResult(stageObjects, expandElements);
+    return new DefaultExpandOperatorResult(
+        stageObjects, expandElements, new ArrayList<>(usedNavigationProperties));
   }
 
   private ExpandOperatorResult parse(
@@ -98,6 +103,7 @@ public class ODataExpandToMongoAggregationPipelineParser {
       throws ExpressionVisitException, ODataApplicationException {
     List<Bson> stageObjects = new ArrayList<>();
     Map<String, ExpandElement> expandElements = new HashMap<>();
+    Set<UsedNavigationProperty> usedNavigationProperties = new LinkedHashSet<>();
     for (ExpandItem eOption : expandOption.getExpandItems()) {
       if (parserExpandItemContext.getParentApplyOperatorResult() != null
           && parserExpandItemContext.getParentApplyOperatorResult().isDocumentShapeRedefined()) {
@@ -148,29 +154,37 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
       stageObjects.addAll(
           prepareStageObjectsForExpandItem(
-              eOption, expandParserContext, parserExpandItemContext, expandElements));
+              eOption,
+              expandParserContext,
+              parserExpandItemContext,
+              expandElements,
+              usedNavigationProperties));
     }
-    return new DefaultExpandOperatorResult(stageObjects, expandElements);
+    return new DefaultExpandOperatorResult(
+        stageObjects, expandElements, new ArrayList<>(usedNavigationProperties));
   }
 
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
       ExpandItem eOption,
       ExpandParserContext expandParserContext,
-      Map<String, ExpandElement> expandElements)
+      Map<String, ExpandElement> expandElements,
+      Set<UsedNavigationProperty> usedNavigationProperties)
       throws ExpressionVisitException, ODataApplicationException {
     return prepareStageObjectsForExpandItem(
         eOption,
         expandParserContext,
         new ParserExpandItemContext(
             null, null, false, expandParserContext.getRootEdmEntityTypeName()),
-        expandElements);
+        expandElements,
+        usedNavigationProperties);
   }
 
   private Collection<? extends Bson> prepareStageObjectsForExpandItem(
       ExpandItem eOption,
       ExpandParserContext expandParserContext,
       ParserExpandItemContext parserExpandItemContext,
-      Map<String, ExpandElement> expandElements)
+      Map<String, ExpandElement> expandElements,
+      Set<UsedNavigationProperty> usedNavigationProperties)
       throws ExpressionVisitException, ODataApplicationException {
     UriResource lastResource =
         eOption
@@ -399,6 +413,76 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
       List<Bson> pipeline = new ArrayList<>();
 
+      String relativeEdmPath =
+          NavigationPropertyExtractor.extractPath(eOption.getResourcePath(), "/");
+      if (relativeEdmPath.isEmpty()) {
+        relativeEdmPath = navProp.getName();
+      }
+      String currentEdmPathSlash =
+          parserExpandItemContext.getCurrentEdmPath() == null
+              ? relativeEdmPath
+              : parserExpandItemContext.getCurrentEdmPath().replace(".", "/")
+                  + "/"
+                  + relativeEdmPath;
+      String currentMongoPathDot = currentEdmPathSlash.replace("/", ".");
+
+      usedNavigationProperties.add(
+          UsedNavigationProperty.builder()
+              .withEdmPath(currentEdmPathSlash)
+              .withMongoPath(currentMongoPathDot)
+              .withEdmPropertyName(navProp.getName())
+              .withEdmEntityFullName(targetFullTypeName)
+              .withCollection(navProp.isCollection())
+              .withLocalKeyProperty(mongoStartWith)
+              .withForeignKeyProperty(mongoConnectTo)
+              .build());
+
+      EdmMongoContextFacade targetFacade =
+          targetResolver == null
+              ? DefaultEdmMongoContextFacade.builder()
+                  .withEntityPropertiesMongoPathContext(null)
+                  .build()
+              : targetResolver;
+
+      if (applyOperatorResult != null
+          && applyOperatorResult.getUsedNavigationProperties() != null) {
+        usedNavigationProperties.addAll(
+            prefixUsedNavigationProperties(
+                applyOperatorResult.getUsedNavigationProperties(),
+                currentEdmPathSlash,
+                currentMongoPathDot));
+      }
+      if (eOption.getFilterOption() != null) {
+        ODataFilterToMongoMatchParser filterParserForNav = new ODataFilterToMongoMatchParser();
+        usedNavigationProperties.addAll(
+            prefixUsedNavigationProperties(
+                filterParserForNav
+                    .parse(eOption.getFilterOption(), targetFacade)
+                    .getUsedNavigationProperties(),
+                currentEdmPathSlash,
+                currentMongoPathDot));
+      }
+      if (eOption.getOrderByOption() != null) {
+        OdataOrderByToMongoSortParser orderByParserForNav = new OdataOrderByToMongoSortParser();
+        usedNavigationProperties.addAll(
+            prefixUsedNavigationProperties(
+                orderByParserForNav
+                    .parse(eOption.getOrderByOption(), targetFacade)
+                    .getUsedNavigationProperties(),
+                currentEdmPathSlash,
+                currentMongoPathDot));
+      }
+      if (eOption.getSelectOption() != null) {
+        OdataSelectToMongoProjectParser selectParserForNav = new OdataSelectToMongoProjectParser();
+        usedNavigationProperties.addAll(
+            prefixUsedNavigationProperties(
+                selectParserForNav
+                    .parse(eOption.getSelectOption(), targetFacade)
+                    .getUsedNavigationProperties(),
+                currentEdmPathSlash,
+                currentMongoPathDot));
+      }
+
       String navPropertyWithRootPrefix =
           parserExpandItemContext.getRoot() == null
               ? navProp.getName()
@@ -587,6 +671,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
             throw new ExpandLevelExceededException(path, e.getRequestedLevel(), e.getMaxLevel());
           }
           nestedElements = nestedExpandResult.getExpandElements();
+          if (nestedExpandResult.getUsedNavigationProperties() != null) {
+            usedNavigationProperties.addAll(nestedExpandResult.getUsedNavigationProperties());
+          }
           pipeline.addAll(nestedExpandResult.getStageObjects());
           pipeline.add(prepareCleanUpStageForSingleObjectProperty(navPropertyWithRootPrefix));
           pipeline.addAll(prepareMergingDocumentStages(navPropertyWithRootPrefix, newIdProperties));
@@ -663,6 +750,9 @@ public class ODataExpandToMongoAggregationPipelineParser {
             throw new ExpandLevelExceededException(path, e.getRequestedLevel(), e.getMaxLevel());
           }
           nestedElements = nestedExpandResult.getExpandElements();
+          if (nestedExpandResult.getUsedNavigationProperties() != null) {
+            usedNavigationProperties.addAll(nestedExpandResult.getUsedNavigationProperties());
+          }
         }
 
         if (eOption.getLevelsOption() != null
@@ -733,6 +823,29 @@ public class ODataExpandToMongoAggregationPipelineParser {
       }
     }
     return List.of();
+  }
+
+  private static List<UsedNavigationProperty> prefixUsedNavigationProperties(
+      List<UsedNavigationProperty> properties, String edmPrefix, String mongoPrefix) {
+    if (properties == null || properties.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<UsedNavigationProperty> prefixed = new ArrayList<>(properties.size());
+    for (UsedNavigationProperty prop : properties) {
+      prefixed.add(
+          UsedNavigationProperty.builder()
+              .withUsedNavigationProperty(prop)
+              .withEdmPath(
+                  edmPrefix == null || edmPrefix.isEmpty()
+                      ? prop.getEdmPath()
+                      : edmPrefix + "/" + prop.getEdmPath())
+              .withMongoPath(
+                  mongoPrefix == null || mongoPrefix.isEmpty()
+                      ? prop.getMongoPath()
+                      : mongoPrefix + "." + prop.getMongoPath())
+              .build());
+    }
+    return prefixed;
   }
 
   private static String getCurrentSourceFullTypeName(
@@ -1519,19 +1632,30 @@ public class ODataExpandToMongoAggregationPipelineParser {
 
     private final List<Bson> stageObjects;
     private final Map<String, ExpandElement> expandElements;
+    private final List<UsedNavigationProperty> usedNavigationProperties;
 
     private DefaultExpandOperatorResult(List<Bson> stageObjects) {
-      this.stageObjects = stageObjects;
-      this.expandElements = Collections.emptyMap();
+      this(stageObjects, Collections.emptyMap(), Collections.emptyList());
     }
 
     private DefaultExpandOperatorResult(
         List<Bson> stageObjects, Map<String, ExpandElement> expandElements) {
+      this(stageObjects, expandElements, Collections.emptyList());
+    }
+
+    private DefaultExpandOperatorResult(
+        List<Bson> stageObjects,
+        Map<String, ExpandElement> expandElements,
+        List<UsedNavigationProperty> usedNavigationProperties) {
       this.stageObjects = stageObjects;
       this.expandElements =
           expandElements != null
               ? Collections.unmodifiableMap(new HashMap<>(expandElements))
               : Collections.emptyMap();
+      this.usedNavigationProperties =
+          usedNavigationProperties != null
+              ? Collections.unmodifiableList(new ArrayList<>(usedNavigationProperties))
+              : Collections.emptyList();
     }
 
     @Override
@@ -1542,6 +1666,11 @@ public class ODataExpandToMongoAggregationPipelineParser {
     @Override
     public List<Bson> getStageObjects() {
       return stageObjects;
+    }
+
+    @Override
+    public List<UsedNavigationProperty> getUsedNavigationProperties() {
+      return usedNavigationProperties;
     }
 
     @Override
