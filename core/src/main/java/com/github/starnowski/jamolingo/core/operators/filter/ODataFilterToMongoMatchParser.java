@@ -2,6 +2,7 @@ package com.github.starnowski.jamolingo.core.operators.filter;
 
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -88,7 +89,8 @@ public class ODataFilterToMongoMatchParser {
     Bson result = MongoFilterVisitor.unwrapWrapperIfNeeded(expr.accept(rootMongoFilterVisitor));
     return new DefaultFilterOperatorResult(
         List.of(new Document("$match", new Document("$and", List.of(result)))),
-        rootMongoFilterVisitor.getUsedMongoDBProperties());
+        rootMongoFilterVisitor.getUsedMongoDBProperties(),
+        rootMongoFilterVisitor.getUsedNavigationProperties());
   }
 
   /**
@@ -171,10 +173,11 @@ public class ODataFilterToMongoMatchParser {
 
     private final List<Bson> stageObjects;
     private final Set<String> userMongoDBProperties;
+    private final Set<UsedNavigationProperty> usedNavigationProperties;
 
     /** Creates a new empty DefaultFilterOperatorResult. */
     public DefaultFilterOperatorResult() {
-      this(Collections.emptyList(), Collections.emptySet());
+      this(Collections.emptyList(), Collections.emptySet(), Collections.emptySet());
     }
 
     /**
@@ -185,8 +188,25 @@ public class ODataFilterToMongoMatchParser {
      * @param userMongoDBProperties the set of used MongoDB properties
      */
     public DefaultFilterOperatorResult(List<Bson> stageObjects, Set<String> userMongoDBProperties) {
+      this(stageObjects, userMongoDBProperties, Collections.emptySet());
+    }
+
+    /**
+     * Creates a new DefaultFilterOperatorResult with the specified stage objects, used properties,
+     * and used navigation properties.
+     *
+     * @param stageObjects the list of BSON stage objects
+     * @param userMongoDBProperties the set of used MongoDB properties
+     * @param usedNavigationProperties the set of used navigation properties
+     */
+    public DefaultFilterOperatorResult(
+        List<Bson> stageObjects,
+        Set<String> userMongoDBProperties,
+        Set<UsedNavigationProperty> usedNavigationProperties) {
       this.stageObjects = stageObjects;
       this.userMongoDBProperties = userMongoDBProperties;
+      this.usedNavigationProperties =
+          usedNavigationProperties != null ? usedNavigationProperties : Collections.emptySet();
     }
 
     @Override
@@ -197,6 +217,11 @@ public class ODataFilterToMongoMatchParser {
     @Override
     public List<String> getUsedMongoDocumentProperties() {
       return userMongoDBProperties.stream().toList();
+    }
+
+    @Override
+    public List<UsedNavigationProperty> getUsedNavigationProperties() {
+      return usedNavigationProperties.stream().toList();
     }
 
     @Override
