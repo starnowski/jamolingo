@@ -31,6 +31,7 @@ public class FilterItemParser implements ApplyItemParser {
           .withAddedMongoDocumentProperties(result.getAddedMongoDocumentProperties())
           .withRemovedMongoDocumentProperties(result.getRemovedMongoDocumentProperties())
           .withDocumentShapeRedefined(result.isDocumentShapeRedefined())
+          .withUsedNavigationProperties(result.getUsedNavigationProperties())
           .build();
     } catch (ODataApplicationException | ExpressionVisitException e) {
       throw new RuntimeException("Failed to parse filter item", e);

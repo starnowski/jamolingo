@@ -42,6 +42,7 @@ public class OrderByItemParser implements ApplyItemParser {
         .withAddedMongoDocumentProperties(result.getAddedMongoDocumentProperties())
         .withRemovedMongoDocumentProperties(result.getRemovedMongoDocumentProperties())
         .withDocumentShapeRedefined(result.isDocumentShapeRedefined())
+        .withUsedNavigationProperties(result.getUsedNavigationProperties())
         .build();
   }
 }

@@ -96,6 +96,7 @@ public class ExpandItemParser implements ApplyItemParser {
           .withAddedMongoDocumentProperties(new ArrayList<>(addedProperties))
           .withRemovedMongoDocumentProperties(result.getRemovedMongoDocumentProperties())
           .withDocumentShapeRedefined(result.isDocumentShapeRedefined())
+          .withUsedNavigationProperties(result.getUsedNavigationProperties())
           .build();
     } catch (ODataApplicationException | ExpressionVisitException e) {
       throw new RuntimeException("Failed to parse expand item", e);

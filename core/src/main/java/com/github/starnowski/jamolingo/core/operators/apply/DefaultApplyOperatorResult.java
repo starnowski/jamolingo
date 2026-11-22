@@ -1,5 +1,6 @@
 package com.github.starnowski.jamolingo.core.operators.apply;
 
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +15,7 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
   private final List<String> addedMongoDocumentProperties;
   private final List<String> removedMongoDocumentProperties;
   private final boolean documentShapeRedefined;
+  private final List<UsedNavigationProperty> usedNavigationProperties;
 
   /** DefaultApplyOperatorResult constructor. */
   public DefaultApplyOperatorResult(
@@ -23,6 +25,25 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
       List<String> addedMongoDocumentProperties,
       List<String> removedMongoDocumentProperties,
       boolean documentShapeRedefined) {
+    this(
+        stageObjects,
+        usedMongoDocumentProperties,
+        writtenMongoDocumentProperties,
+        addedMongoDocumentProperties,
+        removedMongoDocumentProperties,
+        documentShapeRedefined,
+        Collections.emptyList());
+  }
+
+  /** DefaultApplyOperatorResult constructor with used navigation properties. */
+  public DefaultApplyOperatorResult(
+      List<Bson> stageObjects,
+      List<String> usedMongoDocumentProperties,
+      List<String> writtenMongoDocumentProperties,
+      List<String> addedMongoDocumentProperties,
+      List<String> removedMongoDocumentProperties,
+      boolean documentShapeRedefined,
+      List<UsedNavigationProperty> usedNavigationProperties) {
     this.stageObjects =
         stageObjects != null ? Collections.unmodifiableList(stageObjects) : Collections.emptyList();
     this.usedMongoDocumentProperties =
@@ -42,6 +63,10 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
             ? Collections.unmodifiableList(removedMongoDocumentProperties)
             : Collections.emptyList();
     this.documentShapeRedefined = documentShapeRedefined;
+    this.usedNavigationProperties =
+        usedNavigationProperties != null
+            ? Collections.unmodifiableList(usedNavigationProperties)
+            : Collections.emptyList();
   }
 
   @Override
@@ -81,6 +106,12 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
   }
 
   @Override
+  /** getUsedNavigationProperties method. */
+  public List<UsedNavigationProperty> getUsedNavigationProperties() {
+    return usedNavigationProperties;
+  }
+
+  @Override
   /** equals method. */
   public boolean equals(Object o) {
     if (this == o) return true;
@@ -91,7 +122,8 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
         && Objects.equals(usedMongoDocumentProperties, that.usedMongoDocumentProperties)
         && Objects.equals(writtenMongoDocumentProperties, that.writtenMongoDocumentProperties)
         && Objects.equals(addedMongoDocumentProperties, that.addedMongoDocumentProperties)
-        && Objects.equals(removedMongoDocumentProperties, that.removedMongoDocumentProperties);
+        && Objects.equals(removedMongoDocumentProperties, that.removedMongoDocumentProperties)
+        && Objects.equals(usedNavigationProperties, that.usedNavigationProperties);
   }
 
   @Override
@@ -103,7 +135,8 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
         writtenMongoDocumentProperties,
         addedMongoDocumentProperties,
         removedMongoDocumentProperties,
-        documentShapeRedefined);
+        documentShapeRedefined,
+        usedNavigationProperties);
   }
 
   @Override
@@ -122,6 +155,8 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
         + removedMongoDocumentProperties
         + ", documentShapeRedefined="
         + documentShapeRedefined
+        + ", usedNavigationProperties="
+        + usedNavigationProperties
         + '}';
   }
 
@@ -137,6 +172,22 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
     private List<String> addedMongoDocumentProperties = Collections.emptyList();
     private List<String> removedMongoDocumentProperties = Collections.emptyList();
     private boolean documentShapeRedefined = false;
+    private List<UsedNavigationProperty> usedNavigationProperties = Collections.emptyList();
+
+    /** Copies all properties from an existing DefaultApplyOperatorResult. */
+    public Builder withDefaultApplyOperatorResult(
+        DefaultApplyOperatorResult defaultApplyOperatorResult) {
+      this.stageObjects = defaultApplyOperatorResult.stageObjects;
+      this.usedMongoDocumentProperties = defaultApplyOperatorResult.usedMongoDocumentProperties;
+      this.writtenMongoDocumentProperties =
+          defaultApplyOperatorResult.writtenMongoDocumentProperties;
+      this.addedMongoDocumentProperties = defaultApplyOperatorResult.addedMongoDocumentProperties;
+      this.removedMongoDocumentProperties =
+          defaultApplyOperatorResult.removedMongoDocumentProperties;
+      this.documentShapeRedefined = defaultApplyOperatorResult.documentShapeRedefined;
+      this.usedNavigationProperties = defaultApplyOperatorResult.usedNavigationProperties;
+      return this;
+    }
 
     /** withStageObjects method. */
     public Builder withStageObjects(List<Bson> stageObjects) {
@@ -169,6 +220,12 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
       return this;
     }
 
+    public Builder withUsedNavigationProperties(
+        List<UsedNavigationProperty> usedNavigationProperties) {
+      this.usedNavigationProperties = usedNavigationProperties;
+      return this;
+    }
+
     /** build method. */
     public DefaultApplyOperatorResult build() {
       return new DefaultApplyOperatorResult(
@@ -177,7 +234,8 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
           writtenMongoDocumentProperties,
           addedMongoDocumentProperties,
           removedMongoDocumentProperties,
-          documentShapeRedefined);
+          documentShapeRedefined,
+          usedNavigationProperties);
     }
   }
 }

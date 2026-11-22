@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.apply;
 
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,8 @@ public class ConcatItemParser implements ApplyItemParser {
     java.util.Set<String> writtenProperties = new java.util.LinkedHashSet<>();
     java.util.Set<String> addedProperties = new java.util.LinkedHashSet<>();
     java.util.Set<String> removedProperties = new java.util.LinkedHashSet<>();
+    java.util.Set<UsedNavigationProperty> usedNavigationProperties =
+        new java.util.LinkedHashSet<>();
     boolean shapeRedefined = false;
 
     int index = 0;
@@ -56,6 +59,9 @@ public class ConcatItemParser implements ApplyItemParser {
       }
       if (innerResult.getRemovedMongoDocumentProperties() != null) {
         removedProperties.addAll(innerResult.getRemovedMongoDocumentProperties());
+      }
+      if (innerResult.getUsedNavigationProperties() != null) {
+        usedNavigationProperties.addAll(innerResult.getUsedNavigationProperties());
       }
       shapeRedefined = shapeRedefined || innerResult.isDocumentShapeRedefined();
     }
@@ -81,6 +87,7 @@ public class ConcatItemParser implements ApplyItemParser {
         .withAddedMongoDocumentProperties(new ArrayList<>(addedProperties))
         .withRemovedMongoDocumentProperties(new ArrayList<>(removedProperties))
         .withDocumentShapeRedefined(shapeRedefined)
+        .withUsedNavigationProperties(new ArrayList<>(usedNavigationProperties))
         .build();
   }
 }

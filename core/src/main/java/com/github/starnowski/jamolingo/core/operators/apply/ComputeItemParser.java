@@ -51,6 +51,8 @@ public class ComputeItemParser implements ApplyItemParser {
         .withWrittenMongoDocumentProperties(addedProperties)
         .withAddedMongoDocumentProperties(addedProperties)
         .withDocumentShapeRedefined(false)
+        .withUsedNavigationProperties(
+            new java.util.ArrayList<>(visitor.getUsedNavigationProperties()))
         .build();
   }
 }
