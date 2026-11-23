@@ -381,13 +381,11 @@ public class UsedNavigationPropertyLookupStagesBuilder {
             ? declaringComplexEdmPrefix + ODATA_PATH_SEPARATOR_CHARACTER + localKeyProperty
             : localKeyProperty;
 
-    String resolvedLocalKeyOnDeclaring =
-        tryResolvePath(sourceResolver, localKeyEdmPathOnDeclaring);
+    String resolvedLocalKeyOnDeclaring = tryResolvePath(sourceResolver, localKeyEdmPathOnDeclaring);
     if (resolvedLocalKeyOnDeclaring == null) {
       if (declaringComplexEdmPrefix != null) {
         String complexMongoPrefix =
-            extractComplexMongoPrefix(
-                relativeMongoPath, parentNavProp, resolvedRelativeMongoPaths);
+            extractComplexMongoPrefix(relativeMongoPath, parentNavProp, resolvedRelativeMongoPaths);
         resolvedLocalKeyOnDeclaring =
             complexMongoPrefix != null
                 ? complexMongoPrefix + "." + localKeyProperty
