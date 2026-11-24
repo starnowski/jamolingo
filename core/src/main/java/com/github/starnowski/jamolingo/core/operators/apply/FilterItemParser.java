@@ -8,11 +8,18 @@ import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.apply.Filter;
 import org.apache.olingo.server.api.uri.queryoption.expression.ExpressionVisitException;
 
-/** FilterItemParser type. */
+/** Parser that translates OData $apply filter transformations into MongoDB stages. */
 public class FilterItemParser implements ApplyItemParser {
 
   private final ODataFilterToMongoMatchParser filterParser = new ODataFilterToMongoMatchParser();
 
+  /**
+   * Parses the filter apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the filter apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {
@@ -31,6 +38,7 @@ public class FilterItemParser implements ApplyItemParser {
           .withAddedMongoDocumentProperties(result.getAddedMongoDocumentProperties())
           .withRemovedMongoDocumentProperties(result.getRemovedMongoDocumentProperties())
           .withDocumentShapeRedefined(result.isDocumentShapeRedefined())
+          .withUsedNavigationProperties(result.getUsedNavigationProperties())
           .build();
     } catch (ODataApplicationException | ExpressionVisitException e) {
       throw new RuntimeException("Failed to parse filter item", e);

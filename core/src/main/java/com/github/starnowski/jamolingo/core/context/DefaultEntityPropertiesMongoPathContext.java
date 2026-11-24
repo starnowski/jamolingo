@@ -118,6 +118,17 @@ public class DefaultEntityPropertiesMongoPathContext implements EntityProperties
     // Check if baseEDMProperty has recurrence type
     if (baseEDMProperty.getCircularReferenceMapping() == null
         || baseEDMProperty.getCircularReferenceMapping().getAnchorEdmPath() == null) {
+      if (baseEDMProperty.getNavigation() != null) {
+        String remainingEdmPath =
+            edmPath.substring(
+                longestMatchingEDMPath.length() + ODATA_PATH_SEPARATOR_CHARACTER.length());
+        String resolvedMongoPath =
+            baseEDMProperty.getMongoPath()
+                + "."
+                + remainingEdmPath.replace(ODATA_PATH_SEPARATOR_CHARACTER, ".");
+        edmPathSearchState.validateCurrentWithAppliedPath(resolvedMongoPath);
+        return resolvedMongoPath;
+      }
       return null;
     }
     String baseMongoPath = baseEDMProperty.getMongoPath();

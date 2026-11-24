@@ -4,11 +4,13 @@ import com.github.starnowski.jamolingo.core.AbstractSpecification
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade
 import com.github.starnowski.jamolingo.core.context.EntityPropertiesMongoPathContextBuilder
 import com.github.starnowski.jamolingo.core.mapping.ODataMongoMappingFactory
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty
 import com.github.starnowski.jamolingo.core.operators.select.DefaultOdataSelectToMongoProjectParserContext
 import org.apache.olingo.commons.api.edm.Edm
 import org.apache.olingo.server.api.OData
 import org.apache.olingo.server.api.uri.UriInfo
 import org.apache.olingo.server.core.uri.parser.Parser
+import org.bson.Document
 import org.bson.conversions.Bson
 import spock.lang.Unroll
 
@@ -349,5 +351,64 @@ class OdataSelectToMongoProjectParserTest extends AbstractSpecification {
 
         where:
         rootMongoPath << ["root", "nested.root", null]
+    }
+
+    @Unroll
+    def "should parse select with navigation properties and return expected project stage and used navigation properties for #selectClause"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        ODataMongoMappingFactory factory = new ODataMongoMappingFactory()
+        def odataMapping = factory.build(edm.getSchema("MyService"))
+        def entityMapping = odataMapping.getEntities().get("TreeType1")
+        def context = new EntityPropertiesMongoPathContextBuilder().build(entityMapping)
+        def facade = DefaultEdmMongoContextFacade.builder().withEntityPropertiesMongoPathContext(context).build()
+
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", "\$select=" + selectClause, null, null)
+        OdataSelectToMongoProjectParser tested = new OdataSelectToMongoProjectParser()
+
+        when:
+        def result = tested.parse(uriInfo.getSelectOption(), facade)
+        def mapResult = tested.computeValueForMapOperator(uriInfo.getSelectOption(), facade)
+
+        then:
+        result.getStageObject() == Document.parse(expectedBson)
+        result.getSelectedFields() == expectedSelectedFields as Set
+        mapResult.getArrayFields() == expectedArrayFields as Set
+        result.getUsedNavigationProperties() == expectedNavProps
+
+        where:
+        selectClause | expectedBson | expectedSelectedFields | expectedArrayFields | expectedNavProps
+        "category" | """{"\$project": {"_id": 0, "category": 1}}""" | ["category"] | [] | [
+                UsedNavigationProperty.builder()
+                        .withEdmPath("category")
+                        .withMongoPath("category")
+                        .withEdmPropertyName("category")
+                        .withEdmEntityFullName("MyService.Category")
+                        .withCollection(false)
+                        .withLocalKeyProperty("categoryId")
+                        .withForeignKeyProperty("_id")
+                        .build()
+        ]
+        "index,category,children" | """{"\$project": {"_id": 0, "index": 1, "category": 1, "children": 1}}""" | ["index", "category", "children"] | ["children"] | [
+                UsedNavigationProperty.builder()
+                        .withEdmPath("category")
+                        .withMongoPath("category")
+                        .withEdmPropertyName("category")
+                        .withEdmEntityFullName("MyService.Category")
+                        .withCollection(false)
+                        .withLocalKeyProperty("categoryId")
+                        .withForeignKeyProperty("_id")
+                        .build(),
+                UsedNavigationProperty.builder()
+                        .withEdmPath("children")
+                        .withMongoPath("children")
+                        .withEdmPropertyName("children")
+                        .withEdmEntityFullName("MyService.TreeType1")
+                        .withCollection(true)
+                        .withLocalKeyProperty("_id")
+                        .withForeignKeyProperty("parentId")
+                        .build()
+        ]
     }
 }

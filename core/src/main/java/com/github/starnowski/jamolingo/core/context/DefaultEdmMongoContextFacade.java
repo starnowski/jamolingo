@@ -2,9 +2,8 @@ package com.github.starnowski.jamolingo.core.context;
 
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
-import java.util.stream.Collectors;
+import com.github.starnowski.jamolingo.core.operators.NavigationPropertyExtractor;
 import org.apache.olingo.server.api.uri.UriInfoResource;
-import org.apache.olingo.server.api.uri.UriResourceProperty;
 
 /** Default implementation of {@link EdmMongoContextFacade}. */
 public class DefaultEdmMongoContextFacade
@@ -71,9 +70,7 @@ public class DefaultEdmMongoContextFacade
   }
 
   private static String preparePath(UriInfoResource uriInfoResource, String delimiter) {
-    return uriInfoResource.getUriResourceParts().stream()
-        .map(p -> ((UriResourceProperty) p).getProperty().getName())
-        .collect(Collectors.joining(delimiter));
+    return NavigationPropertyExtractor.extractPath(uriInfoResource, delimiter);
   }
 
   @Override

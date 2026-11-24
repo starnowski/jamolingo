@@ -2,6 +2,8 @@ package com.github.starnowski.jamolingo.core.operators.filter;
 
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
 import com.github.starnowski.jamolingo.core.context.MongoPathResolution;
+import com.github.starnowski.jamolingo.core.operators.NavigationPropertyExtractor;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -37,6 +39,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private final MongoFilterVisitorCommonContext mongoFilterVisitorCommonContext;
 
   private final Set<String> usedMongoDBProperties = new HashSet<>();
+  private final Set<UsedNavigationProperty> usedNavigationProperties = new LinkedHashSet<>();
 
   /**
    * Returns the set of MongoDB properties used in the filter expression.
@@ -47,12 +50,27 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
     return Collections.unmodifiableSet(usedMongoDBProperties);
   }
 
+  /**
+   * Returns the set of navigation properties used in the filter expression.
+   *
+   * @return the set of used navigation properties
+   */
+  public Set<UsedNavigationProperty> getUsedNavigationProperties() {
+    return Collections.unmodifiableSet(usedNavigationProperties);
+  }
+
   private void addUsedMongoDBProperty(String property) {
     this.usedMongoDBProperties.add(property);
   }
 
   private void addUsedMongoDBProperties(Set<String> properties) {
     this.usedMongoDBProperties.addAll(properties);
+  }
+
+  private void addUsedNavigationProperties(Collection<UsedNavigationProperty> properties) {
+    if (properties != null) {
+      this.usedNavigationProperties.addAll(properties);
+    }
   }
 
   private Bson bsonWrapper(Bson bson, BsonWrapperProperties properties) {
@@ -272,6 +290,12 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
           field.append(".");
         }
         field.append(uiProperty.getProperty().getName());
+      } else if (property instanceof UriResourceNavigation) {
+        UriResourceNavigation uiNavigation = (UriResourceNavigation) property;
+        if (nested) {
+          field.append(".");
+        }
+        field.append(uiNavigation.getProperty().getName());
       } else {
         break;
       }
@@ -330,25 +354,26 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
       }
       String field = extractFieldName(member, 1);
       EdmType fieldType = null;
-      if (member
+      UriResource lastPart =
+          member
               .getResourcePath()
               .getUriResourceParts()
-              .get(member.getResourcePath().getUriResourceParts().size() - 1)
-          instanceof UriResourceProperty) {
-        UriResourceProperty uriResourceProperty =
-            (UriResourceProperty)
-                member
-                    .getResourcePath()
-                    .getUriResourceParts()
-                    .get(member.getResourcePath().getUriResourceParts().size() - 1);
-        fieldType = uriResourceProperty.getType();
+              .get(member.getResourcePath().getUriResourceParts().size() - 1);
+      if (lastPart instanceof UriResourceProperty) {
+        fieldType = ((UriResourceProperty) lastPart).getType();
+      } else if (lastPart instanceof UriResourceNavigation) {
+        fieldType = ((UriResourceNavigation) lastPart).getType();
       } else {
         List<UriResource> tmpList =
             member.getResourcePath().getUriResourceParts().stream()
-                .filter(u -> u instanceof UriResourceProperty)
+                .filter(u -> u instanceof UriResourceProperty || u instanceof UriResourceNavigation)
                 .toList();
         if (!tmpList.isEmpty()) {
-          fieldType = ((UriResourceProperty) tmpList.get(tmpList.size() - 1)).getType();
+          UriResource lastTyped = tmpList.get(tmpList.size() - 1);
+          fieldType =
+              lastTyped instanceof UriResourceProperty
+                  ? ((UriResourceProperty) lastTyped).getType()
+                  : ((UriResourceNavigation) lastTyped).getType();
         }
       }
       if ((this.context.isLambdaAnyContext() || this.context.isLambdaAllContext())
@@ -496,6 +521,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   visitor.visitLambdaExpression(
                       "ALL", all.getLambdaVariable(), all.getExpression()));
           this.addUsedMongoDBProperties(visitor.getUsedMongoDBProperties());
+          this.addUsedNavigationProperties(visitor.getUsedNavigationProperties());
           return visitor.context.isExprMode()
               ? visitor.prepareExprDocumentForAllLambdaWithExpr(
                   innerObject,
@@ -538,6 +564,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                       innerMongoFilterVisitor.visitLambdaExpression(
                           "ALL", all.getLambdaVariable(), all.getExpression()));
               this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
+              this.addUsedNavigationProperties(
+                  innerMongoFilterVisitor.getUsedNavigationProperties());
               return prepareExprDocumentForAllLambdaWithExpr(
                   innerObject,
                   propertyContext.getMongoField(),
@@ -572,6 +600,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                       innerMongoFilterVisitor.visitLambdaExpression(
                           "ALL", all.getLambdaVariable(), all.getExpression()));
               this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
+              this.addUsedNavigationProperties(
+                  innerMongoFilterVisitor.getUsedNavigationProperties());
               return innerMongoFilterVisitor.context.isExprMode()
                   ? prepareExprDocumentForAllLambdaWithExpr(
                       innerObject,
@@ -610,6 +640,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                       innerMongoFilterVisitor.visitLambdaExpression(
                           "ALL", all.getLambdaVariable(), all.getExpression()));
               this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
+              this.addUsedNavigationProperties(
+                  innerMongoFilterVisitor.getUsedNavigationProperties());
               return innerMongoFilterVisitor.context.isExprMode()
                   ? innerMongoFilterVisitor.prepareExprDocumentForAllLambdaWithExpr(
                       innerObject,
@@ -673,6 +705,7 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
               innerMongoFilterVisitor.visitLambdaExpression(
                   "ANY", any.getLambdaVariable(), any.getExpression());
           this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
+          this.addUsedNavigationProperties(innerMongoFilterVisitor.getUsedNavigationProperties());
           return innerMongoFilterVisitor.context.isExprMode()
               ? innerMongoFilterVisitor.prepareExprDocumentForAnyLambdaWithExpr(
                   innerObject,
@@ -722,6 +755,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   innerMongoFilterVisitor.visitLambdaExpression(
                       "ANY", any.getLambdaVariable(), any.getExpression());
               this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
+              this.addUsedNavigationProperties(
+                  innerMongoFilterVisitor.getUsedNavigationProperties());
               return innerMongoFilterVisitor.prepareExprDocumentForAnyLambdaWithExpr(
                   innerObject,
                   propertyContext.getMongoField(),
@@ -753,6 +788,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   innerMongoFilterVisitor.visitLambdaExpression(
                       "ANY", any.getLambdaVariable(), any.getExpression());
               this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
+              this.addUsedNavigationProperties(
+                  innerMongoFilterVisitor.getUsedNavigationProperties());
               return innerMongoFilterVisitor.context.isExprMode()
                   ? innerMongoFilterVisitor.prepareExprDocumentForAnyLambdaWithExpr(
                       innerObject,
@@ -787,6 +824,8 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                   innerMongoFilterVisitor.visitLambdaExpression(
                       "ANY", any.getLambdaVariable(), any.getExpression());
               this.addUsedMongoDBProperties(innerMongoFilterVisitor.getUsedMongoDBProperties());
+              this.addUsedNavigationProperties(
+                  innerMongoFilterVisitor.getUsedNavigationProperties());
               return innerObject;
             };
       }
@@ -978,12 +1017,22 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   }
 
   private String resolvePropertyTypeBasedOnMember(Member member) {
-    return member.getResourcePath().getUriResourceParts().get(0) instanceof UriResourceProperty
-        ? ((UriResourceProperty) member.getResourcePath().getUriResourceParts().get(0))
-            .getType()
-            .getFullQualifiedName()
-            .toString()
-        : null;
+    List<UriResource> parts = member.getResourcePath().getUriResourceParts();
+    for (int i = parts.size() - 1; i >= 0; i--) {
+      UriResource part = parts.get(i);
+      if (part instanceof UriResourceProperty) {
+        EdmType type = ((UriResourceProperty) part).getType();
+        return type != null && type.getFullQualifiedName() != null
+            ? type.getFullQualifiedName().toString()
+            : null;
+      } else if (part instanceof UriResourceNavigation) {
+        EdmType type = ((UriResourceNavigation) part).getType();
+        return type != null && type.getFullQualifiedName() != null
+            ? type.getFullQualifiedName().toString()
+            : null;
+      }
+    }
+    return null;
   }
 
   private Document prepareMemberDocument(String field, Member member) {
@@ -1041,6 +1090,14 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
   private PropertyContext prepareProperty(String field, Member member) {
     String mongoField = null;
     String mongoFullPath = null;
+    if (member != null && member.getResourcePath() != null) {
+      addUsedNavigationProperties(
+          NavigationPropertyExtractor.extract(
+              member.getResourcePath().getUriResourceParts(),
+              null,
+              edmPropertyMongoPathResolver,
+              this.context::resolveFullPathForLambdaVariable));
+    }
     if (edmPropertyMongoPathResolver != null) {
       MongoPathResolution mongoPathResolution =
           edmPropertyMongoPathResolver.resolveMongoPathForEDMPath(
@@ -1274,9 +1331,11 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
                 edmPropertyMongoPathResolver,
                 MongoFilterVisitorContext.builder().isExprMode(true).build(),
                 this.mongoFilterVisitorCommonContext);
-        return new Document(
-            "$expr",
-            unwrapWrapperIfNeeded(innerVisitor.visitBinaryOperator(operator, left, right)));
+        Bson exprBson =
+            unwrapWrapperIfNeeded(innerVisitor.visitBinaryOperator(operator, left, right));
+        this.addUsedMongoDBProperties(innerVisitor.getUsedMongoDBProperties());
+        this.addUsedNavigationProperties(innerVisitor.getUsedNavigationProperties());
+        return new Document("$expr", exprBson);
       }
     }
     return bsonWrapper(
@@ -2229,6 +2288,9 @@ public class MongoFilterVisitor implements ExpressionVisitor<Bson> {
         } else if (path instanceof UriResourceProperty) {
           UriResourceProperty property = (UriResourceProperty) path;
           value = property.getProperty().getName();
+        } else if (path instanceof UriResourceNavigation) {
+          UriResourceNavigation navigation = (UriResourceNavigation) path;
+          value = navigation.getProperty().getName();
         }
         if (value == null) {
           break;

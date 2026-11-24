@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.core.operators.apply;
 
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,16 +11,27 @@ import org.apache.olingo.server.api.uri.queryoption.apply.Concat;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-/** ConcatItemParser type. */
+/** Parser that translates OData $apply concat transformations into MongoDB stages. */
 public class ConcatItemParser implements ApplyItemParser {
 
   private final ODataApplyToMongoAggregationPipelineParser applyParser;
 
-  /** ConcatItemParser constructor. */
+  /**
+   * Constructs a new ConcatItemParser with the specified apply parser.
+   *
+   * @param applyParser the parent apply parser used to parse inner transformation sequences
+   */
   public ConcatItemParser(ODataApplyToMongoAggregationPipelineParser applyParser) {
     this.applyParser = applyParser;
   }
 
+  /**
+   * Parses the concat apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the concat apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {
@@ -35,6 +47,8 @@ public class ConcatItemParser implements ApplyItemParser {
     java.util.Set<String> writtenProperties = new java.util.LinkedHashSet<>();
     java.util.Set<String> addedProperties = new java.util.LinkedHashSet<>();
     java.util.Set<String> removedProperties = new java.util.LinkedHashSet<>();
+    java.util.Set<UsedNavigationProperty> usedNavigationProperties =
+        new java.util.LinkedHashSet<>();
     boolean shapeRedefined = false;
 
     int index = 0;
@@ -56,6 +70,9 @@ public class ConcatItemParser implements ApplyItemParser {
       }
       if (innerResult.getRemovedMongoDocumentProperties() != null) {
         removedProperties.addAll(innerResult.getRemovedMongoDocumentProperties());
+      }
+      if (innerResult.getUsedNavigationProperties() != null) {
+        usedNavigationProperties.addAll(innerResult.getUsedNavigationProperties());
       }
       shapeRedefined = shapeRedefined || innerResult.isDocumentShapeRedefined();
     }
@@ -81,6 +98,7 @@ public class ConcatItemParser implements ApplyItemParser {
         .withAddedMongoDocumentProperties(new ArrayList<>(addedProperties))
         .withRemovedMongoDocumentProperties(new ArrayList<>(removedProperties))
         .withDocumentShapeRedefined(shapeRedefined)
+        .withUsedNavigationProperties(new ArrayList<>(usedNavigationProperties))
         .build();
   }
 }

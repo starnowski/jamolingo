@@ -10,6 +10,11 @@ The `core` module is primarily an OData query translator and not a full OData se
 
 The `$select` operator allows clients to specify a subset of properties to be returned by the service. The `core` module translates this into a MongoDB `$project` aggregation stage.
 
+**Translation Details:**
+- Translates to a `$project` aggregation stage.
+- Supports primitive properties, complex property paths, and navigation properties (including navigation properties nested inside complex properties).
+- Reports any referenced navigation properties via `getUsedNavigationProperties()`.
+
 **Usage:**
 
 The `OdataSelectToMongoProjectParser` class is responsible for this translation.
@@ -57,7 +62,8 @@ The `$filter` operator allows clients to filter a collection of resources. The `
         - **all operator:** Applies a Boolean expression to each member of a collection and returns true if the expression is true for all members of the collection, otherwise it returns false. As per [OData specification](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_all), the `all` operator always returns true for an empty collection. This also applies when the collection property is `null` or does not exist in the document.
         - **any operator:** Applies a Boolean expression to each member of a collection and returns true if and only if the expression is true for any member of the collection, otherwise it returns false. This implies that the `any` operator always returns false for an empty collection. The `any` operator can also be used without an argument expression (e.g., `any()`); this short form returns true if the collection is not empty and false if the collection is empty, as per [OData specification](https://docs.oasis-open.org/odata/odata/v4.01/os/part2-url-conventions/odata-v4.01-os-part2-url-conventions.html#sec_any). This makes `any()` a useful way to check if a collection is not empty.
     - **Collection count:** `/$count`.
-- Handles nested property paths and complex types.
+- Handles nested property paths, complex types, and navigation property paths (single-valued, multi-hop, navigation properties nested inside complex types, entity `null` comparisons, and collection-valued navigation properties via `any()`, `all()`, and `/$count`).
+- Reports all referenced navigation properties via `getUsedNavigationProperties()`.
 - Supports mapping overrides for MongoDB field names and nested structures (e.g., wrapper objects).
 
 **Usage:**
@@ -161,6 +167,7 @@ The `$expand` operator allows clients to include related resources in the respon
 - Handles complex "orphan" removal logic in `$graphLookup` to ensure integrity when `$filter` is used.
 - Allows limiting the maximum number of explicitly nested `$expand` operations to prevent performance issues (throws `NestedExpandLevelExceededException` when exceeded).
 - Throws `CannotHandleExpandWithApplyByGraphLookupException` when an `$expand` operator contains an inner `$apply` option and is configured to be handled by the `$graphLookup` stage (e.g., when `$levels` > 1 or `$levels=max` and `useLookupForLevelGreaterThanOne` is `false`), as `$graphLookup` does not support inner pipeline transformations. To translate inner `$apply` operations for multi-level expansions, configure `useLookupForLevelGreaterThanOne(true)` on `ExpandParserContext`.
+- Reports all expanded navigation properties as well as navigation properties referenced in nested `$filter`, `$orderby`, `$select`, `$apply`, and nested `$expand` options via `getUsedNavigationProperties()`.
 
 **Usage:**
 
@@ -198,6 +205,8 @@ The `$orderby` operator specifies the sort order of the returned items. The `cor
 
 **Translation Details:**
 - Translates to a `$sort` aggregation stage.
+- Supports sorting by direct properties, nested complex properties, and navigation property paths (including multi-hop navigation paths).
+- Reports any referenced navigation properties via `getUsedNavigationProperties()`.
 
 **Usage:**
 
@@ -328,6 +337,11 @@ The `$apply` operator specifies a sequence of set transformations, such as group
 **Translation Details:**
 - Translates to multiple aggregation stages based on the transformations used, such as `$match`, `$group`, `$sort`, `$limit`, `$skip`, `$set`, `$project`, `$lookup`, etc.
 - Supported apply item kinds include: `FILTER`, `IDENTITY`, `GROUP_BY`, `ORDERBY`, `TOP`, `SKIP`, `AGGREGATE`, `COMPUTE`, `CONCAT`, `SEARCH`, `BOTTOM_TOP`, `EXPAND`.
+- Supports navigation property paths across transformations, including:
+    - `filter`, `orderby`, `compute`, `bottomtop` (`topcount`, `bottomcount`, `topsum`, `bottomsum`, `toppercent`, `bottompercent`), `expand`, and `concat`.
+    - `groupby`: Supports multi-segment complex and navigation property paths as well as `$rollup` items.
+    - `aggregate`: Supports single-valued navigation property paths, arithmetic and scalar expressions across navigation properties, inline aggregations over collection-valued navigation properties (e.g., `Orders(Amount with sum as Total)`), collection navigation `/$count` (with or without standard aggregation methods), and `from` clauses with navigation paths.
+- Reports all referenced navigation properties across all transformations via `getUsedNavigationProperties()`.
 - The `SEARCH` item kind requires providing an `ApplySearchToMongoPipelineParser` implementation if it's used.
 - The `EXPAND` item kind optionally accepts an `ODataExpandToMongoAggregationPipelineParser` implementation (a default parser is used if not provided).
 
@@ -357,6 +371,67 @@ ApplyOperatorResult result = parser.parse(applyOption, contextFacade);
 // 4. Use the result in your MongoDB aggregation pipeline
 List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
+```
+
+### Navigation Properties, Lookup Stages Builder, and Unset Stages Builder
+
+Operators that can reference OData navigation properties (`$filter`, `$orderby`, `$select`, `$expand`, and `$apply`) expose metadata about all traversed navigation property hops via `OlingoOperatorResult.getUsedNavigationProperties()`, which returns a list of `UsedNavigationProperty` instances.
+
+Each `UsedNavigationProperty` captures:
+- `edmPath`: The EDM path to the navigation property (using `/` separator).
+- `mongoPath`: The resolved MongoDB document path (using `.` notation).
+- `edmPropertyName`: The name of the navigation property segment.
+- `edmEntityFullName`: The full qualified name of the target EDM entity type.
+- `collection`: Whether the navigation property is collection-valued.
+- `localKeyProperty` and `foreignKeyProperty`: The local and foreign referential constraint property names.
+
+When navigation properties are referenced in operators such as `$filter`, `$orderby`, or `$apply`:
+- Use `UsedNavigationPropertyLookupStagesBuilder` to generate the required MongoDB `$lookup` (and `$unwind` for single-valued navigation properties, or nested `$lookup` pipelines for multi-hop collection navigation paths) stages to prepend before the operator stages.
+- Use `UsedNavigationPropertyUnsetStagesBuilder` to generate a MongoDB `$unset` stage to append after the operator stages, removing temporary looked-up navigation property fields that should not remain in the returned documents (with automatic deduplication and collapsing of descendant paths when an ancestor navigation property is also being unset).
+
+**Usage:**
+
+```java
+import com.github.starnowski.jamolingo.common.beans.KeyValue;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
+import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
+import com.github.starnowski.jamolingo.core.utils.DefaultNavigationPropertyLookupContext;
+import com.github.starnowski.jamolingo.core.utils.NavigationPropertyLookupContext;
+import com.github.starnowski.jamolingo.core.utils.UsedNavigationPropertyLookupStagesBuilder;
+import com.github.starnowski.jamolingo.core.utils.UsedNavigationPropertyUnsetStagesBuilder;
+import org.bson.conversions.Bson;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+// 1. Parse an operator that references navigation properties (e.g., $filter=Category/Name eq 'Books')
+FilterOperatorResult filterResult = filterParser.parse(filterOption, contextFacade);
+List<UsedNavigationProperty> usedNavProps = filterResult.getUsedNavigationProperties();
+
+// 2. Configure the lookup context with entity-to-collection and property mappings
+NavigationPropertyLookupContext lookupContext = DefaultNavigationPropertyLookupContext.builder()
+    .withRootEdmEntityTypeName("MyNamespace.Product")
+    .withRootEdmMongoContextFacade(contextFacade)
+    .withEdmTypeMapping(Map.of(
+        "MyNamespace.Category", categoryContextFacade
+    ))
+    .withEdmTablesToMongoDBCollections(Map.of(
+        new KeyValue<>("MyNamespace", "Category"), "categories"
+    ))
+    .build();
+
+// 3. Build the $lookup (and $unwind) stages and the $unset stage for the used navigation properties
+UsedNavigationPropertyLookupStagesBuilder lookupBuilder = new UsedNavigationPropertyLookupStagesBuilder();
+List<Bson> lookupStages = lookupBuilder.build(usedNavProps, lookupContext);
+
+UsedNavigationPropertyUnsetStagesBuilder unsetBuilder = new UsedNavigationPropertyUnsetStagesBuilder();
+List<Bson> unsetStages = unsetBuilder.build(usedNavProps, lookupContext);
+
+// 4. Combine the lookup stages, operator stages, and unset stages
+List<Bson> pipeline = new ArrayList<>();
+pipeline.addAll(lookupStages);
+pipeline.addAll(filterResult.getStageObjects());
+pipeline.addAll(unsetStages);
 ```
 
 ## Configuration and Mapping

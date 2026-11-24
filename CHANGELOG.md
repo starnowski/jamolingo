@@ -24,6 +24,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+#### Core Module
+*   Added `com.github.starnowski.jamolingo.core.operators.NavigationPropertyExtractor` type [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added `com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty` type [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added `com.github.starnowski.jamolingo.core.utils.DefaultNavigationPropertyLookupContext` type [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added `com.github.starnowski.jamolingo.core.utils.NavigationPropertyLookupContext` type [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added `com.github.starnowski.jamolingo.core.utils.UsedNavigationPropertyLookupStagesBuilder` type [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added `com.github.starnowski.jamolingo.core.utils.UsedNavigationPropertyUnsetStagesBuilder` type [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added `getUsedNavigationProperties()` method to `com.github.starnowski.jamolingo.core.operators.OlingoOperatorResult` [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added `getUsedNavigationProperties()` method to `com.github.starnowski.jamolingo.core.operators.filter.MongoFilterVisitor` [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added `withDefaultApplyOperatorResult(DefaultApplyOperatorResult)` and `withUsedNavigationProperties(List<UsedNavigationProperty>)` methods to `com.github.starnowski.jamolingo.core.operators.apply.DefaultApplyOperatorResult.Builder` [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added new constructor for `com.github.starnowski.jamolingo.core.operators.apply.DefaultApplyOperatorResult` accepting `java.util.List<com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty>` [59](https://github.com/starnowski/jamolingo/issues/59)
+*   Added support for navigation properties in `$filter`, `$orderby`, `$select`, `$expand`, and `$apply` operators [59](https://github.com/starnowski/jamolingo/issues/59)
+
 ## [0.10.1] - 2026-11-14
 
 ### Added

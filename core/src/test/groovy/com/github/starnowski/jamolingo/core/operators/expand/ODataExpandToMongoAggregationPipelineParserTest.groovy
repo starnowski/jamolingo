@@ -2,6 +2,7 @@ package com.github.starnowski.jamolingo.core.operators.expand
 
 import com.github.starnowski.jamolingo.common.beans.KeyValue
 import com.github.starnowski.jamolingo.core.AbstractSpecification
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty
 import com.github.starnowski.jamolingo.core.operators.apply.ApplySearchToMongoPipelineParser
 import com.github.starnowski.jamolingo.core.operators.apply.ODataApplyToMongoAtlasSearchPipelineParser
 import com.github.starnowski.jamolingo.core.operators.expand.ExpandParserContext
@@ -879,6 +880,84 @@ class ODataExpandToMongoAggregationPipelineParserTest extends AbstractSpecificat
             }
         }""")
         pipeline.get(2) == Document.parse("""{ "\$match": { "metaResult.0": { "\$exists": true } } }""")
+    }
+
+    @Unroll
+    def "should return expected used navigation properties for expand query #expandQuery"() {
+        given:
+        Edm edm = loadEmdProvider("edm/edm_tree.xml")
+        UriInfo uriInfo = new Parser(edm, OData.newInstance())
+                .parseUri("treeType1s", expandQuery, null, null)
+        def parser = new ODataExpandToMongoAggregationPipelineParser()
+
+        when:
+        def result = parser.parse(uriInfo.getExpandOption())
+
+        then:
+        result.getUsedNavigationProperties() == expectedNavProps
+
+        where:
+        expandQuery | expectedNavProps
+        '$expand=category' | [
+                UsedNavigationProperty.builder()
+                        .withEdmPath("category")
+                        .withMongoPath("category")
+                        .withEdmPropertyName("category")
+                        .withEdmEntityFullName("MyService.Category")
+                        .withCollection(false)
+                        .withLocalKeyProperty("categoryId")
+                        .withForeignKeyProperty("_id")
+                        .build()
+        ]
+        '$expand=treeType2s($expand=treeType3s)' | [
+                UsedNavigationProperty.builder()
+                        .withEdmPath("treeType2s")
+                        .withMongoPath("treeType2s")
+                        .withEdmPropertyName("treeType2s")
+                        .withEdmEntityFullName("MyService.TreeType2")
+                        .withCollection(true)
+                        .withLocalKeyProperty("_id")
+                        .withForeignKeyProperty("treeType1Id")
+                        .build(),
+                UsedNavigationProperty.builder()
+                        .withEdmPath("treeType2s/treeType3s")
+                        .withMongoPath("treeType2s.treeType3s")
+                        .withEdmPropertyName("treeType3s")
+                        .withEdmEntityFullName("MyService.TreeType3")
+                        .withCollection(true)
+                        .withLocalKeyProperty("_id")
+                        .withForeignKeyProperty("treeType2Id")
+                        .build()
+        ]
+        '$expand=children($filter=category/name eq \'A\';$orderby=parent/index desc)' | [
+                UsedNavigationProperty.builder()
+                        .withEdmPath("children")
+                        .withMongoPath("children")
+                        .withEdmPropertyName("children")
+                        .withEdmEntityFullName("MyService.TreeType1")
+                        .withCollection(true)
+                        .withLocalKeyProperty("_id")
+                        .withForeignKeyProperty("parentId")
+                        .build(),
+                UsedNavigationProperty.builder()
+                        .withEdmPath("children/category")
+                        .withMongoPath("children.category")
+                        .withEdmPropertyName("category")
+                        .withEdmEntityFullName("MyService.Category")
+                        .withCollection(false)
+                        .withLocalKeyProperty("categoryId")
+                        .withForeignKeyProperty("_id")
+                        .build(),
+                UsedNavigationProperty.builder()
+                        .withEdmPath("children/parent")
+                        .withMongoPath("children.parent")
+                        .withEdmPropertyName("parent")
+                        .withEdmEntityFullName("MyService.TreeType1")
+                        .withCollection(false)
+                        .withLocalKeyProperty("parentId")
+                        .withForeignKeyProperty("_id")
+                        .build()
+        ]
     }
 
     private static ApplySearchToMongoPipelineParser createApplySearchParser(String indexName, List<String> paths) {

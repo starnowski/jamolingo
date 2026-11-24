@@ -3,8 +3,16 @@ package com.github.starnowski.jamolingo.core.operators.apply;
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 
-/** ComputeItemParser type. */
+/** Parser that translates OData $apply compute transformations into MongoDB stages. */
 public class ComputeItemParser implements ApplyItemParser {
+
+  /**
+   * Parses the compute apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the compute apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {
@@ -51,6 +59,8 @@ public class ComputeItemParser implements ApplyItemParser {
         .withWrittenMongoDocumentProperties(addedProperties)
         .withAddedMongoDocumentProperties(addedProperties)
         .withDocumentShapeRedefined(false)
+        .withUsedNavigationProperties(
+            new java.util.ArrayList<>(visitor.getUsedNavigationProperties()))
         .build();
   }
 }

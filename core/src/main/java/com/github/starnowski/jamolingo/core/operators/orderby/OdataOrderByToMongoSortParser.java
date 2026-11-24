@@ -2,11 +2,15 @@ package com.github.starnowski.jamolingo.core.operators.orderby;
 
 import com.github.starnowski.jamolingo.core.api.EdmMongoContextFacade;
 import com.github.starnowski.jamolingo.core.context.DefaultEdmMongoContextFacade;
+import com.github.starnowski.jamolingo.core.operators.NavigationPropertyExtractor;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.apache.olingo.server.api.uri.queryoption.OrderByItem;
 import org.apache.olingo.server.api.uri.queryoption.OrderByOption;
 import org.apache.olingo.server.api.uri.queryoption.expression.Expression;
@@ -30,6 +34,13 @@ public class OdataOrderByToMongoSortParser {
     return parse(orderByOption, DefaultEdmMongoContextFacade.builder().build());
   }
 
+  /**
+   * Parses the given OrderByOption using the provided context facade.
+   *
+   * @param orderByOption the OData orderby option to parse
+   * @param edmMongoContextFacade the context facade for resolving paths
+   * @return the result of the parsing containing the MongoDB sort stage
+   */
   public OrderByOperatorResult parse(
       OrderByOption orderByOption, EdmMongoContextFacade edmMongoContextFacade) {
     return parse(
@@ -38,11 +49,20 @@ public class OdataOrderByToMongoSortParser {
         DefaultOdataOrderByToMongoSortParserContext.builder().build());
   }
 
+  /**
+   * Parses the given OrderByOption using the provided context facade and parser context.
+   *
+   * @param orderByOption the OData orderby option to parse
+   * @param edmMongoContextFacade the context facade for resolving paths
+   * @param context the parser context containing additional sort configurations
+   * @return the result of the parsing containing the MongoDB sort stage
+   */
   public OrderByOperatorResult parse(
       OrderByOption orderByOption,
       EdmMongoContextFacade edmMongoContextFacade,
       OdataOrderByToMongoSortParserContext context) {
     Map<String, Object> sortFields = new LinkedHashMap<>();
+    Set<UsedNavigationProperty> usedNavigationProperties = new LinkedHashSet<>();
 
     if (context != null && context.getPrependedSortProperties() != null) {
       for (SortProperty sortProp : context.getPrependedSortProperties()) {
@@ -66,18 +86,21 @@ public class OdataOrderByToMongoSortParser {
                 .resolveMongoPathForEDMPath(member.getResourcePath())
                 .getMongoPath();
         sortFields.put(mongoPath, item.isDescending() ? -1 : 1);
+        usedNavigationProperties.addAll(
+            NavigationPropertyExtractor.extract(member.getResourcePath(), edmMongoContextFacade));
       }
     }
 
     if (sortFields.isEmpty()) {
       return new DefaultOrderByOperatorResult(
-          Collections.emptyList(), false, Collections.emptyList());
+          Collections.emptyList(), false, Collections.emptyList(), Collections.emptyList());
     }
 
     return new DefaultOrderByOperatorResult(
         Collections.singletonList(new Document("$sort", new Document(sortFields))),
         true,
-        new ArrayList<>(sortFields.keySet()));
+        new ArrayList<>(sortFields.keySet()),
+        new ArrayList<>(usedNavigationProperties));
   }
 
   private static class DefaultOrderByOperatorResult implements OrderByOperatorResult {
@@ -85,12 +108,20 @@ public class OdataOrderByToMongoSortParser {
     private final List<Bson> stageObjects;
     private final boolean present;
     private final List<String> usedMongoDocumentProperties;
+    private final List<UsedNavigationProperty> usedNavigationProperties;
 
     private DefaultOrderByOperatorResult(
-        List<Bson> stageObjects, boolean present, List<String> usedMongoDocumentProperties) {
+        List<Bson> stageObjects,
+        boolean present,
+        List<String> usedMongoDocumentProperties,
+        List<UsedNavigationProperty> usedNavigationProperties) {
       this.stageObjects = stageObjects;
       this.present = present;
       this.usedMongoDocumentProperties = usedMongoDocumentProperties;
+      this.usedNavigationProperties =
+          usedNavigationProperties != null
+              ? Collections.unmodifiableList(usedNavigationProperties)
+              : Collections.emptyList();
     }
 
     @Override
@@ -101,6 +132,11 @@ public class OdataOrderByToMongoSortParser {
     @Override
     public List<String> getUsedMongoDocumentProperties() {
       return usedMongoDocumentProperties;
+    }
+
+    @Override
+    public List<UsedNavigationProperty> getUsedNavigationProperties() {
+      return usedNavigationProperties;
     }
 
     @Override

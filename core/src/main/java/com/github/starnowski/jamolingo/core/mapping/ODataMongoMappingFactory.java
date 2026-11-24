@@ -193,6 +193,11 @@ public class ODataMongoMappingFactory {
                   new HashMap<>(entityPropertyMappingContext.getEdmTypeAndEdmPath()))));
     }
 
+    for (String navPropName : complexType.getNavigationPropertyNames()) {
+      EdmNavigationProperty navProp = complexType.getNavigationProperty(navPropName);
+      props.put(navProp.getName(), mapNavigationProperty(navProp));
+    }
+
     return props;
   }
 

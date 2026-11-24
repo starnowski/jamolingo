@@ -1,24 +1,41 @@
 package com.github.starnowski.jamolingo.core.operators.apply;
 
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.operators.NavigationPropertyExtractor;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
+import org.apache.olingo.server.api.uri.queryoption.apply.Aggregate;
+import org.apache.olingo.server.api.uri.queryoption.apply.AggregateExpression;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupBy;
 import org.apache.olingo.server.api.uri.queryoption.apply.GroupByItem;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-/** GroupByItemParser type. */
+/** Parser that translates OData $apply groupby transformations into MongoDB stages. */
 public class GroupByItemParser implements ApplyItemParser {
 
   private final ODataApplyToMongoAggregationPipelineParser applyParser;
 
-  /** GroupByItemParser constructor. */
+  /**
+   * Constructs a new GroupByItemParser with the specified apply parser.
+   *
+   * @param applyParser the parent apply parser used to parse nested transformation sequences
+   */
   public GroupByItemParser(ODataApplyToMongoAggregationPipelineParser applyParser) {
     this.applyParser = applyParser;
   }
 
+  /**
+   * Parses the groupby apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the groupby apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {
@@ -29,17 +46,14 @@ public class GroupByItemParser implements ApplyItemParser {
 
     Document idDoc = new Document();
     List<String> groupedMongoPaths = new ArrayList<>();
-    for (GroupByItem item : groupBy.getGroupByItems()) {
-      StringBuilder pathBuilder = new StringBuilder();
-      for (int i = 0; i < item.getPath().size(); i++) {
-        if (i > 0) pathBuilder.append("/");
-        pathBuilder.append(item.getPath().get(i).getSegmentValue());
-      }
-      String edmPath = pathBuilder.toString();
-      String mongoPath = edmMongoContextFacade.resolveMongoPathForEDMPath(edmPath).getMongoPath();
-      idDoc.put(mongoPath, "$" + mongoPath);
-      groupedMongoPaths.add(mongoPath);
-    }
+    Set<UsedNavigationProperty> usedNavigationProperties = new LinkedHashSet<>();
+
+    collectGroupByItems(
+        groupBy.getGroupByItems(),
+        edmMongoContextFacade,
+        idDoc,
+        groupedMongoPaths,
+        usedNavigationProperties);
 
     Document groupStageDoc = new Document("_id", idDoc);
     Document projectStageDoc = new Document("_id", 0);
@@ -53,47 +67,18 @@ public class GroupByItemParser implements ApplyItemParser {
     List<ApplyItem> remainingItems = new ArrayList<>();
     if (groupBy.getApplyOption() != null) {
       for (ApplyItem item : groupBy.getApplyOption().getApplyItems()) {
-        if (item instanceof org.apache.olingo.server.api.uri.queryoption.apply.Aggregate) {
-          org.apache.olingo.server.api.uri.queryoption.apply.Aggregate aggregate =
-              (org.apache.olingo.server.api.uri.queryoption.apply.Aggregate) item;
-          for (org.apache.olingo.server.api.uri.queryoption.apply.AggregateExpression expr :
-              aggregate.getExpressions()) {
-            String alias = expr.getAlias();
-            String path = null;
-            if (expr.getPath() != null && !expr.getPath().isEmpty()) {
-              path = expr.getPath().get(0).getSegmentValue();
-            } else if (expr.getExpression()
-                instanceof org.apache.olingo.server.api.uri.queryoption.expression.Member) {
-              org.apache.olingo.server.api.uri.queryoption.expression.Member member =
-                  (org.apache.olingo.server.api.uri.queryoption.expression.Member)
-                      expr.getExpression();
-              path = member.getResourcePath().getUriResourceParts().get(0).getSegmentValue();
-            } else {
-              throw new IllegalArgumentException("Cannot extract path from AggregateExpression");
-            }
-            if (expr.getStandardMethod() == null && "$count".equals(path)) {
-              groupStageDoc.put(alias, new Document("$sum", 1));
-              projectStageDoc.put(alias, 1);
-              addedProperties.add(alias);
-            } else {
-              String mongoPath =
-                  edmMongoContextFacade.resolveMongoPathForEDMPath(path).getMongoPath();
-              String method = expr.getStandardMethod().name().toLowerCase();
-              if ("average".equals(method)) {
-                method = "avg";
-              }
-              usedProperties.add(mongoPath);
-              addedProperties.add(alias);
-              if ("count_distinct".equals(method)) {
-                String distinctArrayField = alias + "_distinctArray";
-                groupStageDoc.put(distinctArrayField, new Document("$addToSet", "$" + mongoPath));
-                projectStageDoc.put(alias, new Document("$size", "$" + distinctArrayField));
-              } else {
-                String mongoOperator = "$" + method;
-                groupStageDoc.put(alias, new Document(mongoOperator, "$" + mongoPath));
-                projectStageDoc.put(alias, 1);
-              }
-            }
+        if (item instanceof Aggregate) {
+          Aggregate aggregate = (Aggregate) item;
+          for (AggregateExpression expr : aggregate.getExpressions()) {
+            AggregateItemParser.processAggregateExpression(
+                expr,
+                null,
+                edmMongoContextFacade,
+                groupStageDoc,
+                projectStageDoc,
+                usedProperties,
+                addedProperties,
+                usedNavigationProperties);
           }
         } else {
           remainingItems.add(item);
@@ -129,6 +114,9 @@ public class GroupByItemParser implements ApplyItemParser {
       if (innerResult.getRemovedMongoDocumentProperties() != null) {
         finalRemovedProperties.addAll(innerResult.getRemovedMongoDocumentProperties());
       }
+      if (innerResult.getUsedNavigationProperties() != null) {
+        usedNavigationProperties.addAll(innerResult.getUsedNavigationProperties());
+      }
     }
 
     return DefaultApplyOperatorResult.builder()
@@ -138,6 +126,36 @@ public class GroupByItemParser implements ApplyItemParser {
         .withAddedMongoDocumentProperties(finalAddedProperties)
         .withRemovedMongoDocumentProperties(finalRemovedProperties)
         .withDocumentShapeRedefined(true)
+        .withUsedNavigationProperties(new ArrayList<>(usedNavigationProperties))
         .build();
+  }
+
+  private void collectGroupByItems(
+      List<GroupByItem> items,
+      EdmPropertyMongoPathResolver edmMongoContextFacade,
+      Document idDoc,
+      List<String> groupedMongoPaths,
+      Set<UsedNavigationProperty> usedNavigationProperties) {
+    if (items == null) {
+      return;
+    }
+    for (GroupByItem item : items) {
+      if (item.getPath() != null && !item.getPath().isEmpty()) {
+        String edmPath = NavigationPropertyExtractor.extractPath(item.getPath(), "/");
+        usedNavigationProperties.addAll(
+            NavigationPropertyExtractor.extract(item.getPath(), edmMongoContextFacade));
+        String mongoPath = edmMongoContextFacade.resolveMongoPathForEDMPath(edmPath).getMongoPath();
+        idDoc.put(mongoPath, "$" + mongoPath);
+        groupedMongoPaths.add(mongoPath);
+      }
+      if (item.getRollup() != null && !item.getRollup().isEmpty()) {
+        collectGroupByItems(
+            item.getRollup(),
+            edmMongoContextFacade,
+            idDoc,
+            groupedMongoPaths,
+            usedNavigationProperties);
+      }
+    }
   }
 }

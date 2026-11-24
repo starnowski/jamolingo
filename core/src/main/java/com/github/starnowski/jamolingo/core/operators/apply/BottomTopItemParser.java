@@ -1,6 +1,8 @@
 package com.github.starnowski.jamolingo.core.operators.apply;
 
 import com.github.starnowski.jamolingo.core.api.EdmPropertyMongoPathResolver;
+import com.github.starnowski.jamolingo.core.operators.NavigationPropertyExtractor;
+import com.github.starnowski.jamolingo.core.operators.UsedNavigationProperty;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
@@ -11,9 +13,16 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-/** BottomTopItemParser type. */
+/** Parser that translates OData $apply bottom/top transformations into MongoDB stages. */
 public class BottomTopItemParser implements ApplyItemParser {
 
+  /**
+   * Parses the bottom/top apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the bottom/top apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {
@@ -37,8 +46,10 @@ public class BottomTopItemParser implements ApplyItemParser {
       throw new IllegalArgumentException("Expected Member for BottomTop value");
     }
     Member member = (Member) value;
-    String edmPath = member.getResourcePath().getUriResourceParts().get(0).getSegmentValue();
+    String edmPath = NavigationPropertyExtractor.extractPath(member.getResourcePath(), "/");
     String mongoPath = edmMongoContextFacade.resolveMongoPathForEDMPath(edmPath).getMongoPath();
+    List<UsedNavigationProperty> usedNavigationProperties =
+        NavigationPropertyExtractor.extract(member.getResourcePath(), edmMongoContextFacade);
 
     Expression numberExpr = bottomTop.getNumber();
     if (!(numberExpr instanceof Literal)) {
@@ -122,6 +133,7 @@ public class BottomTopItemParser implements ApplyItemParser {
         .withStageObjects(stages)
         .withUsedMongoDocumentProperties(java.util.Collections.singletonList(mongoPath))
         .withDocumentShapeRedefined(false)
+        .withUsedNavigationProperties(usedNavigationProperties)
         .build();
   }
 }
