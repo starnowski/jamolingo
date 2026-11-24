@@ -373,7 +373,7 @@ List<Bson> stages = result.getStageObjects();
 // e.g. collection.aggregate(stages);
 ```
 
-### Navigation Properties and Lookup Stages Builder
+### Navigation Properties, Lookup Stages Builder, and Unset Stages Builder
 
 Operators that can reference OData navigation properties (`$filter`, `$orderby`, `$select`, `$expand`, and `$apply`) expose metadata about all traversed navigation property hops via `OlingoOperatorResult.getUsedNavigationProperties()`, which returns a list of `UsedNavigationProperty` instances.
 
@@ -385,7 +385,9 @@ Each `UsedNavigationProperty` captures:
 - `collection`: Whether the navigation property is collection-valued.
 - `localKeyProperty` and `foreignKeyProperty`: The local and foreign referential constraint property names.
 
-When navigation properties are referenced in operators such as `$filter`, `$orderby`, or `$apply`, you can use `UsedNavigationPropertyLookupStagesBuilder` to generate the required MongoDB `$lookup` (and `$unwind` for single-valued navigation properties, or nested `$lookup` pipelines for multi-hop collection navigation paths) stages to prepend before the operator stages.
+When navigation properties are referenced in operators such as `$filter`, `$orderby`, or `$apply`:
+- Use `UsedNavigationPropertyLookupStagesBuilder` to generate the required MongoDB `$lookup` (and `$unwind` for single-valued navigation properties, or nested `$lookup` pipelines for multi-hop collection navigation paths) stages to prepend before the operator stages.
+- Use `UsedNavigationPropertyUnsetStagesBuilder` to generate a MongoDB `$unset` stage to append after the operator stages, removing temporary looked-up navigation property fields that should not remain in the returned documents (with automatic deduplication and collapsing of descendant paths when an ancestor navigation property is also being unset).
 
 **Usage:**
 
@@ -396,6 +398,7 @@ import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResul
 import com.github.starnowski.jamolingo.core.utils.DefaultNavigationPropertyLookupContext;
 import com.github.starnowski.jamolingo.core.utils.NavigationPropertyLookupContext;
 import com.github.starnowski.jamolingo.core.utils.UsedNavigationPropertyLookupStagesBuilder;
+import com.github.starnowski.jamolingo.core.utils.UsedNavigationPropertyUnsetStagesBuilder;
 import org.bson.conversions.Bson;
 import java.util.ArrayList;
 import java.util.List;
@@ -417,14 +420,18 @@ NavigationPropertyLookupContext lookupContext = DefaultNavigationPropertyLookupC
     ))
     .build();
 
-// 3. Build the $lookup (and $unwind) stages for the used navigation properties
+// 3. Build the $lookup (and $unwind) stages and the $unset stage for the used navigation properties
 UsedNavigationPropertyLookupStagesBuilder lookupBuilder = new UsedNavigationPropertyLookupStagesBuilder();
 List<Bson> lookupStages = lookupBuilder.build(usedNavProps, lookupContext);
 
-// 4. Combine the lookup stages with the operator stages
+UsedNavigationPropertyUnsetStagesBuilder unsetBuilder = new UsedNavigationPropertyUnsetStagesBuilder();
+List<Bson> unsetStages = unsetBuilder.build(usedNavProps, lookupContext);
+
+// 4. Combine the lookup stages, operator stages, and unset stages
 List<Bson> pipeline = new ArrayList<>();
 pipeline.addAll(lookupStages);
 pipeline.addAll(filterResult.getStageObjects());
+pipeline.addAll(unsetStages);
 ```
 
 ## Configuration and Mapping
