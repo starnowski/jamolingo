@@ -7,11 +7,18 @@ import com.github.starnowski.jamolingo.core.operators.orderby.OrderByOperatorRes
 import org.apache.olingo.server.api.uri.queryoption.ApplyItem;
 import org.apache.olingo.server.api.uri.queryoption.apply.OrderBy;
 
-/** OrderByItemParser type. */
+/** Parser that translates OData $apply orderby transformations into MongoDB stages. */
 public class OrderByItemParser implements ApplyItemParser {
 
   private final OdataOrderByToMongoSortParser orderByParser = new OdataOrderByToMongoSortParser();
 
+  /**
+   * Parses the orderby apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the orderby apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {

@@ -13,9 +13,16 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-/** BottomTopItemParser type. */
+/** Parser that translates OData $apply bottom/top transformations into MongoDB stages. */
 public class BottomTopItemParser implements ApplyItemParser {
 
+  /**
+   * Parses the bottom/top apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the bottom/top apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {

@@ -21,8 +21,16 @@ import org.apache.olingo.server.api.uri.queryoption.expression.Member;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-/** AggregateItemParser type. */
+/** Parser that translates OData $apply aggregate transformations into MongoDB stages. */
 public class AggregateItemParser implements ApplyItemParser {
+
+  /**
+   * Parses the aggregate apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the aggregate apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {

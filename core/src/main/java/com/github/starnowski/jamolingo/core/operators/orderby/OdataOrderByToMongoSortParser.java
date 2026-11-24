@@ -34,6 +34,13 @@ public class OdataOrderByToMongoSortParser {
     return parse(orderByOption, DefaultEdmMongoContextFacade.builder().build());
   }
 
+  /**
+   * Parses the given OrderByOption using the provided context facade.
+   *
+   * @param orderByOption the OData orderby option to parse
+   * @param edmMongoContextFacade the context facade for resolving paths
+   * @return the result of the parsing containing the MongoDB sort stage
+   */
   public OrderByOperatorResult parse(
       OrderByOption orderByOption, EdmMongoContextFacade edmMongoContextFacade) {
     return parse(
@@ -42,6 +49,14 @@ public class OdataOrderByToMongoSortParser {
         DefaultOdataOrderByToMongoSortParserContext.builder().build());
   }
 
+  /**
+   * Parses the given OrderByOption using the provided context facade and parser context.
+   *
+   * @param orderByOption the OData orderby option to parse
+   * @param edmMongoContextFacade the context facade for resolving paths
+   * @param context the parser context containing additional sort configurations
+   * @return the result of the parsing containing the MongoDB sort stage
+   */
   public OrderByOperatorResult parse(
       OrderByOption orderByOption,
       EdmMongoContextFacade edmMongoContextFacade,

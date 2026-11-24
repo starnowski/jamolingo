@@ -11,16 +11,27 @@ import org.apache.olingo.server.api.uri.queryoption.apply.Concat;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-/** ConcatItemParser type. */
+/** Parser that translates OData $apply concat transformations into MongoDB stages. */
 public class ConcatItemParser implements ApplyItemParser {
 
   private final ODataApplyToMongoAggregationPipelineParser applyParser;
 
-  /** ConcatItemParser constructor. */
+  /**
+   * Constructs a new ConcatItemParser with the specified apply parser.
+   *
+   * @param applyParser the parent apply parser used to parse inner transformation sequences
+   */
   public ConcatItemParser(ODataApplyToMongoAggregationPipelineParser applyParser) {
     this.applyParser = applyParser;
   }
 
+  /**
+   * Parses the concat apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the concat apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {

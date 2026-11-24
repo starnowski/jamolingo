@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import org.bson.conversions.Bson;
 
-/** DefaultApplyOperatorResult type. */
+/** Default implementation of ApplyOperatorResult. */
 public class DefaultApplyOperatorResult implements ApplyOperatorResult {
 
   private final List<Bson> stageObjects;
@@ -17,7 +17,19 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
   private final boolean documentShapeRedefined;
   private final List<UsedNavigationProperty> usedNavigationProperties;
 
-  /** DefaultApplyOperatorResult constructor. */
+  /**
+   * Constructs a new DefaultApplyOperatorResult.
+   *
+   * @param stageObjects the list of MongoDB aggregation pipeline stages
+   * @param usedMongoDocumentProperties the list of MongoDB document properties read by the operator
+   * @param writtenMongoDocumentProperties the list of MongoDB document properties written by the
+   *     operator
+   * @param addedMongoDocumentProperties the list of MongoDB document properties added by the
+   *     operator
+   * @param removedMongoDocumentProperties the list of MongoDB document properties removed by the
+   *     operator
+   * @param documentShapeRedefined true if the document shape is redefined, false otherwise
+   */
   public DefaultApplyOperatorResult(
       List<Bson> stageObjects,
       List<String> usedMongoDocumentProperties,
@@ -35,7 +47,20 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
         Collections.emptyList());
   }
 
-  /** DefaultApplyOperatorResult constructor with used navigation properties. */
+  /**
+   * Constructs a new DefaultApplyOperatorResult including used navigation properties.
+   *
+   * @param stageObjects the list of MongoDB aggregation pipeline stages
+   * @param usedMongoDocumentProperties the list of MongoDB document properties read by the operator
+   * @param writtenMongoDocumentProperties the list of MongoDB document properties written by the
+   *     operator
+   * @param addedMongoDocumentProperties the list of MongoDB document properties added by the
+   *     operator
+   * @param removedMongoDocumentProperties the list of MongoDB document properties removed by the
+   *     operator
+   * @param documentShapeRedefined true if the document shape is redefined, false otherwise
+   * @param usedNavigationProperties the list of navigation properties referenced by the operator
+   */
   public DefaultApplyOperatorResult(
       List<Bson> stageObjects,
       List<String> usedMongoDocumentProperties,
@@ -70,49 +95,41 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
   }
 
   @Override
-  /** getStageObjects method. */
   public List<Bson> getStageObjects() {
     return stageObjects;
   }
 
   @Override
-  /** getUsedMongoDocumentProperties method. */
   public List<String> getUsedMongoDocumentProperties() {
     return usedMongoDocumentProperties;
   }
 
   @Override
-  /** getWrittenMongoDocumentProperties method. */
   public List<String> getWrittenMongoDocumentProperties() {
     return writtenMongoDocumentProperties;
   }
 
   @Override
-  /** getAddedMongoDocumentProperties method. */
   public List<String> getAddedMongoDocumentProperties() {
     return addedMongoDocumentProperties;
   }
 
   @Override
-  /** getRemovedMongoDocumentProperties method. */
   public List<String> getRemovedMongoDocumentProperties() {
     return removedMongoDocumentProperties;
   }
 
   @Override
-  /** isDocumentShapeRedefined method. */
   public boolean isDocumentShapeRedefined() {
     return documentShapeRedefined;
   }
 
   @Override
-  /** getUsedNavigationProperties method. */
   public List<UsedNavigationProperty> getUsedNavigationProperties() {
     return usedNavigationProperties;
   }
 
   @Override
-  /** equals method. */
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
@@ -127,7 +144,6 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
   }
 
   @Override
-  /** hashCode method. */
   public int hashCode() {
     return Objects.hash(
         stageObjects,
@@ -140,7 +156,6 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
   }
 
   @Override
-  /** toString method. */
   public String toString() {
     return "DefaultApplyOperatorResult{"
         + "stageObjects="
@@ -160,11 +175,16 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
         + '}';
   }
 
-  /** builder method. */
+  /**
+   * Creates a new Builder for DefaultApplyOperatorResult.
+   *
+   * @return a new builder instance
+   */
   public static Builder builder() {
     return new Builder();
   }
 
+  /** Builder for DefaultApplyOperatorResult. */
   public static class Builder {
     private List<Bson> stageObjects = Collections.emptyList();
     private List<String> usedMongoDocumentProperties = Collections.emptyList();
@@ -174,7 +194,12 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
     private boolean documentShapeRedefined = false;
     private List<UsedNavigationProperty> usedNavigationProperties = Collections.emptyList();
 
-    /** Copies all properties from an existing DefaultApplyOperatorResult. */
+    /**
+     * Copies all properties from an existing DefaultApplyOperatorResult.
+     *
+     * @param defaultApplyOperatorResult the instance to copy from
+     * @return this builder
+     */
     public Builder withDefaultApplyOperatorResult(
         DefaultApplyOperatorResult defaultApplyOperatorResult) {
       this.stageObjects = defaultApplyOperatorResult.stageObjects;
@@ -189,44 +214,89 @@ public class DefaultApplyOperatorResult implements ApplyOperatorResult {
       return this;
     }
 
-    /** withStageObjects method. */
+    /**
+     * Sets the list of MongoDB aggregation pipeline stages.
+     *
+     * @param stageObjects the list of stage objects
+     * @return this builder
+     */
     public Builder withStageObjects(List<Bson> stageObjects) {
       this.stageObjects = stageObjects;
       return this;
     }
 
+    /**
+     * Sets the list of MongoDB document properties read by the operator.
+     *
+     * @param usedMongoDocumentProperties the list of used document properties
+     * @return this builder
+     */
     public Builder withUsedMongoDocumentProperties(List<String> usedMongoDocumentProperties) {
       this.usedMongoDocumentProperties = usedMongoDocumentProperties;
       return this;
     }
 
+    /**
+     * Sets the list of MongoDB document properties written by the operator.
+     *
+     * @param writtenMongoDocumentProperties the list of written document properties
+     * @return this builder
+     */
     public Builder withWrittenMongoDocumentProperties(List<String> writtenMongoDocumentProperties) {
       this.writtenMongoDocumentProperties = writtenMongoDocumentProperties;
       return this;
     }
 
+    /**
+     * Sets the list of MongoDB document properties added by the operator.
+     *
+     * @param addedMongoDocumentProperties the list of added document properties
+     * @return this builder
+     */
     public Builder withAddedMongoDocumentProperties(List<String> addedMongoDocumentProperties) {
       this.addedMongoDocumentProperties = addedMongoDocumentProperties;
       return this;
     }
 
+    /**
+     * Sets the list of MongoDB document properties removed by the operator.
+     *
+     * @param removedMongoDocumentProperties the list of removed document properties
+     * @return this builder
+     */
     public Builder withRemovedMongoDocumentProperties(List<String> removedMongoDocumentProperties) {
       this.removedMongoDocumentProperties = removedMongoDocumentProperties;
       return this;
     }
 
+    /**
+     * Sets whether the document shape is redefined by the operator.
+     *
+     * @param documentShapeRedefined true if the document shape is redefined, false otherwise
+     * @return this builder
+     */
     public Builder withDocumentShapeRedefined(boolean documentShapeRedefined) {
       this.documentShapeRedefined = documentShapeRedefined;
       return this;
     }
 
+    /**
+     * Sets the list of navigation properties referenced by the operator.
+     *
+     * @param usedNavigationProperties the list of used navigation properties
+     * @return this builder
+     */
     public Builder withUsedNavigationProperties(
         List<UsedNavigationProperty> usedNavigationProperties) {
       this.usedNavigationProperties = usedNavigationProperties;
       return this;
     }
 
-    /** build method. */
+    /**
+     * Builds a new DefaultApplyOperatorResult instance.
+     *
+     * @return the created DefaultApplyOperatorResult
+     */
     public DefaultApplyOperatorResult build() {
       return new DefaultApplyOperatorResult(
           stageObjects,

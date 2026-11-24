@@ -15,16 +15,27 @@ import org.apache.olingo.server.api.uri.queryoption.apply.GroupByItem;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
-/** GroupByItemParser type. */
+/** Parser that translates OData $apply groupby transformations into MongoDB stages. */
 public class GroupByItemParser implements ApplyItemParser {
 
   private final ODataApplyToMongoAggregationPipelineParser applyParser;
 
-  /** GroupByItemParser constructor. */
+  /**
+   * Constructs a new GroupByItemParser with the specified apply parser.
+   *
+   * @param applyParser the parent apply parser used to parse nested transformation sequences
+   */
   public GroupByItemParser(ODataApplyToMongoAggregationPipelineParser applyParser) {
     this.applyParser = applyParser;
   }
 
+  /**
+   * Parses the groupby apply item into an ApplyOperatorResult.
+   *
+   * @param applyItem the groupby apply item
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   @Override
   public ApplyOperatorResult parse(
       ApplyItem applyItem, EdmPropertyMongoPathResolver edmMongoContextFacade) {

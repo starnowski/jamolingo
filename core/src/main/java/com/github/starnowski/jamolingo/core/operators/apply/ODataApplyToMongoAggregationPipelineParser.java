@@ -72,6 +72,14 @@ public class ODataApplyToMongoAggregationPipelineParser {
     return parse(applyOption.getApplyItems(), edmMongoContextFacade);
   }
 
+  /**
+   * Parses the list of apply items into an ApplyOperatorResult containing MongoDB aggregation
+   * pipeline stages.
+   *
+   * @param applyItems the list of apply items to parse
+   * @param edmMongoContextFacade the resolver for EDM property to MongoDB path
+   * @return the apply operator result
+   */
   public ApplyOperatorResult parse(
       List<ApplyItem> applyItems, EdmPropertyMongoPathResolver edmMongoContextFacade) {
     if (applyItems == null || applyItems.isEmpty()) {
