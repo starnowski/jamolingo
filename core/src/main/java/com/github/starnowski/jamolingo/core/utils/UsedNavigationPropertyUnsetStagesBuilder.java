@@ -103,10 +103,8 @@ public class UsedNavigationPropertyUnsetStagesBuilder {
 
     for (String normalizedEdmPath : orderedEdmPaths) {
       UsedNavigationProperty prop = uniqueByEdmPath.get(normalizedEdmPath);
-      UsedNavigationProperty parentNavProp =
-          findNearestParent(normalizedEdmPath, uniqueByEdmPath);
-      EdmMongoContextFacade sourceResolver =
-          resolveSourceFacade(parentNavProp, effectiveContext);
+      UsedNavigationProperty parentNavProp = findNearestParent(normalizedEdmPath, uniqueByEdmPath);
+      EdmMongoContextFacade sourceResolver = resolveSourceFacade(parentNavProp, effectiveContext);
       String declaringRelativeEdmPath =
           extractDeclaringRelativeEdmPath(normalizedEdmPath, parentNavProp);
 
