@@ -34,6 +34,8 @@ public interface ExplainAnalyzeResult {
    */
   Throwable getResolutionIndexMatchStagesException();
 
+  Bson getRawIndexDocument();
+
   /** Interface representing a value that has a string representation. */
   interface HasIndexValue {
     String getValue();

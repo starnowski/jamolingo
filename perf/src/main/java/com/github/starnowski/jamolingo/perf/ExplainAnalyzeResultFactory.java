@@ -121,7 +121,8 @@ public class ExplainAnalyzeResultFactory {
       return resolveExplainAnalyzeResult(
           IXSCAN,
           () ->
-              resolveMatchingStages(winningPlan, (Document) winningPlan.get("filter"), mergeIndex));
+              resolveMatchingStages(winningPlan, (Document) winningPlan.get("filter"), mergeIndex),
+          winningPlan);
     }
     if ("COLLSCAN".equals(stage)) {
       return new DefaultExplainAnalyzeResult(COLLSCAN);
@@ -134,7 +135,8 @@ public class ExplainAnalyzeResultFactory {
             FETCH_IXSCAN,
             () ->
                 resolveMatchingStages(
-                    inputStageDoc, (Document) winningPlan.get("filter"), mergeIndex));
+                    inputStageDoc, (Document) winningPlan.get("filter"), mergeIndex),
+            inputStageDoc);
       }
       ExplainAnalyzeResult innerStage = tryToResolveKnowStage(inputStageDoc, mergeIndex);
       if (innerStage != null
@@ -234,7 +236,8 @@ public class ExplainAnalyzeResultFactory {
 
   private ExplainAnalyzeResult resolveExplainAnalyzeResult(
       ExplainAnalyzeResult.IndexValueRepresentation indexValueRepresentation,
-      java.util.function.Supplier<List<Bson>> matchStagesSupplier) {
+      java.util.function.Supplier<List<Bson>> matchStagesSupplier,
+      Bson rawIndexDocument) {
     try {
       return new DefaultExplainAnalyzeResult(
           indexValueRepresentation, matchStagesSupplier.get(), null);
@@ -407,6 +410,7 @@ public class ExplainAnalyzeResultFactory {
     private final HasIndexValue hasIndexValue;
     private final List<Bson> indexMatchStages;
     private final Throwable exception;
+    private final Bson rawIndexDocument;
 
     public DefaultExplainAnalyzeResult(HasIndexValue hasIndexValue) {
       this(hasIndexValue, Collections.emptyList(), null);
@@ -418,9 +422,18 @@ public class ExplainAnalyzeResultFactory {
 
     public DefaultExplainAnalyzeResult(
         HasIndexValue hasIndexValue, List<Bson> indexMatchStages, Throwable exception) {
+      this(hasIndexValue, indexMatchStages, exception, null);
+    }
+
+    public DefaultExplainAnalyzeResult(
+        HasIndexValue hasIndexValue,
+        List<Bson> indexMatchStages,
+        Throwable exception,
+        Bson rawIndexDocument) {
       this.hasIndexValue = hasIndexValue;
       this.indexMatchStages = indexMatchStages;
       this.exception = exception;
+      this.rawIndexDocument = rawIndexDocument;
     }
 
     @Override
@@ -436,6 +449,10 @@ public class ExplainAnalyzeResultFactory {
     @Override
     public Throwable getResolutionIndexMatchStagesException() {
       return exception;
+    }
+
+    public Bson getRawIndexDocument() {
+      return rawIndexDocument;
     }
   }
 }
