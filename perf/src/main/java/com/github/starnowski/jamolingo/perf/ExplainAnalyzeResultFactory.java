@@ -150,7 +150,7 @@ public class ExplainAnalyzeResultFactory {
             fetchExists ? FETCH_IXSCAN : innerStage.getIndexValue(),
             innerStage.getIndexMatchStages(),
             innerStage.getResolutionIndexMatchStagesException(),
-            innerStage.getRawIndexDocument());
+            innerStage.getRawIndexDocuments());
       }
       return innerStage;
     } else if (winningPlan.containsKey("inputStages")) {
@@ -215,7 +215,7 @@ public class ExplainAnalyzeResultFactory {
             fetchExists ? FETCH_IXSCAN : firstIXSCANStage.getIndexValue(),
             indexMatchStages,
             exception,
-            firstIXSCANStage.getRawIndexDocument());
+            firstIXSCANStage.getRawIndexDocuments());
       }
       logger.debug("Resolved stages are: {}", stages);
       return stages.stream().findFirst().orElse(new DefaultExplainAnalyzeResult(null));
@@ -458,7 +458,7 @@ public class ExplainAnalyzeResultFactory {
       return exception;
     }
 
-    public Bson getRawIndexDocument() {
+    public Bson getRawIndexDocuments() {
       return rawIndexDocument;
     }
   }

@@ -669,9 +669,9 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
       // Verify that raw index documents matches
       Document explainEnhancedPipeline = getCollection().aggregate(enhancedPipeline).explain();
       ExplainAnalyzeResult resultEnhancedPipeline = tested.build(explainEnhancedPipeline);
-      Assertions.assertNotNull(result.getRawIndexDocument());
+      Assertions.assertNotNull(result.getRawIndexDocuments());
       Assertions.assertEquals(
-          result.getRawIndexDocument(), resultEnhancedPipeline.getRawIndexDocument());
+          result.getRawIndexDocuments(), resultEnhancedPipeline.getRawIndexDocuments());
     }
   }
 
