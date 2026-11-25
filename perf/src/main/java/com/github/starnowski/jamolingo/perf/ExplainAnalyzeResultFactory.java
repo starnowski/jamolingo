@@ -214,7 +214,8 @@ public class ExplainAnalyzeResultFactory {
         return new DefaultExplainAnalyzeResult(
             fetchExists ? FETCH_IXSCAN : firstIXSCANStage.getIndexValue(),
             indexMatchStages,
-            exception);
+            exception,
+            firstIXSCANStage.getRawIndexDocument());
       }
       logger.debug("Resolved stages are: {}", stages);
       return stages.stream().findFirst().orElse(new DefaultExplainAnalyzeResult(null));
