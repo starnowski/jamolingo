@@ -149,7 +149,8 @@ public class ExplainAnalyzeResultFactory {
         return new DefaultExplainAnalyzeResult(
             fetchExists ? FETCH_IXSCAN : innerStage.getIndexValue(),
             innerStage.getIndexMatchStages(),
-            innerStage.getResolutionIndexMatchStagesException());
+            innerStage.getResolutionIndexMatchStagesException(),
+            innerStage.getRawIndexDocument());
       }
       return innerStage;
     } else if (winningPlan.containsKey("inputStages")) {
