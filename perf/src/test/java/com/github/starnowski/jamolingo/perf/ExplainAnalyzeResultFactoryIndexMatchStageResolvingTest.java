@@ -666,6 +666,12 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
           "FETCH + IXSCAN".endsWith(enhancedPipelineIndex)
               || "IXSCAN".equals(enhancedPipelineIndex));
     }
+
+    Document explainEnhancedPipeline = getCollection().aggregate(enhancedPipeline).explain();
+    ExplainAnalyzeResult resultEnhancedPipeline = tested.build(explainEnhancedPipeline);
+    Assertions.assertNotNull(result.getRawIndexDocument());
+    Assertions.assertEquals(
+        result.getRawIndexDocument(), resultEnhancedPipeline.getRawIndexDocument());
   }
 
   private String resolveIndexStatus(Document explain) {

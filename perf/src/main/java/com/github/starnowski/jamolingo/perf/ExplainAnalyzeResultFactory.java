@@ -89,14 +89,18 @@ public class ExplainAnalyzeResultFactory {
           resolveMatchingStages(
               (Document) winningPlan.get("inputStage"),
               (Document) winningPlan.get("filter"),
-              false));
+              false),
+          null,
+          (Document) winningPlan.get("inputStage"));
     } else if ("FETCH".equals(stage)) {
       Document inputStage = (Document) winningPlan.get("inputStage");
       if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
         logger.debug("Index scan with fetch (aggregation not covered, but index is used).");
         return new DefaultExplainAnalyzeResult(
             FETCH_IXSCAN,
-            resolveMatchingStages(inputStage, (Document) winningPlan.get("filter"), false));
+            resolveMatchingStages(inputStage, (Document) winningPlan.get("filter"), false),
+            null,
+            inputStage);
       }
       if (inputStage != null && "OR".equals(inputStage.getString("stage"))) {
         return tryToResolveKnowStage(winningPlan, true);
@@ -240,9 +244,10 @@ public class ExplainAnalyzeResultFactory {
       Bson rawIndexDocument) {
     try {
       return new DefaultExplainAnalyzeResult(
-          indexValueRepresentation, matchStagesSupplier.get(), null);
+          indexValueRepresentation, matchStagesSupplier.get(), null, rawIndexDocument);
     } catch (Throwable ex) {
-      return new DefaultExplainAnalyzeResult(indexValueRepresentation, Collections.emptyList(), ex);
+      return new DefaultExplainAnalyzeResult(
+          indexValueRepresentation, Collections.emptyList(), ex, rawIndexDocument);
     }
   }
 
