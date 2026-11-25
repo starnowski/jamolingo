@@ -3,6 +3,7 @@ package com.github.starnowski.jamolingo.perf;
 import static com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult.IndexValueRepresentation.*;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import org.bson.*;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -91,7 +92,7 @@ public class ExplainAnalyzeResultFactory {
               (Document) winningPlan.get("filter"),
               false),
           null,
-          (Document) winningPlan.get("inputStage"));
+          returnSetOrNull((Document) winningPlan.get("inputStage")));
     } else if ("FETCH".equals(stage)) {
       Document inputStage = (Document) winningPlan.get("inputStage");
       if (inputStage != null && "IXSCAN".equals(inputStage.getString("stage"))) {
@@ -100,7 +101,7 @@ public class ExplainAnalyzeResultFactory {
             FETCH_IXSCAN,
             resolveMatchingStages(inputStage, (Document) winningPlan.get("filter"), false),
             null,
-            inputStage);
+            returnSetOrNull(inputStage));
       }
       if (inputStage != null && "OR".equals(inputStage.getString("stage"))) {
         return tryToResolveKnowStage(winningPlan, true);
@@ -113,6 +114,10 @@ public class ExplainAnalyzeResultFactory {
       logger.debug("Other plan stage: {}", stage);
     }
     return tryToResolveKnowStage(winningPlan);
+  }
+
+  private Set<Bson> returnSetOrNull(Bson bson) {
+    return bson == null ? null : Set.of(bson);
   }
 
   private ExplainAnalyzeResult tryToResolveKnowStage(Document winningPlan) {
@@ -215,7 +220,14 @@ public class ExplainAnalyzeResultFactory {
             fetchExists ? FETCH_IXSCAN : firstIXSCANStage.getIndexValue(),
             indexMatchStages,
             exception,
-            firstIXSCANStage.getRawIndexDocuments());
+            stages.stream()
+                .filter(
+                    s ->
+                        s.getIndexValue() != null
+                            && s.getIndexValue().getValue().contains("IXSCAN"))
+                .filter(ei -> ei.getRawIndexDocuments() != null)
+                .flatMap(ei -> ei.getRawIndexDocuments().stream())
+                .collect(Collectors.toSet()));
       }
       logger.debug("Resolved stages are: {}", stages);
       return stages.stream().findFirst().orElse(new DefaultExplainAnalyzeResult(null));
@@ -246,10 +258,13 @@ public class ExplainAnalyzeResultFactory {
       Bson rawIndexDocument) {
     try {
       return new DefaultExplainAnalyzeResult(
-          indexValueRepresentation, matchStagesSupplier.get(), null, rawIndexDocument);
+          indexValueRepresentation,
+          matchStagesSupplier.get(),
+          null,
+          returnSetOrNull(rawIndexDocument));
     } catch (Throwable ex) {
       return new DefaultExplainAnalyzeResult(
-          indexValueRepresentation, Collections.emptyList(), ex, rawIndexDocument);
+          indexValueRepresentation, Collections.emptyList(), ex, returnSetOrNull(rawIndexDocument));
     }
   }
 
@@ -417,7 +432,7 @@ public class ExplainAnalyzeResultFactory {
     private final HasIndexValue hasIndexValue;
     private final List<Bson> indexMatchStages;
     private final Throwable exception;
-    private final Bson rawIndexDocument;
+    private final Set<Bson> rawIndexDocument;
 
     public DefaultExplainAnalyzeResult(HasIndexValue hasIndexValue) {
       this(hasIndexValue, Collections.emptyList(), null);
@@ -436,7 +451,7 @@ public class ExplainAnalyzeResultFactory {
         HasIndexValue hasIndexValue,
         List<Bson> indexMatchStages,
         Throwable exception,
-        Bson rawIndexDocument) {
+        Set<Bson> rawIndexDocument) {
       this.hasIndexValue = hasIndexValue;
       this.indexMatchStages = indexMatchStages;
       this.exception = exception;
@@ -458,7 +473,7 @@ public class ExplainAnalyzeResultFactory {
       return exception;
     }
 
-    public Bson getRawIndexDocuments() {
+    public Set<Bson> getRawIndexDocuments() {
       return rawIndexDocument;
     }
   }

@@ -1,6 +1,7 @@
 package com.github.starnowski.jamolingo.perf;
 
 import java.util.List;
+import java.util.Set;
 import org.bson.conversions.Bson;
 
 /**
@@ -34,7 +35,7 @@ public interface ExplainAnalyzeResult {
    */
   Throwable getResolutionIndexMatchStagesException();
 
-  Bson getRawIndexDocuments();
+  Set<Bson> getRawIndexDocuments();
 
   /** Interface representing a value that has a string representation. */
   interface HasIndexValue {

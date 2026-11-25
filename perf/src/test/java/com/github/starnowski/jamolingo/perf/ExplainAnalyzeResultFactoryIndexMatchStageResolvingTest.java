@@ -670,6 +670,7 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
       Document explainEnhancedPipeline = getCollection().aggregate(enhancedPipeline).explain();
       ExplainAnalyzeResult resultEnhancedPipeline = tested.build(explainEnhancedPipeline);
       Assertions.assertNotNull(result.getRawIndexDocuments());
+      Assertions.assertFalse(result.getRawIndexDocuments().isEmpty());
       Assertions.assertEquals(
           result.getRawIndexDocuments(), resultEnhancedPipeline.getRawIndexDocuments());
     }
