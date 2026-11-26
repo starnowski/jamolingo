@@ -472,6 +472,26 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
+            bsonFilePath = "data/doc_uuid_match.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_uuid_mismatch.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForUuidQuery() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("uuidField", 1)),
+        "pipelines/uuid_query.json",
+        "FETCH + IXSCAN",
+        "results/uuid_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
             bsonFilePath = "data/doc_geo_1.json"),
         @MongoDocument(
             database = TEST_DATABASE,
