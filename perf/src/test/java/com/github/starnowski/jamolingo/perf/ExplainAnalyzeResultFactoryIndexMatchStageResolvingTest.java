@@ -512,6 +512,56 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
+            bsonFilePath = "data/doc_array_1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_array_2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_array_3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForArrayElemMatchNeQuery()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("nestedObject.tokens", 1)),
+        "pipelines/array_elemmatch_ne_query.json",
+        "FETCH + IXSCAN",
+        "results/array_elemmatch_ne_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_array_1.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_array_2.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_array_3.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForArrayOrElemMatchRegexNeQuery()
+      throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("tags", 1)),
+        "pipelines/array_or_elemmatch_regex_ne_query.json",
+        "FETCH + IXSCAN",
+        "results/array_or_elemmatch_regex_ne_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
             bsonFilePath = "data/doc_geo_1.json"),
         @MongoDocument(
             database = TEST_DATABASE,
