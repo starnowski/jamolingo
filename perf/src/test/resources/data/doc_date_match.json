@@ -1,0 +1,7 @@
+{
+  "_id": "doc_date_match",
+  "dateField": {
+    "$date": "2024-06-18T10:15:30Z"
+  },
+  "plainString": "match"
+}

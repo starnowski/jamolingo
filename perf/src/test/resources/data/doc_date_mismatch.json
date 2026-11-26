@@ -1,0 +1,7 @@
+{
+  "_id": "doc_date_mismatch",
+  "dateField": {
+    "$date": "2023-01-01T00:00:00Z"
+  },
+  "plainString": "mismatch"
+}

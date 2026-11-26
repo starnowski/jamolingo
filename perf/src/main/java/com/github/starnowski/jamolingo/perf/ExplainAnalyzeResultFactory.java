@@ -405,6 +405,7 @@ public class ExplainAnalyzeResultFactory {
     if (value.isBoolean()) return value.asBoolean().getValue();
     if (value.isRegularExpression()) return value.asRegularExpression();
     if (value.isBinary()) return value.asBinary();
+    if (value.isDateTime()) return value.asDateTime();
     return null;
   }
 

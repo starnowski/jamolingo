@@ -492,6 +492,26 @@ class ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest {
         @MongoDocument(
             database = TEST_DATABASE,
             collection = "docs",
+            bsonFilePath = "data/doc_date_match.json"),
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
+            bsonFilePath = "data/doc_date_mismatch.json")
+      })
+  public void shouldResolveCorrectIndexValueAndReturnCorrectDataForDateQuery() throws IOException {
+    shouldResolveCorrectIndexValueAndReturnCorrectData(
+        List.of(new Document("dateField", 1)),
+        "pipelines/date_query.json",
+        "FETCH + IXSCAN",
+        "results/date_query_result.json");
+  }
+
+  @Test
+  @MongoSetup(
+      mongoDocuments = {
+        @MongoDocument(
+            database = TEST_DATABASE,
+            collection = "docs",
             bsonFilePath = "data/doc_geo_1.json"),
         @MongoDocument(
             database = TEST_DATABASE,
