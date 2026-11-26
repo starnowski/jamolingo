@@ -32,11 +32,10 @@ import org.apache.olingo.server.core.uri.validator.UriValidationException;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-//@Disabled
+
 @QuarkusTest
 public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOperatorTest {
 

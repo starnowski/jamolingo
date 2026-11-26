@@ -301,9 +301,10 @@ public class ExplainAnalyzeResultFactory {
           }
           Object boundsObj = indexBounds.get(key);
           if (boundsObj instanceof List) {
+            boolean keyIsMultiKey = isMultiKey(indexScanStage, key);
             List<?> bounds = (List<?>) boundsObj;
             List<Object> exactMatches = new ArrayList<>();
-            List<Document> keyRanges = new ArrayList<>();
+            List<ParsedRangeBound> parsedRanges = new ArrayList<>();
 
             String logParsedBound = "";
             for (Object boundObj : bounds) {
@@ -359,9 +360,15 @@ public class ExplainAnalyzeResultFactory {
                           rangeDoc.append(endInclusive ? "$lte" : "$lt", val);
                         }
                       }
-                      if (!rangeDoc.isEmpty()) {
-                        keyRanges.add(new Document(key, rangeDoc));
-                      }
+                      parsedRanges.add(
+                          new ParsedRangeBound(
+                              min,
+                              max,
+                              startInclusive,
+                              endInclusive,
+                              !minInfinity && min.getBsonType() == BsonType.MIN_KEY,
+                              !maxInfinity && max.getBsonType() == BsonType.MAX_KEY,
+                              rangeDoc));
                     }
                   }
                 } else if (boundObj instanceof Number || boundObj instanceof Boolean) {
@@ -371,11 +378,8 @@ public class ExplainAnalyzeResultFactory {
                 logger.debug("Failed to parse index bound: " + boundObj, e);
               }
             }
-            List<Document> keyConstraints = new ArrayList<>();
-            if (!exactMatches.isEmpty()) {
-              keyConstraints.add(new Document(key, new Document("$in", exactMatches)));
-            }
-            keyConstraints.addAll(keyRanges);
+            List<Document> keyConstraints =
+                buildKeyConstraints(key, keyIsMultiKey, exactMatches, parsedRanges);
 
             if (keyConstraints.size() == 1) {
               conditions.add(keyConstraints.get(0));
@@ -395,6 +399,157 @@ public class ExplainAnalyzeResultFactory {
       }
     }
     return Collections.emptyList();
+  }
+
+  private boolean isMultiKey(Document indexScanStage, String key) {
+    if (!Boolean.TRUE.equals(indexScanStage.getBoolean("isMultiKey"))) {
+      return false;
+    }
+    Document multiKeyPaths = indexScanStage.get("multiKeyPaths", Document.class);
+    if (multiKeyPaths != null && multiKeyPaths.containsKey(key)) {
+      Object paths = multiKeyPaths.get(key);
+      if (paths instanceof List<?>) {
+        return !((List<?>) paths).isEmpty();
+      }
+    }
+    return true;
+  }
+
+  private List<Document> buildKeyConstraints(
+      String key,
+      boolean keyIsMultiKey,
+      List<Object> exactMatches,
+      List<ParsedRangeBound> parsedRanges) {
+    List<Document> keyConstraints = new ArrayList<>();
+    List<Object> minMaxExcluded = resolveMinMaxKeyExclusionValues(parsedRanges);
+    if (!minMaxExcluded.isEmpty()) {
+      Document exclusionDoc =
+          minMaxExcluded.size() == 1
+              ? new Document("$ne", minMaxExcluded.get(0))
+              : new Document("$nin", minMaxExcluded);
+      if (!exactMatches.isEmpty()) {
+        Document combined = new Document("$in", exactMatches);
+        combined.putAll(exclusionDoc);
+        keyConstraints.add(
+            keyIsMultiKey
+                ? new Document(key, new Document("$elemMatch", combined))
+                : new Document(key, combined));
+      } else {
+        keyConstraints.add(
+            keyIsMultiKey
+                ? new Document(key, new Document("$elemMatch", exclusionDoc))
+                : new Document(key, exclusionDoc));
+      }
+      return keyConstraints;
+    }
+
+    if (!exactMatches.isEmpty()
+        && exactMatches.stream().allMatch(e -> e instanceof BsonRegularExpression)) {
+      List<Object> stringExcluded = resolveStringBracketedExclusionValues(parsedRanges);
+      if (!stringExcluded.isEmpty()) {
+        Document combined = new Document("$in", exactMatches);
+        if (stringExcluded.size() == 1) {
+          combined.append("$ne", stringExcluded.get(0));
+        } else {
+          combined.append("$nin", stringExcluded);
+        }
+        keyConstraints.add(
+            keyIsMultiKey
+                ? new Document(key, new Document("$elemMatch", combined))
+                : new Document(key, combined));
+        return keyConstraints;
+      }
+    }
+
+    if (!exactMatches.isEmpty()) {
+      keyConstraints.add(new Document(key, new Document("$in", exactMatches)));
+    }
+    for (ParsedRangeBound parsedRange : parsedRanges) {
+      if (!parsedRange.rangeDoc.isEmpty()) {
+        if (keyIsMultiKey && parsedRange.rangeDoc.size() > 1) {
+          keyConstraints.add(new Document(key, new Document("$elemMatch", parsedRange.rangeDoc)));
+        } else {
+          keyConstraints.add(new Document(key, parsedRange.rangeDoc));
+        }
+      }
+    }
+    return keyConstraints;
+  }
+
+  private List<Object> resolveMinMaxKeyExclusionValues(List<ParsedRangeBound> parsedRanges) {
+    if (parsedRanges.size() < 2) {
+      return Collections.emptyList();
+    }
+    ParsedRangeBound first = parsedRanges.get(0);
+    ParsedRangeBound last = parsedRanges.get(parsedRanges.size() - 1);
+    if (!first.literalMinKey
+        || !first.startInclusive
+        || !last.literalMaxKey
+        || !last.endInclusive) {
+      return Collections.emptyList();
+    }
+    return extractAdjacentExcludedValues(parsedRanges);
+  }
+
+  private List<Object> resolveStringBracketedExclusionValues(List<ParsedRangeBound> parsedRanges) {
+    if (parsedRanges.size() < 2) {
+      return Collections.emptyList();
+    }
+    ParsedRangeBound first = parsedRanges.get(0);
+    ParsedRangeBound last = parsedRanges.get(parsedRanges.size() - 1);
+    if (!first.min.isString()
+        || !first.min.asString().getValue().isEmpty()
+        || !first.startInclusive
+        || !last.max.isDocument()
+        || !last.max.asDocument().isEmpty()
+        || last.endInclusive) {
+      return Collections.emptyList();
+    }
+    return extractAdjacentExcludedValues(parsedRanges);
+  }
+
+  private List<Object> extractAdjacentExcludedValues(List<ParsedRangeBound> parsedRanges) {
+    List<Object> excludedValues = new ArrayList<>();
+    for (int i = 0; i < parsedRanges.size() - 1; i++) {
+      ParsedRangeBound current = parsedRanges.get(i);
+      ParsedRangeBound next = parsedRanges.get(i + 1);
+      if (current.endInclusive || next.startInclusive || !current.max.equals(next.min)) {
+        return Collections.emptyList();
+      }
+      Object val = convert(current.max);
+      if (val == null) {
+        return Collections.emptyList();
+      }
+      excludedValues.add(val);
+    }
+    return excludedValues;
+  }
+
+  private static final class ParsedRangeBound {
+    private final BsonValue min;
+    private final BsonValue max;
+    private final boolean startInclusive;
+    private final boolean endInclusive;
+    private final boolean literalMinKey;
+    private final boolean literalMaxKey;
+    private final Document rangeDoc;
+
+    private ParsedRangeBound(
+        BsonValue min,
+        BsonValue max,
+        boolean startInclusive,
+        boolean endInclusive,
+        boolean literalMinKey,
+        boolean literalMaxKey,
+        Document rangeDoc) {
+      this.min = min;
+      this.max = max;
+      this.startInclusive = startInclusive;
+      this.endInclusive = endInclusive;
+      this.literalMinKey = literalMinKey;
+      this.literalMaxKey = literalMaxKey;
+      this.rangeDoc = rangeDoc;
+    }
   }
 
   private Object convert(BsonValue value) {
