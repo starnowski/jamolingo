@@ -1,0 +1,13 @@
+{
+  "_id": "doc_array_3",
+  "plainString": "array_mismatch",
+  "tags": [
+    "developer",
+    "LLM"
+  ],
+  "nestedObject": {
+    "tokens": [
+      "no such text"
+    ]
+  }
+}

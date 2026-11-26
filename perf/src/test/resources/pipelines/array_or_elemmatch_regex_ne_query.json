@@ -1,0 +1,38 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$and": [
+          {
+            "$or": [
+              {
+                "tags": {
+                  "$elemMatch": {
+                    "$regex": "^\\Qspider\\E",
+                    "$ne": "spiderweb"
+                  }
+                }
+              },
+              {
+                "tags": {
+                  "$elemMatch": {
+                    "$regex": "^\\Qspider\\E",
+                    "$ne": "spider"
+                  }
+                }
+              },
+              {
+                "tags": {
+                  "$elemMatch": {
+                    "$regex": "\\Qwide\\E",
+                    "$ne": "word wide"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

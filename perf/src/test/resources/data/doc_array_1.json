@@ -1,0 +1,14 @@
+{
+  "_id": "doc_array_1",
+  "plainString": "array_match_1",
+  "tags": [
+    "spider trap",
+    "word wide web"
+  ],
+  "nestedObject": {
+    "tokens": [
+      "1 ex",
+      "first example"
+    ]
+  }
+}

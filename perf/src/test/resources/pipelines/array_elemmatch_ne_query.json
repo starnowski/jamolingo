@@ -1,0 +1,17 @@
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$and": [
+          {
+            "nestedObject.tokens": {
+              "$elemMatch": {
+                "$ne": "no such text"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

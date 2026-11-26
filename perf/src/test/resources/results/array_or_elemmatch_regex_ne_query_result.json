@@ -1,0 +1,32 @@
+{
+  "value": [
+    {
+      "_id": "doc_array_1",
+      "plainString": "array_match_1",
+      "tags": [
+        "spider trap",
+        "word wide web"
+      ],
+      "nestedObject": {
+        "tokens": [
+          "1 ex",
+          "first example"
+        ]
+      }
+    },
+    {
+      "_id": "doc_array_2",
+      "plainString": "array_match_2",
+      "tags": [
+        "spiderweb",
+        "z_tag"
+      ],
+      "nestedObject": {
+        "tokens": [
+          "2 ex",
+          "second example"
+        ]
+      }
+    }
+  ]
+}

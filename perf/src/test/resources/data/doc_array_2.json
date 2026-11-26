@@ -1,0 +1,14 @@
+{
+  "_id": "doc_array_2",
+  "plainString": "array_match_2",
+  "tags": [
+    "spiderweb",
+    "z_tag"
+  ],
+  "nestedObject": {
+    "tokens": [
+      "2 ex",
+      "second example"
+    ]
+  }
+}
