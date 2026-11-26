@@ -1,0 +1,14 @@
+{
+  "value": [
+    {
+      "_id": "doc_uuid_match",
+      "uuidField": {
+        "$binary": {
+          "base64": "uSHx3Ty8BJX9q4zRTTPwqg==",
+          "subType": "04"
+        }
+      },
+      "plainString": "match"
+    }
+  ]
+}

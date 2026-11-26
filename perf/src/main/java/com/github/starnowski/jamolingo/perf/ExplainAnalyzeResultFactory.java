@@ -404,6 +404,7 @@ public class ExplainAnalyzeResultFactory {
     if (value.isDouble()) return value.asDouble().getValue();
     if (value.isBoolean()) return value.asBoolean().getValue();
     if (value.isRegularExpression()) return value.asRegularExpression();
+    if (value.isBinary()) return value.asBinary();
     return null;
   }
 
