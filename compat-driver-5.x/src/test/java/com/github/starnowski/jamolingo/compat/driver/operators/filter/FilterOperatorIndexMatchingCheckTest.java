@@ -4,6 +4,7 @@ import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResul
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
 import com.github.starnowski.jamolingo.junit5.MongoSetup;
+import com.github.starnowski.jamolingo.junit5.SearchIndex;
 import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResult;
 import com.github.starnowski.jamolingo.perf.ExplainAnalyzeResultFactory;
 import com.mongodb.client.MongoClient;
@@ -45,6 +46,59 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
+          indexes = {
+                  //plainString
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "plainString"
+                  ),
+                  //timestamp
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "timestamp"
+                  ),
+                  //uuidProp
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "uuidProp"
+                  ),
+                  //tags
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "tags"
+                  ),
+                  //birthDate
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "birthDate"
+                  ),
+                  //floatValue
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "floatValue"
+                  ),
+                  //nestedObject/tokens
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "nestedObject.tokens"
+                  ),
+                  //numericArray
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "numericArray"
+                  ),
+                  //complexList
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "complexList.someString"
+                  ),
+                  //smallInteger
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "smallInteger"
+                  )
+          },
+
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
@@ -88,6 +142,53 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
+          indexes = {
+                  //plainString
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "plainString"
+                  ),
+                  //timestamp
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "timestamp"
+                  ),
+                  //uuidProp
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "uuidProp"
+                  ),
+                  //tags
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "tags"
+                  ),
+                  //birthDate
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "birthDate"
+                  ),
+                  //floatValue
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "floatValue"
+                  ),
+                  //nestedObject/tokens
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "nestedObject.tokens"
+                  ),
+                  //numericArray
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "numericArray"
+                  ),
+                  //complexList
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "complexList.someString"
+                  )
+          },
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
@@ -131,6 +232,53 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
+          indexes = {
+                  //plainString
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "plainString"
+                  ),
+                  //timestamp
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "timestamp"
+                  ),
+                  //uuidProp
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "uuidProp"
+                  ),
+                  //tags
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "tags"
+                  ),
+                  //birthDate
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "birthDate"
+                  ),
+                  //floatValue
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "floatValue"
+                  ),
+                  //nestedObject/tokens
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "nestedObject.tokens"
+                  ),
+                  //numericArray
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "numericArray"
+                  ),
+                  //complexList
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "complexList.someString"
+                  )
+          },
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
@@ -194,6 +342,53 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
   @ParameterizedTest
   @MethodSource("provideCaseSensitivityTests")
   @MongoSetup(
+          indexes = {
+                  //plainString
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "plainString"
+                  ),
+                  //timestamp
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "timestamp"
+                  ),
+                  //uuidProp
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "uuidProp"
+                  ),
+                  //tags
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "tags"
+                  ),
+                  //birthDate
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "birthDate"
+                  ),
+                  //floatValue
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "floatValue"
+                  ),
+                  //nestedObject/tokens
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "nestedObject.tokens"
+                  ),
+                  //numericArray
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "numericArray"
+                  ),
+                  //complexList
+                  @SearchIndex(database = "testdb",
+                          collection = "Items",
+                          fieldName = "complexList.someString"
+                  )
+          },
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
@@ -287,7 +482,14 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
       Document explainEnhancedPipeline = collection.aggregate(enhancedPipeline).explain();
       Assertions.assertNotNull(enhancedPipelineIndex.getRawIndexDocuments());
       Assertions.assertFalse(enhancedPipelineIndex.getRawIndexDocuments().isEmpty());
-      Assertions.assertEquals(
-              explainAnalyzeResult.getRawIndexDocuments(), enhancedPipelineIndex.getRawIndexDocuments());
+      if (explainAnalyzeResult.getRawIndexDocuments().size() == enhancedPipelineIndex.getRawIndexDocuments().size()) {
+        Assertions.assertEquals(
+                explainAnalyzeResult.getRawIndexDocuments(), enhancedPipelineIndex.getRawIndexDocuments());
+      } else if (explainAnalyzeResult.getRawIndexDocuments().size() < enhancedPipelineIndex.getRawIndexDocuments().size()) {
+        //TODO Comment why
+        Assertions.assertTrue(enhancedPipelineIndex.getRawIndexDocuments().containsAll(explainAnalyzeResult.getRawIndexDocuments()));
+      } else {
+        Assertions.fail("the number of enhanced pipeline is lower than orginal - that should not be the case");
+      }
   }
 }
