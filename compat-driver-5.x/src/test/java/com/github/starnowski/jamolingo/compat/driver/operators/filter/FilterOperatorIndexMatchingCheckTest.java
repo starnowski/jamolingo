@@ -1,5 +1,8 @@
 package com.github.starnowski.jamolingo.compat.driver.operators.filter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import com.github.starnowski.jamolingo.core.operators.filter.FilterOperatorResult;
 import com.github.starnowski.jamolingo.core.operators.filter.ODataFilterToMongoMatchParser;
 import com.github.starnowski.jamolingo.junit5.MongoDocument;
@@ -12,6 +15,12 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
+import javax.xml.stream.XMLStreamException;
 import org.apache.olingo.commons.api.edm.Edm;
 import org.apache.olingo.server.api.OData;
 import org.apache.olingo.server.api.ODataApplicationException;
@@ -27,78 +36,41 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import javax.xml.stream.XMLStreamException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
-
 @QuarkusTest
 public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOperatorTest {
 
-  @Inject
-  protected MongoClient mongoClient;
+  @Inject protected MongoClient mongoClient;
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
-          indexes = {
-                  //plainString
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "plainString"
-                  ),
-                  //timestamp
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "timestamp"
-                  ),
-                  //uuidProp
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "uuidProp"
-                  ),
-                  //tags
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "tags"
-                  ),
-                  //birthDate
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "birthDate"
-                  ),
-                  //floatValue
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "floatValue"
-                  ),
-                  //nestedObject/tokens
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "nestedObject.tokens"
-                  ),
-                  //numericArray
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "numericArray"
-                  ),
-                  //complexList
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "complexList.someString"
-                  ),
-                  //smallInteger
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "smallInteger"
-                  )
-          },
-
+      indexes = {
+        // plainString
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "plainString"),
+        // timestamp
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "timestamp"),
+        // uuidProp
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "uuidProp"),
+        // tags
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "tags"),
+        // birthDate
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "birthDate"),
+        // floatValue
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "floatValue"),
+        // nestedObject/tokens
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "nestedObject.tokens"),
+        // numericArray
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "numericArray"),
+        // complexList
+        @SearchIndex(
+            database = "testdb",
+            collection = "Items",
+            fieldName = "complexList.someString"),
+        // smallInteger
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "smallInteger"),
+        // password
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "password")
+      },
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
@@ -131,64 +103,45 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
       })
   public void shouldReturnExpectedDocuments(
       String filter, Set<String> expectedPlainStrings, String expectedIndex)
-          throws UriValidationException,
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException, IOException {
+          ODataApplicationException,
+          IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(filter, expectedPlainStrings);
   }
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
-          indexes = {
-                  //plainString
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "plainString"
-                  ),
-                  //timestamp
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "timestamp"
-                  ),
-                  //uuidProp
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "uuidProp"
-                  ),
-                  //tags
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "tags"
-                  ),
-                  //birthDate
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "birthDate"
-                  ),
-                  //floatValue
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "floatValue"
-                  ),
-                  //nestedObject/tokens
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "nestedObject.tokens"
-                  ),
-                  //numericArray
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "numericArray"
-                  ),
-                  //complexList
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "complexList.someString"
-                  )
-          },
+      indexes = {
+        // plainString
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "plainString"),
+        // timestamp
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "timestamp"),
+        // uuidProp
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "uuidProp"),
+        // tags
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "tags"),
+        // birthDate
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "birthDate"),
+        // floatValue
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "floatValue"),
+        // nestedObject/tokens
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "nestedObject.tokens"),
+        // numericArray
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "numericArray"),
+        // complexList
+        @SearchIndex(
+            database = "testdb",
+            collection = "Items",
+            fieldName = "complexList.someString"),
+        // smallInteger
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "smallInteger"),
+        // password
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "password")
+      },
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
@@ -221,64 +174,41 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
       })
   public void shouldUsedExpectedIndexesBasedOnFilterOperator(
       String filter, Set<String> expectedPlainStrings, String expectedIndex)
-          throws UriValidationException,
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException, IOException {
+          ODataApplicationException,
+          IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(filter, expectedPlainStrings);
   }
 
   @ParameterizedTest
   @MethodSource("provideShouldReturnExpectedProjectedDocument")
   @MongoSetup(
-          indexes = {
-                  //plainString
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "plainString"
-                  ),
-                  //timestamp
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "timestamp"
-                  ),
-                  //uuidProp
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "uuidProp"
-                  ),
-                  //tags
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "tags"
-                  ),
-                  //birthDate
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "birthDate"
-                  ),
-                  //floatValue
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "floatValue"
-                  ),
-                  //nestedObject/tokens
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "nestedObject.tokens"
-                  ),
-                  //numericArray
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "numericArray"
-                  ),
-                  //complexList
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "complexList.someString"
-                  )
-          },
+      indexes = {
+        // plainString
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "plainString"),
+        // timestamp
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "timestamp"),
+        // uuidProp
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "uuidProp"),
+        // tags
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "tags"),
+        // birthDate
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "birthDate"),
+        // floatValue
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "floatValue"),
+        // nestedObject/tokens
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "nestedObject.tokens"),
+        // numericArray
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "numericArray"),
+        // complexList
+        @SearchIndex(
+            database = "testdb",
+            collection = "Items",
+            fieldName = "complexList.someString")
+      },
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
@@ -311,11 +241,12 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
       })
   public void shouldReturnExpectedDocumentsForQueryObject(
       String filter, Set<String> expectedPlainStrings, String expectedIndex)
-          throws UriValidationException,
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException, IOException {
+          ODataApplicationException,
+          IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(filter, expectedPlainStrings);
   }
 
@@ -342,53 +273,33 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
   @ParameterizedTest
   @MethodSource("provideCaseSensitivityTests")
   @MongoSetup(
-          indexes = {
-                  //plainString
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "plainString"
-                  ),
-                  //timestamp
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "timestamp"
-                  ),
-                  //uuidProp
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "uuidProp"
-                  ),
-                  //tags
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "tags"
-                  ),
-                  //birthDate
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "birthDate"
-                  ),
-                  //floatValue
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "floatValue"
-                  ),
-                  //nestedObject/tokens
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "nestedObject.tokens"
-                  ),
-                  //numericArray
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "numericArray"
-                  ),
-                  //complexList
-                  @SearchIndex(database = "testdb",
-                          collection = "Items",
-                          fieldName = "complexList.someString"
-                  )
-          },
+      indexes = {
+        // plainString
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "plainString"),
+        // timestamp
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "timestamp"),
+        // uuidProp
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "uuidProp"),
+        // tags
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "tags"),
+        // birthDate
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "birthDate"),
+        // floatValue
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "floatValue"),
+        // nestedObject/tokens
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "nestedObject.tokens"),
+        // numericArray
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "numericArray"),
+        // complexList
+        @SearchIndex(
+            database = "testdb",
+            collection = "Items",
+            fieldName = "complexList.someString"),
+        // smallInteger
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "smallInteger"),
+        // password
+        @SearchIndex(database = "testdb", collection = "Items", fieldName = "password")
+      },
       mongoDocuments = {
         @MongoDocument(
             database = "testdb",
@@ -401,11 +312,12 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
       })
   public void shouldCorrectCheckCaseSensitivityForStringFunctions(
       String filter, Set<String> expectedPlainStrings)
-          throws UriValidationException,
+      throws UriValidationException,
           UriParserException,
           XMLStreamException,
           ExpressionVisitException,
-          ODataApplicationException, IOException {
+          ODataApplicationException,
+          IOException {
     shouldResolveCorrectIndexValueAndReturnCorrectData(filter, expectedPlainStrings);
   }
 
@@ -426,15 +338,20 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
   }
 
   private void shouldResolveCorrectIndexValueAndReturnCorrectData(
-          String filter, Set<String> expectedPlainStrings)
-          throws IOException, XMLStreamException, UriValidationException, UriParserException, ExpressionVisitException, ODataApplicationException {
+      String filter, Set<String> expectedPlainStrings)
+      throws IOException,
+          XMLStreamException,
+          UriValidationException,
+          UriParserException,
+          ExpressionVisitException,
+          ODataApplicationException {
 
     // GIVEN
     MongoDatabase database = mongoClient.getDatabase("testdb");
     MongoCollection<Document> collection = database.getCollection("Items");
     Edm edm = loadEmdProvider("edm/edm6_filter_main.xml");
     UriInfo uriInfo =
-            new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
+        new Parser(edm, OData.newInstance()).parseUri("examples2", "$filter=" + filter, null, null);
     ODataFilterToMongoMatchParser tested = new ODataFilterToMongoMatchParser();
 
     // WHEN
@@ -449,22 +366,26 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
 
     Document explain = collection.aggregate(pipeline).explain();
 
-    ExplainAnalyzeResultFactory explainAnalyzeResultFactoryTested = new ExplainAnalyzeResultFactory();
+    ExplainAnalyzeResultFactory explainAnalyzeResultFactoryTested =
+        new ExplainAnalyzeResultFactory();
 
     ExplainAnalyzeResult explainAnalyzeResult = explainAnalyzeResultFactoryTested.build(explain);
 
     // TODO Resolve match stage that use index
     List<Bson> indexMatchStages = explainAnalyzeResult.getIndexMatchStages();
     System.out.println("Pipeline: " + filter);
-      assumeTrue(!"COLLSCAN".equals(explainAnalyzeResult.getIndexValue().getValue()), "Test ignored because it suppose to test only queries without COLLSCAN");
-      Assertions.assertFalse(indexMatchStages.isEmpty());
+    assumeTrue(
+        !"COLLSCAN".equals(explainAnalyzeResult.getIndexValue().getValue()),
+        "Test ignored because it suppose to test only queries without COLLSCAN");
+    Assertions.assertFalse(indexMatchStages.isEmpty());
     List<Bson> enhancedPipeline = new ArrayList<>(indexMatchStages);
     enhancedPipeline.add(new Document("$set", new Document("no_such_field_test", true)));
     enhancedPipeline.addAll(pipeline);
     enhancedPipeline.add(new Document("$unset", "no_such_field_test"));
     // resolve index for enhanced pipeline
 
-    ExplainAnalyzeResult enhancedPipelineIndex = explainAnalyzeResultFactoryTested.build(collection.aggregate(enhancedPipeline).explain());
+    ExplainAnalyzeResult enhancedPipelineIndex =
+        explainAnalyzeResultFactoryTested.build(collection.aggregate(enhancedPipeline).explain());
     List<Document> actualResultsForEnhancedPipelineIndex = new ArrayList<>();
     collection.aggregate(enhancedPipeline).into(actualResultsForEnhancedPipelineIndex);
     // THEN
@@ -476,20 +397,29 @@ public class FilterOperatorIndexMatchingCheckTest extends AbstractBaseFilterOper
 
     // Verify Index
 
-    Assertions.assertEquals(explainAnalyzeResult.getIndexValue().getValue(), enhancedPipelineIndex.getIndexValue().getValue());
+    Assertions.assertEquals(
+        explainAnalyzeResult.getIndexValue().getValue(),
+        enhancedPipelineIndex.getIndexValue().getValue());
 
-      // Verify that raw index documents matches
-      Document explainEnhancedPipeline = collection.aggregate(enhancedPipeline).explain();
-      Assertions.assertNotNull(enhancedPipelineIndex.getRawIndexDocuments());
-      Assertions.assertFalse(enhancedPipelineIndex.getRawIndexDocuments().isEmpty());
-      if (explainAnalyzeResult.getRawIndexDocuments().size() == enhancedPipelineIndex.getRawIndexDocuments().size()) {
-        Assertions.assertEquals(
-                explainAnalyzeResult.getRawIndexDocuments(), enhancedPipelineIndex.getRawIndexDocuments());
-      } else if (explainAnalyzeResult.getRawIndexDocuments().size() < enhancedPipelineIndex.getRawIndexDocuments().size()) {
-        //TODO Comment why
-        Assertions.assertTrue(enhancedPipelineIndex.getRawIndexDocuments().containsAll(explainAnalyzeResult.getRawIndexDocuments()));
-      } else {
-        Assertions.fail("the number of enhanced pipeline is lower than orginal - that should not be the case");
-      }
+    // Verify that raw index documents matches
+    Document explainEnhancedPipeline = collection.aggregate(enhancedPipeline).explain();
+    Assertions.assertNotNull(enhancedPipelineIndex.getRawIndexDocuments());
+    Assertions.assertFalse(enhancedPipelineIndex.getRawIndexDocuments().isEmpty());
+    if (explainAnalyzeResult.getRawIndexDocuments().size()
+        == enhancedPipelineIndex.getRawIndexDocuments().size()) {
+      Assertions.assertEquals(
+          explainAnalyzeResult.getRawIndexDocuments(),
+          enhancedPipelineIndex.getRawIndexDocuments());
+    } else if (explainAnalyzeResult.getRawIndexDocuments().size()
+        < enhancedPipelineIndex.getRawIndexDocuments().size()) {
+      // TODO Comment why
+      Assertions.assertTrue(
+          enhancedPipelineIndex
+              .getRawIndexDocuments()
+              .containsAll(explainAnalyzeResult.getRawIndexDocuments()));
+    } else {
+      Assertions.fail(
+          "the number of enhanced pipeline is lower than orginal - that should not be the case");
+    }
   }
 }
