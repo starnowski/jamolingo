@@ -77,7 +77,11 @@ public class ExplainAnalyzeResultFactory {
       return null;
     }
 
-    Document winningPlan = (Document) queryPlanner.get("winningPlan");
+    Document winningPlan = resolveWinningPlan(queryPlanner);
+    if (winningPlan == null) {
+      logger.debug("No winning plan found in explain output.");
+      return null;
+    }
     String stage = winningPlan.getString("stage");
 
     logger.debug("Winning plan stage: {}", stage);
@@ -118,6 +122,90 @@ public class ExplainAnalyzeResultFactory {
 
   private Set<Bson> returnSetOrNull(Bson bson) {
     return bson == null ? null : Set.of(bson);
+  }
+
+  private Document resolveWinningPlan(Document queryPlanner) {
+    Document winningPlan = queryPlanner.get("winningPlan", Document.class);
+    if (winningPlan == null) {
+      return null;
+    }
+    Document winningIxscan = findSingleIxscanStage(winningPlan);
+    if (!isWildcardIndexScan(winningIxscan)) {
+      return winningPlan;
+    }
+    Object rejectedPlansObj = queryPlanner.get("rejectedPlans");
+    if (!(rejectedPlansObj instanceof List<?>)) {
+      return winningPlan;
+    }
+    List<?> rejectedPlans = (List<?>) rejectedPlansObj;
+    if (rejectedPlans.isEmpty()) {
+      return winningPlan;
+    }
+    String winningIndexName = winningIxscan.getString("indexName");
+    String winningTopStage = winningPlan.getString("stage");
+    Document selectedPlan = winningPlan;
+    String selectedSortKey = buildWildcardIxscanSortKey(winningIxscan);
+
+    for (Object rejectedObj : rejectedPlans) {
+      if (rejectedObj instanceof Document) {
+        Document rejectedPlan = (Document) rejectedObj;
+        if (!Objects.equals(winningTopStage, rejectedPlan.getString("stage"))) {
+          continue;
+        }
+        Document rejectedIxscan = findSingleIxscanStage(rejectedPlan);
+        if (isWildcardIndexScan(rejectedIxscan)
+            && Objects.equals(winningIndexName, rejectedIxscan.getString("indexName"))) {
+          String candidateSortKey = buildWildcardIxscanSortKey(rejectedIxscan);
+          if (candidateSortKey.compareTo(selectedSortKey) < 0) {
+            selectedPlan = rejectedPlan;
+            selectedSortKey = candidateSortKey;
+          }
+        }
+      }
+    }
+    return selectedPlan;
+  }
+
+  private Document findSingleIxscanStage(Document plan) {
+    if (plan == null) {
+      return null;
+    }
+    String stage = plan.getString("stage");
+    if ("IXSCAN".equals(stage)) {
+      return plan;
+    }
+    if (plan.containsKey("inputStage")) {
+      Object inputStage = plan.get("inputStage");
+      if (inputStage instanceof Document) {
+        return findSingleIxscanStage((Document) inputStage);
+      }
+    }
+    return null;
+  }
+
+  private boolean isWildcardIndexScan(Document ixscanStage) {
+    if (ixscanStage == null) {
+      return false;
+    }
+    Document keyPattern = ixscanStage.get("keyPattern", Document.class);
+    if (keyPattern != null && keyPattern.containsKey("$_path")) {
+      return true;
+    }
+    Document indexBounds = ixscanStage.get("indexBounds", Document.class);
+    return indexBounds != null && indexBounds.containsKey("$_path");
+  }
+
+  private String buildWildcardIxscanSortKey(Document ixscanStage) {
+    Document keyPattern = ixscanStage.get("keyPattern", Document.class);
+    String keys = "";
+    if (keyPattern != null) {
+      keys =
+          keyPattern.keySet().stream()
+              .filter(k -> !k.startsWith("$"))
+              .sorted()
+              .collect(Collectors.joining(","));
+    }
+    return keys + "|" + ixscanStage.toJson();
   }
 
   private ExplainAnalyzeResult tryToResolveKnowStage(Document winningPlan) {
