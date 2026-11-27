@@ -17,12 +17,14 @@ public class ExplainAnalyzeResultFactory {
   private static final List<Bson> MATCH_2DSPHERE_STage = null;
 
   /**
-   * Builds an {@link ExplainAnalyzeResult} from the provided MongoDB explain document.
-   *
-   * <p>Supports standard query plans and Atlas Search ($search stage).
+   * Builds an {@link ExplainAnalyzeResult} from the provided MongoDB explain document. Supports
+   * standard query plans (including deterministic plan resolution for wildcard indexes, multikey
+   * array bounds, binary/UUID, and date values) and Atlas Search ($search stage), extracting index
+   * usage, derived index match stages, and raw index scan stage documents.
    *
    * @param explain the MongoDB explain document
-   * @return the explain analyze result, or null if the query planner info is missing
+   * @return the explain analyze result, or null if the query planner or winning plan info is
+   *     missing
    */
   public ExplainAnalyzeResult build(Document explain) {
     // Navigate to winning plan

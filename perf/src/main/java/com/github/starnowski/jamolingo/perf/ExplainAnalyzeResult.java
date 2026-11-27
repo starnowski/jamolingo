@@ -35,6 +35,12 @@ public interface ExplainAnalyzeResult {
    */
   Throwable getResolutionIndexMatchStagesException();
 
+  /**
+   * Returns the set of raw index scan stage documents (for example, IXSCAN stages) extracted from
+   * the query execution plan.
+   *
+   * @return the set of raw index stage documents, or null if no index scan stage was resolved
+   */
   Set<Bson> getRawIndexDocuments();
 
   /** Interface representing a value that has a string representation. */
