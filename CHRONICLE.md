@@ -234,3 +234,44 @@ If `let` variables are used instead of `localField` / `foreignField`, the `$$tar
   }
 ]
 ```
+
+
+#### Non-deterministic MongoDB `winningPlan` selection for compound queries on a wildcard index (`$**`)
+
+In `ExplainAnalyzeResultFactoryIndexMatchStageResolvingTest#shouldResolveCorrectIndexValueForWildcardCompoundQuery()`, an aggregation pipeline with a compound `$match` stage on multiple sub-fields is executed against a collection indexed by a single wildcard index (`{"wildcardObj.$**": 1}`):
+
+```json
+{
+  "pipeline": [
+    {
+      "$match": {
+        "$and": [
+          { "wildcardObj.color": "red" },
+          { "wildcardObj.size": "large" }
+        ]
+      }
+    }
+  ]
+}
+```
+
+##### 1. Root Cause of Non-Deterministic Explain Plans
+
+1. **Single-path limitation of MongoDB wildcard indexes**:
+   Internally, a MongoDB wildcard index (`$**`) indexes each scalar value alongside its field path (`{"$_path": 1, "<field>": 1}`). Unlike a regular compound index, a wildcard index can support at most **one** query predicate path per `IXSCAN` stage; any remaining predicates in a compound `$and` query are evaluated in the parent `FETCH` stage's `filter`.
+2. **Tied candidate plans in MongoDB's MultiPlanner**:
+   When planning the `$and` query above against `wildcardObj.$**_1`, MongoDB's query planner generates two separate candidate plans on the same wildcard index:
+   - **Candidate Plan A**: `FETCH` (`filter: {"wildcardObj.size": {"$eq": "large"}}`) $\leftarrow$ `IXSCAN` (`keyPattern: {"$_path": 1, "wildcardObj.color": 1}`, `indexBounds: {"$_path": ["[\"wildcardObj.color\", \"wildcardObj.color\"]"], "wildcardObj.color": ["[\"red\", \"red\"]"]}`)
+   - **Candidate Plan B**: `FETCH` (`filter: {"wildcardObj.color": {"$eq": "red"}}`) $\leftarrow$ `IXSCAN` (`keyPattern: {"$_path": 1, "wildcardObj.size": 1}`, `indexBounds: {"$_path": ["[\"wildcardObj.size\", \"wildcardObj.size\"]"], "wildcardObj.size": ["[\"large\", \"large\"]"]}`)
+
+   Because both candidate plans examine the same number of index keys and documents (`1` key, `1` document) and achieve identical productivity scores during the MultiPlanner trial period, MongoDB places whichever plan was enumerated first into `queryPlanner.winningPlan` and the other into `queryPlanner.rejectedPlans`.
+3. **Why the original and enhanced pipelines could pick different winning plans**:
+   In `shouldResolveCorrectIndexValueAndReturnCorrectData(...)`, the resolved `indexMatchStages` are prepended before `{"$set": {"no_such_field_test": true}}` and the original `$match` stage (`enhancedPipeline`). Because the original `$match` predicates (`wildcardObj.color` and `wildcardObj.size`) do not reference `no_such_field_test`, MongoDB's aggregation pipeline optimizer pushes the original `$match` stage past `$set` and merges it with `indexMatchStages` into `$cursor`. As a result, `$cursor` in `explainEnhancedPipeline` also evaluates both Candidate Plan A and Candidate Plan B. Due to internal hash/pointer ordering in `mongod` when planning the 2-branch `$and` vs. the 3-branch merged `$and`, MongoDB could pick `wildcardObj.color` as `winningPlan` in `explain` and `wildcardObj.size` as `winningPlan` in `explainEnhancedPipeline` (or vice versa), causing `Assertions.assertEquals(result.getRawIndexDocuments(), resultEnhancedPipeline.getRawIndexDocuments())` to fail intermittently.
+
+##### 2. Solution in `ExplainAnalyzeResultFactory`
+
+To make index match stage and raw index document resolution deterministic without modifying test code, `ExplainAnalyzeResultFactory` now resolves the canonical winning plan via `resolveWinningPlan(Document queryPlanner)`:
+
+1. It locates the single `IXSCAN` stage of `queryPlanner.winningPlan` and checks whether it is a wildcard index scan (`isWildcardIndexScan`), identified by the presence of `"$_path"` in `keyPattern` or `indexBounds`.
+2. When `winningPlan` is a wildcard index scan and `queryPlanner.rejectedPlans` is non-empty, it inspects all candidate plans in `rejectedPlans` that have the same top-level stage (e.g., `"FETCH"`) and a single wildcard `IXSCAN` on the same `indexName`.
+3. Among `winningPlan` and those matching `rejectedPlans`, it deterministically selects the plan with the lexicographically smallest sort key (`buildWildcardIxscanSortKey`), constructed from the sorted non-`"$_path"` field names in `keyPattern` followed by the `IXSCAN` document's JSON representation as a tie-breaker.
